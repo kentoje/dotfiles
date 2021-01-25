@@ -1,58 +1,65 @@
 {
-  "launch": {
+    "launch": {
 
 
 
-
-
-      "configurations": [],
-      "compounds": []
-  },
-
-  // Editor
-  "editor.quickSuggestions": true,
-  "editor.suggestOnTriggerCharacters": true,
-  "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-  },
-  "editor.fontFamily": "Fira Code",
-  "editor.fontLigatures": true,
-  "editor.fontSize": 16,
-  "editor.tabSize": 2,
-  "editor.lineHeight": 30,
-  "editor.cursorBlinking": "expand",
-
-  // Files
-  "files.autoSave": "onFocusChange",
-  "files.trimTrailingWhitespace": true,
-
-  // Workbench
-  "workbench.editor.enablePreview": false,
-  "workbench.colorCustomizations": {
-      "tab.activeBackground": "#2c3643",
-      "activityBar.background": "#242D38",
-      "sideBar.background": "#2c3643",
-      "input.background": "#242D38",
-      "input.border": "#37404E",
-      "list.focusBackground": "#215D8C",
-      "tab.inactiveBackground": "#242D38",
-      "editorGroupHeader.tabsBackground": "#212934",
-      "editor.selectionBackground": "#fc038ca9",
-      "titleBar.activeBackground": "#242D38",
-      "statusBar.background": "#3b444f",
-      "editorCursor.foreground": "#fc0394",
-  },
-
-  // Window
-  "window.zoomLevel": 0,
-
-  // Emmet
-  "emmet.includeLanguages": {
-      "javascript": "javascriptreact"
-  },
-
-  // Tabnine
-  "tabnine.experimentalAutoImports": true,
-  "workbench.colorTheme": "GitHub Dark",
-  "workbench.iconTheme": "vscode-icons"
+        "configurations": [],
+        "compounds": []
+    },
+    // Editor
+    "editor.quickSuggestions": true,
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": true,
+    "editor.fontSize": 16,
+    "editor.tabSize": 2,
+    "editor.lineHeight": 30,
+    "editor.cursorBlinking": "expand",
+    // Files
+    "files.autoSave": "onFocusChange",
+    "files.trimTrailingWhitespace": true,
+    // Workbench
+    "workbench.colorTheme": "Gruvbox Dark Medium",
+    "workbench.iconTheme": "vscode-icons",
+    "workbench.editor.enablePreview": false,
+    "workbench.colorCustomizations": {
+        "tab.activeBackground": "#2c3643",
+        "activityBar.background": "#242D38",
+        "sideBar.background": "#2c3643",
+        "input.background": "#242D38",
+        "input.border": "#37404E",
+        "list.focusBackground": "#215D8C",
+        "tab.inactiveBackground": "#242D38",
+        "editorGroupHeader.tabsBackground": "#212934",
+        "editor.selectionBackground": "#504945",
+        "titleBar.activeBackground": "#242D38",
+        "statusBar.background": "#3b444f",
+        "editorCursor.foreground": "#8ec07c",
+    },
+    // Window
+    "window.zoomLevel": 0,
+    // Emmet
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    },
+    "[go]": {
+        "editor.tabSize": 4
+    },
+    // Tabnine
+    "tabnine.experimentalAutoImports": true,
+    // Vim
+    "vim.handleKeys": {
+        "<C-c>": false,
+        "<C-d>": false,
+        "<C-a>": false,
+        "<C-x>": false,
+        "<C-w>": false,
+        "<C-k>": false,
+        "<C-z>": false,
+        "<C-b>": false
+    }
 }
+
