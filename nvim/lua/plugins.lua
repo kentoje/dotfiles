@@ -9,10 +9,6 @@ vim.cmd [[packadd packer.nvim]]
 
 packer.startup(function(use)
   use 'wbthomason/packer.nvim'
-  -- use {
-  --   'svrana/neosolarized.nvim',
-  --   requires = { 'tjdevries/colorbuddy.nvim' }
-  -- }
   use 'numToStr/Comment.nvim'
   use 'catppuccin/nvim'
   use 'nvim-lualine/lualine.nvim' -- Statusline
@@ -22,10 +18,11 @@ packer.startup(function(use)
   use 'hrsh7th/nvim-cmp' -- Completion
   use 'onsails/lspkind-nvim'
   use 'L3MON4D3/LuaSnip'
-  use {
-    'nvim-treesitter/nvim-treesitter',
-    run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
-  }
+  -- use {
+  --   'nvim-treesitter/nvim-treesitter',
+  --   run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
+  -- }
+  use { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" }
   -- use {
   --   'nvim-tree/nvim-tree.lua',
   --   requires = {

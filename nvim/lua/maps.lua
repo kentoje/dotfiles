@@ -33,4 +33,4 @@ keymap.set('n', '<C-w><up>', '<C-w>+')
 keymap.set('n', '<C-w><down>', '<C-w>-')
 
 -- Nvim-tree
-keymap.set('n', '<C-b>', ':NvimTreeToggle<Return>')
+-- keymap.set('n', '<C-b>', ':NvimTreeToggle<Return>')

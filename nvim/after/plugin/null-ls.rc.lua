@@ -8,13 +8,14 @@ null_ls.setup {
       vim.api.nvim_command [[augroup Format]]
       vim.api.nvim_command [[autocmd! * <buffer>]]
       vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_seq_sync()]]
+      -- vim.api.nvim_command [[autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js EslintFixAll]]
       vim.api.nvim_command [[augroup END]]
     end
   end,
   sources = {
+    -- null_ls.builtins.diagnostics.eslint_d
     null_ls.builtins.diagnostics.eslint_d.with({
       diagnostic_format = '[eslint] #{m}\n(#{c})'
     }),
-    null_ls.builtins.diagnostics.fish
   }
 }

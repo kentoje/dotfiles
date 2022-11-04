@@ -3,9 +3,12 @@ local status, ts = pcall(require, "nvim-treesitter.configs")
 if (not status) then return end
 
 ts.setup {
+  -- highlight = {
+  --   enable = true,
+  --   disable = {},
+  -- },
   highlight = {
-    enable = true,
-    disable = {},
+    enable = true
   },
   indent = {
     enable = true,
@@ -24,5 +27,5 @@ ts.setup {
   },
 }
 
-local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
+-- local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+-- parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
