@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "🍎 - Setting up apple configuration!"
+
 # Mouse behaviour
 defaults write .GlobalPreferences com.apple.mouse.scaling -1
 

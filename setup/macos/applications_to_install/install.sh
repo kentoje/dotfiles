@@ -126,6 +126,8 @@ trap 'handle_error' SIGINT
 
 # ---
 
+echo "📱 - Installing applications!"
+
 install_app_dmg "https://releases.arc.net/release/Arc-latest.dmg" "arc"
 install_app_dmg "https://cachefly.alfredapp.com/Alfred_5.1.1_2138.dmg" "alfred"
 install_app_dmg "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.3.5/Obsidian-1.3.5-universal.dmg" "obsidian"
