@@ -21,7 +21,6 @@ git-delta
 glab
 glib
 gnu-getopt
-go
 gotop
 grep
 highway
@@ -69,15 +68,11 @@ luajit
 luv
 lz4
 m4
-mongodb-community
-mongodb-database-tools
-mongosh
 mpdecimal
 msgpack
 ncurses
 neofetch
 neovim
-node@16
 nvm
 oniguruma
 openexr
@@ -93,8 +88,6 @@ python@3.11
 python@3.9
 readline
 ripgrep
-rust
-rustfmt
 screenresolution
 shared-mime-info
 six
