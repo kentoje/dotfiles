@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# Some brew utilies might be needed in order to run other scripts.
 ./brew/install.sh
-./macos_config/install.sh
+
+# Needs some "homebrew" packages.
 ./applications_to_install/install.sh
+
+# Needs VSCode and RunJS apps.
+./macos_config/install.sh
