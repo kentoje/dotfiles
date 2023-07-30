@@ -10,30 +10,15 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("x", "p", '"_dP')
 
--- Yank on system file
+-- Yank on system clipboard
 vim.keymap.set("n", "<leader>y", '"+y')
 vim.keymap.set("v", "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>Y", '"+Y')
 
--- Tabs
+-- Pane
 vim.keymap.set("n", "te", ":tabedit<Return>", { silent = true })
-vim.keymap.set("n", "ss", ":split<Return><C-w>w", { silent = true })
-vim.keymap.set("n", "sv", ":vsplit<Return><C-w>w", { silent = true })
+-- Might want to use something else
+vim.keymap.set("n", '<leader>sS"', ":split<Return><C-w>w", { silent = false, noremap = true })
+vim.keymap.set("n", "<leader>ss", ":vsplit<Return><C-w>w", { silent = false, noremap = true })
 
--- Buffers
--- vim.keymap.set('n', '', ':bnext<cr>', { silent = true })
--- vim.keymap.set('n', '', ':bprevious<cr>', { silent = true })
--- vim.keymap.set('n', '', ':bdelete<cr>', { silent = true })
-
--- Window
-vim.keymap.set("n", "<Space>", "<C-w>w")
-vim.keymap.set("", "s<left>", "<C-w>h")
-vim.keymap.set("", "s<up>", "<C-w>k")
-vim.keymap.set("", "s<down>", "<C-w>j")
-vim.keymap.set("", "s<right>", "<C-w>l")
-vim.keymap.set("", "sh", "<C-w>h")
-vim.keymap.set("", "sk", "<C-w>k")
-vim.keymap.set("", "sj", "<C-w>j")
-vim.keymap.set("", "sl", "<C-w>l")
-
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])

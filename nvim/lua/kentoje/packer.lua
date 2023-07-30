@@ -2,8 +2,12 @@ vim.cmd([[packadd packer.nvim]])
 
 return require("packer").startup(function(use)
 	-- Packer can manage itself
-	use 'romgrk/barbar.nvim'
-	use 'lewis6991/gitsigns.nvim'
+	use({ "MaximilianLloyd/ascii.nvim", requires = {
+		"MunifTanjim/nui.nvim",
+	} })
+	use({ "catppuccin/nvim", as = "catppuccin" })
+	use("romgrk/barbar.nvim")
+	use("lewis6991/gitsigns.nvim")
 	use("christoomey/vim-tmux-navigator")
 	use("wbthomason/packer.nvim")
 	use("nvim-tree/nvim-web-devicons")
@@ -19,21 +23,19 @@ return require("packer").startup(function(use)
 		tag = "0.1.1",
 		requires = { { "nvim-lua/plenary.nvim" } },
 	})
-	use({
-		"nvim-tree/nvim-tree.lua",
-		requires = {
-			"nvim-tree/nvim-web-devicons", -- optional
-		},
-	})
+	-- Might add it later
+	-- use({
+	-- 	"nvim-tree/nvim-tree.lua",
+	-- 	requires = {
+	-- 		"nvim-tree/nvim-web-devicons", -- optional
+	-- 	},
+	-- })
 	use({
 		"numToStr/Comment.nvim",
 	})
-	use({ "catppuccin/nvim", as = "catppuccin" })
 	use("nvim-treesitter/nvim-treesitter", { run = ":TSUpdate" })
 	use("nvim-treesitter/playground")
 	use("mbbill/undotree")
-	--Not sure I want this one.
-	-- use('tpope/vim-fugitive')
 	use({
 		"goolord/alpha-nvim",
 	})

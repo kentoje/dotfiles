@@ -94,6 +94,11 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/alpha-nvim",
     url = "https://github.com/goolord/alpha-nvim"
   },
+  ["ascii.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/ascii.nvim",
+    url = "https://github.com/MaximilianLloyd/ascii.nvim"
+  },
   ["barbar.nvim"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/barbar.nvim",
@@ -154,6 +159,11 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/neotest-jest",
     url = "https://github.com/haydenmeade/neotest-jest"
   },
+  ["nui.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nui.nvim",
+    url = "https://github.com/MunifTanjim/nui.nvim"
+  },
   ["nvim-autopairs"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-autopairs",
@@ -168,11 +178,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
-  },
-  ["nvim-tree.lua"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-tree.lua",
-    url = "https://github.com/nvim-tree/nvim-tree.lua"
   },
   ["nvim-treesitter"] = {
     loaded = true,
