@@ -1,4 +1,5 @@
 .DS_Store
 
 fish/includes/private-vars.fish
+fish/fish_variables
 
