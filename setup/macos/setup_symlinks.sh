@@ -40,6 +40,10 @@ if [ -d "$HOME/.config/lf" ]; then
 	rm -rf "$HOME/.config/lf"
 fi
 
+if [ -d "$HOME/.hammerspoon" ]; then
+	rm -rf "$HOME/.hammerspoon"
+fi
+
 ln -s $CLEANED_PATH/starship.toml $HOME/.config/starship.toml
 ln -s $CLEANED_PATH/tmux/gitmux.conf $HOME/.config/tmux/gitmux.conf
 ln -s $CLEANED_PATH/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
@@ -49,4 +53,5 @@ ln -s $CLEANED_PATH/bat $HOME/.config/bat
 ln -s $CLEANED_PATH/kitty $HOME/.config/kitty
 ln -s $CLEANED_PATH/nvim $HOME/.config/nvim
 ln -s $CLEANED_PATH/lf $HOME/.config/lf
+ln -s $CLEANED_PATH/hammerspoon $HOME/.hammerspoon
 
