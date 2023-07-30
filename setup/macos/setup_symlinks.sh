@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PWD=$(pwd)
 # .../dotfiles
-CLEANED_PATH="$(echo "$PWD" | sed 's/\/setup\/macos//')"
+PWD=$(pwd)
+CLEANED_PATH="$(echo $PWD | sed 's/\(.*\)\/dotfiles.*/\1\/dotfiles/')"
 
 if [ -f "$HOME/.config/starship.toml" ]; then
 	rm "$HOME/.config/starship.toml"
