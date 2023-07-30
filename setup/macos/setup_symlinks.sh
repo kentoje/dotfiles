@@ -16,6 +16,10 @@ if [ -f "$HOME/.config/tmux/tmux.conf" ]; then
 	rm "$HOME/.config/tmux/tmux.conf"
 fi
 
+if [ -f "$HOME/.yabairc" ]; then
+	rm "$HOME/.yabairc"
+fi
+
 if [ -d "$HOME/.config/fish" ]; then
 	rm -rf "$HOME/.config/fish"
 fi
@@ -39,6 +43,7 @@ fi
 ln -s $CLEANED_PATH/starship.toml $HOME/.config/starship.toml
 ln -s $CLEANED_PATH/tmux/gitmux.conf $HOME/.config/tmux/gitmux.conf
 ln -s $CLEANED_PATH/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
+ln -s $CLEANED_PATH/.yabairc $HOME/.yabairc
 ln -s $CLEANED_PATH/fish $HOME/.config/fish
 ln -s $CLEANED_PATH/bat $HOME/.config/bat
 ln -s $CLEANED_PATH/kitty $HOME/.config/kitty
