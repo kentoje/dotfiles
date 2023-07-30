@@ -6,7 +6,10 @@ zoxide init fish | source
 fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 
-source includes/global.fish
-source includes/fzf.fish
-source includes/private-vars.fish
-source includes/abbr.fish
+set path (dirname (realpath ~/.config/fish/config.fish))
+
+source $path/includes/global.fish
+source $path/includes/fzf.fish
+source $path/includes/private-vars.fish
+source $path/includes/abbr.fish
+
