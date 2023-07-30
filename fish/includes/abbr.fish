@@ -1,0 +1,13 @@
+abbr n "nvim"
+abbr v "nvim"
+abbr c "clear"
+abbr cl "clear"
+abbr tn "tmux new -s (basename (pwd))"
+abbr ls "lsd  --group-dirs first"
+abbr la "lsd  --group-dirs first -A"
+abbr ll "lsd  --group-dirs first -Al"
+abbr lt "lsd  --group-dirs last -A --tree"
+abbr shutd "osascript -e 'tell app \"System Events\" to shut down'"
+abbr fcat "fzf --preview 'bat --color=always {}' | xargs nvim"
+abbr fhistory "history | fzf"
+
