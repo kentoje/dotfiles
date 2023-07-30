@@ -20,8 +20,13 @@ if [ -d "$HOME/.config/fish" ]; then
 	rm -rf "$HOME/.config/fish"
 fi
 
+if [ -d "$HOME/.config/bat" ]; then
+	rm -rf "$HOME/.config/bat"
+fi
+
 ln -s $CLEANED_PATH/starship.toml $HOME/.config/starship.toml
 ln -s $CLEANED_PATH/tmux/gitmux.conf $HOME/.config/tmux/gitmux.conf
 ln -s $CLEANED_PATH/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
 ln -s $CLEANED_PATH/fish $HOME/.config/fish
+ln -s $CLEANED_PATH/bat $HOME/.config/bat
 
