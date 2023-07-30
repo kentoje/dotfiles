@@ -8,5 +8,7 @@
 
 ./fish/setup_install_fisher_plugins.sh
 
+./setup_symlinks.sh
+
 # Needs VSCode and RunJS apps.
  ./macos_config/install.sh
