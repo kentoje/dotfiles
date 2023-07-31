@@ -12,4 +12,5 @@ source $path/includes/global.fish
 source $path/includes/fzf.fish
 source $path/includes/private-vars.fish
 source $path/includes/abbr.fish
+source $path/includes/alias.fish
 
