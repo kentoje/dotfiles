@@ -19,4 +19,5 @@ sudo ./setup_scripting_addition.sh
 /usr/local/opt/fzf/install
 
 # Needs VSCode and RunJS apps.
- ./macos_config/install.sh
+./macos_config/install.sh
+
