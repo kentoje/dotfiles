@@ -95,6 +95,8 @@ alias gmum 'git merge upstream/master'
 
 alias gp 'git push'
 alias gpd 'git push --dry-run'
+alias gpf 'git push --force-with-lease'
+alias gpf! 'git push --force'
 alias gpsup='git push --set-upstream origin $(git_current_branch)'
 alias gpoat 'git push origin --all & git push origin --tags'
 alias gpu 'git push upstream'
