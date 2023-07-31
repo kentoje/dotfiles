@@ -14,6 +14,7 @@ if not vim.g.vscode then
 
 	-- run the current file
 	vim.api.nvim_set_keymap("n", "<leader>ta", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", {})
+	vim.api.nvim_set_keymap("n", "<leader>ts", "<cmd>lua require('neotest').run.stop(vim.fn.expand('%'))<cr>", {})
 	-- run nearer test
 	vim.api.nvim_set_keymap("n", "<leader>tc", "<cmd>lua require('neotest').run.run()<cr>", {})
 
