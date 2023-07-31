@@ -35,6 +35,7 @@ alt("p", { "window --toggle pip" })
 alt("g", { "space --toggle padding", "space --toggle gap" })
 alt("r", { "space --rotate 90" })
 alt("t", { "window --toggle float", "window --grid 4:4:1:1:2:2" })
+alt("w", { "window --close" })
 
 -- special characters
 alt("'", { "space --layout stack" })
