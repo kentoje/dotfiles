@@ -4,6 +4,7 @@ abbr v "nvim"
 
 # Day to day
 abbr c "clear"
+abbr cd "z"
 abbr cl "clear"
 abbr tn "tmux new -s (basename (pwd))"
 abbr ls "lsd  --group-dirs first"
