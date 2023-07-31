@@ -43,5 +43,8 @@ yabai -m rule --add app="^Alfred Preferences$" manage=off
 yabai -m rule --add app="^Spark$" manage=off
 yabai -m rule --add app="^Music$" manage=off
 
+# force opacity
+yabai -m rule --add app="Visual Studio Code" opacity=0.90
+
 echo "yabai configuration loaded..."
 
