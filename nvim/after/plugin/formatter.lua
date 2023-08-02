@@ -39,46 +39,46 @@ if not vim.g.vscode then
 					}
 				end,
 			},
-			typescript = {
-				function()
-					return {
-						exe = "prettier",
-						-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-						args = { vim.api.nvim_buf_get_name(0) },
-						stdin = true,
-					}
-				end,
-			},
-			typescriptreact = {
-				function()
-					return {
-						exe = "prettier",
-						-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-						args = { vim.api.nvim_buf_get_name(0) },
-						stdin = true,
-					}
-				end,
-			},
-			javascript = {
-				function()
-					return {
-						exe = "prettier",
-						-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-						args = { vim.api.nvim_buf_get_name(0) },
-						stdin = true,
-					}
-				end,
-			},
-			jevascriptreact = {
-				function()
-					return {
-						exe = "prettier",
-						-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-						args = { vim.api.nvim_buf_get_name(0) },
-						stdin = true,
-					}
-				end,
-			},
+			-- typescript = {
+			-- 	function()
+			-- 		return {
+			-- 			exe = "prettier",
+			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
+			-- 			args = { vim.api.nvim_buf_get_name(0) },
+			-- 			stdin = true,
+			-- 		}
+			-- 	end,
+			-- },
+			-- typescriptreact = {
+			-- 	function()
+			-- 		return {
+			-- 			exe = "prettier",
+			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
+			-- 			args = { vim.api.nvim_buf_get_name(0) },
+			-- 			stdin = true,
+			-- 		}
+			-- 	end,
+			-- },
+			-- javascript = {
+			-- 	function()
+			-- 		return {
+			-- 			exe = "prettier",
+			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
+			-- 			args = { vim.api.nvim_buf_get_name(0) },
+			-- 			stdin = true,
+			-- 		}
+			-- 	end,
+			-- },
+			-- jevascriptreact = {
+			-- 	function()
+			-- 		return {
+			-- 			exe = "prettier",
+			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
+			-- 			args = { vim.api.nvim_buf_get_name(0) },
+			-- 			stdin = true,
+			-- 		}
+			-- 	end,
+			-- },
 
 			-- Use the special "*" filetype for defining formatter configurations on
 			-- any filetype
