@@ -12,6 +12,7 @@ abbr la "lsd  --group-dirs first -A"
 abbr l "lsd  --group-dirs first -Al"
 abbr ll "lsd  --group-dirs first -Al"
 abbr lt "lsd  --group-dirs last -A --tree"
+abbr lz "lazygit"
 
 # Misc
 abbr shutd "osascript -e 'tell app \"System Events\" to shut down'"
