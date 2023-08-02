@@ -8,6 +8,10 @@ if [ -f "$HOME/.config/starship.toml" ]; then
 	rm "$HOME/.config/starship.toml"
 fi
 
+if [ -f "$HOME/Library/Application Support/lazygit/config.yml" ]; then
+	rm "$HOME/Library/Application Support/lazygit/config.yml"
+fi
+
 if [ -f "$HOME/.config/tmux/gitmux.conf" ]; then
 	rm "$HOME/.config/tmux/gitmux.conf"
 fi
@@ -45,6 +49,7 @@ if [ -d "$HOME/.hammerspoon" ]; then
 fi
 
 ln -s $CLEANED_PATH/starship.toml $HOME/.config/starship.toml
+ln -s $CLEANED_PATH/lazygit/config.yml $HOME/Library/Application\ Support/lazygit/config.yml 
 ln -s $CLEANED_PATH/tmux/gitmux.conf $HOME/.config/tmux/gitmux.conf
 ln -s $CLEANED_PATH/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
 ln -s $CLEANED_PATH/.yabairc $HOME/.yabairc
