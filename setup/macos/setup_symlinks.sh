@@ -12,6 +12,10 @@ if [ -f "$HOME/Library/Application Support/lazygit/config.yml" ]; then
 	rm "$HOME/Library/Application Support/lazygit/config.yml"
 fi
 
+if [ -f "$HOME/Library/Application Support/name.guoc.SpaceLauncher/configuration.json" ]; then
+	rm "$HOME/Library/Application Support/name.guoc.SpaceLauncher/configuration.json"
+fi
+
 if [ -f "$HOME/.config/tmux/gitmux.conf" ]; then
 	rm "$HOME/.config/tmux/gitmux.conf"
 fi
@@ -50,6 +54,7 @@ fi
 
 ln -s $CLEANED_PATH/starship.toml $HOME/.config/starship.toml
 ln -s $CLEANED_PATH/lazygit/config.yml $HOME/Library/Application\ Support/lazygit/config.yml 
+ln -s $CLEANED_PATH/spacelauncher2/configuration.json $HOME/Library/Application\ Support/name.guoc.SpaceLauncher/configuration.json 
 ln -s $CLEANED_PATH/tmux/gitmux.conf $HOME/.config/tmux/gitmux.conf
 ln -s $CLEANED_PATH/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
 ln -s $CLEANED_PATH/.yabairc $HOME/.yabairc
