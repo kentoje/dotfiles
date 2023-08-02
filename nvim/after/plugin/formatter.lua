@@ -2,6 +2,18 @@ if not vim.g.vscode then
 	-- Utilities for creating configurations
 	local util = require("formatter.util")
 
+	local prettierd = function()
+		if not vim.loop.fs_realpath(".prettierrc") then
+			return nil
+		end
+
+		return {
+			exe = "prettierd",
+			args = { vim.api.nvim_buf_get_name(0) },
+			stdin = true,
+		}
+	end
+
 	-- Provides the Format, FormatWrite, FormatLock, and FormatWriteLock commands
 	require("formatter").setup({
 		-- Enable or disable logging
@@ -39,53 +51,18 @@ if not vim.g.vscode then
 					}
 				end,
 			},
-			-- typescript = {
-			-- 	function()
-			-- 		return {
-			-- 			exe = "prettier",
-			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-			-- 			args = { vim.api.nvim_buf_get_name(0) },
-			-- 			stdin = true,
-			-- 		}
-			-- 	end,
-			-- },
-			-- typescriptreact = {
-			-- 	function()
-			-- 		return {
-			-- 			exe = "prettier",
-			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-			-- 			args = { vim.api.nvim_buf_get_name(0) },
-			-- 			stdin = true,
-			-- 		}
-			-- 	end,
-			-- },
-			-- javascript = {
-			-- 	function()
-			-- 		return {
-			-- 			exe = "prettier",
-			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-			-- 			args = { vim.api.nvim_buf_get_name(0) },
-			-- 			stdin = true,
-			-- 		}
-			-- 	end,
-			-- },
-			-- jevascriptreact = {
-			-- 	function()
-			-- 		return {
-			-- 			exe = "prettier",
-			-- 			-- args = { util.escape_path(util.get_current_buffer_file_path()) },
-			-- 			args = { vim.api.nvim_buf_get_name(0) },
-			-- 			stdin = true,
-			-- 		}
-			-- 	end,
-			-- },
-
+			javascript = { prettierd },
+			javascriptreact = { prettierd },
+			typescript = { prettierd },
+			typescriptreact = { prettierd },
+			html = { prettierd },
+			markdown = { prettierd },
 			-- Use the special "*" filetype for defining formatter configurations on
 			-- any filetype
 			["*"] = {
 				-- "formatter.filetypes.any" defines default configurations for any
 				-- filetype
-				-- require("formatter.filetypes.any").remove_trailing_whitespace,
+				require("formatter.filetypes.any").remove_trailing_whitespace,
 			},
 		},
 	})

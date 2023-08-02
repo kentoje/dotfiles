@@ -80,9 +80,11 @@ if not vim.g.vscode then
 		-- vim.keymap.set('n', '<C-h>', function() vim.lsp.buf.signature_help() end, opts)
 	end)
 
-	-- (Optional) Configure lua language server for neovim
 	lspconfig.lua_ls.setup(lsp.nvim_lua_ls())
 	lspconfig.eslint.setup({
+		settings = {
+			packageManager = "yarn",
+		},
 		on_attach = function(client, bufnr)
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
