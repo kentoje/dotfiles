@@ -22,3 +22,4 @@ vim.keymap.set("n", '<leader>sS"', ":split<Return><C-w>w", { silent = false, nor
 vim.keymap.set("n", "<leader>ss", ":vsplit<Return><C-w>w", { silent = false, noremap = true })
 
 vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory" })

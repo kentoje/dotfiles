@@ -31,6 +31,12 @@ return require("packer").startup(function(use)
 	-- 	},
 	-- })
 	use({
+		"stevearc/oil.nvim",
+		config = function()
+			require("oil").setup()
+		end,
+	})
+	use({
 		"numToStr/Comment.nvim",
 	})
 	use("nvim-treesitter/nvim-treesitter", { run = ":TSUpdate" })
