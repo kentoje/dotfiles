@@ -39,6 +39,8 @@ if not vim.g.vscode then
 	vim.keymap.set("n", "<leader>:", builtin.commands, {})
 	vim.keymap.set("n", "<leader>.", builtin.quickfix, {})
 	vim.keymap.set("n", "<leader>g", builtin.lsp_definitions, {})
-	vim.keymap.set("n", "<leader>G", builtin.lsp_references, {})
+	vim.keymap.set("n", "<leader>G", function()
+		builtin.lsp_references({ show_line = false })
+	end, {})
 	vim.keymap.set("n", "<leader>?k", ":Telescope keymaps<cr>")
 end
