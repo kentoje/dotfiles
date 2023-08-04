@@ -1,5 +1,8 @@
 if not vim.g.vscode then
-	require("telescope").setup({
+	local telescope = require("telescope")
+
+	telescope.load_extension("harpoon")
+	telescope.setup({
 		defaults = {
 			file_ignore_patterns = {
 				"node_modules",
@@ -25,6 +28,7 @@ if not vim.g.vscode then
 			},
 		},
 	})
+
 	local builtin = require("telescope.builtin")
 
 	vim.keymap.set("n", "<leader>p", builtin.git_files, {})
@@ -32,6 +36,10 @@ if not vim.g.vscode then
 	vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
 	vim.keymap.set("n", "<leader>fc", builtin.grep_string, {})
 	vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+	vim.keymap.set("n", "<leader>fG", function()
+		local pattern = ("*." .. vim.fn.input("File type: "))
+		builtin.live_grep({ glob_pattern = pattern })
+	end, {})
 	vim.keymap.set("n", "<leader>fs", function()
 		builtin.lsp_workspace_symbols({ query = vim.fn.input("Query: ") })
 	end, {})

@@ -5,6 +5,11 @@ return require("packer").startup(function(use)
 	use({ "MaximilianLloyd/ascii.nvim", requires = {
 		"MunifTanjim/nui.nvim",
 	} })
+	use("sindrets/diffview.nvim")
+	use("windwp/nvim-ts-autotag")
+	use("windwp/nvim-autopairs")
+	use("ThePrimeagen/harpoon")
+	use("ray-x/lsp_signature.nvim")
 	use({ "catppuccin/nvim", as = "catppuccin" })
 	use("romgrk/barbar.nvim")
 	use("lewis6991/gitsigns.nvim")
@@ -12,11 +17,12 @@ return require("packer").startup(function(use)
 	use("wbthomason/packer.nvim")
 	use("nvim-tree/nvim-web-devicons")
 	use({
-		"nvim-lualine/lualine.nvim",
-		requires = { "nvim-tree/nvim-web-devicons", opt = true },
+		"folke/trouble.nvim",
+		requires = { "nvim-tree/nvim-web-devicons" },
 	})
 	use({
-		"windwp/nvim-autopairs",
+		"nvim-lualine/lualine.nvim",
+		requires = { "nvim-tree/nvim-web-devicons", opt = true },
 	})
 	use({
 		"nvim-telescope/telescope.nvim",

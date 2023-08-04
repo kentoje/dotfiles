@@ -1,5 +1,11 @@
 if not vim.g.vscode then
-	require("neodev").setup({
+	vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "LspDiagnosticsDefaultError" })
+	vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "LspDiagnosticsDefaultWarning" })
+	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
+	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
+
+	local neodev = require("neodev")
+	neodev.setup({
 		library = {
 			enabled = true, -- when not enabled, neodev will not change any settings to the LSP server
 			-- these settings will be used for your Neovim config directory
@@ -34,6 +40,19 @@ if not vim.g.vscode then
 			["<C-Space>"] = cmp.mapping.complete(),
 			["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 		}),
+		-- performance = {
+		-- 	trigger_debounce_time = 500,
+		-- 	throttle = 550,
+		-- 	fetching_timeout = 80,
+		-- },
+	})
+
+	-- limit suggestions items. Triggers auto suggestions at 6 chars.
+	cmp.setup({
+		sources = {
+			{ name = "nvim_lsp", max_items = 30, keyword_length = 6, group_index = 1 },
+		},
+		-- Other configuration options can go here
 	})
 
 	lsp.on_attach(function(client, bufnr)
@@ -58,16 +77,16 @@ if not vim.g.vscode then
 		vim.keymap.set("n", "<leader><F2>", function()
 			vim.lsp.buf.rename()
 		end, opts)
-		vim.keymap.set("n", "<leader>e", function()
-			vim.diagnostic.goto_next({
-				severity = vim.diagnostic.severity.ERROR,
-			})
-		end, opts)
-		vim.keymap.set("n", "<leader>E", function()
-			vim.diagnostic.goto_prev({
-				severity = vim.diagnostic.severity.ERROR,
-			})
-		end, opts)
+		-- vim.keymap.set("n", "<leader>e", function()
+		-- 	vim.diagnostic.goto_next({
+		-- 		severity = vim.diagnostic.severity.ERROR,
+		-- 	})
+		-- end, opts)
+		-- vim.keymap.set("n", "<leader>E", function()
+		-- 	vim.diagnostic.goto_prev({
+		-- 		severity = vim.diagnostic.severity.ERROR,
+		-- 	})
+		-- end, opts)
 		-- vim.keymap.set("n", "<leader>gf", function()
 		-- 	vim.lsp.buf.open_float()
 		-- end, opts)
@@ -81,7 +100,19 @@ if not vim.g.vscode then
 	end)
 
 	lspconfig.lua_ls.setup(lsp.nvim_lua_ls())
+	lspconfig.yamlls.setup({
+		settings = {
+			yaml = {
+				schemas = {
+					["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+				},
+			},
+		},
+	})
 	lspconfig.eslint.setup({
+		flags = {
+			debounce_text_changes = 300,
+		},
 		settings = {
 			packageManager = "yarn",
 		},
