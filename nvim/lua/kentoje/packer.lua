@@ -5,13 +5,18 @@ return require("packer").startup(function(use)
 	use({ "MaximilianLloyd/ascii.nvim", requires = {
 		"MunifTanjim/nui.nvim",
 	} })
+	use({ "AckslD/nvim-neoclip.lua", requires = {
+		"nvim-telescope/telescope.nvim",
+	} })
+	use("svban/YankAssassin.vim")
+	use("Aasim-A/scrollEOF.nvim")
 	use("sindrets/diffview.nvim")
 	use("windwp/nvim-ts-autotag")
+	use("ruifm/gitlinker.nvim")
 	use("windwp/nvim-autopairs")
 	use("ThePrimeagen/harpoon")
 	use("ray-x/lsp_signature.nvim")
 	use({ "catppuccin/nvim", as = "catppuccin" })
-	use("romgrk/barbar.nvim")
 	use("lewis6991/gitsigns.nvim")
 	use("christoomey/vim-tmux-navigator")
 	use("wbthomason/packer.nvim")

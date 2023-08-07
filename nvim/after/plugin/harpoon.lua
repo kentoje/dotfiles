@@ -6,7 +6,7 @@ if not vim.g.vscode then
 	vim.keymap.set("n", "<leader>A", mark.rm_file)
 	vim.keymap.set("n", "<leader>xa", mark.clear_all)
 
-	vim.keymap.set("n", "<leader>fh", ":Telescope harpoon marks<CR>")
+	vim.keymap.set("n", "<leader>fh", ui.toggle_quick_menu)
 
 	vim.keymap.set("n", "<leader>1", function()
 		ui.nav_file(1)

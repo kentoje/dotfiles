@@ -31,6 +31,7 @@ if not vim.g.vscode then
 
 	local lsp = require("lsp-zero").preset({})
 	local lspconfig = require("lspconfig")
+	local ts_utils = require("nvim-treesitter.ts_utils")
 
 	local cmp = require("cmp")
 	cmp.setup({
@@ -40,19 +41,43 @@ if not vim.g.vscode then
 			["<C-Space>"] = cmp.mapping.complete(),
 			["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 		}),
-		-- performance = {
-		-- 	trigger_debounce_time = 2000,
-		-- 	-- throttle = 550,
-		-- 	fetching_timeout = 80,
-		-- },
-	})
-
-	-- limit suggestions items. Triggers auto suggestions at 6 chars.
-	cmp.setup({
-		sources = {
-			{ name = "nvim_lsp", max_items = 30, keyword_length = 6, group_index = 1 },
+		performance = {
+			max_view_entries = 30,
 		},
-		-- Other configuration options can go here
+		completion = {
+			keyword_length = 6,
+		},
+		sources = cmp.config.sources({
+			{
+				name = "nvim_lsp",
+				entry_filter = function(entry, context)
+					local kind = entry:get_kind()
+					local node = ts_utils.get_node_at_cursor():type()
+
+					if node == "arguments" then
+						-- 6 means variables
+						if kind == 6 then
+							return true
+						else
+							return false
+						end
+					end
+
+					return true
+				end,
+			},
+		}),
+		-- PreselectMode = cmp.PreselectMode.Item,
+		-- limit suggestions items. Triggers auto suggestions at 6 chars.
+		-- sources = {
+		-- 	{ name = "nvim_lsp", max_items = 30, keyword_length = 6, group_index = 1 },
+		-- },
+		-- performance = {
+		-- 	-- debounce = 1000,
+		-- 	throttle = 3000,
+		-- 	fetching_timeout = 80,
+		-- 	max_view_entries = 30,
+		-- },
 	})
 
 	lsp.on_attach(function(client, bufnr)

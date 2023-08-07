@@ -43,6 +43,7 @@ if not vim.g.vscode then
 		options = {
 			theme = "auto",
 			globalstatus = true,
+			section_separators = { left = "", right = "" },
 			component_separators = { left = "", right = "" },
 			disabled_filetypes = { statusline = { "dashboard", "lazy", "alpha" } },
 		},

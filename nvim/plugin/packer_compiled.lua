@@ -99,11 +99,6 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/ascii.nvim",
     url = "https://github.com/MaximilianLloyd/ascii.nvim"
   },
-  ["barbar.nvim"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/barbar.nvim",
-    url = "https://github.com/romgrk/barbar.nvim"
-  },
   catppuccin = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/catppuccin",
@@ -123,6 +118,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/formatter.nvim",
     url = "https://github.com/mhartington/formatter.nvim"
+  },
+  ["gitlinker.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/gitlinker.nvim",
+    url = "https://github.com/ruifm/gitlinker.nvim"
   },
   ["gitsigns.nvim"] = {
     loaded = true,
@@ -194,6 +194,11 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
   },
+  ["nvim-neoclip.lua"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-neoclip.lua",
+    url = "https://github.com/AckslD/nvim-neoclip.lua"
+  },
   ["nvim-treesitter"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
@@ -229,6 +234,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/plenary.nvim",
     url = "https://github.com/nvim-lua/plenary.nvim"
+  },
+  ["scrollEOF.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/scrollEOF.nvim",
+    url = "https://github.com/Aasim-A/scrollEOF.nvim"
   },
   ["telescope.nvim"] = {
     loaded = true,

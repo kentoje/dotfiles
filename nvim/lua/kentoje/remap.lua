@@ -25,3 +25,4 @@ vim.keymap.set("n", "<leader>Y", ':let @+ = expand("%:p")<CR>', { silent = true,
 vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory" })
 vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true })
+vim.keymap.set("n", "<leader>w", ":q<CR>", { silent = true })
