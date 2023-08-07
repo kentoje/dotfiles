@@ -41,8 +41,8 @@ if not vim.g.vscode then
 			["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 		}),
 		-- performance = {
-		-- 	trigger_debounce_time = 500,
-		-- 	throttle = 550,
+		-- 	trigger_debounce_time = 2000,
+		-- 	-- throttle = 550,
 		-- 	fetching_timeout = 80,
 		-- },
 	})

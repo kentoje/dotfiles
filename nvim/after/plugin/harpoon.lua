@@ -4,6 +4,7 @@ if not vim.g.vscode then
 
 	vim.keymap.set("n", "<leader>a", mark.add_file)
 	vim.keymap.set("n", "<leader>A", mark.rm_file)
+	vim.keymap.set("n", "<leader>xa", mark.clear_all)
 
 	vim.keymap.set("n", "<leader>fh", ":Telescope harpoon marks<CR>")
 
