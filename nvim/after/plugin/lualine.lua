@@ -51,7 +51,7 @@ if not vim.g.vscode then
 			lualine_a = { "mode" },
 			lualine_x = { "encoding", "fileformat", "filetype" },
 			lualine_y = { "progress" },
-			lualine_b = { "filename" },
+			lualine_b = {{ "filename", path = 1 }},
 			lualine_c = { diff, diagnostics },
 			lualine_z = {},
 		},

@@ -89,6 +89,11 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/LuaSnip",
     url = "https://github.com/L3MON4D3/LuaSnip"
   },
+  ["YankAssassin.vim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/YankAssassin.vim",
+    url = "https://github.com/svban/YankAssassin.vim"
+  },
   ["alpha-nvim"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/alpha-nvim",
@@ -108,6 +113,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/cmp-nvim-lsp",
     url = "https://github.com/hrsh7th/cmp-nvim-lsp"
+  },
+  ["cmp-nvim-lsp-signature-help"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/cmp-nvim-lsp-signature-help",
+    url = "https://github.com/hrsh7th/cmp-nvim-lsp-signature-help"
   },
   ["diffview.nvim"] = {
     loaded = true,
@@ -139,11 +149,6 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/lsp-zero.nvim",
     url = "https://github.com/VonHeikemen/lsp-zero.nvim"
   },
-  ["lsp_signature.nvim"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/lsp_signature.nvim",
-    url = "https://github.com/ray-x/lsp_signature.nvim"
-  },
   ["lualine.nvim"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/lualine.nvim",
@@ -158,11 +163,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/mason.nvim",
     url = "https://github.com/williamboman/mason.nvim"
-  },
-  ["neodev.nvim"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/neodev.nvim",
-    url = "https://github.com/folke/neodev.nvim"
   },
   neotest = {
     loaded = true,

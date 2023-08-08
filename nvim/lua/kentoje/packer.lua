@@ -8,6 +8,7 @@ return require("packer").startup(function(use)
 	use({ "AckslD/nvim-neoclip.lua", requires = {
 		"nvim-telescope/telescope.nvim",
 	} })
+	use("hrsh7th/cmp-nvim-lsp-signature-help")
 	use("svban/YankAssassin.vim")
 	use("Aasim-A/scrollEOF.nvim")
 	use("sindrets/diffview.nvim")
@@ -15,7 +16,6 @@ return require("packer").startup(function(use)
 	use("ruifm/gitlinker.nvim")
 	use("windwp/nvim-autopairs")
 	use("ThePrimeagen/harpoon")
-	use("ray-x/lsp_signature.nvim")
 	use({ "catppuccin/nvim", as = "catppuccin" })
 	use("lewis6991/gitsigns.nvim")
 	use("christoomey/vim-tmux-navigator")
@@ -55,9 +55,6 @@ return require("packer").startup(function(use)
 	use("mbbill/undotree")
 	use({
 		"goolord/alpha-nvim",
-	})
-	use({
-		"folke/neodev.nvim",
 	})
 	use({ "mhartington/formatter.nvim" })
 	use({
