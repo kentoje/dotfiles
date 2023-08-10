@@ -26,3 +26,16 @@ vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory" })
 vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true })
 vim.keymap.set("n", "<leader>w", ":q<CR>", { silent = true })
+
+local function surround_with(char)
+	-- vim.cmd("normal! viwc")
+	vim.cmd("normal! d")
+	-- vim.cmd("normal! i" .. char)
+	vim.cmd("normal! i" .. char)
+	vim.cmd("normal! P")
+end
+
+vim.keymap.set("v", "<leader>sw", function()
+	surround_with(vim.fn.input("Char to surround: "))
+end, { silent = true })
+

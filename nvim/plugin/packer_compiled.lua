@@ -114,11 +114,6 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/cmp-nvim-lsp",
     url = "https://github.com/hrsh7th/cmp-nvim-lsp"
   },
-  ["cmp-nvim-lsp-signature-help"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/cmp-nvim-lsp-signature-help",
-    url = "https://github.com/hrsh7th/cmp-nvim-lsp-signature-help"
-  },
   ["diffview.nvim"] = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/diffview.nvim",
@@ -128,11 +123,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/formatter.nvim",
     url = "https://github.com/mhartington/formatter.nvim"
-  },
-  ["gitlinker.nvim"] = {
-    loaded = true,
-    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/gitlinker.nvim",
-    url = "https://github.com/ruifm/gitlinker.nvim"
   },
   ["gitsigns.nvim"] = {
     loaded = true,
@@ -148,6 +138,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/lsp-zero.nvim",
     url = "https://github.com/VonHeikemen/lsp-zero.nvim"
+  },
+  ["lsp_signature.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/lsp_signature.nvim",
+    url = "https://github.com/ray-x/lsp_signature.nvim"
   },
   ["lualine.nvim"] = {
     loaded = true,
@@ -188,6 +183,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-cmp",
     url = "https://github.com/hrsh7th/nvim-cmp"
+  },
+  ["nvim-cursorline"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/nvim-cursorline",
+    url = "https://github.com/yamatsum/nvim-cursorline"
   },
   ["nvim-lspconfig"] = {
     loaded = true,

@@ -8,12 +8,12 @@ return require("packer").startup(function(use)
 	use({ "AckslD/nvim-neoclip.lua", requires = {
 		"nvim-telescope/telescope.nvim",
 	} })
-	use("hrsh7th/cmp-nvim-lsp-signature-help")
+	use("ray-x/lsp_signature.nvim")
 	use("svban/YankAssassin.vim")
 	use("Aasim-A/scrollEOF.nvim")
 	use("sindrets/diffview.nvim")
 	use("windwp/nvim-ts-autotag")
-	use("ruifm/gitlinker.nvim")
+	use("yamatsum/nvim-cursorline")
 	use("windwp/nvim-autopairs")
 	use("ThePrimeagen/harpoon")
 	use({ "catppuccin/nvim", as = "catppuccin" })
@@ -34,13 +34,6 @@ return require("packer").startup(function(use)
 		tag = "0.1.1",
 		requires = { { "nvim-lua/plenary.nvim" } },
 	})
-	-- Might add it later
-	-- use({
-	-- 	"nvim-tree/nvim-tree.lua",
-	-- 	requires = {
-	-- 		"nvim-tree/nvim-web-devicons", -- optional
-	-- 	},
-	-- })
 	use({
 		"stevearc/oil.nvim",
 		config = function()
