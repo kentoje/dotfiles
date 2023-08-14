@@ -78,3 +78,4 @@ if not vim.g.vscode then
 		group = formatGroup,
 	})
 end
+

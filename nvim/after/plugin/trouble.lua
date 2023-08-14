@@ -62,7 +62,7 @@ if not vim.g.vscode then
 	-- vim.keymap.set("n", "<leader>ep", function()
 	-- 	trouble.previous({ skip_group = true, jump = true })
 	-- end)
-	vim.keymap.set("n", "<leader>ew", ":TroubleToggle workspace_diagnostics<CR>")
-	vim.keymap.set("n", "<leader>ed", ":TroubleToggle document_diagnostics<CR>")
+	vim.keymap.set("n", "<leader>xew", ":TroubleToggle workspace_diagnostics<CR>")
+	vim.keymap.set("n", "<leader>xed", ":TroubleToggle document_diagnostics<CR>")
 	-- TroubleToggle
 end
