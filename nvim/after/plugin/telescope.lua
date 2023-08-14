@@ -37,7 +37,7 @@ if not vim.g.vscode then
 		builtin.git_files({ hidden = true })
 	end, {})
 	vim.keymap.set("n", "<leader>ff", function()
-		builtin.find_files({ hidden = true })
+		builtin.find_files({ hidden = true, no_ignore = true })
 	end, {})
 	vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
 	vim.keymap.set("n", "<leader>fc", builtin.grep_string, {})

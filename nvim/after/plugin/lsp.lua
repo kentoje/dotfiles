@@ -4,6 +4,9 @@ if not vim.g.vscode then
 	vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
 	vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
 
+	-- move it elsewhere?
+	require("luasnip.loaders.from_vscode").lazy_load()
+
 	-- local neodev = require("neodev")
 	-- neodev.setup({
 	-- 	library = {
@@ -28,6 +31,8 @@ if not vim.g.vscode then
 	-- 	-- needs lua-language-server >= 3.6.0
 	-- 	pathStrict = true,
 	-- })
+
+	local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 	require("lsp_signature").setup({
 		debug = false, -- set to true to enable debug logging
@@ -109,6 +114,7 @@ if not vim.g.vscode then
 		-- 	keyword_length = 6,
 		-- },
 		sources = cmp.config.sources({
+			{ name = "luasnip" },
 			{
 				name = "nvim_lsp",
 				entry_filter = function(entry, context)
@@ -211,6 +217,7 @@ if not vim.g.vscode then
 		},
 	})
 	lspconfig.eslint.setup({
+		capabilities = capabilities,
 		flags = {
 			debounce_text_changes = 300,
 		},

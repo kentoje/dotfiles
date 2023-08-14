@@ -8,6 +8,8 @@ return require("packer").startup(function(use)
 	use({ "AckslD/nvim-neoclip.lua", requires = {
 		"nvim-telescope/telescope.nvim",
 	} })
+	use("saadparwaiz1/cmp_luasnip")
+	use("rafamadriz/friendly-snippets")
 	use("ray-x/lsp_signature.nvim")
 	use("svban/YankAssassin.vim")
 	use("Aasim-A/scrollEOF.nvim")
@@ -43,6 +45,7 @@ return require("packer").startup(function(use)
 	use({
 		"numToStr/Comment.nvim",
 	})
+	use("nvim-treesitter/nvim-treesitter-context")
 	use("nvim-treesitter/nvim-treesitter", { run = ":TSUpdate" })
 	use("nvim-treesitter/playground")
 	use("mbbill/undotree")
