@@ -7,10 +7,6 @@ if not vim.g.vscode then
 			return nil
 		end
 
-		vim.opt.tabstop = 2
-		vim.opt.softtabstop = 2
-		vim.opt.shiftwidth = 2
-
 		return {
 			exe = "prettierd",
 			args = { vim.api.nvim_buf_get_name(0) },
@@ -61,12 +57,15 @@ if not vim.g.vscode then
 			typescriptreact = { prettierd },
 			html = { prettierd },
 			markdown = { prettierd },
+			graphql = {
+				require("formatter.filetypes.lua").graphql,
+			},
 			-- Use the special "*" filetype for defining formatter configurations on
 			-- any filetype
 			["*"] = {
 				-- "formatter.filetypes.any" defines default configurations for any
 				-- filetype
-				require("formatter.filetypes.any").remove_trailing_whitespace,
+				-- require("formatter.filetypes.any").remove_trailing_whitespace,
 			},
 		},
 	})
@@ -78,4 +77,3 @@ if not vim.g.vscode then
 		group = formatGroup,
 	})
 end
-
