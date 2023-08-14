@@ -59,7 +59,7 @@ if not vim.g.vscode then
 			["g."] = "actions.toggle_hidden",
 		},
 		-- Set to false to disable all of the above keymaps
-		use_default_keymaps = true,
+		use_default_keymaps = false,
 		view_options = {
 			-- Show files and directories that start with "."
 			show_hidden = true,
