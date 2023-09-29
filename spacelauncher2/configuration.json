@@ -273,7 +273,7 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Visual Studio Code.app",
+                            "path" : "\/Applications\/Cursor.app",
                             "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
                             "switchToPreviousApp" : false
