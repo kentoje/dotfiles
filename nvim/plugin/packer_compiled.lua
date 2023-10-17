@@ -169,6 +169,11 @@ _G.packer_plugins = {
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/mason.nvim",
     url = "https://github.com/williamboman/mason.nvim"
   },
+  ["mini.nvim"] = {
+    loaded = true,
+    path = "/Users/kento/.local/share/nvim/site/pack/packer/start/mini.nvim",
+    url = "https://github.com/echasnovski/mini.nvim"
+  },
   neotest = {
     loaded = true,
     path = "/Users/kento/.local/share/nvim/site/pack/packer/start/neotest",

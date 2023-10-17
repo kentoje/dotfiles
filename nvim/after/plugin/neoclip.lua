@@ -61,5 +61,5 @@ if not vim.g.vscode then
 		},
 	})
 
-	vim.keymap.set("n", "<leader>xY", ":Telescope neoclip<CR>", {})
+	vim.keymap.set("n", "<leader>xY", ":Telescope neoclip<CR>", { desc = "Open the neoclip buffer" })
 end

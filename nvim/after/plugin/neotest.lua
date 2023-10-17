@@ -144,16 +144,16 @@ if not vim.g.vscode then
 	-- run the current file
 	vim.keymap.set("n", "<leader>ta", function()
 		neotest.run.run(vim.fn.expand("%"))
-	end, {})
+	end, { desc = "Run all tests of the current file" })
 
 	vim.keymap.set("n", "<leader>ts", function()
 		neotest.run.stop(vim.fn.expand("%"))
-	end, {})
+	end, { desc = "Stop all running tests" })
 	--
 	-- run nearer test
 	vim.keymap.set("n", "<leader>tc", function()
 		neotest.run.run()
-	end, {})
+	end, { desc = "Run the closest test" })
 
 	-- Watch does not work
 	-- vim.keymap.set("n", "<leader>tw", function()
@@ -167,10 +167,10 @@ if not vim.g.vscode then
 	-- toggle tree result
 	vim.keymap.set("n", "<leader>tt", function()
 		neotest.summary.toggle()
-	end, {})
+	end, { desc = "Toggle the neotest pane" })
 
 	-- display test output
 	vim.keymap.set("n", "<leader>to", function()
 		neotest.output.open({ enter = true })
-	end, {})
+	end, { desc = "Display the neotest output" })
 end

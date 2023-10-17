@@ -2,11 +2,11 @@ if not vim.g.vscode then
 	local mark = require("harpoon.mark")
 	local ui = require("harpoon.ui")
 
-	vim.keymap.set("n", "<leader>a", mark.add_file)
-	vim.keymap.set("n", "<leader>A", mark.rm_file)
-	vim.keymap.set("n", "<leader>xa", mark.clear_all)
+	vim.keymap.set("n", "<leader>a", mark.add_file, { desc = "Add file to harpoon" })
+	vim.keymap.set("n", "<leader>A", mark.rm_file, { desc = "Remove file from harpoon" })
+	vim.keymap.set("n", "<leader>xa", mark.clear_all, { desc = "Remove all files from harpoon" })
 
-	vim.keymap.set("n", "<leader>fh", ui.toggle_quick_menu)
+	vim.keymap.set("n", "<leader>fh", ui.toggle_quick_menu, { desc = "Display harpoon menu" })
 
 	vim.keymap.set("n", "<leader>1", function()
 		ui.nav_file(1)

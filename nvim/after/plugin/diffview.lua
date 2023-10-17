@@ -537,8 +537,19 @@ if not vim.g.vscode then
 		},
 	})
 
-	vim.keymap.set("n", "<leader>xh", ":DiffviewFileHistory %<CR>", { silent = true })
-	vim.keymap.set("n", "<leader>xH", ":DiffviewFileHistory<CR>", { silent = true })
-	vim.keymap.set("n", "<leader>xv", ":DiffviewOpen<CR>", { silent = true })
-	vim.keymap.set("n", "<leader>xx", ":DiffviewClose<CR>", { silent = true })
+	vim.keymap.set(
+		"n",
+		"<leader>xh",
+		":DiffviewFileHistory %<CR>",
+		{ silent = true, desc = "Display the git file history" }
+	)
+	-- f
+	vim.keymap.set(
+		"n",
+		"<leader>xH",
+		":DiffviewFileHistory<CR>",
+		{ silent = true, desc = "Display the git file history of the whole project" }
+	)
+	vim.keymap.set("n", "<leader>xv", ":DiffviewOpen<CR>", { silent = true, desc = "Open diff view" })
+	vim.keymap.set("n", "<leader>xx", ":DiffviewClose<CR>", { silent = true, desc = "Close diff view" })
 end

@@ -23,6 +23,7 @@ return require("packer").startup(function(use)
 	use("christoomey/vim-tmux-navigator")
 	use("wbthomason/packer.nvim")
 	use("nvim-tree/nvim-web-devicons")
+	use("echasnovski/mini.nvim")
 	use({
 		"folke/trouble.nvim",
 		requires = { "nvim-tree/nvim-web-devicons" },

@@ -50,6 +50,7 @@ if not vim.g.vscode then
 			["<C-t>"] = "actions.select_tab",
 			["<C-p>"] = "actions.preview",
 			["<Esc>"] = "actions.close",
+			["q"] = "actions.close",
 			["<C-r>"] = "actions.refresh",
 			["<C-y>"] = "actions.copy_entry_path",
 			["-"] = "actions.parent",

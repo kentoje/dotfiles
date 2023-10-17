@@ -1,10 +1,12 @@
+vim.cmd("set expandtab")
+
 vim.opt.nu = true
 
 vim.opt.cursorline = false
 
+-- vim.bo.expandtab = true
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
-vim.bo.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.smartindent = true
 vim.opt.showmode = false
