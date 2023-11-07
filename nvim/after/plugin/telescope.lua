@@ -7,6 +7,8 @@ if not vim.g.vscode then
 	telescope.setup({
 		defaults = {
 			file_ignore_patterns = {
+				"coverage",
+				".cache",
 				"node_modules",
 				"yarn.lock",
 				".yarn",

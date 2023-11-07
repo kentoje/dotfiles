@@ -20,19 +20,31 @@ vim.keymap.set("n", "te", ":tabedit<Return>", { silent = true })
 
 vim.keymap.set(
 	"n",
-	'<leader>sv"',
+	"<leader>sv",
 	":split<Return><C-w>w",
 	{ silent = false, noremap = true, desc = "Split view in row" }
 )
 vim.keymap.set(
 	"n",
-	"<leader>ss",
+	"<leader>d",
 	":vsplit<Return><C-w>w",
 	{ silent = false, noremap = true, desc = "Split view in column" }
 )
-vim.keymap.set("n", "<leader>y", ':let @+ = expand("%")<CR>', { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>Y", ':let @+ = expand("%:p")<CR>', { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set(
+	"n",
+	"<leader>y",
+	':let @+ = expand("%")<CR>',
+	{ silent = true, noremap = true, desc = "Copy the relative path of the current file" }
+)
+vim.keymap.set(
+	"n",
+	"<leader>Y",
+	':let @+ = expand("%:p")<CR>',
+	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
+)
+vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {
+	desc = "Search and replace current selection in file",
+})
 vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory in oil" })
 vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 vim.keymap.set("n", "<leader>w", ":q<CR>", { silent = true, desc = "Mimic MacOS close" })

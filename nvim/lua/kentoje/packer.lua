@@ -8,6 +8,20 @@ return require("packer").startup(function(use)
 	use({ "AckslD/nvim-neoclip.lua", requires = {
 		"nvim-telescope/telescope.nvim",
 	} })
+	use({
+		"jackMort/ChatGPT.nvim",
+		config = function()
+			require("chatgpt").setup()
+		end,
+		requires = {
+			"MunifTanjim/nui.nvim",
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
+	})
+	use({
+		"JoosepAlviste/nvim-ts-context-commentstring",
+	})
 	use("saadparwaiz1/cmp_luasnip")
 	use("rafamadriz/friendly-snippets")
 	use("ray-x/lsp_signature.nvim")
