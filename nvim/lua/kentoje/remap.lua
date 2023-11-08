@@ -45,7 +45,6 @@ vim.keymap.set(
 vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {
 	desc = "Search and replace current selection in file",
 })
-vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory in oil" })
 vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 vim.keymap.set("n", "<leader>w", ":q<CR>", { silent = true, desc = "Mimic MacOS close" })
 

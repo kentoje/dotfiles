@@ -1,5 +1,9 @@
-if not vim.g.vscode then
-	require("nvim-treesitter.configs").setup({
+return {
+	"nvim-treesitter/nvim-treesitter",
+	dependencies = {
+		"JoosepAlviste/nvim-ts-context-commentstring",
+	},
+	config = {
 		-- autotag = {
 		-- 	enable = true,
 		-- 	enable_rename = true,
@@ -37,5 +41,5 @@ if not vim.g.vscode then
 			-- Instead of true it can also be a list of languages
 			additional_vim_regex_highlighting = false,
 		},
-	})
-end
+	},
+}

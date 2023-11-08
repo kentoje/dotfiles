@@ -1,5 +1,6 @@
-if not vim.g.vscode then
-	require("gitsigns").setup({
+return {
+	"lewis6991/gitsigns.nvim",
+	config = {
 		signs = {
 			add = { text = "│" },
 			change = { text = "│" },
@@ -39,5 +40,5 @@ if not vim.g.vscode then
 		yadm = {
 			enable = false,
 		},
-	})
-end
+	},
+}

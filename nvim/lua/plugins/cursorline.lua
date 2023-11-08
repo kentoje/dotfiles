@@ -1,5 +1,6 @@
-if not vim.g.vscode then
-	require("nvim-cursorline").setup({
+return {
+	"yamatsum/nvim-cursorline",
+	config = {
 		cursorline = {
 			enable = false,
 			timeout = 1000,
@@ -10,5 +11,5 @@ if not vim.g.vscode then
 			min_length = 3,
 			hl = { underline = true },
 		},
-	})
-end
+	},
+}
