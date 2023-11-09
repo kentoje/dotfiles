@@ -39,12 +39,26 @@ return {
 
 		local builtin = require("telescope.builtin")
 
+		local wk = require("which-key")
+
+		wk.register({
+			f = {
+				name = "file", -- optional group name
+				f = {
+					function()
+						builtin.find_files({ hidden = true, no_ignore = true })
+					end,
+					"Find all files",
+				}, -- create a binding with label
+			},
+		}, { prefix = "<leader>" })
+
 		vim.keymap.set("n", "<leader>p", function()
 			builtin.git_files({ hidden = true })
 		end, { desc = "Find git files" })
-		vim.keymap.set("n", "<leader>ff", function()
-			builtin.find_files({ hidden = true, no_ignore = true })
-		end, { desc = "Find all files, non git included" })
+		-- vim.keymap.set("n", "<leader>ff", function()
+		-- 	builtin.find_files({ hidden = true, no_ignore = true })
+		-- end, { desc = "Find all files, non git included" })
 		vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
 		vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Search for a given pattern in the project" })
 		vim.keymap.set("n", "<leader>fg", function()
