@@ -23,7 +23,8 @@ end
 
 for i = 1, 9 do
 	local num = tostring(i)
-	alt(num, { "space --focus " .. num })
+	-- Does not work since Sonoma update
+	-- alt(num, { "space --focus " .. num })
 	altShiftNumber(num)
 end
 
