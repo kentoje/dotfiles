@@ -3,20 +3,8 @@
 
   ],
   "decision" : {
-    "actions" : [
-      {
-        "getFrontmostApp" : {
-          "kind" : "bundleURL"
-        }
-      }
-    ],
     "chances" : [
       {
-        "pattern" : {
-          "alwaysMatch" : {
-
-          }
-        },
         "decision" : {
           "actions" : [
             {
@@ -33,18 +21,8 @@
                 }
               },
               "decision" : {
-                "actions" : [
-
-                ],
                 "chances" : [
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          11
-                        ]
-                      }
-                    },
                     "decision" : {
                       "actions" : [
                         {
@@ -63,23 +41,54 @@
                       "chances" : [
 
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          11
+                        ]
+                      }
                     }
                   },
                   {
+                    "decision" : {
+                      "chances" : [
+
+                      ],
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/Figma.app",
+                            "launchArgumentsText" : ""
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ]
+                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           3
                         ]
                       }
-                    },
+                    }
+                  },
+                  {
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Figma.app",
+                            "launchArgumentsText" : "",
                             "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
+                            "path" : "\/Applications\/Arc.app"
                           }
                         },
                         {
@@ -87,38 +96,14 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
-                    }
-                  },
-                  {
+                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           5
                         ]
                       }
-                    },
-                    "decision" : {
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "path" : "\/Applications\/Arc.app",
-                            "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ],
-                      "chances" : [
-
-                      ]
                     }
                   },
                   {
@@ -132,10 +117,10 @@
                     "decision" : {
                       "actions" : [
                         {
+                          "description" : "Toggle this window",
                           "openURL" : {
                             "url" : "spacelauncher:\/\/toggle-preferences-window"
-                          },
-                          "description" : "Toggle this window"
+                          }
                         },
                         {
                           "reWaitTriggerKeys" : {
@@ -188,9 +173,9 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Obsidian.app",
                             "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/Obsidian.app"
                           }
                         },
                         {
@@ -217,8 +202,8 @@
                         {
                           "openApp" : {
                             "path" : "\/Applications\/Slack.app",
-                            "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
+                            "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -244,10 +229,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/kitty.app",
-                            "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false
+                            "path" : "\/Applications\/kitty.app",
+                            "switchToPreviousApp" : false,
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -262,21 +247,14 @@
                     }
                   },
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          9
-                        ]
-                      }
-                    },
                     "decision" : {
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Cursor.app",
                             "hideAppIfRunning" : false,
+                            "switchToPreviousApp" : false,
                             "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false
+                            "path" : "\/Applications\/Cursor.app"
                           }
                         },
                         {
@@ -288,6 +266,13 @@
                       "chances" : [
 
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          9
+                        ]
+                      }
                     }
                   },
                   {
@@ -299,13 +284,16 @@
                       }
                     },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/zoom.us.app",
                             "hideAppIfRunning" : false,
-                            "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false
+                            "switchToPreviousApp" : false,
+                            "path" : "\/Applications\/zoom.us.app",
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -313,16 +301,28 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     }
                   }
+                ],
+                "actions" : [
+
                 ]
               }
             }
           ]
+        },
+        "pattern" : {
+          "alwaysMatch" : {
+
+          }
+        }
+      }
+    ],
+    "actions" : [
+      {
+        "getFrontmostApp" : {
+          "kind" : "bundleURL"
         }
       }
     ]
