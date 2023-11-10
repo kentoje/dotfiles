@@ -73,11 +73,11 @@ return {
 		-- vim.keymap.set("n", "<leader>/", builtin.current_buffer_fuzzy_find, {})
 		vim.keymap.set("n", "<leader>:", builtin.commands, {})
 		vim.keymap.set("n", "<leader>.", builtin.quickfix, {})
-		vim.keymap.set("n", "<leader>g", builtin.lsp_definitions, { desc = "Go to definition" })
-		vim.keymap.set("n", "<M-g>", builtin.lsp_definitions, { desc = "Go to definition" })
-		vim.keymap.set("n", "<leader>G", function()
-			builtin.lsp_references({ show_line = false })
-		end, { desc = "Search for all references" })
+		-- vim.keymap.set("n", "<leader>g", builtin.lsp_definitions, { desc = "Go to definition" })
+		-- vim.keymap.set("n", "<M-g>", builtin.lsp_definitions, { desc = "Go to definition" })
+		-- vim.keymap.set("n", "<leader>G", function()
+		-- 	builtin.lsp_references({ show_line = false })
+		-- end, { desc = "Search for all references" })
 		vim.keymap.set("n", "<leader>?k", ":Telescope keymaps<cr>", { desc = "Display all keymaps" })
 	end,
 }

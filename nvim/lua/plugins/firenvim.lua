@@ -1,3 +1,17 @@
+vim.g.firenvim_config = {
+	globalSettings = { alt = "all" },
+	localSettings = {
+		[".*"] = {
+			cmdline = "neovim",
+			content = "text",
+			priority = 0,
+			selector = "textarea",
+      -- forces it to be not enabled by default. Use the keybinding on Arc to spawn it in the textarea
+			takeover = "never",
+		},
+	},
+}
+
 return {
 	"glacambre/firenvim",
 	-- Lazy load firenvim

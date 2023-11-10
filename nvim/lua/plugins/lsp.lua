@@ -63,9 +63,9 @@ return {
 				vim.keymap.set("n", "<leader>h", function()
 					vim.lsp.buf.hover()
 				end, opts)
-				vim.keymap.set("n", "<leader><F2>", function()
-					vim.lsp.buf.rename()
-				end, opts)
+				-- vim.keymap.set("n", "<leader><F2>", function()
+				-- 	vim.lsp.buf.rename()
+				-- end, opts)
 				vim.keymap.set("n", "<leader>j", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "<leader>e", vim.diagnostic.goto_next, opts) -- go to next error
 				vim.keymap.set("n", "<leader>E", vim.diagnostic.goto_prev, opts) -- go to next error
