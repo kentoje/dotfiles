@@ -17,7 +17,7 @@ return {
 				["git.savannah.gnu.org"] = require("gitlinker.hosts").get_cgit_type_url,
 			},
 			-- default mapping to call url generation with action_callback
-			mappings = "<leader>xs",
+			mappings = "<leader>xl",
 		})
 	end,
 }
