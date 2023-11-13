@@ -6,8 +6,11 @@ return {
 	config = function()
 		require("spectre").setup()
 
-		vim.keymap.set("n", "<leader>xs", '<cmd>lua require("spectre").toggle()<CR>', {
+		vim.keymap.set("n", "<leader>fg", '<cmd>lua require("spectre").toggle()<CR>', {
 			desc = "Toggle Spectre buffer",
+		})
+		vim.keymap.set("n", "<leader>fc", '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
+			desc = "Search on current word",
 		})
 	end,
 }
