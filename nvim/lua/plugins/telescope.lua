@@ -1,6 +1,9 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	version = "0.1.1",
+	version = "0.1.x",
+	cmd = {
+		"Telescope",
+	},
 	dependencies = { { "nvim-lua/plenary.nvim" } },
 	config = function()
 		local telescope = require("telescope")
@@ -19,6 +22,7 @@ return {
 					".git/",
 				},
 				path_display = { "smart" },
+				preview = false,
 				prompt_prefix = " ",
 				selection_caret = " ",
 				sorting_strategy = "ascending",
@@ -46,7 +50,10 @@ return {
 				name = "file", -- optional group name
 				f = {
 					function()
-						builtin.find_files({ hidden = true, no_ignore = true })
+						builtin.find_files({
+							hidden = true,
+							no_ignore = true,
+						})
 					end,
 					"Find all files",
 				}, -- create a binding with label
@@ -54,7 +61,7 @@ return {
 		}, { prefix = "<leader>" })
 
 		vim.keymap.set("n", "<leader>p", function()
-			builtin.git_files({ hidden = true })
+			builtin.find_files({ hidden = true })
 		end, { desc = "Find git files" })
 		-- vim.keymap.set("n", "<leader>ff", function()
 		-- 	builtin.find_files({ hidden = true, no_ignore = true })

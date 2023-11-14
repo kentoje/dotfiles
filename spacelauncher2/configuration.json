@@ -3,13 +3,6 @@
 
   ],
   "decision" : {
-    "actions" : [
-      {
-        "getFrontmostApp" : {
-          "kind" : "bundleURL"
-        }
-      }
-    ],
     "chances" : [
       {
         "decision" : {
@@ -22,21 +15,12 @@
           ],
           "chances" : [
             {
-              "pattern" : {
-                "message" : {
-                  "regex" : "53\\(0\\)"
-                }
-              },
               "decision" : {
+                "actions" : [
+
+                ],
                 "chances" : [
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          11
-                        ]
-                      }
-                    },
                     "decision" : {
                       "chances" : [
 
@@ -44,57 +28,8 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
-                            "path" : "\/Applications\/Spark.app"
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "decision" : {
-                      "chances" : [
-
-                      ],
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "path" : "\/Applications\/Figma.app",
-                            "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ]
-                    },
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          3
-                        ]
-                      }
-                    }
-                  },
-                  {
-                    "decision" : {
-                      "chances" : [
-
-                      ],
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "path" : "\/Applications\/Arc.app",
-                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/Spark.app",
                             "hideAppIfRunning" : false
                           }
                         },
@@ -108,13 +43,72 @@
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
-                          5
+                          11
                         ]
                       }
                     }
                   },
                   {
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          3
+                        ]
+                      }
+                    },
                     "decision" : {
+                      "chances" : [
+
+                      ],
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/Figma.app"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          5
+                        ]
+                      }
+                    },
+                    "decision" : {
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/Arc.app"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ],
+                      "chances" : [
+
+                      ]
+                    }
+                  },
+                  {
+                    "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "description" : "Toggle this window",
@@ -127,9 +121,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     },
                     "pattern" : {
@@ -141,20 +132,13 @@
                     }
                   },
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          46
-                        ]
-                      }
-                    },
                     "decision" : {
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
+                            "path" : "\/Users\/kento\/Applications\/Spotify.app",
                             "launchArgumentsText" : "",
-                            "path" : "\/Users\/kento\/Applications\/Spotify.app"
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -166,6 +150,13 @@
                       "chances" : [
 
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          46
+                        ]
+                      }
                     }
                   },
                   {
@@ -173,9 +164,9 @@
                       "actions" : [
                         {
                           "openApp" : {
+                            "hideAppIfRunning" : false,
                             "path" : "\/Applications\/Obsidian.app",
-                            "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -233,14 +224,11 @@
                       }
                     },
                     "decision" : {
-                      "chances" : [
-
-                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false,
                             "switchToPreviousApp" : false,
                             "path" : "\/Applications\/kitty.app"
                           }
@@ -250,71 +238,76 @@
 
                           }
                         }
+                      ],
+                      "chances" : [
+
                       ]
                     }
                   },
                   {
+                    "decision" : {
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "switchToPreviousApp" : false,
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/kitty.app"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ],
+                      "chances" : [
+
+                      ]
+                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           9
                         ]
                       }
-                    },
-                    "decision" : {
-                      "chances" : [
-
-                      ],
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/kitty.app",
-                            "hideAppIfRunning" : false
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ]
                     }
                   },
                   {
-                    "decision" : {
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "launchArgumentsText" : "",
-                            "path" : "\/Applications\/zoom.us.app",
-                            "hideAppIfRunning" : false,
-                            "switchToPreviousApp" : false
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ],
-                      "chances" : [
-
-                      ]
-                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           6
                         ]
                       }
+                    },
+                    "decision" : {
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "switchToPreviousApp" : false,
+                            "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/zoom.us.app"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ],
+                      "chances" : [
+
+                      ]
                     }
                   }
-                ],
-                "actions" : [
-
                 ]
+              },
+              "pattern" : {
+                "message" : {
+                  "regex" : "53\\(0\\)"
+                }
               }
             }
           ]
@@ -323,6 +316,13 @@
           "alwaysMatch" : {
 
           }
+        }
+      }
+    ],
+    "actions" : [
+      {
+        "getFrontmostApp" : {
+          "kind" : "bundleURL"
         }
       }
     ]

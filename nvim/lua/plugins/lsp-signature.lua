@@ -1,5 +1,6 @@
 return {
 	"ray-x/lsp_signature.nvim",
+	event = { "BufReadPost", "BufNewFile" },
 	config = function()
 		require("lsp_signature").setup({
 			debug = false, -- set to true to enable debug logging

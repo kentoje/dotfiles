@@ -6,9 +6,9 @@ return {
 		local util = require("formatter.util")
 
 		local prettierd = function()
-			if not vim.loop.fs_realpath(".prettierrc") then
-				return nil
-			end
+			-- if not vim.loop.fs_realpath(".prettierrc") then
+			-- 	return nil
+			-- end
 
 			return {
 				exe = "prettierd",
