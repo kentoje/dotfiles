@@ -3,8 +3,6 @@ tap "arl/arl"
 tap "epk/epk"
 tap "fsouza/prettierd"
 tap "homebrew/bundle"
-tap "homebrew/cask"
-tap "homebrew/core"
 tap "homebrew/services"
 tap "koekeishiya/formulae"
 tap "mongodb/brew"
@@ -20,28 +18,26 @@ brew "libpng"
 brew "lz4"
 # General-purpose data compression with high compression ratio
 brew "xz"
+# New file format for still image compression
+brew "jpeg-xl"
 # Perceptual video quality assessment based on multi-method fusion
 brew "libvmaf"
 # Codec library for encoding and decoding AV1 video streams
 brew "aom"
 # Mozilla CA certificate store
 brew "ca-certificates"
-# Library for decimal floating point arithmetic
-brew "mpdecimal"
-# Cryptography and SSL/TLS Toolkit
-brew "openssl@1.1"
-# Library for command-line editing
-brew "readline"
-# Command-line interface for SQLite
-brew "sqlite"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.11"
 # C parser in Python
 brew "pycparser"
 # C Foreign Function Interface for Python
 brew "cffi"
 # Text processing system for reStructuredText
 brew "docutils"
+# Library for decimal floating point arithmetic
+brew "mpdecimal"
+# Library for command-line editing
+brew "readline"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
 # Python 2 and 3 compatibility utilities
 brew "six"
 # Official Amazon AWS command-line interface
@@ -58,6 +54,8 @@ brew "cmake"
 brew "docbook"
 # XML vocabulary to create presentation-neutral documents
 brew "docbook-xsl"
+# Bash, Zsh and Fish completion for Docker
+brew "docker-completion"
 # Run arbitrary commands when files change
 brew "entr"
 # Banner-like program prints strings as ASCII art
@@ -88,24 +86,28 @@ brew "glab"
 brew "glib"
 # Command-line option parsing utility
 brew "gnu-getopt"
+# GNU implementation of the famous stream editor
+brew "gnu-sed"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
 # Terminal based graphical activity monitor inspired by gtop and vtop
 brew "gotop"
 # GNU grep, egrep and fgrep
 brew "grep"
+# Kubernetes package manager
+brew "helm"
 # Improved top (interactive process viewer)
 brew "htop"
 # C/C++ and Java libraries for Unicode and globalization
 brew "icu4c"
 # Library for manipulating JPEG-2000 images
 brew "jasper"
-# Convert XML to another format (based on XSL or other tools)
-brew "xmlto"
 # Database of common MIME types
 brew "shared-mime-info"
 # H.265/HEVC encoder
 brew "x265"
+# ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
+brew "libheif"
 # C/C++ seam carving library
 brew "liblqr"
 # Macro processing language
@@ -120,8 +122,16 @@ brew "jpegoptim"
 brew "oniguruma"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
+# Kubernetes command-line interface
+brew "kubernetes-cli"
+# Simple terminal UI for git commands
+brew "lazygit"
 # Terminal file manager
 brew "lf"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@1.1"
+# C library implementing the SSH2 protocol
+brew "libssh2"
 # X.Org: Inter-Client Exchange Library
 brew "libice"
 # C string library for manipulating Unicode strings
@@ -136,8 +146,6 @@ brew "pkg-config"
 brew "libpthread-stubs"
 # X.Org: X Session Management Library
 brew "libsm"
-# C library implementing the SSH2 protocol
-brew "libssh2"
 # Very basic terminfo library
 brew "unibilium"
 # Library for processing keyboard entry from the terminal
@@ -200,14 +208,24 @@ brew "terraform"
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Language for application scale JavaScript development
+brew "typescript"
 # Internet file retriever
 brew "wget"
 # Access X11 clipboards from the command-line
 brew "xclip"
+# Convert XML to another format (based on XSL or other tools)
+brew "xmlto"
+# JavaScript package manager
+brew "yarn"
 # Process YAML, JSON, XML, CSV and properties documents from the CLI
 brew "yq"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+# Fish-like fast/unobtrusive autosuggestions for zsh
+brew "zsh-autosuggestions"
+# Fish shell like syntax highlighting for zsh
+brew "zsh-syntax-highlighting"
 # 🔥 Feature-rich interactive Jira command-line
 brew "ankitpokhrel/jira-cli/jira-cli"
 # Git in your tmux status bar.
@@ -220,10 +238,87 @@ brew "koekeishiya/formulae/skhd"
 brew "koekeishiya/formulae/yabai"
 # High-performance, schema-free, document-oriented database
 brew "mongodb/brew/mongodb-community"
+# Chromium based browser
+cask "arc"
+# Collaborative team software
+cask "figma"
 cask "font-sf-mono-nerd-font"
 # Desktop automation application
 cask "hammerspoon"
+# HTTP and GraphQL Client
+cask "insomnia"
 # Open-source keystroke visualizer
 cask "keycastr"
+# Software for Logitech devices
+cask "logitech-options"
+# Knowledge base that works on top of a local folder of plain text Markdown files
+cask "obsidian"
+# HTTP debugging proxy
+cask "proxyman"
+# Control your tools with a few keystrokes
+cask "raycast"
+# JavaScript playground that auto-evaluates as code is typed
+cask "runjs"
+# App launcher/switcher
+cask "spacelauncher"
+# Music streaming service
+cask "spotify"
 # Rust-based terminal
 cask "warp"
+vscode "alefragnani.project-manager"
+vscode "apollographql.vscode-apollo"
+vscode "arcanis.vscode-zipfs"
+vscode "arcticicestudio.nord-visual-studio-code"
+vscode "artdiniz.quitcontrol-vscode"
+vscode "asvetliakov.vscode-neovim"
+vscode "barrsan.reui"
+vscode "be5invis.vscode-custom-css"
+vscode "Catppuccin.catppuccin-vsc"
+vscode "Catppuccin.catppuccin-vsc-icons"
+vscode "ChakrounAnas.turbo-console-log"
+vscode "christian-kohler.path-intellisense"
+vscode "cocopon.iceberg-theme"
+vscode "dbaeumer.vscode-eslint"
+vscode "dracula-theme.theme-dracula"
+vscode "eamodio.gitlens"
+vscode "EditorConfig.EditorConfig"
+vscode "esbenp.prettier-vscode"
+vscode "firsttris.vscode-jest-runner"
+vscode "formulahendry.auto-rename-tag"
+vscode "GitLab.gitlab-workflow"
+vscode "GraphQL.vscode-graphql"
+vscode "GraphQL.vscode-graphql-syntax"
+vscode "hashicorp.terraform"
+vscode "hedinne.popping-and-locking-vscode"
+vscode "ionutvmi.path-autocomplete"
+vscode "IronGeek.vscode-env"
+vscode "jdinhlife.gruvbox"
+vscode "lkytal.FlatUI"
+vscode "mads-hartmann.bash-ide-vscode"
+vscode "meganrogge.template-string-converter"
+vscode "ms-vsliveshare.vsliveshare"
+vscode "muhammadsammy.flat-ui-dark"
+vscode "naumovs.color-highlight"
+vscode "Orta.vscode-twoslash-queries"
+vscode "PKief.material-icon-theme"
+vscode "pnp.polacode"
+vscode "redhat.vscode-yaml"
+vscode "richie5um2.vscode-sort-json"
+vscode "sallar.vscode-duotone-dark"
+vscode "sdras.night-owl"
+vscode "sgoley.lookml-syntax-highlighter"
+vscode "SimonSiefke.svg-preview"
+vscode "styled-components.vscode-styled-components"
+vscode "stylelint.vscode-stylelint"
+vscode "sumneko.lua"
+vscode "tamasfe.even-better-toml"
+vscode "timonwong.shellcheck"
+vscode "unifiedjs.vscode-mdx"
+vscode "usernamehw.errorlens"
+vscode "vscode-icons-team.vscode-icons"
+vscode "vuesion.vuesion-theme"
+vscode "WallabyJs.console-ninja"
+vscode "WallabyJs.wallaby-vscode"
+vscode "wayou.vscode-todo-highlight"
+vscode "xabikos.JavaScriptSnippets"
+vscode "yzhang.markdown-all-in-one"
