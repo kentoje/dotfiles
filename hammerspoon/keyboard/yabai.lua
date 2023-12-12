@@ -23,29 +23,30 @@ end
 
 for i = 1, 9 do
 	local num = tostring(i)
-	-- Does not work since Sonoma update
+	-- broken
 	-- alt(num, { "space --focus " .. num })
 	altShiftNumber(num)
 end
 
 -- alpha
 alt("f", { "window --toggle zoom-fullscreen" })
-alt("l", { "space --focus recent" })
-alt("m", { "space --toggle mission-control" })
-alt("p", { "window --toggle pip" })
-alt("g", { "space --toggle padding", "space --toggle gap" })
-alt("r", { "space --rotate 90" })
+-- alt("l", { "space --focus recent" })
+-- alt("m", { "space --toggle mission-control" })
+-- alt("p", { "window --toggle pip" })
+-- alt("g", { "space --toggle padding", "space --toggle gap" })
+-- alt("r", { "space --rotate 90" })
 alt("t", { "window --toggle float", "window --grid 4:4:1:1:2:2" })
-alt("w", { "window --close" })
+-- alt("w", { "window --close" })
 
 -- special characters
 alt("'", { "space --layout stack" })
 alt(";", { "space --layout bsp" })
-alt("tab", { "space --focus recent" })
+-- alt("tab", { "space --focus recent" })
 
 local homeRow = { h = "west", j = "south", k = "north", l = "east" }
 
 for key, direction in pairs(homeRow) do
+	-- move between windows with hjkl
 	alt(key, { "window --focus " .. direction })
 	altShift(key, { "window --swap " .. direction })
 end
