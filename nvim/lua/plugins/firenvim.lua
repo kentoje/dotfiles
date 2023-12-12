@@ -5,8 +5,8 @@ vim.g.firenvim_config = {
 			cmdline = "neovim",
 			content = "text",
 			priority = 0,
-			selector = "textarea",
-      -- forces it to be not enabled by default. Use the keybinding on Arc to spawn it in the textarea
+			selector = "textarea, input",
+			-- forces it to be not enabled by default. Use the keybinding on Arc to spawn it in the textarea
 			takeover = "never",
 		},
 	},

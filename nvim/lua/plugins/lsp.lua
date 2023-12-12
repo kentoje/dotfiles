@@ -28,18 +28,18 @@ return {
 			callback = function(event)
 				local opts = { buffer = event.buf }
 
-				-- vim.keymap.set("n", "<leader>g", function()
-				-- 	vim.lsp.buf.definition()
-				-- end, opts)
+				vim.keymap.set("n", "<A-g>", function()
+					vim.lsp.buf.definition()
+				end, opts)
 				-- vim.keymap.set("n", "<leader>G", function()
 				-- 	vim.lsp.buf.references()
 				-- end, opts)
 				-- vim.keymap.set("n", "<leader>fs", function()
 				-- 	vim.lsp.buf.workspace_symbol()
 				-- end, opts)
-				-- vim.keymap.set("n", "<leader>.", function()
-				-- 	vim.lsp.buf.code_action()
-				-- end, opts)
+				vim.keymap.set("n", "<C-.>", function()
+					vim.lsp.buf.code_action()
+				end, opts)
 				-- vim.keymap.set("n", "<leader>e", function()
 				-- 	vim.diagnostic.goto_next({
 				-- 		severity = vim.diagnostic.severity.ERROR,
@@ -60,6 +60,10 @@ return {
 				-- 	vim.lsp.buf.goto_prev()
 				-- end, opts)
 				-- vim.keymap.set('n', '<C-h>', function() vim.lsp.buf.signature_help() end, opts)
+				-- vim.keymap.set("n", "<leader>h", function()
+				-- 	vim.lsp.buf.hover()
+				-- end, opts)
+				-- Made because of custom MacOS keyboard shortcut for "Hide kitty"
 				vim.keymap.set("n", "<leader>h", function()
 					vim.lsp.buf.hover()
 				end, opts)
@@ -67,8 +71,8 @@ return {
 				-- 	vim.lsp.buf.rename()
 				-- end, opts)
 				vim.keymap.set("n", "<leader>j", vim.diagnostic.open_float, opts) -- open error
-				vim.keymap.set("n", "<leader>e", vim.diagnostic.goto_next, opts) -- go to next error
-				vim.keymap.set("n", "<leader>E", vim.diagnostic.goto_prev, opts) -- go to next error
+				vim.keymap.set("n", "<A-e>", vim.diagnostic.goto_next, opts) -- go to next error
+				vim.keymap.set("n", "<A-E>", vim.diagnostic.goto_prev, opts) -- go to next error
 			end,
 		})
 
@@ -113,6 +117,15 @@ return {
 						end,
 					})
 				end,
+
+				graphql = function()
+					lspconfig.graphql.setup({
+						filetypes = { "graphql", "typescriptreact", "javascriptreact", "typescript" },
+						root_dir = function(fname)
+							return lspconfig.util.root_pattern(".git")(fname) or lspconfig.util.path.dirname(fname)
+						end,
+					})
+				end,
 			},
 		})
 
@@ -130,6 +143,8 @@ return {
 				["<C-f>"] = cmp.mapping.scroll_docs(2),
 				["<C-Space>"] = cmp.mapping.complete(),
 				["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+				["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+				["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
 			}),
 			snippet = {
 				expand = function(args)
