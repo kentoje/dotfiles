@@ -37,7 +37,7 @@ return {
 				-- vim.keymap.set("n", "<leader>fs", function()
 				-- 	vim.lsp.buf.workspace_symbol()
 				-- end, opts)
-				vim.keymap.set("n", "<C-.>", function()
+				vim.keymap.set("n", "<M-.>", function()
 					vim.lsp.buf.code_action()
 				end, opts)
 				-- vim.keymap.set("n", "<leader>e", function()
