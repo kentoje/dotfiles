@@ -50,10 +50,28 @@ return {
 			disabled_filetypes = { statusline = { "dashboard", "lazy", "alpha" } },
 		},
 		sections = {
-			lualine_a = { "mode" },
+			lualine_a = {
+				{
+					"buffers",
+
+					-- 0: Shows buffer name
+					-- 1: Shows buffer index
+					-- 2: Shows buffer name + buffer index
+					-- 3: Shows buffer number
+					-- 4: Shows buffer name + buffer number
+					mode = 2,
+
+					symbols = {
+						modified = " +", -- Text to show when the buffer is modified
+						alternate_file = "", -- Text to show to identify the alternate file
+						directory = "", -- Text to show when the buffer is a directory
+					},
+				},
+			},
 			lualine_x = { "encoding", "fileformat", "filetype" },
 			lualine_y = { "progress" },
-			lualine_b = { { "filename", path = 1 } },
+			-- lualine_b = { { "filename", path = 1 } },
+			lualine_b = {},
 			lualine_c = { diff, diagnostics },
 			lualine_z = {},
 		},

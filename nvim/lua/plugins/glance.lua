@@ -87,7 +87,7 @@ return {
 		-- vim.keymap.set("n", "<M-g>", "<cmd>Glance definitions<CR>", { desc = "Go to definition" })
 		vim.keymap.set(
 			"n",
-			"<A-G>",
+			"<leader>g",
 			"<cmd>Glance references<CR>",
 			{ desc = "Search for all references", silent = true }
 		)

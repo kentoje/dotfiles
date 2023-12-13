@@ -32,8 +32,8 @@ vim.keymap.set("n", "<C-Down>", "5<C-w>-", { noremap = true, silent = true, desc
 -- end, { silent = true, desc = "Resize bottom" })
 
 -- Buffers
-vim.keymap.set("n", "<A-h>", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
-vim.keymap.set("n", "<A-l>", ":bnext<CR>", { silent = true, desc = "Buffer next" })
+vim.keymap.set("n", "<M-h>", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
+vim.keymap.set("n", "<M-l>", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 
 -- Yank on system clipboard
 -- vim.keymap.set("n", "<leader>y", '"+y')
@@ -41,7 +41,7 @@ vim.keymap.set("n", "<A-l>", ":bnext<CR>", { silent = true, desc = "Buffer next"
 -- vim.keymap.set("n", "<leader>Y", '"+Y')
 
 -- Pane
-vim.keymap.set("n", "<C-D>", ":split<Return><C-w>w", { silent = true, noremap = true, desc = "Split view in row" })
+-- vim.keymap.set("n", "<C-D>", ":split<Return><C-w>w", { silent = true, noremap = true, desc = "Split view in row" })
 vim.keymap.set("n", "<C-d>", ":vsplit<Return><C-w>w", { silent = true, noremap = true, desc = "Split view in column" })
 vim.keymap.set(
 	"n",
@@ -80,3 +80,41 @@ end
 vim.keymap.set("v", "<leader>sw", function()
 	surround_with(vim.fn.input("Char to surround: "))
 end, { silent = true, desc = "Surround visual mode selection with the given char" })
+--
+-------- GO TO BUFFER INDEX ---------------------------------------------------
+
+local function get_listed_buffers()
+	local buffers = vim.tbl_filter(function(b)
+		return vim.fn.buflisted(b) == 1
+	end, vim.api.nvim_list_bufs())
+	return buffers
+end
+
+-- Get buffer id from buffer index
+local function go_to_buffer(buffer_list_index)
+	local buffer_list = get_listed_buffers()
+	local buffer_id = buffer_list[buffer_list_index]
+	if buffer_id ~= nil then
+		vim.api.nvim_command("buffer " .. buffer_id)
+	end
+end
+
+vim.keymap.set("n", "<leader>1", function()
+	go_to_buffer(1)
+end, { noremap = true, silent = false })
+vim.keymap.set("n", "<leader>2", function()
+	go_to_buffer(2)
+end, { noremap = true, silent = false })
+vim.keymap.set("n", "<leader>3", function()
+	go_to_buffer(3)
+end, { noremap = true, silent = false })
+vim.keymap.set("n", "<leader>4", function()
+	go_to_buffer(4)
+end, { noremap = true, silent = false })
+vim.keymap.set("n", "<leader>5", function()
+	go_to_buffer(5)
+end, { noremap = true, silent = false })
+vim.keymap.set("n", "<leader>6", function()
+	go_to_buffer(6)
+end, { noremap = true, silent = false })
+-------------------------------------------------------------------------------

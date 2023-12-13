@@ -13,6 +13,23 @@ return {
 
 		telescope.setup({
 			defaults = {
+				vimgrep_arguments = {
+					"rg",
+					"--color=never",
+					"--no-heading",
+					"--with-filename",
+					"--line-number",
+					"--column",
+					"--smart-case",
+					"--no-ignore",
+					"--hidden",
+					"-g",
+					"!node_modules/*",
+					"-g",
+					"!.yarn",
+					"-g",
+					"!.git/logs",
+				},
 				file_ignore_patterns = {
 					"coverage",
 					".cache",
@@ -62,11 +79,31 @@ return {
 		-- vim.keymap.set("n", "<leader>p", function()
 		-- 	builtin.find_files({ hidden = true })
 		-- end, { desc = "Find git files" })
+
+		local find_command = {
+			"rg",
+			"--files",
+			"--no-ignore",
+			"--hidden",
+			"-g",
+			"!node_modules/*",
+			"-g",
+			"!.yarn",
+			"-g",
+			"!.git/logs",
+		}
+
 		vim.keymap.set("n", "<C-p>", function()
-			builtin.find_files({ hidden = true })
+			builtin.find_files({
+				hidden = true,
+				find_command = find_command,
+			})
 		end, { desc = "Find git files" })
 		vim.keymap.set("n", "<M-p>", function()
-			builtin.find_files({ hidden = true })
+			builtin.find_files({
+				hidden = true,
+				find_command = find_command,
+			})
 		end, { desc = "Find git files" })
 		-- vim.keymap.set("n", ";", function()
 		-- 	builtin.find_files({ hidden = true })
@@ -77,7 +114,9 @@ return {
 		vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
 		-- vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Search for a given pattern in the project" })
 		vim.keymap.set("n", "<leader>fg", function()
-			builtin.live_grep({ hidden = true })
+			builtin.live_grep({
+				hidden = true,
+			})
 		end, { desc = "Search for a regex pattern in the project" })
 		-- vim.keymap.set("n", "<leader>fG", function()
 		-- 	builtin.live_grep({ glob_pattern = vim.fn.input("Pattern: ") })

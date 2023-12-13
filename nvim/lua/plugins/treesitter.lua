@@ -19,6 +19,15 @@ return {
 			-- },
 			-- },
 			-- A list of parser names, or "all" (the five listed parsers should always be installed)
+			-- incremental_selection = {
+			-- 	enable = true,
+			-- 	keymaps = {
+			-- 		init_selection = "<C-space>",
+			-- 		node_incremental = "<C-space>",
+			-- 		scope_incremental = false,
+			-- 		node_decremental = "<bs>",
+			-- 	},
+			-- },
 			ensure_installed = {
 				"c",
 				"rust",
