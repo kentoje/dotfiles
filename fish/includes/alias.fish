@@ -11,6 +11,14 @@ function git_current_branch
 end
 funcsave -q git_current_branch
 
+function zcd
+    set -l result (zoxide query --list | fzf-tmux -p)
+    if test -n "$result"
+        cd $result
+    end
+end
+funcsave -q zcd
+
 alias g 'git'
 
 alias ga 'git add'
