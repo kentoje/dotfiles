@@ -28,18 +28,22 @@ return {
 			callback = function(event)
 				local opts = { buffer = event.buf }
 
-				vim.keymap.set("n", "<C-g>", function()
-					vim.lsp.buf.definition()
-				end, opts)
+				vim.diagnostic.config({
+					severity_sort = true,
+				})
+
+				-- vim.keymap.set("n", "<C-g>", function()
+				-- 	vim.lsp.buf.definition()
+				-- end, opts)
 				-- vim.keymap.set("n", "<leader>G", function()
 				-- 	vim.lsp.buf.references()
 				-- end, opts)
 				-- vim.keymap.set("n", "<leader>fs", function()
 				-- 	vim.lsp.buf.workspace_symbol()
 				-- end, opts)
-				vim.keymap.set("n", "<M-.>", function()
-					vim.lsp.buf.code_action()
-				end, opts)
+				-- vim.keymap.set("n", "<M-.>", function()
+				-- 	vim.lsp.buf.code_action()
+				-- end, opts)
 				-- vim.keymap.set("n", "<leader>e", function()
 				-- 	vim.diagnostic.goto_next({
 				-- 		severity = vim.diagnostic.severity.ERROR,
@@ -67,10 +71,10 @@ return {
 				-- vim.keymap.set("n", "<leader><F2>", function()
 				-- 	vim.lsp.buf.rename()
 				-- end, opts)
-				vim.keymap.set("n", "<leader>h", function()
-					vim.lsp.buf.hover()
-				end, opts)
-				vim.keymap.set("n", "<C-j>", vim.diagnostic.open_float, opts) -- open error
+				-- vim.keymap.set("n", "<leader>h", function()
+				-- 	vim.lsp.buf.hover()
+				-- end, opts)
+				vim.keymap.set("n", "L", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "<C-e>", vim.diagnostic.goto_next, opts) -- go to next error
 				vim.keymap.set("n", "<C-S-e>", vim.diagnostic.goto_prev, opts) -- go to next error
 			end,
