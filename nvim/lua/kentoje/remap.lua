@@ -155,6 +155,7 @@ local function go_to_buffer(buffer_list_index)
 	end
 end
 
+-- mapped by kitty with ctrl+x
 vim.keymap.set("n", "<leader>1", function()
 	go_to_buffer(1)
 end, { noremap = true, silent = false })
