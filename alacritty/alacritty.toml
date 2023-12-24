@@ -22,7 +22,7 @@ multiplier = 1
 style = { shape = "Block" }
 
 [[hints.enabled]]
-command = "open"                                                                                                                                          # On macOS
+command = "open"
 hyperlinks = true
 post_processing = true
 persist = false
