@@ -1,4 +1,4 @@
-import = ["~/.config/alacritty/themes/themes/catppuccin_macchiato.toml"]
+import = ["~/.config/alacritty/themes/catppuccin_macchiato.toml"]
 
 [window]
 padding = { x = 12, y = 12 }
