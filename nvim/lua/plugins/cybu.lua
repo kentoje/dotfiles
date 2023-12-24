@@ -33,9 +33,14 @@ return {
 			},
 			display_time = 1000, -- time in ms the cybu win is displayed
 		})
+		-- TODO: Remove kitty map, and use leader syntax
 		vim.keymap.set("n", "<M-h>", "<Plug>(CybuPrev)", { desc = "Cybu prev" })
 		vim.keymap.set("n", "<M-l>", "<Plug>(CybuNext)", { desc = "Cybu next" })
 
+		vim.keymap.set("n", "<leader>qh", "<Plug>(CybuPrev)", { desc = "Cybu prev" })
+		vim.keymap.set("n", "<leader>ql", "<Plug>(CybuNext)", { desc = "Cybu next" })
+
+		-- TODO: Remove kitty map, and use leader syntax
 		-- Kitty is sending F3 / F4 by pressing custom keymaps
 		vim.keymap.set("n", "<F3>", "<Plug>(CybuPrev)", { desc = "Cybu prev" })
 		vim.keymap.set("n", "<F4>", "<Plug>(CybuNext)", { desc = "Cybu next" })

@@ -32,9 +32,12 @@ return {
 					severity_sort = true,
 				})
 
-				-- vim.keymap.set("n", "<C-g>", function()
-				-- 	vim.lsp.buf.definition()
-				-- end, opts)
+				vim.keymap.set("n", "<C-g>", function()
+					vim.lsp.buf.definition()
+				end, opts)
+				vim.keymap.set("n", "<M-g>", function()
+					vim.lsp.buf.definition()
+				end, opts)
 				-- vim.keymap.set("n", "<leader>G", function()
 				-- 	vim.lsp.buf.references()
 				-- end, opts)
@@ -74,7 +77,8 @@ return {
 				-- vim.keymap.set("n", "<leader>h", function()
 				-- 	vim.lsp.buf.hover()
 				-- end, opts)
-				vim.keymap.set("n", "L", vim.diagnostic.open_float, opts) -- open error
+				vim.keymap.set("n", "<M-k>", vim.diagnostic.open_float, opts) -- open error
+				vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "<C-e>", vim.diagnostic.goto_next, opts) -- go to next error
 				vim.keymap.set("n", "<C-S-e>", vim.diagnostic.goto_prev, opts) -- go to next error
 			end,

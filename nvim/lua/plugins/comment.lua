@@ -13,6 +13,13 @@ return {
 			api.call("toggle.linewise.current", "g@$"),
 			{ expr = true, desc = "Comment the current line" }
 		)
+		-- TODO: Change kitty binds
+		vim.keymap.set(
+			"n",
+			"<leader>q/",
+			api.call("toggle.linewise.current", "g@$"),
+			{ expr = true, desc = "Comment the current line" }
+		)
 		vim.keymap.set("x", "<C-/>", "<Plug>(comment_toggle_linewise_visual)")
 	end,
 }

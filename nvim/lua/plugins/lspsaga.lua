@@ -3,6 +3,7 @@ return {
 	config = function()
 		require("lspsaga").setup({
 			symbol_in_winbar = {
+				enable = false,
 				folder_level = 2,
 			},
 			lightbulb = {
@@ -37,15 +38,22 @@ return {
 
 		vim.keymap.set(
 			"n",
+			"<leader>q.",
+			":Lspsaga diagnostic_jump_next<CR>",
+			{ silent = true, desc = "Jump to next diagnostic" }
+		)
+		vim.keymap.set(
+			"n",
 			"<M-.>",
 			":Lspsaga diagnostic_jump_next<CR>",
 			{ silent = true, desc = "Jump to next diagnostic" }
 		)
-		vim.keymap.set("n", "<C-g>", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
-		vim.keymap.set("n", "<M-g>", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
+		vim.keymap.set("n", "<leader>g", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
+		-- vim.keymap.set("n", "<M-g>", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
 		-- mapped by kitty
-		vim.keymap.set("n", "<leader>g", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
-		vim.keymap.set("n", "H", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
+		vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
+		vim.keymap.set("n", "<M-j>", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
+		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader><F2>", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
 		vim.keymap.set("n", "<leader>xt", ":Lspsaga term_toggle<CR>", { silent = true, desc = "Floating term" })
 	end,

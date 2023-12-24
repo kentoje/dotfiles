@@ -51,6 +51,9 @@ return {
 		},
 		sections = {
 			lualine_a = {
+				"mode",
+			},
+			lualine_b = {
 				{
 					"buffers",
 
@@ -61,18 +64,22 @@ return {
 					-- 4: Shows buffer name + buffer number
 					mode = 2,
 
+					-- buffers_color = {
+					-- 	-- Same values as the general color option can be used here.
+					-- 	active = "lualine_{section}_normal", -- Color for active buffer.
+					-- 	inactive = "lualine_{section}_inactive", -- Color for inactive buffer.
+					-- },
+
 					symbols = {
-						modified = " +", -- Text to show when the buffer is modified
+						modified = " [+]", -- Text to show when the buffer is modified
 						alternate_file = "", -- Text to show to identify the alternate file
 						directory = "", -- Text to show when the buffer is a directory
 					},
 				},
 			},
+			lualine_c = { diff, diagnostics },
 			lualine_x = { "encoding", "fileformat", "filetype" },
 			lualine_y = { "progress" },
-			-- lualine_b = { { "filename", path = 1 } },
-			lualine_b = {},
-			lualine_c = { diff, diagnostics },
 			lualine_z = {},
 		},
 		inactive_sections = {

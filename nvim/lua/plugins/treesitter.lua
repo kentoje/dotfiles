@@ -43,6 +43,7 @@ return {
 				"graphql",
 				"markdown",
 				"markdown_inline",
+				"fish",
 			},
 
 			-- Install parsers synchronously (only applied to `ensure_installed`)
@@ -65,5 +66,13 @@ return {
 				additional_vim_regex_highlighting = false,
 			},
 		})
+
+		-- MDX
+		vim.filetype.add({
+			extension = {
+				mdx = "mdx",
+			},
+		})
+		vim.treesitter.language.register("markdown", "mdx")
 	end,
 }

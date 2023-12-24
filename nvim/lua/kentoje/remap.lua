@@ -1,10 +1,21 @@
+local function get_path()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local path = vim.api.nvim_buf_get_name(bufnr)
+	-- vim.api.nvim_command('let @+ = "' .. path .. '"')
+	return path
+end
+
+local function get_bufnr()
+	return vim.api.nvim_get_current_buf()
+end
+
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { silent = true, desc = "Move line down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { silent = true, desc = "Move line up" })
 
--- vim.keymap.set("n", "H", "0", { desc = "Go to beginning of line" })
+vim.keymap.set("n", "H", "0", { desc = "Go to beginning of line" })
 vim.keymap.set("n", "J", "10j", { desc = "Move 10 lines down" })
 vim.keymap.set("n", "K", "10k", { desc = "Move 10 lines up" })
--- vim.keymap.set("n", "L", "<S-$>", { desc = "Go to end of line" })
+vim.keymap.set("n", "L", "<S-$>", { desc = "Go to end of line" })
 
 -- vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Go down and center cursor" })
 -- vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Go up and center cursor" })
@@ -49,7 +60,23 @@ vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 
 vim.keymap.set("n", "<C-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
-vim.keymap.set("n", "<C-w>", ":q<CR>", { silent = true, desc = "Mimic MacOS close" })
+vim.keymap.set("n", "<C-w>", function()
+	-- TODO: Save only if file has been modified
+	if vim.bo.modified then
+		vim.cmd("w")
+	end
+
+	local buffers = vim.api.nvim_list_bufs()
+
+	if #buffers > 1 then
+		local bufnr = get_bufnr()
+
+		vim.cmd(":bprev")
+		vim.api.nvim_command("bdelete " .. bufnr)
+	else
+		vim.cmd("bd")
+	end
+end, { silent = true, desc = "Mimic MacOS close" })
 
 local function surround_with(char)
 	vim.cmd("normal! d")
@@ -73,13 +100,6 @@ end, { silent = true, desc = "Surround visual mode selection with the given char
 -- go to prev buffer if there is
 -- open right pane
 -- e yanked path
-
-local function get_path()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local path = vim.api.nvim_buf_get_name(bufnr)
-	-- vim.api.nvim_command('let @+ = "' .. path .. '"')
-	return path
-end
 
 vim.keymap.set("n", "<leader>l", function()
 	local path = get_path()
@@ -107,7 +127,7 @@ vim.keymap.set("n", "<leader>h", function()
 	vim.cmd(":e " .. path)
 end, { silent = true, desc = "Open current buffer in a left pane" })
 
-local function open_test_file()
+local function open_test_file(should_split)
 	local current_file_path = vim.fn.expand("%:p") -- Get the full path of the current file.
 	local current_file_name = vim.fn.expand("%:t:r") -- Get the base name of the current file without extension.
 	local current_file_ext = vim.fn.expand("%:e") -- Get the base name of the current file without extension.
@@ -121,6 +141,10 @@ local function open_test_file()
 
 		-- check if file exists
 		if vim.fn.filereadable(test_file_path) == 1 then
+			if should_split then
+				vim.cmd(":rightbelow vsplit")
+			end
+
 			vim.cmd("edit " .. test_file_path)
 			return
 		end
@@ -130,11 +154,11 @@ local function open_test_file()
 end
 
 vim.keymap.set("n", "<leader>t", function()
-	vim.cmd(":rightbelow vsplit")
-	open_test_file()
+	open_test_file(true)
 end, { noremap = true, silent = true, desc = "Open sibling test file in right pane" })
+
 vim.keymap.set("n", "<leader>T", function()
-	open_test_file()
+	open_test_file(false)
 end, { noremap = true, silent = true, desc = "Open sibling test file in right pane" })
 
 -------- GO TO BUFFER INDEX ---------------------------------------------------

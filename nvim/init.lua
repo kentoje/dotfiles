@@ -1,6 +1,11 @@
 if vim.g.vscode then
 	-- VSCode extension
 	require("kentoje.remap-vscode")
+elseif vim.g.neovide then
+	require("kentoje.set")
+	require("kentoje.remap")
+	require("kentoje.lazy")
+	require("kentoje.neovide")
 else
 	-- ordinary Neovim
 	require("kentoje.set")

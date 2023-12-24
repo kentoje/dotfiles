@@ -4,7 +4,7 @@ return {
 		local minifiles = require("mini.files")
 
 		minifiles.setup()
-		require("mini.pairs").setup()
+		-- require("mini.pairs").setup()
 
 		vim.keymap.set("n", "<leader>-", function()
 			-- minifiles.open(vim.api.nvim_buf_get_name(0), false) -- cwd with new state

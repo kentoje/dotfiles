@@ -18,21 +18,16 @@ return {
 				-- javascript = { { "prettierd", "prettier" } },
 
 				lua = { "stylua" },
-				-- javascript = { "prettierd" },
-				-- typescript = { "prettierd" },
-				-- javascriptreact = { "prettierd" },
-				-- typescriptreact = { "prettierd" },
-
 				javascript = pick_js_formatter(),
 				typescript = pick_js_formatter(),
 				javascriptreact = pick_js_formatter(),
 				typescriptreact = pick_js_formatter(),
+				json = pick_js_formatter(),
 				html = { "prettierd" },
 				css = { "prettierd" },
 				markdown = { { "prettierd", "prettier" } },
 				yaml = { { "prettierd", "prettier" } },
 				graphql = { { "prettierd", "prettier" } },
-				json = { "prettierd" },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()

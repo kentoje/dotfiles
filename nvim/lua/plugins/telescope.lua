@@ -29,6 +29,14 @@ return {
 					"!.yarn",
 					"-g",
 					"!.git/logs",
+					"-g",
+					"!type-docs",
+					"-g",
+					"!build",
+					"-g",
+					"!local-build",
+					"-g",
+					"!storybook-static",
 				},
 				file_ignore_patterns = {
 					"coverage",
@@ -87,6 +95,14 @@ return {
 			"!.yarn",
 			"-g",
 			"!.git/logs",
+			"-g",
+			"!type-docs",
+			"-g",
+			"!build",
+			"-g",
+			"!local-build",
+			"-g",
+			"!storybook-static",
 		}
 
 		vim.keymap.set("n", "<C-p>", function()
@@ -102,6 +118,7 @@ return {
 			})
 		end, { desc = "Find git files" })
 		-- vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
+		vim.keymap.set("n", "<C-b>", builtin.buffers, { desc = "Displays all current buffers" })
 		vim.keymap.set("n", "<M-b>", builtin.buffers, { desc = "Displays all current buffers" })
 		vim.keymap.set("n", "<leader>fg", function()
 			builtin.live_grep({
