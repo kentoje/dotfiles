@@ -8,6 +8,10 @@ if [ -f "$HOME/.config/starship.toml" ]; then
 	rm "$HOME/.config/starship.toml"
 fi
 
+if [ -f "$HOME/.config/alacritty/alacritty.toml" ]; then
+	rm "$HOME/.config/alacritty/alacritty.toml"
+fi
+
 if [ -f "$HOME/Library/Application Support/lazygit/config.yml" ]; then
 	rm "$HOME/Library/Application Support/lazygit/config.yml"
 fi
@@ -63,5 +67,6 @@ ln -s $CLEANED_PATH/bat $HOME/.config/bat
 ln -s $CLEANED_PATH/kitty $HOME/.config/kitty
 ln -s $CLEANED_PATH/nvim $HOME/.config/nvim
 ln -s $CLEANED_PATH/lf $HOME/.config/lf
+ln -s $CLEANED_PATH/alacritty $HOME/.config/alacritty
 ln -s $CLEANED_PATH/hammerspoon $HOME/.hammerspoon
 
