@@ -3,3 +3,6 @@
 fish/includes/private-vars.fish
 fish/fish_variables
 
+alacritty/themes/*.toml
+!alacritty/themes/catppuccin*.toml
+
