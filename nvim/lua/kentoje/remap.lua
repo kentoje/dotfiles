@@ -35,6 +35,8 @@ vim.keymap.set("n", "<C-Down>", "5<C-w>-", { noremap = true, silent = true, desc
 -- Buffers
 -- vim.keymap.set("n", "<M-h>", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
 -- vim.keymap.set("n", "<M-l>", ":bnext<CR>", { silent = true, desc = "Buffer next" })
+vim.keymap.set("n", "[b", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
+vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 
 -- Yank on system clipboard
 -- vim.keymap.set("n", "<leader>y", '"+y')
@@ -59,9 +61,10 @@ vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 })
 
 vim.keymap.set("n", "<C-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
-vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
+-- Kitty: remove bind
+-- vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
+vim.keymap.set("n", "<leader>qs", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 vim.keymap.set("n", "<C-w>", function()
-	-- TODO: Save only if file has been modified
 	if vim.bo.modified then
 		vim.cmd("w")
 	end

@@ -35,7 +35,11 @@ return {
 				vim.keymap.set("n", "<C-g>", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				vim.keymap.set("n", "<M-g>", function()
+				-- Kitty: Remove M-g and kitty bind
+				-- vim.keymap.set("n", "<M-g>", function()
+				-- 	vim.lsp.buf.definition()
+				-- end, opts)
+				vim.keymap.set("n", "<leader>qg", function()
 					vim.lsp.buf.definition()
 				end, opts)
 				-- vim.keymap.set("n", "<leader>G", function()
@@ -77,10 +81,31 @@ return {
 				-- vim.keymap.set("n", "<leader>h", function()
 				-- 	vim.lsp.buf.hover()
 				-- end, opts)
-				vim.keymap.set("n", "<M-k>", vim.diagnostic.open_float, opts) -- open error
+				-- Kitty: Remove M-k and kitty bind
+				-- vim.keymap.set("n", "<M-k>", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
-				vim.keymap.set("n", "<C-e>", vim.diagnostic.goto_next, opts) -- go to next error
-				vim.keymap.set("n", "<C-S-e>", vim.diagnostic.goto_prev, opts) -- go to next error
+				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- go to next diagnostic
+				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- go to prev diagnostic
+				vim.keymap.set("n", "]e", function()
+					vim.diagnostic.goto_next({
+						severity = vim.diagnostic.severity.ERROR,
+					})
+				end, opts)
+				vim.keymap.set("n", "[e", function()
+					vim.diagnostic.goto_prev({
+						severity = vim.diagnostic.severity.ERROR,
+					})
+				end, opts)
+				vim.keymap.set("n", "]w", function()
+					vim.diagnostic.goto_next({
+						severity = vim.diagnostic.severity.WARN,
+					})
+				end, opts)
+				vim.keymap.set("n", "[w", function()
+					vim.diagnostic.goto_prev({
+						severity = vim.diagnostic.severity.WARN,
+					})
+				end, opts)
 			end,
 		})
 
