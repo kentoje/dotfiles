@@ -39,8 +39,6 @@ bindings = [
   { key = "W", mods = "Super", chars = "\u0001x" },
   { key = "[", mods = "Super", chars = "\u0001[0" },
   { key = "Z", mods = "Super", chars = "\u0001z" },
-
-  # Nvim forward keybinds
   { key = "T", mods = "Super", chars = "\u0001c" },
   { key = "1", mods = "Super", chars = "\u00011" },
   { key = "2", mods = "Super", chars = "\u00012" },
@@ -51,14 +49,16 @@ bindings = [
   { key = "7", mods = "Super", chars = "\u00017" },
   { key = "8", mods = "Super", chars = "\u00018" },
   { key = "9", mods = "Super", chars = "\u00019" },
+
+  # Nvim forward keybinds (\u0020\u0071\u0070 => space+q+p)
   { key = "E", mods = "Super | Shift", chars = "\u001b[13~" },
   { key = "E", mods = "Super", chars = "\u001b[14~" },
   { key = "G", mods = "Super | Shift", chars = "\u0020\u0047" },
   { key = "G", mods = "Control | Shift", chars = "\u0020\u0047" },
-  { key = "G", mods = "Super", chars = "\u0007" },
-  { key = "P", mods = "Super", chars = "\u0010" },
-  { key = "B", mods = "Super", chars = "\u0002" },
-  { key = "S", mods = "Super", chars = "\u0013" },
+  { key = "P", mods = "Super", chars = "\u0020\u0071\u0070" },
+  { key = "B", mods = "Super", chars = "\u0020\u0071\u0062" },
+  { key = "S", mods = "Super", chars = "\u0020\u0071\u0073" },
+  { key = "G", mods = "Super", chars = "\u0020\u0071\u0067" },
   { key = "H", mods = "Super", chars = "\u0020\u0071\u0068" },
   { key = "J", mods = "Super", chars = "\u0020\u0071\u006A" },
   { key = "K", mods = "Super", chars = "\u0020\u0071\u006B" },
