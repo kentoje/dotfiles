@@ -2,7 +2,25 @@ return {
 	"jackMort/ChatGPT.nvim",
 	event = "VeryLazy",
 	config = function()
-		require("chatgpt").setup()
+		local chatgpt = require("chatgpt")
+		chatgpt.setup()
+
+		vim.keymap.set("x", "<leader>e", function()
+			chatgpt.edit_with_instructions()
+		end, {
+			silent = true,
+			desc = "Edit with instructions",
+		})
+
+		vim.keymap.set("n", "<leader>xc", "<cmd>ChatGPT<cr>", {
+			silent = true,
+			desc = "ChatGPT",
+		})
+
+		vim.keymap.set("n", "<leader>xC", "<cmd>ChatGPTCompleteCode<cr>", {
+			silent = true,
+			desc = "ChatGPTCompleteCode",
+		})
 	end,
 	dependencies = {
 		"MunifTanjim/nui.nvim",
@@ -16,25 +34,4 @@ return {
 		"ChatGPTEditWithInstructions",
 		"ChatGPTRun",
 	},
-	keys = function()
-		local chatgpt = require("chatgpt")
-		local wk = require("which-key")
-
-		wk.register({
-			e = {
-				function()
-					chatgpt.edit_with_instructions()
-				end,
-				"Edit with instructions",
-			},
-		}, {
-			prefix = "<leader>",
-			mode = "v",
-		})
-
-		return {
-			{ "<leader>xc", "<cmd>ChatGPT<cr>", desc = "ChatGPT" },
-			{ "<leader>xC", "<cmd>ChatGPTCompleteCode<cr>", desc = "ChatGPTCompleteCode" },
-		}
-	end,
 }
