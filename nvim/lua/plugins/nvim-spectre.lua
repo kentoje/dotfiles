@@ -23,6 +23,14 @@ return {
 						"!.yarn",
 						"-g",
 						"!.git/logs",
+						"-g",
+						"!type-docs",
+						"-g",
+						"!build",
+						"-g",
+						"!local-build",
+						"-g",
+						"!storybook-static",
 					},
 				},
 			},
@@ -31,7 +39,7 @@ return {
 		vim.keymap.set("n", "<leader>fG", '<cmd>lua require("spectre").toggle()<CR>', {
 			desc = "Toggle Spectre buffer",
 		})
-		vim.keymap.set("n", "<leader>fc", '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
+		vim.keymap.set("n", "<leader>fC", '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
 			desc = "Search on current word",
 		})
 	end,

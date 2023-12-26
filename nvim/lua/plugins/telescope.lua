@@ -133,6 +133,9 @@ return {
 				hidden = true,
 			})
 		end, { desc = "Search for a regex pattern in the project" })
+		vim.keymap.set("n", "<leader>fr", function()
+			builtin.resume()
+		end, { desc = "Resume telescope search" })
 		vim.keymap.set("n", "<leader>fs", function()
 			builtin.lsp_workspace_symbols({ query = vim.fn.input("Query: ") })
 		end, { desc = "Find given symbol" })

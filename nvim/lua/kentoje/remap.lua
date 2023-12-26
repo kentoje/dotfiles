@@ -60,10 +60,10 @@ vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 	desc = "Search and replace current selection in file",
 })
 
-vim.keymap.set("n", "<C-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
+-- vim.keymap.set("n", "<C-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 -- Kitty: remove bind
 -- vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
-vim.keymap.set("n", "<leader>qs", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
+-- vim.keymap.set("n", "<leader>qs", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
 vim.keymap.set("n", "<C-w>", function()
 	if vim.bo.modified then
 		vim.cmd("w")
