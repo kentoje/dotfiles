@@ -3,7 +3,7 @@ import = ["~/.config/alacritty/themes/catppuccin_macchiato.toml"]
 [window]
 padding = { x = 12, y = 12 }
 decorations = "None"
-opacity = 0.8
+opacity = 0.85
 blur = true
 
 [font]
@@ -51,8 +51,8 @@ bindings = [
   { key = "9", mods = "Super", chars = "\u00019" },
 
   # Nvim forward keybinds (\u0020\u0071\u0070 => space+q+p)
-  { key = "E", mods = "Super | Shift", chars = "\u001b[13~" },
-  { key = "E", mods = "Super", chars = "\u001b[14~" },
+  { key = "E", mods = "Super | Shift", chars = "\u0020\u0071\u0068" },
+  { key = "E", mods = "Super", chars = "\u0020\u0071\u006C" },
   { key = "G", mods = "Super | Shift", chars = "\u0020\u0047" },
   { key = "G", mods = "Control | Shift", chars = "\u0020\u0047" },
   { key = "P", mods = "Super", chars = "\u0020\u0071\u0070" },
