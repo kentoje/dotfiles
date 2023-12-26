@@ -127,7 +127,7 @@ return {
 		vim.keymap.set("n", "<C-b>", builtin.buffers, { desc = "Displays all current buffers" })
 		-- Kitty: remove bind
 		-- vim.keymap.set("n", "<M-b>", builtin.buffers, { desc = "Displays all current buffers" })
-		vim.keymap.set("n", "<leader>qb", builtin.buffers, { desc = "Displays all current buffers" })
+		-- vim.keymap.set("n", "<leader>qb", builtin.buffers, { desc = "Displays all current buffers" })
 		vim.keymap.set("n", "<leader>fg", function()
 			builtin.live_grep({
 				hidden = true,
