@@ -37,6 +37,8 @@ return {
 					"!local-build",
 					"-g",
 					"!storybook-static",
+					"-g",
+					"!coverage/*",
 				},
 				file_ignore_patterns = {
 					"coverage",
@@ -103,6 +105,8 @@ return {
 			"!local-build",
 			"-g",
 			"!storybook-static",
+			"-g",
+			"!coverage/*",
 		}
 
 		vim.keymap.set("n", "<C-p>", function()

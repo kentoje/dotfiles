@@ -95,7 +95,7 @@ local function surround_with(char)
 	vim.cmd("normal! P")
 end
 
-vim.keymap.set("v", "<leader>sw", function()
+vim.keymap.set("v", "<leader>cs", function()
 	surround_with(vim.fn.input("Char to surround: "))
 end, { silent = true, desc = "Surround visual mode selection with the given char" })
 
@@ -162,7 +162,7 @@ end, { noremap = true, silent = true, desc = "Open sibling test file in right pa
 
 vim.keymap.set("n", "<leader>T", function()
 	open_test_file(false)
-end, { noremap = true, silent = true, desc = "Open sibling test file in right pane" })
+end, { noremap = true, silent = true, desc = "Open sibling test file" })
 
 -------- GO TO BUFFER INDEX ---------------------------------------------------
 

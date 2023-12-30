@@ -31,6 +31,8 @@ return {
 						"!local-build",
 						"-g",
 						"!storybook-static",
+						"-g",
+						"!coverage/*",
 					},
 				},
 			},

@@ -31,7 +31,7 @@ return {
 				},
 				show_on_autocmd = false, -- event to trigger cybu (eg. "BufEnter")
 			},
-			display_time = 1000, -- time in ms the cybu win is displayed
+			display_time = 800, -- time in ms the cybu win is displayed
 		})
 		-- Kitty: Remove kitty map, and use leader syntax
 		-- vim.keymap.set("n", "<M-h>", "<Plug>(CybuPrev)", { desc = "Cybu prev" })

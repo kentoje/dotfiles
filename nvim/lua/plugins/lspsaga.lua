@@ -29,6 +29,7 @@ return {
 				},
 			},
 			rename = {
+				in_select = false,
 				auto_save = true,
 				keys = {
 					quit = "<C-c>",
@@ -56,7 +57,7 @@ return {
 		-- Kitty: remove bind
 		-- vim.keymap.set("n", "<M-j>", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
-		vim.keymap.set("n", "<leader><F2>", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
+		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
 		vim.keymap.set("n", "<leader>xt", ":Lspsaga term_toggle<CR>", { silent = true, desc = "Floating term" })
 	end,
 	dependencies = {

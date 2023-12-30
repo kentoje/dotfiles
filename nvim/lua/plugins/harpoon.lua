@@ -4,6 +4,12 @@ return {
 		local mark = require("harpoon.mark")
 		local ui = require("harpoon.ui")
 
+		require("harpoon").setup({
+			menu = {
+				width = vim.api.nvim_win_get_width(0) - 32,
+			},
+		})
+
 		vim.keymap.set("n", "<leader>a", mark.add_file, { desc = "Add file to harpoon" })
 		-- vim.keymap.set("n", "<C-A>", mark.rm_file, { desc = "Remove file from harpoon" })
 		-- vim.keymap.set("n", "<leader>xa", mark.clear_all, { desc = "Remove all files from harpoon" })
