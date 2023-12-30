@@ -1,21 +1,31 @@
 {
-  "hotKeys" : [
-
-  ],
   "decision" : {
-    "actions" : [
-      {
-        "getFrontmostApp" : {
-          "kind" : "bundleURL"
-        }
-      }
-    ],
     "chances" : [
       {
+        "pattern" : {
+          "alwaysMatch" : {
+
+          }
+        },
         "decision" : {
+          "actions" : [
+            {
+              "getLeaderKey" : {
+                "kind" : "keyCodeText"
+              }
+            }
+          ],
           "chances" : [
             {
+              "pattern" : {
+                "message" : {
+                  "regex" : "53\\(0\\)"
+                }
+              },
               "decision" : {
+                "actions" : [
+
+                ],
                 "chances" : [
                   {
                     "pattern" : {
@@ -26,12 +36,15 @@
                       }
                     },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
+                            "path" : "\/Applications\/Spark.app",
                             "hideAppIfRunning" : false,
-                            "launchArgumentsText" : "",
-                            "path" : "\/Applications\/Spark.app"
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -39,9 +52,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     }
                   },
@@ -51,8 +61,8 @@
                         {
                           "openApp" : {
                             "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false,
-                            "path" : "\/Applications\/Figma.app"
+                            "path" : "\/Applications\/Figma.app",
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -82,15 +92,12 @@
                       }
                     },
                     "decision" : {
-                      "chances" : [
-
-                      ],
                       "actions" : [
                         {
                           "openApp" : {
+                            "hideAppIfRunning" : false,
                             "path" : "\/Applications\/Arc.app",
-                            "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -98,34 +105,37 @@
 
                           }
                         }
+                      ],
+                      "chances" : [
+
                       ]
                     }
                   },
                   {
-                    "decision" : {
-                      "chances" : [
-
-                      ],
-                      "actions" : [
-                        {
-                          "openURL" : {
-                            "url" : "spacelauncher:\/\/toggle-preferences-window"
-                          },
-                          "description" : "Toggle this window"
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ]
-                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           37
                         ]
                       }
+                    },
+                    "decision" : {
+                      "actions" : [
+                        {
+                          "description" : "Toggle this window",
+                          "openURL" : {
+                            "url" : "spacelauncher:\/\/toggle-preferences-window"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ],
+                      "chances" : [
+
+                      ]
                     }
                   },
                   {
@@ -133,10 +143,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Spotify.app",
-                            "switchToPreviousApp" : false,
                             "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false
+                            "path" : "\/Applications\/Spotify.app",
+                            "hideAppIfRunning" : false,
+                            "switchToPreviousApp" : false
                           }
                         },
                         {
@@ -158,13 +168,6 @@
                     }
                   },
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          45
-                        ]
-                      }
-                    },
                     "decision" : {
                       "chances" : [
 
@@ -172,8 +175,8 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Obsidian.app",
                             "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/Obsidian.app",
                             "launchArgumentsText" : ""
                           }
                         },
@@ -183,6 +186,13 @@
                           }
                         }
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          45
+                        ]
+                      }
                     }
                   },
                   {
@@ -222,16 +232,13 @@
                       }
                     },
                     "decision" : {
-                      "chances" : [
-
-                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false,
                             "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/Alacritty.app"
+                            "path" : "\/Applications\/WezTerm.app"
                           }
                         },
                         {
@@ -239,36 +246,39 @@
 
                           }
                         }
+                      ],
+                      "chances" : [
+
                       ]
                     }
                   },
                   {
-                    "decision" : {
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "hideAppIfRunning" : false,
-                            "path" : "\/Applications\/Cursor.app",
-                            "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ],
-                      "chances" : [
-
-                      ]
-                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           9
                         ]
                       }
+                    },
+                    "decision" : {
+                      "chances" : [
+
+                      ],
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "path" : "\/Applications\/Cursor.app",
+                            "launchArgumentsText" : "",
+                            "switchToPreviousApp" : false,
+                            "hideAppIfRunning" : false
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ]
                     }
                   },
                   {
@@ -286,10 +296,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false,
                             "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/zoom.us.app"
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/zoom.us.app",
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -300,32 +310,22 @@
                       ]
                     }
                   }
-                ],
-                "actions" : [
-
                 ]
-              },
-              "pattern" : {
-                "message" : {
-                  "regex" : "53\\(0\\)"
-                }
-              }
-            }
-          ],
-          "actions" : [
-            {
-              "getLeaderKey" : {
-                "kind" : "keyCodeText"
               }
             }
           ]
-        },
-        "pattern" : {
-          "alwaysMatch" : {
-
-          }
+        }
+      }
+    ],
+    "actions" : [
+      {
+        "getFrontmostApp" : {
+          "kind" : "bundleURL"
         }
       }
     ]
-  }
+  },
+  "hotKeys" : [
+
+  ]
 }
