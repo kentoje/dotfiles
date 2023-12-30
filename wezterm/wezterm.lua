@@ -15,6 +15,9 @@ end
 -- This is where you actually apply your config choices
 
 config.color_scheme = "Catppuccin Macchiato"
+config.colors = {
+	cursor_bg = "#f5bde6",
+}
 config.window_padding = {
 	left = 12,
 	right = 12,
@@ -108,7 +111,7 @@ config.macos_window_background_blur = 20
 config.background = {
 	{
 		source = {
-			File = { path = assets .. "/nikita_2.3.webp" },
+			File = { path = assets .. "/5.webp" },
 		},
 		repeat_x = "Mirror",
 		-- width = "100%",
