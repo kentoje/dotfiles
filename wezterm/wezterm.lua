@@ -31,7 +31,7 @@ config.line_height = 1.0
 config.enable_tab_bar = false
 config.window_decorations = "RESIZE"
 config.window_close_confirmation = "NeverPrompt"
-config.max_fps = 120
+config.max_fps = 100
 config.use_ime = false
 config.leader = { key = "b", mods = "CTRL", timeout_milliseconds = 1000 }
 config.mouse_bindings = {
@@ -133,6 +133,7 @@ config.background = {
 		opacity = 0.8,
 	},
 }
+
 -- config.window_background_image = "/Users/kento/Movies/background/nikita_1.mp4"
 -- config.text_background_opacity = 0.3
 -- config.window_background_image_hsb = {
