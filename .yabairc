@@ -37,8 +37,8 @@ yabai -m config window_gap                   12
 # apps to not manage (ignore)
 yabai -m rule --add app="^Archive Utility$" manage=off layer=below
 yabai -m rule --add app="^Creative Cloud$" manage=off layer=below
-yabai -m rule --add app="^Alfred Preferences$" manage=off layer=below
-yabai -m rule --add app="^Raycast" manage=off layer=below
+yabai -m rule --add app="^Alfred Preferences$" manage=off
+yabai -m rule --add app="^Raycast" manage=off layer=above
 yabai -m rule --add app="^Music$" manage=off layer=below
 yabai -m rule --add app="^System Settings$" manage=off layer=below
 yabai -m rule --add app="^Logi Options$" manage=off layer=below
