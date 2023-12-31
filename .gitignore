@@ -3,7 +3,8 @@
 fish/includes/private-vars.fish
 fish/fish_variables
 
-wezterm/assets
+wezterm/assets/*.webp
+!wezterm/assets/5.webp
 
 alacritty/themes/*.toml
 !alacritty/themes/catppuccin*.toml
