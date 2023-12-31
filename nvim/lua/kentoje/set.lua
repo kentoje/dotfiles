@@ -29,7 +29,5 @@ vim.g.loaded_netrwPlugin = 1
 
 vim.g.mapleader = " "
 
-vim.cmd("hi CursorLineNr guifg=#f4b8e4")
-vim.cmd("hi LineNr guifg=#6d7083")
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"

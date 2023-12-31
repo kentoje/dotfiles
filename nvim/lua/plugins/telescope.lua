@@ -8,9 +8,6 @@ return {
 	config = function()
 		local telescope = require("telescope")
 
-		-- telescope.load_extension("harpoon")
-		telescope.load_extension("neoclip")
-
 		telescope.setup({
 			defaults = {
 				vimgrep_arguments = {
@@ -109,29 +106,13 @@ return {
 			"!coverage/*",
 		}
 
-		vim.keymap.set("n", "<C-p>", function()
-			builtin.find_files({
-				hidden = true,
-				find_command = find_command,
-			})
-		end, { desc = "Find git files" })
-		-- vim.keymap.set("n", "<M-p>", function()
-		-- 	builtin.find_files({
-		-- 		hidden = true,
-		-- 		find_command = find_command,
-		-- 	})
-		-- end, { desc = "Find git files" })
 		vim.keymap.set("n", "<leader>qp", function()
 			builtin.find_files({
 				hidden = true,
 				find_command = find_command,
 			})
 		end, { desc = "Find git files" })
-		-- vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
-		vim.keymap.set("n", "<C-b>", builtin.buffers, { desc = "Displays all current buffers" })
-		-- Kitty: remove bind
-		-- vim.keymap.set("n", "<M-b>", builtin.buffers, { desc = "Displays all current buffers" })
-		-- vim.keymap.set("n", "<leader>qb", builtin.buffers, { desc = "Displays all current buffers" })
+		vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
 		vim.keymap.set("n", "<leader>fg", function()
 			builtin.live_grep({
 				hidden = true,

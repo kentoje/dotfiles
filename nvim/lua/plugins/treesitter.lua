@@ -3,22 +3,6 @@ return {
 	build = ":TSUpdate",
 	config = function()
 		require("nvim-treesitter.configs").setup({
-			-- autotag = {
-			-- 	enable = true,
-			-- 	enable_rename = true,
-			-- 	enable_close = true,
-			-- 	enable_close_on_slash = true,
-			-- filetypes = {
-			-- 	"html",
-			-- 	"javascript",
-			-- 	"typescript",
-			-- 	"javascriptreact",
-			-- 	"typescriptreact",
-			-- 	"tsx",
-			-- 	"jsx",
-			-- },
-			-- },
-			-- A list of parser names, or "all" (the five listed parsers should always be installed)
 			incremental_selection = {
 				enable = true,
 				keymaps = {

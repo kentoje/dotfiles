@@ -49,5 +49,7 @@ return {
 		})
 
 		vim.cmd.colorscheme("catppuccin")
+		vim.cmd("hi CursorLineNr guifg=#f5bde6")
+		vim.cmd("hi LineNr guifg=#6d7083")
 	end,
 }

@@ -35,54 +35,9 @@ return {
 				vim.keymap.set("n", "<C-g>", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				-- Kitty: Remove M-g and kitty bind
-				-- vim.keymap.set("n", "<M-g>", function()
-				-- 	vim.lsp.buf.definition()
-				-- end, opts)
 				vim.keymap.set("n", "<leader>qg", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				-- vim.keymap.set("n", "<leader>G", function()
-				-- 	vim.lsp.buf.references()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>fs", function()
-				-- 	vim.lsp.buf.workspace_symbol()
-				-- end, opts)
-				-- vim.keymap.set("n", "<M-.>", function()
-				-- 	vim.lsp.buf.code_action()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>e", function()
-				-- 	vim.diagnostic.goto_next({
-				-- 		severity = vim.diagnostic.severity.ERROR,
-				-- 	})
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>E", function()
-				-- 	vim.diagnostic.goto_prev({
-				-- 		severity = vim.diagnostic.severity.ERROR,
-				-- 	})
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>gf", function()
-				-- 	vim.lsp.buf.open_float()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>gn", function()
-				-- 	vim.lsp.buf.goto_next()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>gp", function()
-				-- 	vim.lsp.buf.goto_prev()
-				-- end, opts)
-				-- vim.keymap.set('n', '<C-h>', function() vim.lsp.buf.signature_help() end, opts)
-				-- vim.keymap.set("n", "<leader>h", function()
-				-- 	vim.lsp.buf.hover()
-				-- end, opts)
-				-- Made because of custom MacOS keyboard shortcut for "Hide kitty"
-				-- vim.keymap.set("n", "<leader><F2>", function()
-				-- 	vim.lsp.buf.rename()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>h", function()
-				-- 	vim.lsp.buf.hover()
-				-- end, opts)
-				-- Kitty: Remove M-k and kitty bind
-				-- vim.keymap.set("n", "<M-k>", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- go to next diagnostic
 				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- go to prev diagnostic
