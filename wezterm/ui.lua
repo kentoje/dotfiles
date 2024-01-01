@@ -9,7 +9,7 @@ function module.apply_to_config(config)
 	config.colors = {
 		cursor_bg = "#f5bde6",
 	}
-	config.font = wezterm.font("SFMono Nerd Font", { weight = "Bold" })
+	config.font = wezterm.font("SFMono Nerd Font", { weight = 600 }) -- 600 -> Semibold
 	config.font_size = 14.0
 	config.cell_width = 0.8
 	config.line_height = 1.0
