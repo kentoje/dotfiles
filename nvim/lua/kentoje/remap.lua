@@ -17,33 +17,29 @@ vim.keymap.set("n", "J", "10j", { desc = "Move 10 lines down" })
 vim.keymap.set("n", "K", "10k", { desc = "Move 10 lines up" })
 vim.keymap.set("n", "L", "<S-$>", { desc = "Go to end of line" })
 
--- vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Go down and center cursor" })
--- vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Go up and center cursor" })
-
--- vim.keymap.set("n", "n", "nzzzv")
--- vim.keymap.set("n", "N", "Nzzzv")
-
 vim.keymap.set("n", "x", '"_x', { desc = "Do not overwrite clipboard while deleting with 'x'" })
 vim.keymap.set("x", "p", '"_dP', { desc = "Do not overwrite clipboard while pasting" })
 
--- resize
 vim.keymap.set("n", "<C-Left>", "5<C-w>>", { noremap = true, silent = true, desc = "Resize left" })
 vim.keymap.set("n", "<C-Right>", "5<C-w><", { noremap = true, silent = true, desc = "Resize right" })
 vim.keymap.set("n", "<C-Up>", "5<C-w>+", { noremap = true, silent = true, desc = "Resize up" })
 vim.keymap.set("n", "<C-Down>", "5<C-w>-", { noremap = true, silent = true, desc = "Resize bottom" })
 
--- Buffers
--- vim.keymap.set("n", "<M-h>", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
--- vim.keymap.set("n", "<M-l>", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 vim.keymap.set("n", "[b", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
 vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 
--- Yank on system clipboard
--- vim.keymap.set("n", "<leader>y", '"+y')
--- vim.keymap.set("v", "<leader>y", '"+y')
--- vim.keymap.set("n", "<leader>Y", '"+Y')
-
-vim.keymap.set("n", "<C-d>", ":vsplit<Return><C-w>w", { silent = true, noremap = true, desc = "Split view in column" })
+vim.keymap.set(
+	"n",
+	"<leader>qd",
+	":vsplit<Return><C-w>w",
+	{ silent = true, noremap = true, desc = "Split view in column" }
+)
+vim.keymap.set(
+	"n",
+	"<leader>qD",
+	":split<Return><C-w>w",
+	{ silent = true, noremap = true, desc = "Split view horizontal" }
+)
 vim.keymap.set(
 	"n",
 	"<leader>y",
@@ -60,11 +56,7 @@ vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 	desc = "Search and replace current selection in file",
 })
 
--- vim.keymap.set("n", "<C-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
--- Kitty: remove bind
--- vim.keymap.set("n", "<M-s>", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
--- vim.keymap.set("n", "<leader>qs", ":w<CR>", { silent = true }, { desc = "Mimic MacOS save" })
-vim.keymap.set("n", "<C-w>", function()
+vim.keymap.set("n", "<leader>qw", function()
 	if vim.bo.modified then
 		vim.cmd("w")
 	end
