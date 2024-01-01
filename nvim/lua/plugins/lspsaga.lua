@@ -43,22 +43,10 @@ return {
 			":Lspsaga diagnostic_jump_next<CR>",
 			{ silent = true, desc = "Jump to next diagnostic" }
 		)
-		-- Kitty: remove bind
-		-- vim.keymap.set(
-		-- 	"n",
-		-- 	"<M-.>",
-		-- 	":Lspsaga diagnostic_jump_next<CR>",
-		-- 	{ silent = true, desc = "Jump to next diagnostic" }
-		-- )
 		vim.keymap.set("n", "<leader>g", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
-		-- vim.keymap.set("n", "<M-g>", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
-		-- mapped by kitty
 		vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
-		-- Kitty: remove bind
-		-- vim.keymap.set("n", "<M-j>", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
-		vim.keymap.set("n", "<leader>xt", ":Lspsaga term_toggle<CR>", { silent = true, desc = "Floating term" })
 	end,
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter", -- optional

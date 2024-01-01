@@ -41,54 +41,58 @@ local diff = {
 return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
-	config = {
-		options = {
-			theme = "auto",
-			globalstatus = true,
-			section_separators = { left = "", right = "" },
-			component_separators = { left = "", right = "" },
-			disabled_filetypes = { statusline = { "dashboard", "lazy", "alpha" } },
-		},
-		sections = {
-			lualine_a = {
-				"mode",
+	config = function()
+		local wtf = require("wtf")
+
+		require("lualine").setup({
+			options = {
+				theme = "auto",
+				globalstatus = true,
+				section_separators = { left = "", right = "" },
+				component_separators = { left = "", right = "" },
+				disabled_filetypes = { statusline = { "dashboard", "lazy", "alpha" } },
 			},
-			lualine_b = {
-				{
-					"buffers",
+			sections = {
+				lualine_a = {
+					"mode",
+				},
+				lualine_b = {
+					{
+						"buffers",
 
-					-- 0: Shows buffer name
-					-- 1: Shows buffer index
-					-- 2: Shows buffer name + buffer index
-					-- 3: Shows buffer number
-					-- 4: Shows buffer name + buffer number
-					mode = 2,
+						-- 0: Shows buffer name
+						-- 1: Shows buffer index
+						-- 2: Shows buffer name + buffer index
+						-- 3: Shows buffer number
+						-- 4: Shows buffer name + buffer number
+						mode = 2,
 
-					-- buffers_color = {
-					-- 	-- Same values as the general color option can be used here.
-					-- 	active = "lualine_{section}_normal", -- Color for active buffer.
-					-- 	inactive = "lualine_{section}_inactive", -- Color for inactive buffer.
-					-- },
+						-- buffers_color = {
+						-- 	-- Same values as the general color option can be used here.
+						-- 	active = "lualine_{section}_normal", -- Color for active buffer.
+						-- 	inactive = "lualine_{section}_inactive", -- Color for inactive buffer.
+						-- },
 
-					symbols = {
-						modified = " [+]", -- Text to show when the buffer is modified
-						alternate_file = "", -- Text to show to identify the alternate file
-						directory = "", -- Text to show when the buffer is a directory
+						symbols = {
+							modified = " [+]", -- Text to show when the buffer is modified
+							alternate_file = "", -- Text to show to identify the alternate file
+							directory = "", -- Text to show when the buffer is a directory
+						},
 					},
 				},
+				lualine_c = { diff, diagnostics },
+				lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
+				lualine_y = { "progress" },
+				lualine_z = {},
 			},
-			lualine_c = { diff, diagnostics },
-			lualine_x = { "encoding", "fileformat", "filetype" },
-			lualine_y = { "progress" },
-			lualine_z = {},
-		},
-		inactive_sections = {
-			lualine_a = {},
-			lualine_b = {},
-			lualine_c = { "filename" },
-			lualine_x = { "location" },
-			lualine_y = {},
-			lualine_z = {},
-		},
-	},
+			inactive_sections = {
+				lualine_a = {},
+				lualine_b = {},
+				lualine_c = { "filename" },
+				lualine_x = { "location" },
+				lualine_y = {},
+				lualine_z = {},
+			},
+		})
+	end,
 }

@@ -541,18 +541,17 @@ return {
 
 		vim.keymap.set(
 			"n",
-			"<leader>xh",
+			"<leader>xdh",
 			":DiffviewFileHistory %<CR>",
 			{ silent = true, desc = "Display the git file history" }
 		)
-		-- f
 		vim.keymap.set(
 			"n",
-			"<leader>xH",
+			"<leader>xdH",
 			":DiffviewFileHistory<CR>",
 			{ silent = true, desc = "Display the git file history of the whole project" }
 		)
-		vim.keymap.set("n", "<leader>xv", ":DiffviewOpen<CR>", { silent = true, desc = "Open diff view" })
-		vim.keymap.set("n", "<leader>xx", ":DiffviewClose<CR>", { silent = true, desc = "Close diff view" })
+		vim.keymap.set("n", "<leader>xdo", ":DiffviewOpen<CR>", { silent = true, desc = "Open diff view" })
+		vim.keymap.set("n", "<leader>xdc", ":DiffviewClose<CR>", { silent = true, desc = "Close diff view" })
 	end,
 }

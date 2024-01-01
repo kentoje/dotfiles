@@ -3,21 +3,24 @@ return {
 	event = "VeryLazy",
 	config = function()
 		local chatgpt = require("chatgpt")
-		chatgpt.setup()
+		local home = vim.fn.expand("$HOME")
 
-		vim.keymap.set("x", "<leader>e", function()
+		chatgpt.setup({
+			api_key_cmd = "gpg --decrypt " .. home .. "/.gnupg/.secrets/openai-api-key.txt.gpg",
+		})
+		vim.keymap.set("x", "<leader>xce", function()
 			chatgpt.edit_with_instructions()
 		end, {
 			silent = true,
 			desc = "Edit with instructions",
 		})
 
-		vim.keymap.set("n", "<leader>xc", "<cmd>ChatGPT<cr>", {
+		vim.keymap.set("n", "<leader>xcc", "<cmd>ChatGPT<cr>", {
 			silent = true,
 			desc = "ChatGPT",
 		})
 
-		vim.keymap.set("n", "<leader>xC", "<cmd>ChatGPTCompleteCode<cr>", {
+		vim.keymap.set("n", "<leader>xcC", "<cmd>ChatGPTCompleteCode<cr>", {
 			silent = true,
 			desc = "ChatGPTCompleteCode",
 		})

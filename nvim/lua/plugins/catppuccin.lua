@@ -1,7 +1,7 @@
 return {
 	"catppuccin/nvim",
 	name = "catppuccin",
-	priority = 1000,
+	priority = 2000,
 	lazy = false,
 	config = function()
 		require("catppuccin").setup({
@@ -42,8 +42,8 @@ return {
 				gitsigns = true,
 				nvimtree = true,
 				telescope = true,
-				notify = false,
-				mini = false,
+				notify = true,
+				mini = true,
 				-- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
 			},
 		})
