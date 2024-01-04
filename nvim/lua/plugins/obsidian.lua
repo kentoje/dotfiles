@@ -155,5 +155,24 @@ return {
 			{ desc = "List of references of current buffer", silent = true }
 		)
 		vim.keymap.set("n", "<leader>xos", ":ObsidianSearch<CR>", { desc = "Search for notes", silent = true })
+		vim.keymap.set(
+			"n",
+			"<leader>xof",
+			":ObsidianFollowLink vsplit <CR>",
+			{ desc = "Follow link in vertical split", silent = true }
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>xot",
+			":ObsidianToday<CR>",
+			{ desc = "Open / Create note for today", silent = true }
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>xoT",
+			":ObsidianTomorrow<CR>",
+			{ desc = "Create note for tomorrow", silent = true }
+		)
+		vim.keymap.set("n", "<leader>xoy", ":ObsidianYesterday<CR>", { desc = "Open yesterday's note", silent = true })
 	end,
 }
