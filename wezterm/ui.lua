@@ -11,7 +11,10 @@ function module.apply_to_config(config)
 	}
 	config.font = wezterm.font("SFMono Nerd Font", { weight = 600 }) -- 600 -> Semibold
 	config.font_size = 14.0
+
+	-- config.cell_width = 0.9
 	config.cell_width = 0.8
+
 	config.line_height = 1.0
 	config.max_fps = 100
 	config.use_ime = false
