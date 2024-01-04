@@ -28,6 +28,14 @@ vim.keymap.set("n", "<C-Down>", "5<C-w>-", { noremap = true, silent = true, desc
 vim.keymap.set("n", "[b", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
 vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 
+-- vim.keymap.set("n", "<leader>.", function()
+-- 	-- vim.cmd("normal! .")
+-- 	-- vim.cmd("normal! @:")
+-- 	print(vim.fn.getreg("A"))
+--
+-- 	-- vim.cmd()
+-- end, { silent = true, noremap = true, desc = "Split view in column" })
+
 vim.keymap.set(
 	"n",
 	"<leader>qd",

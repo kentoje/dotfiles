@@ -1,6 +1,10 @@
+local prettier_config_names = { ".prettierrc", ".prettierrc.json", ".prettierrc.js" }
+
 local function pick_js_formatter()
-	if vim.loop.fs_realpath(".prettierrc") then
-		return { "prettierd" }
+	for _, filename in ipairs(prettier_config_names) do
+		if vim.loop.fs_realpath(filename) then
+			return { "prettierd" }
+		end
 	end
 
 	return { "eslint_d" }

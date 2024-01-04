@@ -2,6 +2,7 @@ vim.cmd("set expandtab")
 
 vim.opt.nu = true
 vim.opt.relativenumber = true
+vim.opt.conceallevel = 1
 
 vim.opt.cursorline = false
 
