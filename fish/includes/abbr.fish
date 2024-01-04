@@ -23,4 +23,5 @@ abbr shutd "osascript -e 'tell app \"System Events\" to shut down'"
 abbr fcat "fzf --preview 'bat --color=always {}' | xargs nvim"
 abbr fhistory "history | fzf"
 abbr gbr "git branch --sort=-committerdate | fzf-tmux -p | xargs -I {} git checkout {}"
+abbr gacp "git add . && git commit --amend -n --no-edit && git push --force-with-lease"
 
