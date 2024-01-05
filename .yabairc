@@ -45,7 +45,8 @@ yabai -m rule --add app="^Logi Options$" manage=off layer=below
 yabai -m rule --add app="Finder" manage=off layer=below
 yabai -m rule --add app="^QuickTime Player$" manage=off layer=below
 yabai -m rule --add app="^Spark$" manage=off layer=below
-yabai -m rule --add app="zoom\.us" manage=off layer=below
+yabai -m rule --add app="^Activity Monitor$" manage=off layer=below
+# yabai -m rule --add app="zoom\.us" manage=off layer=below
 
 
 # force opacity
