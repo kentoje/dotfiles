@@ -12,7 +12,7 @@ return {
 				enable = true,
 
 				-- Timing of animation (how steps will progress in time)
-				timing = mini_animate.gen_timing.linear({ duration = 150, unit = "total" }),
+				timing = mini_animate.gen_timing.linear({ duration = 100, unit = "total" }),
 
 				-- Path generator for visualized cursor movement
 				-- path = --<function: implements shortest line path>,
