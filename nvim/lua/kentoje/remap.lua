@@ -28,6 +28,10 @@ vim.keymap.set("n", "<C-Down>", "5<C-w>-", { noremap = true, silent = true, desc
 vim.keymap.set("n", "[b", ":bprev<CR>", { silent = true, desc = "Buffer prev" })
 vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 
+-- sort json file
+vim.keymap.set("n", "<leader>xjs", ":%!jq -S .<CR>", { silent = true, desc = "Sort current JSON file" })
+vim.keymap.set("v", "<leader>xjs", ":'<,'>!jq -S .<CR>", { silent = true, desc = "Sort current JSON selection" })
+
 -- vim.keymap.set("n", "<leader>.", function()
 -- 	-- vim.cmd("normal! .")
 -- 	-- vim.cmd("normal! @:")

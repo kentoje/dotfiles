@@ -46,10 +46,13 @@ return {
 
 		require("lualine").setup({
 			options = {
+				-- theme = "auto",
 				theme = "auto",
 				globalstatus = true,
+				-- ░▒▓
+				-- section_separators = { left = "", right = "" },
 				section_separators = { left = "", right = "" },
-				component_separators = { left = "", right = "" },
+				component_separators = { left = "", right = "" },
 				disabled_filetypes = { statusline = { "dashboard", "lazy", "alpha" } },
 			},
 			sections = {
@@ -83,7 +86,7 @@ return {
 				lualine_c = { diff, diagnostics },
 				lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
 				lualine_y = { "progress" },
-				lualine_z = {},
+				lualine_z = { "location" },
 			},
 			inactive_sections = {
 				lualine_a = {},

@@ -32,3 +32,4 @@ vim.g.mapleader = " "
 
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
+vim.opt.guicursor = "i:block"

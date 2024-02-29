@@ -117,6 +117,8 @@ return {
 			},
 		})
 
+		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
+
 		local cmp = require("cmp")
 
 		require("luasnip.loaders.from_vscode").lazy_load()

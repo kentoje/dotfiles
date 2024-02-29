@@ -45,7 +45,7 @@ return {
 					".yarn",
 					".git/",
 				},
-				path_display = { "smart" },
+				path_display = { "absolute" },
 				preview = true,
 				prompt_prefix = " ",
 				selection_caret = " ",
@@ -66,22 +66,6 @@ return {
 		})
 
 		local builtin = require("telescope.builtin")
-		local wk = require("which-key")
-
-		wk.register({
-			f = {
-				name = "file", -- optional group name
-				f = {
-					function()
-						builtin.find_files({
-							hidden = true,
-							no_ignore = true,
-						})
-					end,
-					"Find all files",
-				}, -- create a binding with label
-			},
-		}, { prefix = "<leader>" })
 
 		local find_command = {
 			"rg",
@@ -113,6 +97,12 @@ return {
 			})
 		end, { desc = "Find git files" })
 		vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Displays all current buffers" })
+		vim.keymap.set("n", "<leader>ff", function()
+			builtin.find_files({
+				hidden = true,
+				no_ignore = true,
+			})
+		end, { desc = "Find all files" })
 		vim.keymap.set("n", "<leader>fg", function()
 			builtin.live_grep({
 				hidden = true,

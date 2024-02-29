@@ -7,7 +7,11 @@ local function pick_js_formatter()
 		end
 	end
 
-	return { "eslint_d" }
+	if vim.loop.fs_realpath(".eslintrc") then
+		return { "eslint_d" }
+	end
+
+	return { "prettierd" }
 end
 
 return {
