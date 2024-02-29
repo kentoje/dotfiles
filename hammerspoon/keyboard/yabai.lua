@@ -24,7 +24,7 @@ end
 for i = 1, 9 do
 	local num = tostring(i)
 	-- broken
-	-- alt(num, { "space --focus " .. num })
+	alt(num, { "space --focus " .. num })
 	altShiftNumber(num)
 end
 
