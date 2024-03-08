@@ -4,7 +4,11 @@ return {
 		local mini_files = require("mini.files")
 		-- local mini_animate = require("mini.animate")
 
-		mini_files.setup()
+		mini_files.setup({
+			mappings = {
+				close = "<ESC>",
+			},
+		})
 		-- mini_animate.setup({
 		-- 	-- Cursor path
 		-- 	cursor = {
