@@ -14,5 +14,11 @@ source $path/includes/fzf.fish
 source $path/includes/private-vars.fish
 source $path/includes/abbr.fish
 source $path/includes/alias.fish
-source $path/includes/nvm-fix.fish
 
+
+# pnpm
+set -gx PNPM_HOME "/Users/kento/Library/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end
