@@ -15,7 +15,7 @@ function module.apply_to_config(config)
 	-- config.cell_width = 0.9
 	config.cell_width = 0.8
 
-	config.line_height = 1.0
+	config.line_height = 1.05
 	config.max_fps = 144
 	config.use_ime = false
 
