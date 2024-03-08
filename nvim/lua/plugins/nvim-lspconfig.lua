@@ -20,8 +20,45 @@ return {
 		vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
 		vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
 
+		local move_next_error = function()
+			vim.diagnostic.goto_next({
+				severity = vim.diagnostic.severity.ERROR,
+			})
+		end
+		local move_prev_error = function()
+			vim.diagnostic.goto_prev({
+				severity = vim.diagnostic.severity.ERROR,
+			})
+		end
+
+		local move_next_warning = function()
+			vim.diagnostic.goto_next({
+				severity = vim.diagnostic.severity.WARN,
+			})
+		end
+		local move_prev_warning = function()
+			vim.diagnostic.goto_prev({
+				severity = vim.diagnostic.severity.WARN,
+			})
+		end
+
+		local move_next_diag = function()
+			vim.diagnostic.goto_next()
+		end
+		local move_prev_diag = function()
+			vim.diagnostic.goto_prev()
+		end
+
 		local lspconfig = require("lspconfig")
 		local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+		local next_error_repeat, prev_error_repeat =
+			ts_repeat_move.make_repeatable_move_pair(move_next_error, move_prev_error)
+		local next_diag_repeat, prev_diag_repeat =
+			ts_repeat_move.make_repeatable_move_pair(move_next_diag, move_prev_diag)
+		local next_warning_repeat, prev_warning_repeat =
+			ts_repeat_move.make_repeatable_move_pair(move_next_warning, move_prev_warning)
 
 		vim.api.nvim_create_autocmd("LspAttach", {
 			desc = "LSP actions",
@@ -39,28 +76,12 @@ return {
 					vim.lsp.buf.definition()
 				end, opts)
 				vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
-				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- go to next diagnostic
-				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- go to prev diagnostic
-				vim.keymap.set("n", "]e", function()
-					vim.diagnostic.goto_next({
-						severity = vim.diagnostic.severity.ERROR,
-					})
-				end, opts)
-				vim.keymap.set("n", "[e", function()
-					vim.diagnostic.goto_prev({
-						severity = vim.diagnostic.severity.ERROR,
-					})
-				end, opts)
-				vim.keymap.set("n", "]w", function()
-					vim.diagnostic.goto_next({
-						severity = vim.diagnostic.severity.WARN,
-					})
-				end, opts)
-				vim.keymap.set("n", "[w", function()
-					vim.diagnostic.goto_prev({
-						severity = vim.diagnostic.severity.WARN,
-					})
-				end, opts)
+				vim.keymap.set("n", "]d", next_diag_repeat, opts) -- go to next diagnostic
+				vim.keymap.set("n", "[d", prev_diag_repeat, opts) -- go to prev diagnostic
+				vim.keymap.set("n", "]e", next_error_repeat, opts)
+				vim.keymap.set("n", "[e", prev_error_repeat, opts)
+				vim.keymap.set("n", "]w", next_warning_repeat, opts)
+				vim.keymap.set("n", "[w", prev_warning_repeat, opts)
 			end,
 		})
 

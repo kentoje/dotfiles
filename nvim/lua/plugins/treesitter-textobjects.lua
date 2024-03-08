@@ -4,6 +4,11 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 	},
 	config = function()
+		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+
+		vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
+		vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+
 		require("nvim-treesitter.configs").setup({
 			textobjects = {
 				move = {
@@ -27,7 +32,11 @@ return {
 						["ii"] = "@conditional.inner",
 						["al"] = "@loop.outer",
 						["il"] = "@loop.inner",
-						["at"] = "@comment.inner",
+						["it"] = "@comment.inner",
+						["at"] = "@comment.outer",
+						-- Custom queries
+						["ij"] = "@jsx.inner",
+						["aj"] = "@jsx.outer",
 						-- ["ac"] = "@class.outer",
 						-- You can optionally set descriptions to the mappings (used in the desc parameter of
 						-- nvim_buf_set_keymap) which plugins like which-key display
