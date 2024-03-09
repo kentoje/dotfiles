@@ -1,9 +1,11 @@
 [includeIf "gitdir:~/Documents/gitlab/"]
   path = ~/.gitconfig-gitlab
-[includeIf "gitdir:~/Documents/github/"]
-  path = ~/.gitconfig-github
 [includeIf "gitdir:~/Documents/js/"]
   path = ~/.gitconfig-gitlab
+[includeIf "gitdir:~/Documents/github/"]
+  path = ~/.gitconfig-github
+[includeIf "gitdir:~/dotfiles/"]
+  path = ~/.gitconfig-github
 
 [safe]
 	directory = /Users/kento/Documents/gitlab/dashboard-v4

@@ -1,11 +1,11 @@
 .DS_Store
 
-fish/includes/private-vars.fish
-fish/fish_variables
+.config/fish/includes/private-vars.fish
+.config/fish/fish_variables
 
-wezterm/assets/*.webp
-!wezterm/assets/5.webp
+.config/wezterm/assets/*.webp
+!.config/wezterm/assets/5.webp
 
-alacritty/themes/*.toml
-!alacritty/themes/catppuccin*.toml
+.config/alacritty/themes/*.toml
+!.config/alacritty/themes/catppuccin*.toml
 

@@ -6,8 +6,8 @@ echo "🍎 - Setting up apple configuration!"
 defaults write .GlobalPreferences com.apple.mouse.scaling -1
 
 # App behaviour
-defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
-defaults write me.lukehaas.runjs ApplePressAndHoldEnabled -bool false
+# defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+# defaults write me.lukehaas.runjs ApplePressAndHoldEnabled -bool false
 
 # Typing behaviour
 defaults write -g KeyRepeat -int 1
