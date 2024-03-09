@@ -12,22 +12,24 @@
     ],
     "chances" : [
       {
+        "pattern" : {
+          "alwaysMatch" : {
+
+          }
+        },
         "decision" : {
-          "actions" : [
-            {
-              "getLeaderKey" : {
-                "kind" : "keyCodeText"
-              }
-            }
-          ],
           "chances" : [
             {
               "decision" : {
-                "actions" : [
-
-                ],
                 "chances" : [
                   {
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          11
+                        ]
+                      }
+                    },
                     "decision" : {
                       "chances" : [
 
@@ -35,9 +37,9 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
                             "launchArgumentsText" : "",
-                            "path" : "\/Applications\/Spark.app"
+                            "path" : "\/Applications\/Spark.app",
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -46,23 +48,26 @@
                           }
                         }
                       ]
-                    },
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          11
-                        ]
-                      }
                     }
                   },
                   {
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          8
+                        ]
+                      }
+                    },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Amie.app",
-                            "switchToPreviousApp" : false,
                             "hideAppIfRunning" : false,
+                            "switchToPreviousApp" : false,
+                            "path" : "\/Applications\/Amie.app",
                             "launchArgumentsText" : ""
                           }
                         },
@@ -71,31 +76,11 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
-                    },
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          8
-                        ]
-                      }
                     }
                   },
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          14
-                        ]
-                      }
-                    },
                     "decision" : {
-                      "chances" : [
-
-                      ],
                       "actions" : [
                         {
                           "openFinder" : {
@@ -107,7 +92,17 @@
 
                           }
                         }
+                      ],
+                      "chances" : [
+
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          14
+                        ]
+                      }
                     }
                   },
                   {
@@ -147,12 +142,15 @@
                       }
                     },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "launchArgumentsText" : "",
                             "path" : "\/Applications\/Arc.app",
-                            "hideAppIfRunning" : false
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -160,9 +158,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     }
                   },
@@ -174,10 +169,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
-                            "switchToPreviousApp" : false,
                             "launchArgumentsText" : "",
-                            "path" : "\/Applications\/Spotify.app"
+                            "path" : "\/Applications\/Spotify.app",
+                            "switchToPreviousApp" : false,
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -204,15 +199,37 @@
                       }
                     },
                     "decision" : {
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/Slack.app"
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ],
+                      "chances" : [
+
+                      ]
+                    }
+                  },
+                  {
+                    "decision" : {
                       "chances" : [
 
                       ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Slack.app",
+                            "switchToPreviousApp" : false,
                             "hideAppIfRunning" : false,
-                            "launchArgumentsText" : ""
+                            "launchArgumentsText" : "",
+                            "path" : "\/Applications\/WezTerm.app"
                           }
                         },
                         {
@@ -221,23 +238,23 @@
                           }
                         }
                       ]
-                    }
-                  },
-                  {
+                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           17
                         ]
                       }
-                    },
+                    }
+                  },
+                  {
                     "decision" : {
                       "actions" : [
                         {
                           "openApp" : {
                             "launchArgumentsText" : "",
-                            "path" : "\/Applications\/WezTerm.app",
                             "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/WhatsApp.app",
                             "switchToPreviousApp" : false
                           }
                         },
@@ -250,16 +267,16 @@
                       "chances" : [
 
                       ]
-                    }
-                  },
-                  {
+                    },
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           13
                         ]
                       }
-                    },
+                    }
+                  },
+                  {
                     "decision" : {
                       "chances" : [
 
@@ -268,27 +285,8 @@
                         {
                           "openApp" : {
                             "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/WhatsApp.app",
-                            "launchArgumentsText" : "",
-                            "hideAppIfRunning" : false
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "decision" : {
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/zoom.us.app",
                             "hideAppIfRunning" : false,
+                            "path" : "\/Applications\/zoom.us.app",
                             "launchArgumentsText" : ""
                           }
                         },
@@ -297,9 +295,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     },
                     "pattern" : {
@@ -310,6 +305,9 @@
                       }
                     }
                   }
+                ],
+                "actions" : [
+
                 ]
               },
               "pattern" : {
@@ -318,12 +316,14 @@
                 }
               }
             }
+          ],
+          "actions" : [
+            {
+              "getLeaderKey" : {
+                "kind" : "keyCodeText"
+              }
+            }
           ]
-        },
-        "pattern" : {
-          "alwaysMatch" : {
-
-          }
         }
       }
     ]
