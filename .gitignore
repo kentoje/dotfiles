@@ -9,3 +9,5 @@
 .config/alacritty/themes/*.toml
 !.config/alacritty/themes/catppuccin*.toml
 
+.config/tmux/plugins
+

@@ -1,12 +1,17 @@
 {
+  "hotKeys" : [
+
+  ],
   "decision" : {
+    "actions" : [
+      {
+        "getFrontmostApp" : {
+          "kind" : "bundleURL"
+        }
+      }
+    ],
     "chances" : [
       {
-        "pattern" : {
-          "alwaysMatch" : {
-
-          }
-        },
         "decision" : {
           "actions" : [
             {
@@ -17,12 +22,10 @@
           ],
           "chances" : [
             {
-              "pattern" : {
-                "message" : {
-                  "regex" : "53\\(0\\)"
-                }
-              },
               "decision" : {
+                "actions" : [
+
+                ],
                 "chances" : [
                   {
                     "decision" : {
@@ -53,21 +56,14 @@
                     }
                   },
                   {
-                    "pattern" : {
-                      "key" : {
-                        "allowedKeyCodes" : [
-                          8
-                        ]
-                      }
-                    },
                     "decision" : {
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
-                            "launchArgumentsText" : "",
                             "path" : "\/Applications\/Amie.app",
-                            "switchToPreviousApp" : false
+                            "switchToPreviousApp" : false,
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -79,6 +75,13 @@
                       "chances" : [
 
                       ]
+                    },
+                    "pattern" : {
+                      "key" : {
+                        "allowedKeyCodes" : [
+                          8
+                        ]
+                      }
                     }
                   },
                   {
@@ -116,6 +119,9 @@
                       }
                     },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
@@ -129,9 +135,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     }
                   },
@@ -147,9 +150,9 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : "",
                             "path" : "\/Applications\/Arc.app",
-                            "launchArgumentsText" : ""
+                            "hideAppIfRunning" : false
                           }
                         },
                         {
@@ -171,10 +174,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "path" : "\/Applications\/Spotify.app",
                             "hideAppIfRunning" : false,
+                            "switchToPreviousApp" : false,
                             "launchArgumentsText" : "",
-                            "switchToPreviousApp" : false
+                            "path" : "\/Applications\/Spotify.app"
                           }
                         },
                         {
@@ -201,12 +204,15 @@
                       }
                     },
                     "decision" : {
+                      "chances" : [
+
+                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "launchArgumentsText" : "",
                             "path" : "\/Applications\/Slack.app",
-                            "hideAppIfRunning" : false
+                            "hideAppIfRunning" : false,
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -214,9 +220,6 @@
 
                           }
                         }
-                      ],
-                      "chances" : [
-
                       ]
                     }
                   },
@@ -229,15 +232,12 @@
                       }
                     },
                     "decision" : {
-                      "chances" : [
-
-                      ],
                       "actions" : [
                         {
                           "openApp" : {
-                            "hideAppIfRunning" : false,
-                            "path" : "\/Applications\/WezTerm.app",
                             "launchArgumentsText" : "",
+                            "path" : "\/Applications\/WezTerm.app",
+                            "hideAppIfRunning" : false,
                             "switchToPreviousApp" : false
                           }
                         },
@@ -246,36 +246,39 @@
 
                           }
                         }
-                      ]
-                    }
-                  },
-                  {
-                    "decision" : {
-                      "actions" : [
-                        {
-                          "openApp" : {
-                            "hideAppIfRunning" : false,
-                            "switchToPreviousApp" : false,
-                            "path" : "\/Applications\/WhatsApp.app",
-                            "launchArgumentsText" : ""
-                          }
-                        },
-                        {
-                          "reWaitTriggerKeys" : {
-
-                          }
-                        }
                       ],
                       "chances" : [
 
                       ]
-                    },
+                    }
+                  },
+                  {
                     "pattern" : {
                       "key" : {
                         "allowedKeyCodes" : [
                           13
                         ]
                       }
+                    },
+                    "decision" : {
+                      "chances" : [
+
+                      ],
+                      "actions" : [
+                        {
+                          "openApp" : {
+                            "switchToPreviousApp" : false,
+                            "path" : "\/Applications\/WhatsApp.app",
+                            "launchArgumentsText" : "",
+                            "hideAppIfRunning" : false
+                          }
+                        },
+                        {
+                          "reWaitTriggerKeys" : {
+
+                          }
+                        }
+                      ]
                     }
                   },
                   {
@@ -283,10 +286,10 @@
                       "actions" : [
                         {
                           "openApp" : {
-                            "launchArgumentsText" : "",
+                            "switchToPreviousApp" : false,
                             "path" : "\/Applications\/zoom.us.app",
                             "hideAppIfRunning" : false,
-                            "switchToPreviousApp" : false
+                            "launchArgumentsText" : ""
                           }
                         },
                         {
@@ -307,25 +310,22 @@
                       }
                     }
                   }
-                ],
-                "actions" : [
-
                 ]
+              },
+              "pattern" : {
+                "message" : {
+                  "regex" : "53\\(0\\)"
+                }
               }
             }
           ]
-        }
-      }
-    ],
-    "actions" : [
-      {
-        "getFrontmostApp" : {
-          "kind" : "bundleURL"
+        },
+        "pattern" : {
+          "alwaysMatch" : {
+
+          }
         }
       }
     ]
-  },
-  "hotKeys" : [
-
-  ]
+  }
 }
