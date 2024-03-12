@@ -4,6 +4,7 @@ abbr v "nvim"
 
 # Day to day
 abbr c "clear"
+abbr cm "nice_commit"
 abbr cd "z"
 abbr cl "clear"
 abbr ta "tmux attach"
@@ -25,4 +26,5 @@ abbr fhistory "history | fzf"
 abbr gbr "git branch --sort=-committerdate | fzf-tmux -p | xargs -I {} git checkout {}"
 abbr gacp "git add . && git commit --amend -n --no-edit && git push --force-with-lease"
 abbr :q "exit"
+abbr :wq "exit"
 
