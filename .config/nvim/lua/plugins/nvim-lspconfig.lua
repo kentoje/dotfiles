@@ -50,6 +50,7 @@ return {
 		end
 
 		local lspconfig = require("lspconfig")
+
 		local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
@@ -96,6 +97,15 @@ return {
 			ensure_installed = {},
 			handlers = {
 				default_setup,
+
+				-- tsserver = function()
+				-- 	local capabilities =
+				-- 		vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), lsp_capabilities)
+				--
+				-- 	lspconfig.tsserver.setup({
+				-- 		capabilities = capabilities,
+				-- 	})
+				-- end,
 
 				yamlls = function()
 					lspconfig.yamlls.setup({
