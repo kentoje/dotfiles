@@ -129,9 +129,15 @@ return {
 							packageManager = "yarn",
 						},
 						on_attach = function(client, bufnr)
-							vim.api.nvim_create_autocmd("BufWritePre", {
+							-- vim.api.nvim_create_autocmd("BufWritePost", {
+							-- vim.api.nvim_create_autocmd("BufWritePre", {
+							-- 	buffer = bufnr,
+							-- 	command = "EslintFixAll",
+							-- })
+							-- does not work
+							vim.api.nvim_create_autocmd({ "BufNewFile" }, {
 								buffer = bufnr,
-								command = "EslintFixAll",
+								command = "LspR",
 							})
 						end,
 					})

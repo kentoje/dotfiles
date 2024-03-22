@@ -1,6 +1,6 @@
 return {
 	"lewis6991/gitsigns.nvim",
-	config = {
+	opts = {
 		signs = {
 			add = { text = "│" },
 			change = { text = "│" },

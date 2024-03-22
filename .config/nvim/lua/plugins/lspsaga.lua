@@ -1,5 +1,9 @@
 return {
 	"nvimdev/lspsaga.nvim",
+	dependencies = {
+		"nvim-treesitter/nvim-treesitter", -- optional
+		"nvim-tree/nvim-web-devicons", -- optional
+	},
 	config = function()
 		require("lspsaga").setup({
 			symbol_in_winbar = {
@@ -10,6 +14,8 @@ return {
 				virtual_text = false,
 			},
 			definition = {
+				width = 0.8,
+				height = 0.8,
 				keys = {
 					edit = "<C-c>o",
 					vsplit = "<C-c>d",
@@ -48,8 +54,4 @@ return {
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
 	end,
-	dependencies = {
-		"nvim-treesitter/nvim-treesitter", -- optional
-		"nvim-tree/nvim-web-devicons", -- optional
-	},
 }

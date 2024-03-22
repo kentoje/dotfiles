@@ -20,7 +20,7 @@ return {
 		-- see below for full list of optional dependencies 👇
 	},
 	config = function()
-		local obsidian = require("obsidian").setup({
+		require("obsidian").setup({
 			workspaces = {
 				{
 					name = "personal",

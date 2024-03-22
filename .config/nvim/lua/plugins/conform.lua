@@ -1,17 +1,18 @@
 local prettier_config_names = { ".prettierrc", ".prettierrc.json", ".prettierrc.js" }
 
 local function pick_js_formatter()
-	for _, filename in ipairs(prettier_config_names) do
-		if vim.loop.fs_realpath(filename) then
-			return { "prettierd" }
-		end
-	end
-
-	if vim.loop.fs_realpath(".eslintrc") then
-		return { "eslint" }
-	end
-
-	return { "prettierd" }
+	return { "eslint_d", "prettier" }
+	-- for _, filename in ipairs(prettier_config_names) do
+	-- 	if vim.loop.fs_realpath(filename) then
+	-- 		return { { "prettier" } }
+	-- 	end
+	-- end
+	--
+	-- if vim.loop.fs_realpath(".eslintrc") then
+	-- 	return { "eslint" }
+	-- end
+	--
+	-- return { { "prettier" } }
 end
 
 return {
@@ -31,16 +32,16 @@ return {
 				javascriptreact = pick_js_formatter(),
 				typescriptreact = pick_js_formatter(),
 				json = pick_js_formatter(),
-				html = { "prettierd" },
-				css = { "prettierd" },
-				markdown = { { "prettierd", "prettier" } },
-				yaml = { { "prettierd", "prettier" } },
-				graphql = { { "prettierd", "prettier" } },
+				html = { "prettier" },
+				css = { "prettier" },
+				markdown = { { "prettier" } },
+				yaml = { { "prettier" } },
+				graphql = { { "prettier" } },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()
-				timeout_ms = 500,
-				async = false,
+				timeout_ms = 2000,
+				async = true,
 				lsp_fallback = true,
 			},
 		})

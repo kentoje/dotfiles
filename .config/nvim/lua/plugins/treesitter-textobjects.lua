@@ -32,8 +32,8 @@ return {
 						-- You can use the capture groups defined in textobjects.scm
 						["af"] = "@function.outer",
 						["if"] = "@function.inner",
-						["aa"] = "@parameter.outer",
-						["ia"] = "@parameter.inner",
+						-- ["aa"] = "@parameter.outer",
+						-- ["ia"] = "@parameter.inner",
 						["ai"] = "@conditional.outer",
 						["ii"] = "@conditional.inner",
 						["al"] = "@loop.outer",
@@ -50,8 +50,8 @@ return {
 						-- You can also use captures from other query groups like `locals.scm`
 						["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
 
-						["i:"] = { query = "@property.lhs", desc = "Select left part of an object property" },
-						["a:"] = { query = "@property.rhs", desc = "Select right part of an object property" },
+						-- ["i:"] = { query = "@property.lhs", desc = "Select left part of an object property" },
+						-- ["a:"] = { query = "@property.rhs", desc = "Select right part of an object property" },
 					},
 					-- You can choose the select mode (default is charwise 'v')
 					--
