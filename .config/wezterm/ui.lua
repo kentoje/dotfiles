@@ -9,8 +9,8 @@ function module.apply_to_config(config)
 	config.colors = {
 		cursor_bg = "#f5bde6",
 	}
-	config.font = wezterm.font("SFMono Nerd Font", { weight = 600 }) -- 600 -> Semibold
-	config.font_size = 14.0
+	config.font = wezterm.font("SFMono Nerd Font", { weight = 700 }) -- 700 -> Semibold
+	config.font_size = 14
 
 	-- config.cell_width = 0.9
 	config.cell_width = 0.8
@@ -29,7 +29,7 @@ function module.apply_to_config(config)
 		bottom = 16,
 	}
 	config.window_background_opacity = 0.85
-	config.macos_window_background_blur = 20
+	config.macos_window_background_blur = 15
 	config.background = {
 		-- {
 		-- 	source = {
