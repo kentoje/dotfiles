@@ -52,6 +52,6 @@ yabai -m rule --add app="^zoom\.us$" manage=off layer=below
 
 
 # force opacity
-yabai -m rule --add app="Visual Studio Code" opacity=0.90
+# yabai -m rule --add app="Visual Studio Code" opacity=0.90
 
 echo "yabai configuration loaded..."
