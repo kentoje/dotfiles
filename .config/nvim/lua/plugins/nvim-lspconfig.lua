@@ -155,6 +155,7 @@ return {
 		})
 
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
+		vim.keymap.set("n", "<leader>e", ":EslintFixAll<CR>", { silent = true, desc = "EslintFixAll" })
 
 		local cmp = require("cmp")
 
@@ -164,14 +165,23 @@ return {
 			sources = {
 				{ name = "nvim_lsp" },
 				{ name = "luasnip" },
+				{ name = "cody" },
 			},
 			mapping = cmp.mapping.preset.insert({
 				["<C-b>"] = cmp.mapping.scroll_docs(-2),
 				["<C-f>"] = cmp.mapping.scroll_docs(2),
 				["<C-Space>"] = cmp.mapping.complete(),
-				["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+				["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 				["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
 				["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+				-- Manually trigger cody completions
+				-- ["<c-a>"] = cmp.mapping.complete {
+				--   config = {
+				--     sources = {
+				--       { name = "cody" },
+				--     },
+				--   },
+				-- },
 			}),
 			snippet = {
 				expand = function(args)

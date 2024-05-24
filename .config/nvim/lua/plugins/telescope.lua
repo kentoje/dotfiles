@@ -36,6 +36,8 @@ return {
 					"!storybook-static",
 					"-g",
 					"!coverage/*",
+					"-g",
+					"!test-results/*",
 				},
 				file_ignore_patterns = {
 					"coverage",
@@ -88,6 +90,8 @@ return {
 			"!storybook-static",
 			"-g",
 			"!coverage/*",
+			"-g",
+			"!test-results/*",
 		}
 
 		vim.keymap.set("n", "<leader>qp", function()

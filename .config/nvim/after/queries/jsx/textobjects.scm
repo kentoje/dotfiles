@@ -1,5 +1,6 @@
 ; extends
 (jsx_element 
-  (jsx_text)? @jsx.inner
-) @jsx.outer
+  (jsx_text)? @element.inner
+  (jsx_expression)? @element.inner
+) @element.outer
 

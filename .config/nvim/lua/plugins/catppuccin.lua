@@ -2,6 +2,7 @@ return {
 	"catppuccin/nvim",
 	name = "catppuccin",
 	priority = 2000,
+	enabled = false,
 	lazy = false,
 	config = function()
 		local macchiato = require("catppuccin.palettes").get_palette("macchiato")

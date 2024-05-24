@@ -41,8 +41,8 @@ return {
 						["it"] = "@comment.inner",
 						["at"] = "@comment.outer",
 						-- Custom queries
-						["ij"] = "@jsx.inner",
-						["aj"] = "@jsx.outer",
+						["ij"] = "@element.inner",
+						["aj"] = "@element.outer",
 						-- ["ac"] = "@class.outer",
 						-- You can optionally set descriptions to the mappings (used in the desc parameter of
 						-- nvim_buf_set_keymap) which plugins like which-key display

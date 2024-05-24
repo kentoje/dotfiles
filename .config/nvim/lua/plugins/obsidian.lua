@@ -161,6 +161,7 @@ return {
 			":ObsidianFollowLink vsplit <CR>",
 			{ desc = "Follow link in vertical split", silent = true }
 		)
+		vim.keymap.set("n", "<leader>xog", ":ObsidianFollowLink <CR>", { desc = "Follow link", silent = true })
 		vim.keymap.set(
 			"n",
 			"<leader>xot",

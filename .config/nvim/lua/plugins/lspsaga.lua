@@ -44,12 +44,19 @@ return {
 		})
 
 		vim.keymap.set(
-			"n",
+			{ "n", "v" },
 			"<leader>q.",
 			":Lspsaga diagnostic_jump_next<CR>",
 			{ silent = true, desc = "Jump to next diagnostic" }
 		)
+		-- vim.keymap.set({ "n", "v" }, "<leader>q.", vim.lsp.buf.code_action, { silent = true, desc = "Code action" })
 		vim.keymap.set("n", "<leader>g", ":Lspsaga peek_definition<CR>", { silent = true, desc = "Peek definition" })
+		vim.keymap.set(
+			"n",
+			"<leader>j",
+			":Lspsaga peek_type_definition<CR>",
+			{ silent = true, desc = "Peek type definition" }
+		)
 		vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })

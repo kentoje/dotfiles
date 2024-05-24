@@ -1,7 +1,8 @@
 local prettier_config_names = { ".prettierrc", ".prettierrc.json", ".prettierrc.js" }
 
 local function pick_js_formatter()
-	return { "eslint_d", "prettier" }
+	return { "prettierd" }
+	-- return { "eslint_d", "prettierd" }
 	-- for _, filename in ipairs(prettier_config_names) do
 	-- 	if vim.loop.fs_realpath(filename) then
 	-- 		return { { "prettier" } }
@@ -18,7 +19,13 @@ end
 return {
 	"stevearc/conform.nvim",
 	config = function()
-		require("conform").setup({
+		local conform = require("conform")
+
+		-- conform.formatters.prettier = {
+		-- 	prepend_args = { "--cache" },
+		-- }
+
+		conform.setup({
 			formatters_by_ft = {
 				-- Examples:
 				-- Conform will run multiple formatters sequentially
@@ -32,11 +39,11 @@ return {
 				javascriptreact = pick_js_formatter(),
 				typescriptreact = pick_js_formatter(),
 				json = pick_js_formatter(),
-				html = { "prettier" },
-				css = { "prettier" },
-				markdown = { { "prettier" } },
-				yaml = { { "prettier" } },
-				graphql = { { "prettier" } },
+				html = { "prettierd" },
+				css = { "prettierd" },
+				markdown = { { "prettierd" } },
+				yaml = { { "prettierd" } },
+				graphql = { { "prettierd" } },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()
