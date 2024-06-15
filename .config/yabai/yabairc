@@ -46,6 +46,9 @@ yabai -m rule --add app="Finder" manage=off
 yabai -m rule --add app="^QuickTime Player$" manage=off
 yabai -m rule --add app="^Spark$" manage=off layer=below
 yabai -m rule --add app="^Activity Monitor$" manage=off
+yabai -m rule --add app="^Arc$" role="AXWindow"
+yabai -m rule --add app="^Amie$" role="AXWindow"
+
 # yabai -m rule --add app="^Amie$" manage=off layer=below
 yabai -m rule --add app="^Preview$" manage=off
 yabai -m rule --add app="^zoom\.us$" manage=off layer=below
