@@ -23,7 +23,6 @@ end
 
 for i = 1, 9 do
 	local num = tostring(i)
-	-- broken
 	alt(num, { "space --focus " .. num })
 	altShiftNumber(num)
 end
@@ -47,6 +46,6 @@ local homeRow = { h = "west", j = "south", k = "north", l = "east" }
 
 for key, direction in pairs(homeRow) do
 	-- move between windows with hjkl
-	alt(key, { "window --focus " .. direction })
+	-- alt(key, { "window --focus " .. direction })
 	altShift(key, { "window --swap " .. direction })
 end
