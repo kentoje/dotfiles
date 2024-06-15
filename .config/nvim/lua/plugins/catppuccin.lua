@@ -2,7 +2,6 @@ return {
 	"catppuccin/nvim",
 	name = "catppuccin",
 	priority = 2000,
-	enabled = false,
 	lazy = false,
 	config = function()
 		local macchiato = require("catppuccin.palettes").get_palette("macchiato")
@@ -53,6 +52,7 @@ return {
 
 		vim.cmd.colorscheme("catppuccin")
 		vim.cmd("hi CursorLineNr guifg=" .. macchiato.pink)
-		vim.cmd("hi LineNr guifg=" .. macchiato.surface2)
+		-- vim.cmd("hi LineNr guifg=" .. macchiato.surface2)
+		vim.cmd("hi LineNr guifg=#a6accd")
 	end,
 }
