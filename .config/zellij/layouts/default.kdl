@@ -2,7 +2,7 @@ layout {
   default_tab_template {
     pane size=2 borderless=true {
       plugin location="file:/Users/kento/dotfiles/.config/zellij/plugins/zjstatusv0.15.0.wasm" {
-         format_left   "{mode} #[fg=#89B4FA,bold]{session} {datetime} {command_git_branch} {tabs}"
+         format_left   "{mode} #[fg=#89B4FA,bold]{session} {datetime} {tabs}"
          // format_center "{tabs}"
          // format_right  "{command_git_branch} {datetime}"
          format_space  ""
@@ -22,9 +22,9 @@ layout {
          mode_normal  "#[bg=blue] "
          mode_tmux    "#[bg=#ffc387] "
 
-
+         // command_git_branch_command     "bash -c 'GIT_DIR=$(pwd)/.git git rev-parse --abbrev-ref HEAD'"
          command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
-         command_git_branch_format      "#[fg=white] {stdout} "
+         command_git_branch_format      "#[fg=white] {stdout} {stderr}"
          command_git_branch_interval    "10"
          command_git_branch_rendermode  "static"
         
@@ -34,7 +34,7 @@ layout {
         tab_normal_sync         "#[fg=#6C7086] {index}: {name} {sync_indicator} "
 
         // formatting for the current active tab
-        tab_active              "#[fg=magenta,bold] {index}: {name} {floating_indicator} "
+        tab_active              "#[fg=blue,bold] {index}: {name} {floating_indicator} "
         tab_active_fullscreen   "#[fg=green,bold] {index}: {name} {fullscreen_indicator} "
         tab_active_sync         "#[fg=#9399B2,bold] {index} :{name} {sync_indicator} "
 
@@ -50,13 +50,13 @@ layout {
    // }
   }
 
-  tab focus=true name="cc-ext" {
-    pane cwd="/Users/kento/Documents/gitlab/conversation-center-ext" 
-  }
-  tab name="kento" {
-    pane cwd="/Users/kento/dotfiles" 
-  }
-  tab name="vault" {
-    pane cwd="/Users/kento/Documents/github/kentoje/obsidian-vault" 
-  }
+ tab focus=true name="cc-ext" {
+   pane cwd="/Users/kento/Documents/gitlab/conversation-center-ext" 
+ }
+ tab name="kento" {
+   pane cwd="/Users/kento/dotfiles" 
+ }
+ tab name="vault" {
+   pane cwd="/Users/kento/Documents/github/kentoje/obsidian-vault" 
+ }
 }

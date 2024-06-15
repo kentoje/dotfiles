@@ -220,6 +220,8 @@ keybinds clear-defaults=true {
 //    }
 }
 
+theme "catppuccin-macchiato"
+
 plugins {
     tab-bar location="zellij:tab-bar"
     status-bar location="zellij:status-bar"
@@ -314,7 +316,7 @@ plugins {
 // Choose the theme that is specified in the themes section.
 // Default: default
 //
-theme "catppuccin-macchiato"
+// theme "catppuccin-macchiato"
 
 // The name of the default layout to load on startup
 // Default: "default"
