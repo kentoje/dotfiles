@@ -57,7 +57,7 @@ return {
 			":Lspsaga peek_type_definition<CR>",
 			{ silent = true, desc = "Peek type definition" }
 		)
-		vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
+		-- vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
 	end,

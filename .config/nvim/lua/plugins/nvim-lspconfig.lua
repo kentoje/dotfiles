@@ -87,6 +87,11 @@ return {
 		})
 
 		local default_setup = function(server)
+			-- Skip tsserver to use custom tool "https://github.com/pmizio/typescript-tools.nvim"
+			if server == "tsserver" then
+				return
+			end
+
 			lspconfig[server].setup({
 				capabilities = lsp_capabilities,
 			})
