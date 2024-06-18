@@ -19,8 +19,8 @@ layout {
 
          hide_frame_for_single_pane "true"
 
-         mode_normal  "#[bg=blue] "
-         mode_tmux    "#[bg=#ffc387] "
+         mode_normal  "#[fg=blue] N - "
+         mode_tmux    "#[fg=yellow] T - "
 
          // command_git_branch_command     "bash -c 'GIT_DIR=$(pwd)/.git git rev-parse --abbrev-ref HEAD'"
          command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
