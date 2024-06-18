@@ -4,7 +4,7 @@ return {
 	dependencies = {
 		"nvimdev/guard-collection",
 	},
-	cond = false,
+	enabled = false,
 	config = function()
 		local ft = require("guard.filetype")
 		local eslint_d = {

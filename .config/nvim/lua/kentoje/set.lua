@@ -33,3 +33,6 @@ vim.g.mapleader = " "
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
 vim.opt.guicursor = "i:block"
+
+-- Fix flicking with zellij + noice
+vim.opt.termsync = false

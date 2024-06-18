@@ -17,6 +17,8 @@ vim.keymap.set("n", "J", "10j", { desc = "Move 10 lines down" })
 vim.keymap.set("n", "K", "10k", { desc = "Move 10 lines up" })
 vim.keymap.set("n", "L", "<S-$>", { desc = "Go to end of line" })
 
+vim.keymap.set("v", "$", "$h", { noremap = true })
+
 vim.keymap.set("n", "x", '"_x', { desc = "Do not overwrite clipboard while deleting with 'x'" })
 vim.keymap.set("x", "p", '"_dP', { desc = "Do not overwrite clipboard while pasting" })
 
@@ -31,6 +33,9 @@ vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 -- sort json file
 vim.keymap.set("n", "<leader>xjs", ":%!jq -S .<CR>", { silent = true, desc = "Sort current JSON file" })
 vim.keymap.set("v", "<leader>xjs", ":'<,'>!jq -S .<CR>", { silent = true, desc = "Sort current JSON selection" })
+
+vim.keymap.set("n", "<Up>", ":cprev<CR>", { noremap = true, silent = true, desc = "Previous quickfix item (:cprev)" })
+vim.keymap.set("n", "<Down>", ":cnext<CR>", { noremap = true, silent = true, desc = "Next quickfix item (:cprev)" })
 
 -- vim.keymap.set("n", "<leader>.", function()
 -- 	-- vim.cmd("normal! .")
@@ -67,6 +72,12 @@ vim.keymap.set(
 vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {
 	desc = "Search and replace current selection in file",
 })
+vim.keymap.set(
+	"v",
+	"<leader>sr",
+	'"hy:%s/<C-r>h//gIc<left><left><left><left>',
+	{ noremap = true, desc = "Replace selection" }
+)
 
 vim.keymap.set("n", "<leader>qw", function()
 	if vim.bo.modified then

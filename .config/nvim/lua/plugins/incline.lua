@@ -20,16 +20,14 @@ return {
 			},
 			render = function(props)
 				local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-				local parent_filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":p:h:t")
-
-				local constructed_path = parent_filename .. "/" .. filename
+				local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":p:.")
 
 				if vim.bo[props.buf].modified then
-					constructed_path = "[+] " .. constructed_path
+					path = "[+] " .. path
 				end
 
 				local icon, color = require("nvim-web-devicons").get_icon_color(filename)
-				return { { icon, guifg = color }, { " " }, { constructed_path } }
+				return { { icon, guifg = color }, { " " }, { path } }
 			end,
 		})
 	end,
