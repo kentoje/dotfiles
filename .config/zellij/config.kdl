@@ -3,21 +3,6 @@ keybinds clear-defaults=true {
     normal {
         // uncomment this and adjust key if using copy_on_select=false
         // bind "Alt c" { Copy; }
-        bind "Ctrl a" { SwitchToMode "Tmux"; }
-        bind "Ctrl b" { ToggleFloatingPanes; SwitchToMode "Normal"; }
-
-        bind "Alt h" { MoveFocusOrTab "Left"; }
-        bind "Alt l" { MoveFocusOrTab "Right"; }
-        bind "Alt j" { MoveFocus "Down"; }
-        bind "Alt k" { MoveFocus "Up"; }
-
-        bind "Ctrl s" {
-            LaunchOrFocusPlugin "session-manager" {
-                floating true
-                move_to_focused_tab true
-            };
-            SwitchToMode "Normal"
-        }
     }
     locked {
         bind "Ctrl a" { SwitchToMode "Normal"; }
@@ -179,7 +164,23 @@ keybinds clear-defaults=true {
 //        bind "Space" { NextSwapLayout; }
         bind "x" { CloseFocus; SwitchToMode "Normal"; }
     }
-//    shared_except "locked" {
+    shared_except "locked" {
+        bind "Ctrl a" { SwitchToMode "Tmux"; }
+        bind "Ctrl b" { ToggleFloatingPanes; SwitchToMode "Normal"; }
+
+        bind "Alt h" { MoveFocusOrTab "Left"; }
+        bind "Alt l" { MoveFocusOrTab "Right"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+
+        bind "Ctrl s" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "Normal"
+        }
+
 //        bind "Ctrl g" { SwitchToMode "Locked"; }
 //        bind "Ctrl q" { Quit; }
 //        bind "Alt n" { NewPane; }
@@ -193,7 +194,7 @@ keybinds clear-defaults=true {
 //        bind "Alt -" { Resize "Decrease"; }
 //        bind "Alt [" { PreviousSwapLayout; }
 //        bind "Alt ]" { NextSwapLayout; }
-//    }
+    }
 //    shared_except "normal" "locked" {
 //        bind "Enter" "Esc" { SwitchToMode "Normal"; }
 //    }

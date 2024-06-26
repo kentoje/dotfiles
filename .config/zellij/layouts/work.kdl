@@ -19,8 +19,8 @@ layout {
 
          hide_frame_for_single_pane "true"
 
-         mode_normal  "#[fg=blue] N - "
-         mode_tmux    "#[fg=yellow] T - "
+         mode_normal  "#[fg=blue] 🔹 "
+         mode_tmux    "#[fg=yellow] 🔸 "
 
          // command_git_branch_command     "bash -c 'GIT_DIR=$(pwd)/.git git rev-parse --abbrev-ref HEAD'"
          command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
@@ -41,9 +41,10 @@ layout {
         // indicators
         tab_sync_indicator       "*sync*"
         tab_fullscreen_indicator "*full*"
-        tab_floating_indicator   "*"
+        tab_floating_indicator   "*term*"
       }
     }
+
     children
    // pane size=2 borderless=true {
    //   plugin location="zellij:status-bar"
@@ -51,12 +52,12 @@ layout {
   }
 
  tab focus=true name="cc-ext" {
-   pane cwd="/Users/kento/Documents/gitlab/conversation-center-ext" 
+   pane borderless=true cwd="/Users/kento/Documents/gitlab/conversation-center-ext" 
  }
  tab name="kento" {
-   pane cwd="/Users/kento/dotfiles" 
+   pane borderless=true cwd="/Users/kento/dotfiles" 
  }
  tab name="vault" {
-   pane cwd="/Users/kento/Documents/github/kentoje/obsidian-vault" 
+   pane borderless=true cwd="/Users/kento/Documents/github/kentoje/obsidian-vault" 
  }
 }
