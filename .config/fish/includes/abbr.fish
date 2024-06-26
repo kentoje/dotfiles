@@ -18,7 +18,7 @@ abbr l "lsd  --group-dirs first -Al"
 abbr ll "lsd  --group-dirs first -Al"
 abbr lt "lsd  --group-dirs last -A --tree"
 abbr lz "lazygit"
-abbr zn "zellij -s aircall --layout ~/.config/zellij/layouts/default.kdl"
+abbr zn "zellij -s aircall --layout ~/.config/zellij/layouts/work.kdl"
 abbr za "zellij attach"
 abbr zl "zellij list-sessions"
 
