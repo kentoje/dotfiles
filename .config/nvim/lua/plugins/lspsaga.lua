@@ -17,11 +17,11 @@ return {
 				width = 0.8,
 				height = 0.8,
 				keys = {
-					edit = "<C-c>o",
-					vsplit = "<C-c>d",
-					split = "<C-c>D",
-					close = "<C-c>w",
-					quit = "<Esc>",
+					edit = "<leader>e",
+					vsplit = "<leader>d",
+					split = "<leader>D",
+					close = "<leader>w",
+					quit = "<Esc><Esc>",
 				},
 			},
 			finder = {
@@ -38,7 +38,7 @@ return {
 				in_select = false,
 				auto_save = true,
 				keys = {
-					quit = "<C-c>",
+					quit = "<Esc><Esc>",
 				},
 			},
 		})
@@ -57,7 +57,7 @@ return {
 			":Lspsaga peek_type_definition<CR>",
 			{ silent = true, desc = "Peek type definition" }
 		)
-		-- vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
+		vim.keymap.set("n", "<leader>G", ":Lspsaga finder<CR>", { silent = true, desc = "Lookup references" })
 		vim.keymap.set("n", "<leader>qj", ":Lspsaga hover_doc<CR>", { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>cr", ":Lspsaga rename<CR>", { silent = true, desc = "Rename references" })
 	end,

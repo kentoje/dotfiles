@@ -1,10 +1,12 @@
 return {
 	"ibhagwan/fzf-lua",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
+	priority = 2000,
+	lazy = false,
 	config = function()
 		local fzf = require("fzf-lua")
 		fzf.setup({
-			files = { formatter = "path.filename_first" },
+			-- files = { formatter = "path.filename_first" },
 			winopts = {
 				width = 0.95,
 				height = 0.85,
@@ -18,6 +20,9 @@ return {
 		vim.keymap.set("n", "<leader>qp", function()
 			fzf.files({
 				hidden = true,
+				path_shorten = 1,
+				-- cmd = "fd",
+				-- fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
 			})
 		end, { desc = "Find files" })
 
@@ -41,9 +46,9 @@ return {
 			fzf.grep_visual()
 		end, { desc = "Search for current selection" })
 
-		vim.keymap.set("n", "<leader>G", function()
-			fzf.lsp_references()
-		end, { desc = "Find references" })
+		-- vim.keymap.set("n", "<leader>G", function()
+		-- 	fzf.lsp_references()
+		-- end, { desc = "Find references" })
 		vim.keymap.set("n", "<leader>:", function()
 			fzf.commands()
 		end, { desc = "Display commands" })

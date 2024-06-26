@@ -4,14 +4,18 @@ return {
 	event = "BufReadPre",
 	priority = 1200,
 	config = function()
-		local colors = require("catppuccin.palettes").get_palette("mocha")
+		function starts_with(str, start)
+			return string.sub(str, 1, #start) == start
+		end
+
+		local macchiato = require("catppuccin.palettes").get_palette("macchiato")
 
 		require("incline").setup({
 			highlight = {
 				groups = {
-					InclineNormal = { guibg = "00FFFFFF", guifg = colors.blue },
+					InclineNormal = { guibg = "00FFFFFF", guifg = macchiato.blue },
 					-- transparent "00FFFFFF"
-					InclineNormalNC = { guibg = "00FFFFFF", guifg = colors.overlay0 },
+					InclineNormalNC = { guibg = "00FFFFFF", guifg = macchiato.overlay0 },
 				},
 			},
 			window = { margin = { vertical = 0, horizontal = 1 } },
@@ -19,10 +23,14 @@ return {
 				cursorline = true,
 			},
 			render = function(props)
-				local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-				local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":p:.")
+				local bufname = vim.api.nvim_buf_get_name(props.buf)
 
-				if vim.bo[props.buf].modified then
+				local filename = vim.fn.fnamemodify(bufname, ":t")
+				local path = vim.fn.fnamemodify(bufname, ":p:.")
+
+				if starts_with(bufname, "oil://") then
+					path = "oil"
+				elseif vim.bo[props.buf].modified then
 					path = "[+] " .. path
 				end
 

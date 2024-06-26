@@ -3,6 +3,9 @@ return {
 	dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 	config = function()
 		require("typescript-tools").setup({
+			on_attach = function(client, bufnr)
+				require("twoslash-queries").attach(client, bufnr)
+			end,
 			settings = {
 				-- spawn additional tsserver instance to calculate diagnostics on it
 				separate_diagnostic_server = true,

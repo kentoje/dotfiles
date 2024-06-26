@@ -1,3 +1,15 @@
+local function get_harpoon_active_indicator(num)
+	return function(harpoon_entry)
+		return string.format(" %s %s", num, vim.fn.fnamemodify(harpoon_entry.value, ":t"))
+	end
+end
+
+local function get_harpoon_inactive_indicator(num)
+	return function(harpoon_entry)
+		return string.format("%s %s", num, vim.fn.fnamemodify(harpoon_entry.value, ":t"))
+	end
+end
+
 local icons = {
 	diagnostics = {
 		Error = " ",
@@ -62,10 +74,34 @@ return {
 				},
 				lualine_b = {
 					{
-						"buffers",
+						-- "buffers",
+						"harpoon2",
+						-- icon = "🔱",
+						active_indicators = {
+							get_harpoon_active_indicator(1),
+							get_harpoon_active_indicator(2),
+							get_harpoon_active_indicator(3),
+							get_harpoon_active_indicator(4),
+							get_harpoon_active_indicator(5),
+							get_harpoon_active_indicator(6),
+							get_harpoon_active_indicator(7),
+							get_harpoon_active_indicator(8),
+							get_harpoon_active_indicator(9),
+						},
+						indicators = {
+							get_harpoon_inactive_indicator(1),
+							get_harpoon_inactive_indicator(2),
+							get_harpoon_inactive_indicator(3),
+							get_harpoon_inactive_indicator(4),
+							get_harpoon_inactive_indicator(5),
+							get_harpoon_inactive_indicator(6),
+							get_harpoon_inactive_indicator(7),
+							get_harpoon_inactive_indicator(8),
+							get_harpoon_inactive_indicator(9),
+						},
 
 						color = {
-							fg = "",
+							fg = macchiato.blue,
 							bg = "",
 						},
 

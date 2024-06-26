@@ -51,7 +51,7 @@ return {
 				-- ["<C-o>"] = "actions.select_split",
 				["<C-t>"] = "actions.select_tab",
 				["<C-p>"] = "actions.preview",
-				["<Esc>"] = "actions.close",
+				["<Esc><Esc>"] = "actions.close",
 				["q"] = "actions.close",
 				["<C-r>"] = "actions.refresh",
 				["<C-y>"] = "actions.copy_entry_path",
