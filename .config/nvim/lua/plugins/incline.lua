@@ -1,13 +1,12 @@
+local function starts_with(str, start)
+	return string.sub(str, 1, #start) == start
+end
+
 return {
 	"b0o/incline.nvim",
-	dependencies = { "catppuccin/nvim" },
-	event = "BufReadPre",
-	priority = 1200,
+	dependencies = { "catppuccin" },
+	event = "VeryLazy",
 	config = function()
-		function starts_with(str, start)
-			return string.sub(str, 1, #start) == start
-		end
-
 		local macchiato = require("catppuccin.palettes").get_palette("macchiato")
 
 		require("incline").setup({
