@@ -114,6 +114,13 @@ vim.keymap.set("v", "<leader>cs", function()
 	surround_with(vim.fn.input("Char to surround: "))
 end, { silent = true, desc = "Surround visual mode selection with the given char" })
 
+vim.keymap.set(
+	"v",
+	"<leader>fh",
+	[[:s/\s\{2,\}o\(\w\+\),\?/\to\1: handleO\1,<CR>]],
+	{ silent = true, desc = "Add handleOn for all on<Event>" }
+)
+
 -- yank path
 -- go to prev buffer if there is
 -- open right pane
