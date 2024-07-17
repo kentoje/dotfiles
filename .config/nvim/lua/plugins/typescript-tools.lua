@@ -1,6 +1,7 @@
 return {
 	"pmizio/typescript-tools.nvim",
 	dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+	cond = false,
 	config = function()
 		require("typescript-tools").setup({
 			on_attach = function(client, bufnr)
@@ -24,7 +25,8 @@ return {
 				tsserver_plugins = {},
 				-- this value is passed to: https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes
 				-- memory limit in megabytes or "auto"(basically no limit)
-				tsserver_max_memory = "auto",
+				-- tsserver_max_memory = "auto",
+				tsserver_max_memory = 16384,
 				-- described below
 				tsserver_format_options = {},
 				tsserver_file_preferences = {},
@@ -51,13 +53,13 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "<leader>E", function()
-			vim.cmd("TSToolsRemoveUnusedImports")
-			vim.cmd("TSToolsAddMissingImports")
-		end, { desc = "Magic import fix" })
-
-		vim.keymap.set("n", "<leader>cf", function()
-			vim.cmd("TSToolsRenameFile")
-		end, { desc = "Change file name" })
+		-- vim.keymap.set("n", "<leader>E", function()
+		-- 	vim.cmd("TSToolsRemoveUnusedImports")
+		-- 	vim.cmd("TSToolsAddMissingImports")
+		-- end, { desc = "Magic import fix" })
+		--
+		-- vim.keymap.set("n", "<leader>cf", function()
+		-- 	vim.cmd("TSToolsRenameFile")
+		-- end, { desc = "Change file name" })
 	end,
 }

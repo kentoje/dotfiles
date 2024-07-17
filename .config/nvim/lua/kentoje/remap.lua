@@ -45,15 +45,27 @@ vim.keymap.set("n", "<Down>", ":cnext<CR>", { noremap = true, silent = true, des
 -- 	-- vim.cmd()
 -- end, { silent = true, noremap = true, desc = "Split view in column" })
 
+-- vim.keymap.set(
+-- 	"n",
+-- 	"<leader>qd",
+-- 	":vsplit<Return><C-w>w",
+-- 	{ silent = true, noremap = true, desc = "Split view in column" }
+-- )
 vim.keymap.set(
 	"n",
-	"<leader>qd",
+	"<leader>d",
 	":vsplit<Return><C-w>w",
 	{ silent = true, noremap = true, desc = "Split view in column" }
 )
+-- vim.keymap.set(
+-- 	"n",
+-- 	"<leader>qD",
+-- 	":split<Return><C-w>w",
+-- 	{ silent = true, noremap = true, desc = "Split view horizontal" }
+-- )
 vim.keymap.set(
 	"n",
-	"<leader>qD",
+	"<leader>D",
 	":split<Return><C-w>w",
 	{ silent = true, noremap = true, desc = "Split view horizontal" }
 )

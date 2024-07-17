@@ -7,14 +7,15 @@ return {
 	dependencies = { "catppuccin" },
 	event = "VeryLazy",
 	config = function()
-		local macchiato = require("catppuccin.palettes").get_palette("macchiato")
+		-- local colors = require("catppuccin.palettes").get_palette("mocha")
+		local colors = require("poimandres.palette")
 
 		require("incline").setup({
 			highlight = {
 				groups = {
-					InclineNormal = { guibg = "00FFFFFF", guifg = macchiato.blue },
+					InclineNormal = { guibg = "00FFFFFF", guifg = colors.pink1 },
 					-- transparent "00FFFFFF"
-					InclineNormalNC = { guibg = "00FFFFFF", guifg = macchiato.overlay0 },
+					-- InclineNormalNC = { guibg = "00FFFFFF", guifg = colors.background1 },
 				},
 			},
 			window = { margin = { vertical = 0, horizontal = 1 } },

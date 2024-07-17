@@ -2,7 +2,6 @@ return {
 	"goolord/alpha-nvim",
 	config = function()
 		local dashboard = require("alpha.themes.dashboard")
-		local ascii = require("ascii")
 		-- dashboard.section.header.val = ascii.art.misc.krakens.krakedking
 		-- echo "" | sed 's/.*/[[&]],/'
 		dashboard.section.header.val = {

@@ -55,12 +55,13 @@ return {
 	dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
 	config = function()
 		local wtf = require("wtf")
-		local macchiato = require("catppuccin.palettes").get_palette("macchiato")
+		-- local colors = require("catppuccin.palettes").get_palette("mocha")
+		local colors = require("poimandres.palette")
 
 		require("lualine").setup({
 			options = {
 				-- theme = "auto",
-				theme = "auto",
+				theme = "poimandres",
 				globalstatus = true,
 				-- ░▒▓
 				-- section_separators = { left = "", right = "" },
@@ -101,17 +102,19 @@ return {
 						},
 
 						color = {
-							fg = macchiato.blue,
+							-- fg = colors.blue,
+							fg = colors.pink1,
 							bg = "",
 						},
 
 						buffers_color = {
 							-- Same values as the general color option can be used here.
 							active = {
-								fg = macchiato.blue,
+								-- fg = colors.blue,
+								-- fg = colors.teal1,
 							}, -- Color for active buffer.
 							inactive = {
-								fg = macchiato.overlay0,
+								-- fg = colors.overlay0,
 							}, -- Color for inactive buffer.
 						},
 
@@ -136,7 +139,8 @@ return {
 					},
 				},
 				lualine_c = { diff, diagnostics },
-				lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
+				-- lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
+				lualine_x = { wtf.get_status, "filetype" },
 				lualine_y = {
 					"progress",
 				},

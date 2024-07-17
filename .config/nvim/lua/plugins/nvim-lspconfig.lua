@@ -1,3 +1,8 @@
+local function file_exists(name)
+	local f = io.open(name, "r")
+	return f ~= nil and io.close(f)
+end
+
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
@@ -13,6 +18,7 @@ return {
 		{ "L3MON4D3/LuaSnip" },
 		{ "rafamadriz/friendly-snippets" },
 		{ "saadparwaiz1/cmp_luasnip" },
+		{ "yioneko/nvim-vtsls" },
 	},
 	config = function()
 		vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "LspDiagnosticsDefaultError" })
@@ -70,13 +76,17 @@ return {
 					severity_sort = true,
 				})
 
-				vim.keymap.set("n", "<C-g>", function()
+				-- vim.keymap.set("n", "<C-g>", function()
+				-- 	vim.lsp.buf.definition()
+				-- end, opts)
+				-- vim.keymap.set("n", "<leader>qg", function()
+				-- 	vim.lsp.buf.definition()
+				-- end, opts)
+				vim.keymap.set("n", "gf", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				vim.keymap.set("n", "<leader>qg", function()
-					vim.lsp.buf.definition()
-				end, opts)
-				vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
+				-- vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
+				vim.keymap.set("n", "gD", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "]d", next_diag_repeat, opts) -- go to next diagnostic
 				vim.keymap.set("n", "[d", prev_diag_repeat, opts) -- go to prev diagnostic
 				vim.keymap.set("n", "]e", next_error_repeat, opts)
@@ -96,6 +106,66 @@ return {
 				capabilities = lsp_capabilities,
 			})
 		end
+
+		local vtsls = require("vtsls")
+		local util = require("lspconfig.util")
+		local cmd = { "vtsls", "--stdio" }
+
+		local custom_typescript_config = {
+			updateImportsOnFileMove = "always",
+		}
+
+		if file_exists(".yarn/sdks/typescript/lib") then
+			custom_typescript_config.tsdk = ".yarn/sdks/typescript/lib"
+		end
+
+		local vtsls_config = {
+			default_config = {
+				cmd = cmd,
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+				},
+				root_dir = function(fname)
+					return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
+						or util.root_pattern("package.json", ".git")(fname)
+				end,
+				single_file_support = true,
+				settings = {
+					typescript = custom_typescript_config,
+					javascript = {
+						updateImportsOnFileMove = "always",
+					},
+					vtsls = {
+						enableMoveToFileCodeAction = true,
+						autoUseWorkspaceTsdk = true,
+						-- typescript = {
+						-- 	tsdk = ".yarn/sdks/typescript/lib",
+						-- },
+					},
+				},
+			},
+		}
+
+		require("lspconfig.configs").vtsls = vtsls_config
+		require("lspconfig").vtsls.setup({
+			on_attach = function(client, bufnr)
+				require("twoslash-queries").attach(client, bufnr)
+			end,
+		})
+
+		vim.keymap.set("n", "<leader>E", function()
+			vim.cmd("VtsExec add_missing_imports")
+			vim.cmd("VtsExec remove_unused_imports")
+		end, { desc = "Magic import fix" })
+
+		vim.keymap.set("n", "<leader>cf", function()
+			vtsls.rename(vim.fn.input("Current filename: "), vim.fn.input("New filename: "))
+		end, { desc = "Change file name" })
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
@@ -140,10 +210,10 @@ return {
 							-- 	command = "EslintFixAll",
 							-- })
 							-- does not work
-							vim.api.nvim_create_autocmd({ "BufNewFile" }, {
-								buffer = bufnr,
-								command = "LspR",
-							})
+							-- vim.api.nvim_create_autocmd({ "BufNewFile" }, {
+							-- 	buffer = bufnr,
+							-- 	command = "LspR",
+							-- })
 						end,
 					})
 				end,
@@ -179,14 +249,6 @@ return {
 				["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 				["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
 				["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-				-- Manually trigger cody completions
-				-- ["<c-a>"] = cmp.mapping.complete {
-				--   config = {
-				--     sources = {
-				--       { name = "cody" },
-				--     },
-				--   },
-				-- },
 			}),
 			snippet = {
 				expand = function(args)

@@ -23,7 +23,10 @@ return {
 			borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
 		})
 
-		vim.keymap.set("n", "<leader>qb", function()
+		-- vim.keymap.set("n", "<leader>qb", function()
+		-- 	require("buffer_manager.ui").toggle_quick_menu()
+		-- end, { silent = true, noremap = true })
+		vim.keymap.set("n", "fb", function()
 			require("buffer_manager.ui").toggle_quick_menu()
 		end, { silent = true, noremap = true })
 	end,

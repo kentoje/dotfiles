@@ -17,7 +17,7 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "<leader>qp", function()
+		vim.keymap.set("n", "gp", function()
 			fzf.files({
 				hidden = true,
 				path_shorten = 1,
@@ -25,14 +25,22 @@ return {
 				-- fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
 			})
 		end, { desc = "Find files" })
+		-- vim.keymap.set("n", "<leader>qp", function()
+		-- 	fzf.files({
+		-- 		hidden = true,
+		-- 		path_shorten = 1,
+		-- 		-- cmd = "fd",
+		-- 		-- fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
+		-- 	})
+		-- end, { desc = "Find files" })
 
 		vim.keymap.set("n", "<leader>fr", function()
 			fzf.resume()
 		end, { desc = "Resume fzf" })
 
-		vim.keymap.set("n", "<leader>fb", function()
-			fzf.buffers()
-		end, { desc = "List buffers" })
+		-- vim.keymap.set("n", "<leader>fb", function()
+		-- 	fzf.buffers()
+		-- end, { desc = "List buffers" })
 
 		vim.keymap.set("n", "<leader>fg", function()
 			fzf.live_grep_native()
