@@ -9,3 +9,6 @@
 
 [safe]
 	directory = /Users/kento/Documents/gitlab/dashboard-v4
+
+[alias]
+  undo = reset --mixed HEAD~1
