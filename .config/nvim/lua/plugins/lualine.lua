@@ -103,7 +103,7 @@ return {
 
 						color = {
 							-- fg = colors.blue,
-							fg = colors.pink1,
+							fg = colors.blue1,
 							bg = "",
 						},
 

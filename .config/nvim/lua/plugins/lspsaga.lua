@@ -17,7 +17,7 @@ return {
 				width = 0.8,
 				height = 0.8,
 				keys = {
-					edit = "<leader>e",
+					edit = "<leader>o",
 					vsplit = "<leader>d",
 					split = "<leader>D",
 					close = "<leader>w",

@@ -19,14 +19,16 @@ return {
 		vim.cmd("hi EndOfBuffer guifg=" .. colors.background2)
 
 		-- LspSaga
-		vim.cmd("hi HoverNormal guifg=" .. colors.none .. " guibg=" .. colors.none)
-		vim.cmd("hi HoverBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
+		-- vim.cmd("hi HoverNormal guifg=" .. colors.none .. " guibg=" .. colors.none)
+		-- vim.cmd("hi HoverBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
 		vim.cmd("hi SagaNormal guifg=" .. colors.none .. " guibg=" .. colors.none)
 		vim.cmd("hi SagaBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
 		-- WhichKey
 		vim.cmd("hi WhichKeyBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
 		vim.cmd("hi WhichKeyFloat guifg=" .. colors.none .. " guibg=" .. colors.none)
 		vim.cmd("hi FloatBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
+
+		vim.cmd("hi LspSignatureActiveParameter guifg=" .. colors.none .. " guibg=" .. colors.teal3)
 
 		-- vim.cmd("hi NormalFloat guifg=" .. colors.none .. " guibg=" .. colors.none)
 		-- vim.cmd("hi FloatBorder guifg=" .. colors.none .. " guibg=" .. colors.none)
