@@ -1,16 +1,36 @@
-# Default model (gpt-3.5-turbo, gpt-4, ggml-gpt4all-j...).
-default-model: gpt-4
+# https://github.com/charmbracelet/mods/blob/main/config_template.yml
+default-model: gpt-4o-mini
 # Text to append when using the -f flag.
 format-text:
   markdown: "Format the response as markdown without enclosing backticks."
   json: "Format the response as json without enclosing backticks."
 # List of predefined system messages that can be used as roles.
 roles:
-  "default": []
-  "dev":
-    [
-      "As an adept programmer and helpful support aid, you are tasked   with navigating through code diagnostics, identifying and rectifying warning   and error messages. When a resolution involves the use of code, offer   solutions as fenced codeblocks, ensuring to identify the specific coding   language to enable syntax highlighting and seamless implementation.",
-    ]
+  default: []
+  dev:
+    - As an adept programmer and helpful support aid, you are tasked   with navigating through code diagnostics, identifying and rectifying warning   and error messages. When a resolution involves the use of code, offer   solutions as fenced codeblocks, ensuring to identify the specific coding   language to enable syntax highlighting and seamless implementation.
+  commit-message:
+    - |
+      Write a commit message for this patch.
+      Do not write the long commit message.
+      Use semantic commits.
+      Use as a scope only "feat|fix|chore|test|refactor".
+      Only lowercase.
+      Limit to 50 characters.
+  code-review:
+    - |
+      Perform a code review on this code.
+      List out any logical flaws or bugs you find, ranked in order of
+      severity with the most severe issues presented first.
+      When you spot a bug or issue, please always suggest a remediation.
+      Include code snippets only when necessary to understand the issue.
+      Does the code follow common coding conventions and idioms for the
+      language used? Does it include appropriate tests? If not, suggest
+      initial tests that could be added.
+  explain-command:
+    - |
+      As a shell expert, you need to explain, and provide examples of use cases for the given shell command.
+
 # Ask for the response to be formatted as markdown unless otherwise set.
 format: false
 # System role to use.
@@ -48,6 +68,14 @@ apis:
     api-key:
     api-key-env: OPENAI_API_KEY
     models:
+      gpt-4o-mini:
+        aliases: ["4o-mini"]
+        max-input-chars: 392000
+        fallback: gpt-4o
+      gpt-4o:
+        aliases: ["4o"]
+        max-input-chars: 392000
+        fallback: gpt-4
       gpt-4:
         aliases: ["4"]
         max-input-chars: 24500
