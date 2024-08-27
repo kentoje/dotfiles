@@ -31,3 +31,8 @@ abbr gacp "git add . && git commit --amend -n --no-edit && git push --force-with
 abbr :q "exit"
 abbr :wq "exit"
 
+# Mods commands
+abbr gcai "git --no-pager diff | mods --role commit-message > .git/gcai && git commit -a -n -F .git/gcai -e"
+abbr greview "git --no-pager diff HEAD | mods --role code-review | glow -p -"
+abbr tldrai "echo -e (gum input --prompt='Enter shell command to explore: ') | mods --role explain-command | glow -p -"
+
