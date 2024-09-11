@@ -32,7 +32,7 @@ abbr :q "exit"
 abbr :wq "exit"
 
 # Mods commands
-abbr gcai "git --no-pager diff | mods --role commit-message > .git/gcai && git commit -a -n -F .git/gcai -e"
-abbr greview "git --no-pager diff HEAD | mods --role code-review | glow -p -"
-abbr tldrai "echo -e (gum input --prompt='Enter shell command to explore: ') | mods --role explain-command | glow -p -"
+abbr aicommit "git --no-pager diff | mods --model chatgpt --role commit-message > .git/gcai && git commit -a -n -F .git/gcai -e"
+abbr aireview "git --no-pager diff HEAD | mods --model chatgpt --role code-review | glow -p -"
+abbr aitldr "echo -e (gum input --prompt='Enter shell command to explore: ') | mods --model chatgpt --role explain-command | glow -p -"
 
