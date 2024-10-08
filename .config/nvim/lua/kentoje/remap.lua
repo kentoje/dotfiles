@@ -37,32 +37,14 @@ vim.keymap.set("v", "<leader>xjs", ":'<,'>!jq -S .<CR>", { silent = true, desc =
 vim.keymap.set("n", "<Up>", ":cprev<CR>", { noremap = true, silent = true, desc = "Previous quickfix item (:cprev)" })
 vim.keymap.set("n", "<Down>", ":cnext<CR>", { noremap = true, silent = true, desc = "Next quickfix item (:cprev)" })
 
--- vim.keymap.set("n", "<leader>.", function()
--- 	-- vim.cmd("normal! .")
--- 	-- vim.cmd("normal! @:")
--- 	print(vim.fn.getreg("A"))
---
--- 	-- vim.cmd()
--- end, { silent = true, noremap = true, desc = "Split view in column" })
-
--- vim.keymap.set(
--- 	"n",
--- 	"<leader>qd",
--- 	":vsplit<Return><C-w>w",
--- 	{ silent = true, noremap = true, desc = "Split view in column" }
--- )
+vim.keymap.set("n", "<leader>bn", ":vnew", { silent = true, noremap = true, desc = "Open a new vertical buffer" })
+vim.keymap.set("n", "<leader>bN", ":new", { silent = true, noremap = true, desc = "Open a new horizontal buffer" })
 vim.keymap.set(
 	"n",
 	"<leader>d",
 	":vsplit<Return><C-w>w",
 	{ silent = true, noremap = true, desc = "Split view in column" }
 )
--- vim.keymap.set(
--- 	"n",
--- 	"<leader>qD",
--- 	":split<Return><C-w>w",
--- 	{ silent = true, noremap = true, desc = "Split view horizontal" }
--- )
 vim.keymap.set(
 	"n",
 	"<leader>D",
@@ -108,23 +90,23 @@ vim.keymap.set("n", "<leader>qw", function()
 	end
 end, { silent = true, desc = "Mimic MacOS close" })
 
-local function surround_with(char)
-	vim.cmd("normal! d")
+-- local function surround_with(char)
+-- 	vim.cmd("normal! d")
+--
+-- 	if char == "(" then
+-- 		vim.cmd("normal! i" .. char .. ")")
+-- 	elseif char == "{" then
+-- 		vim.cmd("normal! i" .. char .. "}")
+-- 	elseif char == "[" then
+-- 		vim.cmd("normal! i" .. char .. "]")
+-- 	end
+--
+-- 	vim.cmd("normal! P")
+-- end
 
-	if char == "(" then
-		vim.cmd("normal! i" .. char .. ")")
-	elseif char == "{" then
-		vim.cmd("normal! i" .. char .. "}")
-	elseif char == "[" then
-		vim.cmd("normal! i" .. char .. "]")
-	end
-
-	vim.cmd("normal! P")
-end
-
-vim.keymap.set("v", "<leader>cs", function()
-	surround_with(vim.fn.input("Char to surround: "))
-end, { silent = true, desc = "Surround visual mode selection with the given char" })
+-- vim.keymap.set("v", "<leader>cs", function()
+-- 	surround_with(vim.fn.input("Char to surround: "))
+-- end, { silent = true, desc = "Surround visual mode selection with the given char" })
 
 vim.keymap.set(
 	"v",
@@ -217,18 +199,26 @@ local function go_to_buffer(buffer_list_index)
 end
 
 -- mapped by kitty with ctrl+x
-vim.keymap.set("n", "<leader>1", function()
-	go_to_buffer(1)
-end, { noremap = true, silent = false })
-vim.keymap.set("n", "<leader>2", function()
-	go_to_buffer(2)
-end, { noremap = true, silent = false })
-vim.keymap.set("n", "<leader>3", function()
-	go_to_buffer(3)
-end, { noremap = true, silent = false })
-vim.keymap.set("n", "<leader>4", function()
-	go_to_buffer(4)
-end, { noremap = true, silent = false })
-vim.keymap.set("n", "<leader>5", function()
-	go_to_buffer(5)
-end, { noremap = true, silent = false })
+-- vim.keymap.set("n", "<leader>1", function()
+-- 	go_to_buffer(1)
+-- end, { noremap = true, silent = false })
+-- vim.keymap.set("n", "<leader>2", function()
+-- 	go_to_buffer(2)
+-- end, { noremap = true, silent = false })
+-- vim.keymap.set("n", "<leader>3", function()
+-- 	go_to_buffer(3)
+-- end, { noremap = true, silent = false })
+-- vim.keymap.set("n", "<leader>4", function()
+-- 	go_to_buffer(4)
+-- end, { noremap = true, silent = false })
+-- vim.keymap.set("n", "<leader>5", function()
+-- 	go_to_buffer(5)
+-- end, { noremap = true, silent = false })
+
+vim.keymap.set("n", "[[", function()
+	vim.cmd("normal! #")
+end, { noremap = true, silent = true, desc = "Go to previous occurence" })
+
+vim.keymap.set("n", "]]", function()
+	vim.cmd("normal! *")
+end, { noremap = true, silent = true, desc = "Go to next occurence" })
