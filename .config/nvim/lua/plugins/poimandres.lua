@@ -30,6 +30,8 @@ return {
 
 		vim.cmd("hi LspSignatureActiveParameter guifg=" .. colors.none .. " guibg=" .. colors.teal3)
 
+		vim.cmd("hi CursorLineNr guifg=" .. colors.teal1)
+
 		-- vim.cmd("hi NormalFloat guifg=" .. colors.none .. " guibg=" .. colors.none)
 		-- vim.cmd("hi FloatBorder guifg=" .. colors.none .. " guibg=" .. colors.none)
 	end,

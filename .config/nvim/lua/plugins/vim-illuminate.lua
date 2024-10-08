@@ -59,10 +59,20 @@ return {
 			case_insensitive_regex = false,
 		})
 
-		-- vim.cmd("hi def IlluminatedWordText link=visual")
-		-- vim.cmd("hi def IlluminatedWordReadui link=visual")
-		vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "Visual" })
-		vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "Visual" })
-		vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "Visual" })
+		-- vim.cmd("hi def IlluminatedWordText link=Search")
+		-- vim.cmd("hi def IlluminatedWordRead link=Search")
+		-- vim.cmd("hi def IlluminatedWordWrite link=Search")
+		vim.api.nvim_set_hl(0, "IlluminatedCustom", {
+			-- fg = "#d0679d",
+			-- ctermfg = 14,
+			underline = true,
+			bold = true,
+			-- standout = true,
+			-- reverse = true,
+		})
+
+		vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "IlluminatedCustom" })
+		vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "IlluminatedCustom" })
+		vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "IlluminatedCustom" })
 	end,
 }

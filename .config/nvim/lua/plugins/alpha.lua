@@ -51,5 +51,10 @@ return {
 		dashboard.config.opts.noautocmd = true
 
 		require("alpha").setup(dashboard.config)
+
+		vim.api.nvim_set_hl(0, "AlphaHeader", {
+			fg = "#add7ff",
+			ctermfg = 14,
+		})
 	end,
 }
