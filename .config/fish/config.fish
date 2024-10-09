@@ -6,6 +6,11 @@ zoxide init fish | source
 fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
+fish_add_path /opt/homebrew/bin
+fish_add_path /opt/homebrew/sbin
+
+# Nix darwin
+fish_add_path /run/current-system/sw/bin
 
 set path (dirname (realpath ~/.config/fish/config.fish))
 
