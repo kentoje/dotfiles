@@ -44,6 +44,7 @@ return {
 				markdown = { { "prettierd" } },
 				yaml = { { "prettierd" } },
 				graphql = { { "prettierd" } },
+				nix = { "nil" },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()
