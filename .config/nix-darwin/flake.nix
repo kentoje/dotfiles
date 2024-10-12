@@ -82,6 +82,8 @@
         #   "Spark" = 1176895641;
         # };
         onActivation.cleanup = "zap";
+        onActivation.autoUpdate = true;
+        onActivation.upgrade = true;
       };
 
       system.activationScripts.applications.text = let
