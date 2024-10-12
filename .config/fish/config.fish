@@ -3,14 +3,14 @@
 starship init fish | source
 zoxide init fish | source
 
+# Nix darwin
+fish_add_path /run/current-system/sw/bin
+
 fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
-fish_add_path /opt/homebrew/bin
-fish_add_path /opt/homebrew/sbin
-
-# Nix darwin
-fish_add_path /run/current-system/sw/bin
+# fish_add_path /opt/homebrew/bin
+# fish_add_path /opt/homebrew/sbin
 
 set path (dirname (realpath ~/.config/fish/config.fish))
 
