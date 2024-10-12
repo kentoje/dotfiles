@@ -55,6 +55,7 @@
           tmux
           zellij
           tree
+          tldr
           typescript
           yq
           zoxide
