@@ -98,9 +98,14 @@ return {
 
 		local default_setup = function(server)
 			-- Skip tsserver to use custom tool "https://github.com/pmizio/typescript-tools.nvim"
-			if server == "tsserver" then
+			if server == "ts_ls" then
 				return
 			end
+
+			-- if server == "nil_ls" then
+			-- 	require("lspconfig").nil_ls.setup({})
+			-- 	return
+			-- end
 
 			lspconfig[server].setup({
 				capabilities = lsp_capabilities,
@@ -193,6 +198,17 @@ return {
 						},
 					})
 				end,
+
+				-- nil_ls = function()
+				-- 	lspconfig.nil_ls.setup({
+				-- 		capabilities = lsp_capabilities,
+				-- 		settings = {
+				-- 			nil_ls = {
+				-- 				formatter = { command = { "nixpkgs-fmt" } },
+				-- 			},
+				-- 		},
+				-- 	})
+				-- end,
 
 				eslint = function()
 					lspconfig.eslint.setup({
