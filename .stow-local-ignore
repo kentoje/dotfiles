@@ -8,3 +8,5 @@ setup
 .git
 README.md
 scripts
+
+.config/nix-darwin
