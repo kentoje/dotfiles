@@ -86,6 +86,28 @@
         onActivation.upgrade = true;
       };
 
+      system.defaults = {
+        ".GlobalPreferences"."com.apple.mouse.scaling" = -1.0;
+        dock.autohide = true;
+        dock.orientation = "left";
+        finder.FXPreferredViewStyle = "clmv";
+        loginwindow.GuestEnabled = false;
+        NSGlobalDomain.AppleICUForce24HourTime = true;
+        NSGlobalDomain.KeyRepeat = 2;
+        NSGlobalDomain.InitialKeyRepeat = 10;
+        NSGlobalDomain."com.apple.swipescrolldirection" = false;
+        NSGlobalDomain._HIHideMenuBar = true;
+        NSGlobalDomain.AppleInterfaceStyle = "Dark";
+        NSGlobalDomain.AppleShowAllExtensions = true;
+        NSGlobalDomain.AppleShowAllFiles = true;
+        NSGlobalDomain.NSWindowResizeTime = 0.1;
+      };
+
+      system.keyboard = {
+        enableKeyMapping = true;
+        remapCapsLockToEscape = true;
+      };
+
       system.activationScripts.applications.text = let
         env = pkgs.buildEnv {
           name = "system-applications";
