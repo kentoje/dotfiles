@@ -28,13 +28,13 @@ $ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/ni
 Install nix-darwin
 
 ```bash
-nix run nix-darwin -- switch --flake ~/.config/nix-darwin
+$ nix run nix-darwin -- switch --flake ./.config/nix-darwin#kento
 ```
 
 Update nix packages
 
 ```bash
-$ nix flake update
+$ nix flake update ./.config/nix-darwin
 ```
 
 Rebuild env
