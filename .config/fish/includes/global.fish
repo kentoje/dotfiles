@@ -6,3 +6,5 @@ set -Ux VISUAL nvim
 set -Ux BAT_THEME Catppuccin-mocha
 set -Ux HOMEBREW_NO_AUTO_UPDATE 1
 set -Ux XDG_CONFIG_HOME $HOME/.config
+set -Ux NIX_CONF_DIR $HOME/dotfiles/.config/nix-darwin
+

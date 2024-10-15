@@ -6,9 +6,12 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, ... }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager, ... }:
   let
     configuration = { pkgs, config, ... }: {
       nixpkgs.config.allowUnfree = true;
@@ -93,7 +96,7 @@
         finder.FXPreferredViewStyle = "clmv";
         loginwindow.GuestEnabled = false;
         NSGlobalDomain.AppleICUForce24HourTime = true;
-        NSGlobalDomain.KeyRepeat = 2;
+        NSGlobalDomain.KeyRepeat = 1;
         NSGlobalDomain.InitialKeyRepeat = 10;
         NSGlobalDomain."com.apple.swipescrolldirection" = false;
         NSGlobalDomain._HIHideMenuBar = true;
@@ -150,14 +153,23 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
+
+      users.users.kento = {
+        home = "/Users/kento";
+      };
+
+      nix.configureBuildUsers = true;
+      nix.useDaemon = true;
     };
   in
   {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#simple
     darwinConfigurations."kento" = nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
       modules = [
         configuration
+
         nix-homebrew.darwinModules.nix-homebrew
         {
           nix-homebrew = {
@@ -175,6 +187,19 @@
             # With mutableTaps disabled, taps can no longer be added imperatively with `brew tap`.
             # mutableTaps = false;
           };
+        }
+
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.kento = import ./home.nix;
+
+          home-manager.extraSpecialArgs = {
+            inherit inputs;
+          };
+          # Optionally, use home-manager.extraSpecialArgs to pass
+          # arguments to home.nix
         }
       ];
     };
