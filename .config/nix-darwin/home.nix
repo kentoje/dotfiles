@@ -44,6 +44,22 @@
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
 
+    # issues with permissions while starting fish
+    # ".config/fish".source = ../fish;
+    ".config/alacritty".source = ../alacritty;
+    ".config/bat".source = ../bat;
+    ".config/kitty".source = ../kitty;
+    ".config/lazygit".source = ../lazygit;
+    ".config/lf".source = ../lf;
+    ".config/mods".source = ../mods;
+    ".config/shell_gpt".source = ../shell_gpt;
+    ".config/nvim".source = ../nvim;
+    ".config/tmux".source = ../tmux;
+    ".config/wezterm".source = ../wezterm;
+    ".config/yabai".source = ../yabai;
+    ".config/zellij".source = ../zellij;
+    ".config/starship.toml".source = ../starship.toml;
+
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
     #   org.gradle.console=verbose
