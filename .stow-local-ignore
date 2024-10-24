@@ -10,3 +10,22 @@ README.md
 scripts
 
 .config/nix-darwin
+.config/alacritty
+.config/aerospace/aerospace.toml
+.config/bat
+.config/kitty
+.config/lazygit
+.config/lf
+.config/mods
+.config/shell_gpt
+.config/nvim
+.config/tmux
+.config/wezterm
+.config/yabai
+.config/zellij
+.config/starship.toml
+.hammerspoon
+
+.gitconfig
+.gitconfig-github
+.gitconfig-gitlab
