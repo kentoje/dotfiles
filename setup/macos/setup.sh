@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add a nix command to setup
-./setup_symlinks.sh
+./setup_nix.sh
 
 # Needs some "homebrew" packages.
 ./applications_to_install/install.sh

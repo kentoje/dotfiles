@@ -12,3 +12,5 @@ if ! [ -x "$(command -v git)" ]; then
 fi
 
 nix run nix-darwin -- switch --flake "$CLEANED_PATH/.config/nix-darwin/#kento"
+
+# Might want change the owner of the fish folder, if I don't find a workaround.
