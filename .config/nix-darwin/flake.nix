@@ -67,8 +67,6 @@
           zoxide
           gitmux
           prettierd
-          skhd
-          yabai
           qmk
         ];
 
@@ -106,6 +104,7 @@
         NSGlobalDomain._HIHideMenuBar = true;
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
         NSGlobalDomain.AppleShowAllExtensions = true;
+        universalaccess.reduceMotion = true;
         NSGlobalDomain.AppleShowAllFiles = true;
         NSGlobalDomain.NSWindowResizeTime = 0.1;
       };

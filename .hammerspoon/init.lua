@@ -1,2 +1,1 @@
-require("keyboard")
 require("slack")

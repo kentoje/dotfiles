@@ -54,13 +54,12 @@
     ".config/lf".source = ../lf;
     ".config/mods".source = ../mods;
     ".config/shell_gpt".source = ../shell_gpt;
-    ".config/nvim".source = ../nvim;
+    # ".config/nvim".source = ../nvim;
     ".config/tmux".source = ../tmux;
     ".config/wezterm".source = ../wezterm;
-    ".config/yabai".source = ../yabai;
     ".config/zellij".source = ../zellij;
     ".config/starship.toml".source = ../starship.toml;
-    ".aerospace.toml".source = ../aerospace/aerospace.toml;
+    # ".aerospace.toml".source = ../aerospace/aerospace.toml;
     ".hammerspoon".source = ../../.hammerspoon;
     ".gitconfig".source = ../../.gitconfig;
     ".gitconfig-github".source = ../../.gitconfig-github;

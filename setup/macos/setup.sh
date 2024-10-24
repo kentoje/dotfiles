@@ -10,8 +10,5 @@
 
 ./setup_symlinks.sh
 
-# Needs to be run in sudo
-sudo ./setup_scripting_addition.sh
-
 # Install fzf ctrl + r mode
 # /usr/local/opt/fzf/install
