@@ -44,7 +44,8 @@
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
 
-    # issues with permissions while starting fish
+    # issues with permissions while starting fish, chmod 777 on the fish store path works,
+    # but this has to be wrong. There has to be some group or user issue.
     # ".config/fish".source = ../fish;
     ".config/alacritty".source = ../alacritty;
     ".config/bat".source = ../bat;
@@ -59,6 +60,11 @@
     ".config/yabai".source = ../yabai;
     ".config/zellij".source = ../zellij;
     ".config/starship.toml".source = ../starship.toml;
+    ".aerospace.toml".source = ../aerospace/aerospace.toml;
+    ".hammerspoon".source = ../../.hammerspoon;
+    ".gitconfig".source = ../../.gitconfig;
+    ".gitconfig-github".source = ../../.gitconfig-github;
+    ".gitconfig-gitlab".source = ../../.gitconfig-gitlab;
 
     # # You can also set the file content immediately.
     # ".gradle/gradle.properties".text = ''
@@ -88,13 +94,17 @@
   };
 
   # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
+  # programs.home-manager.enable = true;
 
-  # programs.btop = {
-  #   enable = true;
-  #   settings = {
-  #     color_theme = "gruvbox_dark_v2";
-  #     vim_keys = true;
-  #   };
-  # };
+  programs = {
+    home-manager.enable = true;
+
+    # btop = {
+    #   enable = true;
+    #   settings = {
+    #     color_theme = "gruvbox_dark_v2";
+    #     vim_keys = true;
+    #   };
+    # };
+  };
 }

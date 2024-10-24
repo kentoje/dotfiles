@@ -35,11 +35,14 @@
           mkalias
           awscli
           bat
+          gnupg
           btop
           wget
+          sad
           ffmpeg
           entr
           fish
+          fd
           fnm
           fzf
           delta
@@ -74,11 +77,12 @@
         brews = [
           "mas"
         ];
-        # casks = [
+        casks = [
           # "hammerspoon"
           # "spacelauncher"
           # "logitech-options"
-        # ];
+          "nikitabobko/tap/aerospace"
+        ];
         # Make sure to be logged in App Store.
         # masApps = {
         #   "Tayasui" = 1178074963;
