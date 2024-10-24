@@ -9,17 +9,20 @@ fish_add_path /run/current-system/sw/bin
 fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
-# fish_add_path /opt/homebrew/bin
+
+fish_add_path /opt/homebrew/bin
 # fish_add_path /opt/homebrew/sbin
 
 set path (dirname (realpath ~/.config/fish/config.fish))
 
 source $path/includes/global.fish
 source $path/includes/fzf.fish
-source $path/includes/private-vars.fish
 source $path/includes/abbr.fish
 source $path/includes/alias.fish
 
+if test -f $path/includes/private-vars.fish
+  source $path/includes/private-vars.fish
+end
 
 # pnpm
 set -gx PNPM_HOME "/Users/kento/Library/pnpm"
