@@ -1,13 +1,13 @@
 .DS_Store
 
 .config/fish/includes/private-vars.fish
-.config/fish/fish_variables
 
 .config/wezterm/assets/*.webp
 !.config/wezterm/assets/5.webp
 
 .config/alacritty/themes/*.toml
 !.config/alacritty/themes/catppuccin*.toml
+!.config/alacritty/themes/poimandres*.toml
 
 .config/tmux/plugins
 
