@@ -17,5 +17,10 @@ return {
 		vim.keymap.set("n", "<leader>xgh", function()
 			vim.cmd("0Gclog")
 		end, { desc = "Git history of file" })
+
+		vim.keymap.set("n", "<leader>xgo", function()
+			-- Double % means escape the % character.
+			vim.cmd(string.format("Gvsplit %s:%%", vim.fn.input("Target branch: ")))
+		end, { desc = "Git open current file on given branch" })
 	end,
 }

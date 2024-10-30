@@ -54,7 +54,7 @@ return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
 	config = function()
-		local wtf = require("wtf")
+		-- local wtf = require("wtf")
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")
 		local colors = require("poimandres.palette")
 
@@ -140,7 +140,7 @@ return {
 				},
 				lualine_c = { diff, diagnostics },
 				-- lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
-				lualine_x = { wtf.get_status, "filetype" },
+				-- lualine_x = { wtf.get_status, "filetype" },
 				lualine_y = {
 					"progress",
 				},

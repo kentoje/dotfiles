@@ -1,5 +1,6 @@
 return {
 	"piersolenski/wtf.nvim",
+	cond = false,
 	dependencies = {
 		"MunifTanjim/nui.nvim",
 	},

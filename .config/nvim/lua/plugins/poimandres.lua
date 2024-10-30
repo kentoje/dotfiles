@@ -1,3 +1,18 @@
+local function dump(o)
+	if type(o) == "table" then
+		local s = "{ "
+		for k, v in pairs(o) do
+			if type(k) ~= "number" then
+				k = '"' .. k .. '"'
+			end
+			s = s .. "[" .. k .. "] = " .. dump(v) .. ","
+		end
+		return s .. "} "
+	else
+		return tostring(o)
+	end
+end
+
 return {
 	"olivercederborg/poimandres.nvim",
 	lazy = false,
@@ -31,6 +46,10 @@ return {
 		vim.cmd("hi LspSignatureActiveParameter guifg=" .. colors.none .. " guibg=" .. colors.teal3)
 
 		vim.cmd("hi CursorLineNr guifg=" .. colors.teal1)
+
+		-- vim.cmd("hi RenderMarkdownCodeInline guibg=" .. colors.none)
+		-- vim.cmd("hi RenderMarkdownCodeInline guifg=" .. colors.background3)
+		-- vim.cmd("hi RenderMarkdownCode guibg=" .. colors.none)
 
 		-- vim.cmd("hi NormalFloat guifg=" .. colors.none .. " guibg=" .. colors.none)
 		-- vim.cmd("hi FloatBorder guifg=" .. colors.none .. " guibg=" .. colors.none)

@@ -7,7 +7,7 @@ return {
 		"stevearc/dressing.nvim", -- Recommended but not required. Better UI for pickers.
 		"nvim-tree/nvim-web-devicons", -- Recommended but not required. Icons in discussion tree.
 	},
-	enabled = true,
+	enabled = false,
 	build = function()
 		require("gitlab.server").build(true)
 	end, -- Builds the Go binary
