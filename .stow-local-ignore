@@ -10,14 +10,12 @@ README.md
 scripts
 
 .config/nix-darwin
-.config/alacritty
 .config/bat
 .config/kitty
 .config/lazygit
 .config/lf
 .config/mods
 .config/shell_gpt
-.config/tmux
 .config/wezterm
 .config/zellij
 .config/starship.toml
