@@ -77,7 +77,8 @@ disabled = true
 
 [git_branch]
 symbol = ""
-disabled = false
+disabled = true
+# disabled = false
 
 [git_commit]
 disabled = true
