@@ -98,10 +98,15 @@ alt-semicolon = 'layout tiles horizontal vertical'
 alt-quote = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-cmd-alt-h = 'focus left'
-cmd-alt-j = 'focus down'
-cmd-alt-k = 'focus up'
-cmd-alt-l = 'focus right'
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
+
+# cmd-alt-h = 'focus left'
+# cmd-alt-j = 'focus down'
+# cmd-alt-k = 'focus up'
+# cmd-alt-l = 'focus right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 alt-shift-h = 'move left'
@@ -228,4 +233,12 @@ run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
 if.app-id = 'so.amie.electron-app'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'us.zoom.xos'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'net.whatsapp.WhatsApp'
 run = 'move-node-to-workspace 3'
