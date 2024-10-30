@@ -47,7 +47,7 @@
     # issues with permissions while starting fish, chmod 777 on the fish store path works,
     # but this has to be wrong. There has to be some group or user issue.
     # ".config/fish".source = ../fish;
-    ".config/alacritty".source = ../alacritty;
+    # ".config/alacritty".source = ../alacritty;
     ".config/bat".source = ../bat;
     ".config/kitty".source = ../kitty;
     ".config/lazygit".source = ../lazygit;
@@ -55,7 +55,7 @@
     ".config/mods".source = ../mods;
     ".config/shell_gpt".source = ../shell_gpt;
     # ".config/nvim".source = ../nvim;
-    ".config/tmux".source = ../tmux;
+    # ".config/tmux".source = ../tmux;
     ".config/wezterm".source = ../wezterm;
     ".config/zellij".source = ../zellij;
     ".config/starship.toml".source = ../starship.toml;

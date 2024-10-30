@@ -35,6 +35,7 @@
           mkalias
           awscli
           bat
+          procps
           gnupg
           btop
           wget
@@ -52,6 +53,8 @@
           lazygit
           lf
           lsd
+          gum
+          mods
           # lua and co...
           neofetch
           ripgrep
@@ -86,7 +89,7 @@
         #   "Tayasui" = 1178074963;
         #   "Spark" = 1176895641;
         # };
-        onActivation.cleanup = "zap";
+        # onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
         onActivation.upgrade = true;
       };
