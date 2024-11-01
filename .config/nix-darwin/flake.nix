@@ -83,6 +83,7 @@
           # "spacelauncher"
           # "logitech-options"
           "nikitabobko/tap/aerospace"
+          "karabiner-elements"
         ];
         # Make sure to be logged in App Store.
         # masApps = {
