@@ -37,6 +37,8 @@
           bat
           procps
           gnupg
+          coreutils
+          gawk
           btop
           wget
           sad
