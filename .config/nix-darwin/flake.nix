@@ -57,6 +57,7 @@
           lsd
           gum
           mods
+          glow
           # lua and co...
           neofetch
           ripgrep
@@ -69,6 +70,7 @@
           tldr
           typescript
           yq
+          nodePackages.yalc
           zoxide
           gitmux
           prettierd
