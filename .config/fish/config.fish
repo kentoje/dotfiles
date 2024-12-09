@@ -11,6 +11,7 @@ fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
 
 fish_add_path /opt/homebrew/bin
+fish_add_path ~/.local/share/nvim/mason/bin
 # fish_add_path /opt/homebrew/sbin
 
 set path (dirname (realpath ~/.config/fish/config.fish))

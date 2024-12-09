@@ -23,6 +23,7 @@ abbr za "zellij attach"
 abbr zl "zellij list-sessions"
 
 # Misc
+abbr yz "yazi"
 abbr shutd "osascript -e 'tell app \"System Events\" to shut down'"
 abbr fcat "fzf --preview 'bat --color=always {}' | xargs nvim"
 abbr fhistory "history | fzf | fish"

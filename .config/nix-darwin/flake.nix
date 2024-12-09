@@ -64,6 +64,7 @@
           rustc
           starship
           stow
+          pnpm
           tmux
           zellij
           tree
@@ -75,6 +76,7 @@
           gitmux
           prettierd
           qmk
+          yazi
         ];
 
       homebrew = {
