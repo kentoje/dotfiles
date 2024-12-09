@@ -242,3 +242,7 @@ run = 'move-node-to-workspace 3'
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
 run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'org.chromium.Chromium'
+run = 'move-node-to-workspace 3'
