@@ -77,6 +77,7 @@
           prettierd
           qmk
           yazi
+          chafa
         ];
 
       homebrew = {
