@@ -53,7 +53,6 @@
           gnugrep
           jq
           lazygit
-          lf
           lsd
           gum
           mods
