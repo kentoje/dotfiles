@@ -1,5 +1,6 @@
 return {
 	"nvimdev/lspsaga.nvim",
+	enabled = false,
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter", -- optional
 		"nvim-tree/nvim-web-devicons", -- optional
@@ -43,12 +44,6 @@ return {
 			},
 		})
 
-		-- vim.keymap.set(
-		-- 	{ "n", "v" },
-		-- 	"<leader>q.",
-		-- 	":Lspsaga diagnostic_jump_next<CR>",
-		-- 	{ silent = true, desc = "Jump to next diagnostic" }
-		-- )
 		vim.keymap.set(
 			{ "n", "v" },
 			"g.",

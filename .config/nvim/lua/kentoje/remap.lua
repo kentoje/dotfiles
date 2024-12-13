@@ -37,8 +37,8 @@ vim.keymap.set("v", "<leader>xjs", ":'<,'>!jq -S .<CR>", { silent = true, desc =
 vim.keymap.set("n", "<Up>", ":cprev<CR>", { noremap = true, silent = true, desc = "Previous quickfix item (:cprev)" })
 vim.keymap.set("n", "<Down>", ":cnext<CR>", { noremap = true, silent = true, desc = "Next quickfix item (:cprev)" })
 
-vim.keymap.set("n", "<leader>bn", ":vnew", { silent = true, noremap = true, desc = "Open a new vertical buffer" })
-vim.keymap.set("n", "<leader>bN", ":new", { silent = true, noremap = true, desc = "Open a new horizontal buffer" })
+vim.keymap.set("n", "<leader>bn", ":vnew<CR>", { silent = true, noremap = true, desc = "Open a new vertical buffer" })
+vim.keymap.set("n", "<leader>bN", ":new<CR>", { silent = true, noremap = true, desc = "Open a new horizontal buffer" })
 vim.keymap.set(
 	"n",
 	"<leader>d",

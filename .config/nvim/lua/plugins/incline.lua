@@ -4,7 +4,6 @@ end
 
 return {
 	"b0o/incline.nvim",
-	dependencies = { "catppuccin" },
 	event = "VeryLazy",
 	config = function()
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")

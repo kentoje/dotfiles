@@ -1,44 +1,43 @@
 return {
 	"nvim-telescope/telescope.nvim",
 	version = "0.1.x",
-	cmd = {
-		"Telescope",
-	},
-	dependencies = { "nvim-lua/plenary.nvim" },
+	cmd = "Telescope",
+	dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
 	config = function()
 		local telescope = require("telescope")
+		local actions = require("telescope.actions")
 
 		telescope.setup({
 			defaults = {
-				vimgrep_arguments = {
-					"rg",
-					"--color=never",
-					"--no-heading",
-					"--with-filename",
-					"--line-number",
-					"--column",
-					"--smart-case",
-					"--no-ignore",
-					"--hidden",
-					"-g",
-					"!node_modules/*",
-					"-g",
-					"!.yarn",
-					"-g",
-					"!.git/logs",
-					"-g",
-					"!type-docs",
-					"-g",
-					"!build",
-					"-g",
-					"!local-build",
-					"-g",
-					"!storybook-static",
-					"-g",
-					"!coverage/*",
-					"-g",
-					"!test-results/*",
-				},
+				-- vimgrep_arguments = {
+				-- 	"rg",
+				-- 	"--color=never",
+				-- 	"--no-heading",
+				-- 	"--with-filename",
+				-- 	"--line-number",
+				-- 	"--column",
+				-- 	"--smart-case",
+				-- 	"--no-ignore",
+				-- 	"--hidden",
+				-- 	"-g",
+				-- 	"!node_modules/*",
+				-- 	"-g",
+				-- 	"!.yarn",
+				-- 	"-g",
+				-- 	"!.git/logs",
+				-- 	"-g",
+				-- 	"!type-docs",
+				-- 	"-g",
+				-- 	"!build",
+				-- 	"-g",
+				-- 	"!local-build",
+				-- 	"-g",
+				-- 	"!storybook-static",
+				-- 	"-g",
+				-- 	"!coverage/*",
+				-- 	"-g",
+				-- 	"!test-results/*",
+				-- },
 				file_ignore_patterns = {
 					"coverage",
 					".cache",
@@ -64,10 +63,16 @@ return {
 						show_untracked = true,
 					},
 				},
+				mappings = {
+					i = {
+						["<C-j>"] = actions.move_selection_next, -- Rebind next item in insert mode
+						["<C-k>"] = actions.move_selection_previous, -- Rebind previous item in insert mode
+					},
+				},
 			},
 		})
 
-		local builtin = require("telescope.builtin")
+		-- local builtin = require("telescope.builtin")
 
 		-- local find_command = {
 		-- 	"rg",
@@ -93,13 +98,14 @@ return {
 		-- 	"-g",
 		-- 	"!test-results/*",
 		-- }
-		--
-		local find_command = {
-			"fd",
-			"--hidden",
-		}
 
-		-- vim.keymap.set("n", "<leader>qp", function()
+		-- local find_command = {
+		-- 	"rg",
+		-- 	"--files",
+		-- 	"--hidden",
+		-- }
+		--
+		-- vim.keymap.set("n", "gp", function()
 		-- 	builtin.find_files({
 		-- 		hidden = true,
 		-- 		find_command = find_command,
@@ -120,10 +126,10 @@ return {
 		-- vim.keymap.set("n", "<leader>fr", function()
 		-- 	builtin.resume()
 		-- end, { desc = "Resume telescope search" })
+		-- vim.keymap.set("n", "<leader>:", builtin.commands, {})
+		-- vim.keymap.set("n", "<leader>?k", ":Telescope keymaps<cr>", { desc = "Display all keymaps" })
 		-- vim.keymap.set("n", "<leader>fs", function()
 		-- 	builtin.lsp_workspace_symbols({ query = vim.fn.input("Query: ") })
 		-- end, { desc = "Find given symbol" })
-		-- vim.keymap.set("n", "<leader>:", builtin.commands, {})
-		-- vim.keymap.set("n", "<leader>?k", ":Telescope keymaps<cr>", { desc = "Display all keymaps" })
 	end,
 }

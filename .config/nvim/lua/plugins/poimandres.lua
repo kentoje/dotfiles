@@ -47,6 +47,11 @@ return {
 
 		vim.cmd("hi CursorLineNr guifg=" .. colors.teal1)
 
+		vim.cmd("hi FzfLuaBorder guifg=" .. colors.teal1)
+		vim.cmd("hi FzfLuaPreviewBorder guifg=" .. colors.teal1)
+		vim.cmd("hi FzfLuaCursor guifg=" .. colors.pink1)
+		vim.cmd("hi FzfLuaTitle guifg=" .. colors.pink1)
+
 		-- vim.cmd("hi RenderMarkdownCodeInline guibg=" .. colors.none)
 		-- vim.cmd("hi RenderMarkdownCodeInline guifg=" .. colors.background3)
 		-- vim.cmd("hi RenderMarkdownCode guibg=" .. colors.none)

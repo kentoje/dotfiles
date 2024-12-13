@@ -1,19 +1,39 @@
 local prettier_config_names = { ".prettierrc", ".prettierrc.json", ".prettierrc.js" }
 
+local biome_config_names = { "biome.json" }
+
+-- Check if a file with prettier_config_names exists in the current directory
+local function config_exists(config_names)
+	for _, name in ipairs(config_names) do
+		if vim.loop.fs_stat(name) then
+			-- print("Found config file: " .. name)
+			return true
+		end
+	end
+	return false
+end
+
 local function pick_js_formatter()
-	return { "prettierd" }
-	-- return { "eslint_d", "prettierd" }
-	-- for _, filename in ipairs(prettier_config_names) do
-	-- 	if vim.loop.fs_realpath(filename) then
-	-- 		return { { "prettier" } }
-	-- 	end
-	-- end
-	--
-	-- if vim.loop.fs_realpath(".eslintrc") then
-	-- 	return { "eslint" }
-	-- end
-	--
-	-- return { { "prettier" } }
+	-- print("Picking JS formatter...")
+
+	-- Check for Prettier config files
+	if config_exists(prettier_config_names) then
+		-- print("Using Prettier.")
+		return { { "prettierd", "prettier" } }
+	end
+
+	-- Check for Biome config files
+	if config_exists(biome_config_names) then
+		-- print("Using Biome.")
+		-- return { { "biome-check" } }
+		return { { "biome" } }
+	end
+
+	-- print("No formatter config files found, using Prettier.")
+	return { { "prettierd", "prettier" } }
+
+	-- LSP are loaded conditionnally so it should already work
+	-- return { { "biome", "prettierd", "prettier" } }
 end
 
 return {

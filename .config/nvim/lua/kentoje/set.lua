@@ -35,4 +35,4 @@ vim.opt.cursorlineopt = "number"
 vim.opt.guicursor = "i:block"
 
 -- Fix flicking with zellij + noice
-vim.opt.termsync = false
+-- vim.opt.termsync = false

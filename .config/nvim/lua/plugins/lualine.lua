@@ -88,6 +88,9 @@ return {
 							get_harpoon_active_indicator(7),
 							get_harpoon_active_indicator(8),
 							get_harpoon_active_indicator(9),
+							get_harpoon_active_indicator(10),
+							get_harpoon_active_indicator(11),
+							get_harpoon_active_indicator(12),
 						},
 						indicators = {
 							get_harpoon_inactive_indicator(1),
@@ -99,6 +102,9 @@ return {
 							get_harpoon_inactive_indicator(7),
 							get_harpoon_inactive_indicator(8),
 							get_harpoon_inactive_indicator(9),
+							get_harpoon_inactive_indicator(10),
+							get_harpoon_inactive_indicator(11),
+							get_harpoon_inactive_indicator(12),
 						},
 
 						color = {

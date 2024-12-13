@@ -3,6 +3,18 @@ local function file_exists(name)
 	return f ~= nil and io.close(f)
 end
 
+local biome_config_names = { "biome.json" }
+
+local function config_exists(config_names)
+	for _, name in ipairs(config_names) do
+		if vim.loop.fs_stat(name) then
+			-- print("Found config file: " .. name)
+			return true
+		end
+	end
+	return false
+end
+
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
@@ -102,11 +114,6 @@ return {
 				return
 			end
 
-			-- if server == "nil_ls" then
-			-- 	require("lspconfig").nil_ls.setup({})
-			-- 	return
-			-- end
-
 			lspconfig[server].setup({
 				capabilities = lsp_capabilities,
 			})
@@ -168,9 +175,9 @@ return {
 			vim.cmd("VtsExec remove_unused_imports")
 		end, { desc = "Magic import fix" })
 
-		vim.keymap.set("n", "<leader>cf", function()
-			vtsls.rename(vim.fn.input("Current filename: "), vim.fn.input("New filename: "))
-		end, { desc = "Change file name" })
+		-- vim.keymap.set("n", "<leader>cf", function()
+		-- 	vtsls.rename(vim.fn.input("Current filename: "), vim.fn.input("New filename: "))
+		-- end, { desc = "Change file name" })
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
@@ -184,6 +191,23 @@ return {
 				--
 				-- 	lspconfig.tsserver.setup({
 				-- 		capabilities = capabilities,
+				-- 	})
+				-- end,
+
+				-- biome = function()
+				-- 	lspconfig.biome.setup({
+				-- 		capabilities = lsp_capabilities,
+				-- 		on_attach = function(client, bufnr)
+				-- 			-- vim.api.nvim_create_autocmd("BufWritePost", {
+				-- 			vim.api.nvim_create_autocmd("BufWritePre", {
+				-- 				buffer = bufnr,
+				-- 				callback = function()
+				-- 					local current_path = vim.fn.expand("%:p")
+				--
+				-- 					vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
+				-- 				end,
+				-- 			})
+				-- 		end,
 				-- 	})
 				-- end,
 
@@ -219,18 +243,18 @@ return {
 						settings = {
 							packageManager = "yarn",
 						},
-						on_attach = function(client, bufnr)
-							-- vim.api.nvim_create_autocmd("BufWritePost", {
-							-- vim.api.nvim_create_autocmd("BufWritePre", {
-							-- 	buffer = bufnr,
-							-- 	command = "EslintFixAll",
-							-- })
-							-- does not work
-							-- vim.api.nvim_create_autocmd({ "BufNewFile" }, {
-							-- 	buffer = bufnr,
-							-- 	command = "LspR",
-							-- })
-						end,
+						-- on_attach = function(client, bufnr)
+						-- vim.api.nvim_create_autocmd("BufWritePost", {
+						-- vim.api.nvim_create_autocmd("BufWritePre", {
+						-- 	buffer = bufnr,
+						-- 	command = "EslintFixAll",
+						-- })
+						-- does not work
+						-- vim.api.nvim_create_autocmd({ "BufNewFile" }, {
+						-- 	buffer = bufnr,
+						-- 	command = "LspR",
+						-- })
+						-- end,
 					})
 				end,
 
@@ -245,8 +269,26 @@ return {
 			},
 		})
 
+		vim.keymap.set("n", "gd", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
-		vim.keymap.set("n", "<leader>e", ":EslintFixAll<CR>", { silent = true, desc = "EslintFixAll" })
+
+		if config_exists(biome_config_names) then
+			vim.keymap.set("n", "<leader>e", function()
+				local current_path = vim.fn.expand("%:p")
+
+				vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
+			end, { silent = true, desc = "Biome fix all mimic" })
+		else
+			vim.keymap.set("n", "<leader>e", function()
+				vim.cmd("EslintFixAll")
+			end, { silent = true, desc = "EslintFixAll" })
+		end
+
+		-- vim.keymap.set("n", "<leader>e", function()
+		-- 	local current_path = vim.fn.expand("%:p")
+		--
+		-- 	vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
+		-- end, { silent = true, desc = "EslintFixAll" })
 
 		local cmp = require("cmp")
 
@@ -256,15 +298,12 @@ return {
 			sources = {
 				{ name = "nvim_lsp" },
 				{ name = "luasnip" },
-				{ name = "cody" },
 			},
 			mapping = cmp.mapping.preset.insert({
 				["<C-b>"] = cmp.mapping.scroll_docs(-2),
 				["<C-f>"] = cmp.mapping.scroll_docs(2),
 				["<C-Space>"] = cmp.mapping.complete(),
 				["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-				-- ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-				-- ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
 				["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
 				["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
 			}),
