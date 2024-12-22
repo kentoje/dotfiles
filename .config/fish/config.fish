@@ -20,6 +20,7 @@ source $path/includes/global.fish
 source $path/includes/fzf.fish
 source $path/includes/abbr.fish
 source $path/includes/alias.fish
+# source $path/includes/yz.fish
 
 if test -f $path/includes/private-vars.fish
   source $path/includes/private-vars.fish
