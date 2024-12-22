@@ -24,12 +24,8 @@ return {
 				pcall(vim.cmd, "MasonUpdate")
 			end,
 		},
+		{ "saghen/blink.cmp" },
 		{ "williamboman/mason-lspconfig.nvim" },
-		{ "hrsh7th/nvim-cmp" },
-		{ "hrsh7th/cmp-nvim-lsp" },
-		{ "L3MON4D3/LuaSnip" },
-		{ "rafamadriz/friendly-snippets" },
-		{ "saadparwaiz1/cmp_luasnip" },
 		{ "yioneko/nvim-vtsls" },
 	},
 	config = function()
@@ -69,7 +65,8 @@ return {
 
 		local lspconfig = require("lspconfig")
 
-		local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+		-- local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+		local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
 
 		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
 		local next_error_repeat, prev_error_repeat =
@@ -88,16 +85,9 @@ return {
 					severity_sort = true,
 				})
 
-				-- vim.keymap.set("n", "<C-g>", function()
-				-- 	vim.lsp.buf.definition()
-				-- end, opts)
-				-- vim.keymap.set("n", "<leader>qg", function()
-				-- 	vim.lsp.buf.definition()
-				-- end, opts)
 				vim.keymap.set("n", "gf", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				-- vim.keymap.set("n", "<leader>qk", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "gD", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "]d", next_diag_repeat, opts) -- go to next diagnostic
 				vim.keymap.set("n", "[d", prev_diag_repeat, opts) -- go to prev diagnostic
@@ -119,7 +109,7 @@ return {
 			})
 		end
 
-		local vtsls = require("vtsls")
+		-- local vtsls = require("vtsls")
 		local util = require("lspconfig.util")
 		local cmd = { "vtsls", "--stdio" }
 
@@ -191,23 +181,6 @@ return {
 				--
 				-- 	lspconfig.tsserver.setup({
 				-- 		capabilities = capabilities,
-				-- 	})
-				-- end,
-
-				-- biome = function()
-				-- 	lspconfig.biome.setup({
-				-- 		capabilities = lsp_capabilities,
-				-- 		on_attach = function(client, bufnr)
-				-- 			-- vim.api.nvim_create_autocmd("BufWritePost", {
-				-- 			vim.api.nvim_create_autocmd("BufWritePre", {
-				-- 				buffer = bufnr,
-				-- 				callback = function()
-				-- 					local current_path = vim.fn.expand("%:p")
-				--
-				-- 					vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
-				-- 				end,
-				-- 			})
-				-- 		end,
 				-- 	})
 				-- end,
 
@@ -290,28 +263,28 @@ return {
 		-- 	vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
 		-- end, { silent = true, desc = "EslintFixAll" })
 
-		local cmp = require("cmp")
+		-- local cmp = require("cmp")
 
-		require("luasnip.loaders.from_vscode").lazy_load()
+		-- require("luasnip.loaders.from_vscode").lazy_load()
 
-		cmp.setup({
-			sources = {
-				{ name = "nvim_lsp" },
-				{ name = "luasnip" },
-			},
-			mapping = cmp.mapping.preset.insert({
-				["<C-b>"] = cmp.mapping.scroll_docs(-2),
-				["<C-f>"] = cmp.mapping.scroll_docs(2),
-				["<C-Space>"] = cmp.mapping.complete(),
-				["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-				["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-				["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-			}),
-			snippet = {
-				expand = function(args)
-					require("luasnip").lsp_expand(args.body)
-				end,
-			},
-		})
+		-- cmp.setup({
+		-- 	sources = {
+		-- 		{ name = "nvim_lsp" },
+		-- 		{ name = "luasnip" },
+		-- 	},
+		-- 	mapping = cmp.mapping.preset.insert({
+		-- 		["<C-b>"] = cmp.mapping.scroll_docs(-2),
+		-- 		["<C-f>"] = cmp.mapping.scroll_docs(2),
+		-- 		["<C-Space>"] = cmp.mapping.complete(),
+		-- 		["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+		-- 		["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+		-- 		["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+		-- 	}),
+		-- 	snippet = {
+		-- 		expand = function(args)
+		-- 			require("luasnip").lsp_expand(args.body)
+		-- 		end,
+		-- 	},
+		-- })
 	end,
 }

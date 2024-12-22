@@ -53,7 +53,7 @@ return {
 			},
 		},
 		-- input = { enabled = true },
-		notifier = { enabled = true },
+		notifier = { enabled = true, timeout = 2500, top_down = false },
 		quickfile = { enabled = true },
 		-- statuscolumn = { enabled = true },
 		scratch = { enabled = true },

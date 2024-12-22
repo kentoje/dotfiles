@@ -10,6 +10,10 @@ return {
 			vim.cmd("Gvdiff")
 		end, { desc = "Git diff" })
 
+		vim.keymap.set("n", "<leader>xgl", function()
+			vim.cmd("Git log %")
+		end, { desc = "Git log current file" })
+
 		vim.keymap.set("n", "<leader>xgb", function()
 			vim.cmd("Git blame")
 		end, { desc = "Git blame" })

@@ -19,18 +19,18 @@ local function pick_js_formatter()
 	-- Check for Prettier config files
 	if config_exists(prettier_config_names) then
 		-- print("Using Prettier.")
-		return { { "prettierd", "prettier" } }
+		return { "prettierd" }
 	end
 
 	-- Check for Biome config files
 	if config_exists(biome_config_names) then
 		-- print("Using Biome.")
 		-- return { { "biome-check" } }
-		return { { "biome" } }
+		return { "biome" }
 	end
 
 	-- print("No formatter config files found, using Prettier.")
-	return { { "prettierd", "prettier" } }
+	return { "prettierd" }
 
 	-- LSP are loaded conditionnally so it should already work
 	-- return { { "biome", "prettierd", "prettier" } }
@@ -61,15 +61,15 @@ return {
 				json = pick_js_formatter(),
 				html = { "prettierd" },
 				css = { "prettierd" },
-				markdown = { { "prettierd" } },
-				yaml = { { "prettierd" } },
-				graphql = { { "prettierd" } },
+				markdown = { "prettierd" },
+				yaml = { "prettierd" },
+				graphql = { "prettierd" },
 				nix = { "nil" },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()
 				timeout_ms = 2000,
-				async = true,
+				-- async = true,
 				lsp_fallback = true,
 			},
 		})

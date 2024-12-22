@@ -7,7 +7,7 @@ return {
 		local fzf = require("fzf-lua")
 		fzf.setup({
 			files = {
-				formatter = "path.filename_first",
+				-- formatter = "path.filename_first",
 				git_icons = true,
 			},
 			winopts = {
