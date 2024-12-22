@@ -3,8 +3,8 @@ gui:
     activeBorderColor:
       - magenta
       - bold
-    inactiveBorderColor:
-      - black
+    # inactiveBorderColor:
+    #   - black
   showFileTree: true # for rendering changes files in a tree format
 os:
   editPreset: "nvim"
@@ -13,4 +13,3 @@ os:
 keybinding:
   universal:
     quit: "q"
-
