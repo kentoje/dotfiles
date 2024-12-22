@@ -10,15 +10,6 @@ README.md
 scripts
 
 .config/nix-darwin
-.config/bat
-.config/kitty
-.config/lazygit
-.config/lf
-.config/mods
-.config/shell_gpt
-.config/wezterm
-.config/zellij
-.config/starship.toml
 .hammerspoon
 
 .gitconfig

@@ -48,17 +48,16 @@
     # but this has to be wrong. There has to be some group or user issue.
     # ".config/fish".source = ../fish;
     # ".config/alacritty".source = ../alacritty;
-    ".config/bat".source = ../bat;
-    ".config/kitty".source = ../kitty;
-    ".config/lazygit".source = ../lazygit;
-    ".config/lf".source = ../lf;
-    ".config/mods".source = ../mods;
-    ".config/shell_gpt".source = ../shell_gpt;
+    # ".config/bat".source = ../bat;
+    # ".config/kitty".source = ../kitty;
+    # ".config/lazygit".source = ../lazygit;
+    # ".config/mods".source = ../mods;
+    # ".config/shell_gpt".source = ../shell_gpt;
     # ".config/nvim".source = ../nvim;
     # ".config/tmux".source = ../tmux;
-    ".config/wezterm".source = ../wezterm;
-    ".config/zellij".source = ../zellij;
-    ".config/starship.toml".source = ../starship.toml;
+    # ".config/wezterm".source = ../wezterm;
+    # ".config/zellij".source = ../zellij;
+    # ".config/starship.toml".source = ../starship.toml;
     # ".aerospace.toml".source = ../aerospace/aerospace.toml;
     ".hammerspoon".source = ../../.hammerspoon;
     ".gitconfig".source = ../../.gitconfig;
