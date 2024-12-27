@@ -77,7 +77,6 @@ return {
 					{
 						-- "buffers",
 						"harpoon2",
-						-- icon = "🔱",
 						active_indicators = {
 							get_harpoon_active_indicator(1),
 							get_harpoon_active_indicator(2),
@@ -91,6 +90,9 @@ return {
 							get_harpoon_active_indicator(10),
 							get_harpoon_active_indicator(11),
 							get_harpoon_active_indicator(12),
+							get_harpoon_active_indicator(13),
+							get_harpoon_active_indicator(14),
+							get_harpoon_active_indicator(15),
 						},
 						indicators = {
 							get_harpoon_inactive_indicator(1),
@@ -105,6 +107,9 @@ return {
 							get_harpoon_inactive_indicator(10),
 							get_harpoon_inactive_indicator(11),
 							get_harpoon_inactive_indicator(12),
+							get_harpoon_inactive_indicator(13),
+							get_harpoon_inactive_indicator(14),
+							get_harpoon_inactive_indicator(15),
 						},
 
 						color = {
@@ -147,6 +152,8 @@ return {
 				lualine_c = { diff, diagnostics },
 				-- lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
 				-- lualine_x = { wtf.get_status, "filetype" },
+				lualine_x = { "encoding", "fileformat", "filetype" },
+				-- lualine_x = { "filename" },
 				lualine_y = {
 					"progress",
 				},
