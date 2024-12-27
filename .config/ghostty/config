@@ -1,0 +1,80 @@
+font-family = "SFMono Nerd Font"
+font-style = "Bold"
+font-style-bold = "SF Mono Nerd Font"
+font-style-italic = "SF Mono Nerd Font"
+font-style-bold-italic = "SF Mono Nerd Font"
+font-size = 14
+adjust-cell-width = -15%
+
+window-decoration = true
+window-padding-x = 12
+window-padding-y = 12
+
+background-opacity = "0.8"
+background-blur-radius = 60
+background = "1b1e28"
+foreground = "a6accd"
+
+unfocused-split-opacity = "0.7"
+
+cursor-invert-fg-bg = true
+cursor-style = "block"
+cursor-style-blink = false
+
+macos-window-shadow = false
+macos-titlebar-proxy-icon = "hidden"
+macos-titlebar-style = "hidden"
+# macos-icon = "custom-style"
+# macos-icon-frame = "beige"
+# macos-icon-screen-color = "ff0000,0000ff"
+clipboard-read = "allow"
+quick-terminal-animation-duration = 0.05
+mouse-hide-while-typing = true
+shell-integration-features = "no-cursor"
+
+# Poimandres theme
+# black
+palette = 0=#1b1e28
+palette = 8=#a6accd
+# red
+palette = 1=#D0679D
+palette = 9=#D0679D
+# green
+palette = 2=#5DE4C7
+palette = 10=#5DE4C7
+# yellow
+palette = 3=#FFFAC2
+palette = 11=#FFFAC2
+# blue
+palette = 4=#89DDFF
+palette = 12=#ADD7FF
+# purple
+palette = 5=#FCC5E9
+palette = 13=#FCC5E9
+# aqua
+palette = 6=#89DDFF
+palette = 14=#ADD7FF
+# white
+palette = 7=#ffffff
+palette = 15=#ffffff
+
+keybind = ctrl+1=text:\x01\x31
+keybind = ctrl+2=text:\x01\x32
+keybind = ctrl+3=text:\x01\x33
+keybind = ctrl+4=text:\x01\x34
+keybind = ctrl+5=text:\x01\x35
+keybind = ctrl+6=text:\x01\x36
+keybind = ctrl+7=text:\x01\x37
+keybind = ctrl+8=text:\x01\x38
+keybind = ctrl+9=text:\x01\x39
+
+keybind = ctrl+d=text:\x01\x25
+keybind = ctrl+shift+d=text:\x01\x22
+keybind = ctrl+w=text:\x01\x78
+keybind = ctrl+s=text:\x01\x5b\x30
+keybind = ctrl+f=text:\x01\x7a
+keybind = ctrl+t=text:\x01\x63
+# keybind = ctrl+b=toggle_quick_terminal
+
+# Missing cmd+o to open links.
+
