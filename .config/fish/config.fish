@@ -1,7 +1,10 @@
 # eval (/usr/local/bin/brew shellenv)
 
 starship init fish | source
+enable_transience
 zoxide init fish | source
+
+# oh-my-posh init fish --config ~/.config/oh-my-posh/config.toml | source
 
 # Nix darwin
 fish_add_path /run/current-system/sw/bin
