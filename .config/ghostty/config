@@ -1,10 +1,10 @@
-font-family = "SFMono Nerd Font"
-font-style = "Bold"
-font-style-bold = "SF Mono Nerd Font"
-font-style-italic = "SF Mono Nerd Font"
-font-style-bold-italic = "SF Mono Nerd Font"
+font-family = "Liga SFMono Nerd Font"
+font-style = "SemiBold"
+font-style-bold = "Liga SFMono Nerd Font"
+font-style-italic = "Liga SFMono Nerd Font"
+font-style-bold-italic = "Liga SFMono Nerd Font"
 font-size = 14
-adjust-cell-width = -15%
+adjust-cell-width = -17%
 
 window-decoration = true
 window-padding-x = 12
@@ -28,9 +28,11 @@ macos-titlebar-style = "hidden"
 # macos-icon-frame = "beige"
 # macos-icon-screen-color = "ff0000,0000ff"
 clipboard-read = "allow"
-quick-terminal-animation-duration = 0.05
 mouse-hide-while-typing = true
 shell-integration-features = "no-cursor"
+
+quick-terminal-animation-duration = 0.08
+quick-terminal-position = "top"
 
 # Poimandres theme
 # black
@@ -58,15 +60,18 @@ palette = 14=#ADD7FF
 palette = 7=#ffffff
 palette = 15=#ffffff
 
-keybind = ctrl+1=text:\x01\x31
-keybind = ctrl+2=text:\x01\x32
-keybind = ctrl+3=text:\x01\x33
-keybind = ctrl+4=text:\x01\x34
-keybind = ctrl+5=text:\x01\x35
-keybind = ctrl+6=text:\x01\x36
-keybind = ctrl+7=text:\x01\x37
-keybind = ctrl+8=text:\x01\x38
-keybind = ctrl+9=text:\x01\x39
+keybind = cmd+1=text:\x01\x31
+keybind = cmd+2=text:\x01\x32
+keybind = cmd+3=text:\x01\x33
+keybind = cmd+4=text:\x01\x34
+keybind = cmd+5=text:\x01\x35
+keybind = cmd+6=text:\x01\x36
+keybind = cmd+7=text:\x01\x37
+keybind = cmd+8=text:\x01\x38
+keybind = cmd+9=text:\x01\x39
+
+keybind = cmd+o=text:\x01\x6f
+keybind = cmd+b=toggle_quick_terminal
 
 keybind = ctrl+d=text:\x01\x25
 keybind = ctrl+shift+d=text:\x01\x22
@@ -74,7 +79,6 @@ keybind = ctrl+w=text:\x01\x78
 keybind = ctrl+s=text:\x01\x5b\x30
 keybind = ctrl+f=text:\x01\x7a
 keybind = ctrl+t=text:\x01\x63
-# keybind = ctrl+b=toggle_quick_terminal
 
 # Missing cmd+o to open links.
 
