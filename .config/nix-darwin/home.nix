@@ -59,7 +59,6 @@
     # ".config/zellij".source = ../zellij;
     # ".config/starship.toml".source = ../starship.toml;
     # ".aerospace.toml".source = ../aerospace/aerospace.toml;
-    ".hammerspoon".source = ../../.hammerspoon;
     ".gitconfig".source = ../../.gitconfig;
     ".gitconfig-github".source = ../../.gitconfig-github;
     ".gitconfig-gitlab".source = ../../.gitconfig-gitlab;

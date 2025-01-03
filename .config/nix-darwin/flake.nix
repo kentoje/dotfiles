@@ -42,6 +42,7 @@
           coreutils
           gawk
           btop
+          imagemagick
           wget
           sad
           ffmpeg
@@ -60,7 +61,7 @@
           mods
           glow
           # lua and co...
-          neofetch
+          fastfetch
           ripgrep
           rustc
           starship
@@ -88,7 +89,6 @@
         ];
         casks = [
           # "hammerspoon"
-          # "spacelauncher"
           # "logitech-options"
           "nikitabobko/tap/aerospace"
           "karabiner-elements"

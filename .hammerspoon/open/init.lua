@@ -1,0 +1,20 @@
+local function bind_app(key, app_path)
+	hs.hotkey.bind({ "alt" }, key, function()
+		return hs.application.open(app_path)
+	end)
+end
+
+bind_app("t", "/Applications/Ghostty.app")
+bind_app("g", "/Applications/Arc.app")
+bind_app("m", "/Applications/Spotify.app")
+bind_app("s", "/Applications/Slack.app")
+bind_app("f", "/Applications/Figma.app")
+bind_app("c", "/Applications/Rise.app")
+bind_app("z", "/Applications/zoom.us.app")
+bind_app("d", "/Applications/Tayasui Sketches.app")
+bind_app("w", "/Applications/WhatsApp.app")
+bind_app("b", "/Applications/Spark.app")
+
+hs.hotkey.bind({ "alt" }, "e", function()
+	hs.execute("open -a Finder")
+end)
