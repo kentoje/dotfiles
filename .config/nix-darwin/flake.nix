@@ -14,7 +14,10 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, home-manager, ... }:
   let
     configuration = { pkgs, config, ... }: {
-      nixpkgs.config.allowUnfree = true;
+      nixpkgs = {
+        config.allowUnfree = true;
+        # overlays = [];
+      };
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
@@ -35,7 +38,6 @@
           mkalias
           awscli
           bat
-          procps
           gnupg
           coreutils
           gawk
@@ -90,6 +92,8 @@
           # "logitech-options"
           "nikitabobko/tap/aerospace"
           "karabiner-elements"
+          "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"
+          "jandedobbeleer/oh-my-posh/oh-my-posh"
         ];
         # Make sure to be logged in App Store.
         # masApps = {
@@ -144,7 +148,15 @@
         done
       '';
 
-      # fonts.packages = [];
+      # fonts.fontDir.enable = true;
+      # fonts.packages = with pkgs; [
+      #   sf-mono-liga-bin  # Your custom font from the overlay
+      #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
+      # ];
+
+      # fonts = {
+      #   fonts = with pkgs; [ sf-mono-liga-bin ];
+      # };
 
       # Auto upgrade nix package and the daemon service.
       services.nix-daemon.enable = true;
