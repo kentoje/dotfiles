@@ -83,6 +83,8 @@ return {
 
 				vim.diagnostic.config({
 					severity_sort = true,
+					-- tiny-inline-diagnostic
+					virtual_text = false,
 				})
 
 				vim.keymap.set("n", "gf", function()

@@ -43,6 +43,8 @@ return {
 		vim.cmd("hi WhichKeyFloat guifg=" .. colors.none .. " guibg=" .. colors.none)
 		vim.cmd("hi FloatBorder guifg=" .. colors.teal2 .. " guibg=" .. colors.none)
 
+		vim.cmd("hi MatchParen guifg=" .. colors.teal1 .. " guibg=" .. colors.none)
+
 		vim.cmd("hi LspSignatureActiveParameter guifg=" .. colors.none .. " guibg=" .. colors.teal3)
 
 		vim.cmd("hi CursorLineNr guifg=" .. colors.teal1)
