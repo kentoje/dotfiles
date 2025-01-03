@@ -23,7 +23,8 @@ $shell\
 $character"""
 
 [character] # The name of the module we are configuring is 'character'
-success_symbol = '[](bold green)'
+# success_symbol = '[](bold green)'
+success_symbol = '[~>](bold green)'
 error_symbol = "[](bold red)"
 vimcmd_symbol = "[](bold purple)"
 
@@ -37,8 +38,8 @@ style = "cyan"
 conflicted = "󰞇 "
 untracked = " ($count)"
 modified = " ($count) "
-renamed = "r"
-deleted = "d"
+renamed = ""
+deleted = ""
 staged = "󰏗 ($count)"
 stashed = " ($count)"
 ahead = ' ${count}'
