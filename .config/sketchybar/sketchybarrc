@@ -17,7 +17,7 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
 # sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=30 padding_left=2 padding_right=2 color=0x66494d64
-sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=30 padding_left=2 padding_right=2 color=0x22000000
+sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=30 padding_left=2 padding_right=2 color=0x44000000
 
 ##### Changing Defaults #####
 # We now change some default values, which are applied to all further items.
@@ -107,16 +107,16 @@ done
 # volume is registered. More info about the event system can be found here:
 # https://felixkratz.github.io/SketchyBar/config/events
 
-sketchybar --add item clock right \
+sketchybar --add item clock center \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
+  background.color=0x00ffffff \
   icon.padding_right=0 \
-  label.padding_left=0 \
-  --subscribe volume volume_change
+  label.padding_left=0
 
 sketchybar --add item battery right \
   --set battery \
   update_freq=20 \
-  icon.font="Hack Nerd Font:Bold:10.0" \
+  icon.font="Hack Nerd Font:Bold:12.0" \
   script="$PLUGIN_DIR/battery.sh"
 
 sketchybar -m --add item network_down right \
@@ -147,6 +147,16 @@ sketchybar -m --add item network_down right \
   label.align=right \
   y_offset=0 \
   background.y_offset=0
+
+sketchybar --add item cpu right \
+  --set cpu update_freq=4 \
+  icon= \
+  script="$PLUGIN_DIR/cpu.sh"
+
+sketchybar --add item ram right \
+  --set ram update_freq=4 \
+  icon= \
+  script="$PLUGIN_DIR/ram.sh"
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --update
