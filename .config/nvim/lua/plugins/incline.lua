@@ -7,12 +7,14 @@ return {
 	event = "VeryLazy",
 	config = function()
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")
-		local colors = require("poimandres.palette")
+		-- local colors = require("poimandres.palette")
+		local colors = require("vesper.colors")
 
 		require("incline").setup({
 			highlight = {
 				groups = {
-					InclineNormal = { guibg = "00FFFFFF", guifg = colors.pink1 },
+					-- InclineNormal = { guibg = "00FFFFFF", guifg = colors.pink1 },
+					InclineNormal = { guibg = "00FFFFFF", guifg = colors.orange },
 					-- transparent "00FFFFFF"
 					-- InclineNormalNC = { guibg = "00FFFFFF", guifg = colors.background1 },
 				},

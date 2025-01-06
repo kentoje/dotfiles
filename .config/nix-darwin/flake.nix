@@ -83,17 +83,25 @@
         ];
 
       homebrew = {
-        enable = true;
-        brews = [
-          "mas"
+        taps = [
+          "FelixKratz/formulae"
         ];
+        enable = true;
         casks = [
           # "hammerspoon"
           # "logitech-options"
+          "font-hack-nerd-font"
+          "font-sf-pro"
           "nikitabobko/tap/aerospace"
           "karabiner-elements"
           "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"
           "jandedobbeleer/oh-my-posh/oh-my-posh"
+        ];
+        # Brews are formulaes
+        brews = [
+          "mas"
+          "sketchybar"
+          "ifstat"
         ];
         # Make sure to be logged in App Store.
         # masApps = {
@@ -162,6 +170,33 @@
       services.nix-daemon.enable = true;
       # nix.package = pkgs.nix;
 
+      # Launch sketchybar on login
+      launchd.user.agents.sketchybar = {
+        serviceConfig = {
+          RunAtLoad = true;
+          KeepAlive = true;
+          ProcessType = "Interactive";
+          StandardOutPath = "/tmp/sketchybar.out.log";
+          StandardErrorPath = "/tmp/sketchybar.err.log";
+          EnvironmentVariables = {
+            PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          };
+        };
+        # Not sure how to avoid waiting, and have some sort of dependencies.
+        script = ''
+          # Wait for font-hack-nerd-font to be installed (cask)
+          while [ ! -f "/Library/Fonts/SF-Pro.ttf" ]; do
+            echo "Waiting for font to be installed..." >> /tmp/sketchybar.out.log
+            sleep 1
+          done
+
+          # Give the system a moment to register the font
+          sleep 2
+
+          /opt/homebrew/bin/sketchybar
+        '';
+      };
+
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
 
@@ -193,7 +228,6 @@
     darwinConfigurations."kento" = nix-darwin.lib.darwinSystem {
       system = "aarch64-darwin";
       modules = [
-        configuration
 
         nix-homebrew.darwinModules.nix-homebrew
         {
@@ -213,6 +247,8 @@
             # mutableTaps = false;
           };
         }
+
+        configuration
 
         home-manager.darwinModules.home-manager
         {

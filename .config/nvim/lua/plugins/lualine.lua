@@ -56,7 +56,8 @@ return {
 	config = function()
 		-- local wtf = require("wtf")
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")
-		local colors = require("poimandres.palette")
+		-- local colors = require("poimandres.palette")
+		local colors = require("vesper.colors")
 
 		require("lualine").setup({
 			options = {
@@ -114,7 +115,8 @@ return {
 
 						color = {
 							-- fg = colors.blue,
-							fg = colors.blue1,
+							-- fg = colors.blue1,
+							fg = colors.green,
 							bg = "",
 						},
 

@@ -1,3 +1,19 @@
+local function random_number(min, max)
+	-- Seed the random number generator
+	math.randomseed(os.time())
+	return math.random(min, max)
+end
+
+local function count_jpg_files(directory)
+	local handle = io.popen('ls -1 "' .. directory .. '"/*.jpg 2>/dev/null | wc -l')
+	if handle then
+		local result = handle:read("*n")
+		handle:close()
+		return result or 0
+	end
+	return 0
+end
+
 return {
 	"folke/snacks.nvim",
 	priority = 1000,
@@ -41,7 +57,10 @@ return {
 					section = "terminal",
 					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x17 --stretch /Users/kento/Pictures/wallpapers/abstract/Yellow\\ white.jpg",
 					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x20 --stretch /Users/kento/Pictures/samples/pp.jpg",
-					cmd = "clear; chafa --symbols vhalf --stretch /Users/kento/Pictures/samples/pp.jpg",
+					cmd = string.format(
+						"clear; chafa --symbols vhalf --stretch /Users/kento/Pictures/samples/%d.jpg",
+						random_number(1, count_jpg_files("/Users/kento/Pictures/samples"))
+					),
 					height = 17,
 					padding = 1,
 				},
