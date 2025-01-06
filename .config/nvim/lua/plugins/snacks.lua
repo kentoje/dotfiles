@@ -9,14 +9,18 @@ local function pick_random_jpg(directory)
 
 	if handle then
 		local files = {}
+
 		for file in handle:lines() do
 			table.insert(files, file)
 		end
+
 		handle:close()
 
 		if #files > 0 then
-			math.randomseed(os.time())
-			return files[math.random(#files)]
+			local index = random_number(1, #files)
+
+			print("index", index)
+			return files[index]
 		end
 	end
 
@@ -68,7 +72,7 @@ return {
 					section = "terminal",
 					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x17 --stretch /Users/kento/Pictures/wallpapers/abstract/Yellow\\ white.jpg",
 					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x20 --stretch /Users/kento/Pictures/samples/pp.jpg",
-					cmd = string.format("clear; chafa --symbols vhalf --stretch %s", image),
+					cmd = string.format("chafa --symbols vhalf --stretch %s", image),
 					height = 17,
 					padding = 1,
 				},
