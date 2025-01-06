@@ -84,6 +84,7 @@
 
       homebrew = {
         taps = [
+          "zfdang/free-for-macOS"
           "FelixKratz/formulae"
         ];
         enable = true;
@@ -102,6 +103,7 @@
           "mas"
           "sketchybar"
           "ifstat"
+          "free-for-macOS"
         ];
         # Make sure to be logged in App Store.
         # masApps = {
