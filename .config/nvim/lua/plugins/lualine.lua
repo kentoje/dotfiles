@@ -62,7 +62,8 @@ return {
 		require("lualine").setup({
 			options = {
 				-- theme = "auto",
-				theme = "poimandres",
+				-- theme = "poimandres",
+				theme = "vesper",
 				globalstatus = true,
 				-- ░▒▓
 				-- section_separators = { left = "", right = "" },
