@@ -1,20 +1,15 @@
 tell application "System Events"
-	try
-		set _groups to groups of UI element 1 of scroll area 1 of group 1 of window "Notification Center" of application process "NotificationCenter"
-		
-		repeat with _group in _groups
-			
-			set _actions to actions of _group
-			
-			repeat with _action in _actions
-				if description of _action is in {"Close", "Clear All"} then
-					perform _action
-					
-				end if
-			end repeat
-			
-		end repeat
-		
-	end try
+  tell process "NotificationCenter"
+    if not (window "Notification Center" exists) then return
+    set alertGroups to groups of first UI element of first scroll area of first group of window "Notification Center"
+    repeat with aGroup in alertGroups
+      try
+        perform (first action of aGroup whose name contains "Close" or name contains "Clear")
+      on error errMsg
+        log errMsg
+      end try
+    end repeat
+    -- Show no message on success
+    return ""
+  end tell
 end tell
-
