@@ -42,7 +42,7 @@ if [[ $CHARGING != "" ]]; then
   [8-9][0-9] | 100)
     ICON="󰂅"
     ICON_COLOR=$WHITE
-    BACKGROUND_COLOR=$GREEN_BRIGHT
+    BACKGROUND_COLOR=$GREEN
     ;;
   7[0-9])
     ICON="󰂉"

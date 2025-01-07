@@ -26,7 +26,7 @@ get_color() {
 }
 
 if [ "$1" = "$FOCUSED_WORKSPACE" ]; then
-  sketchybar --set $NAME background.color=$(get_color $1) icon.color=$CONTENT_ACTIVE label.color=$CONTENT_ACTIVE
+  sketchybar --set $NAME label.color=$(get_color $1) background.color=$BACKGROUND_SURFACE
 else
-  sketchybar --set $NAME background.color=$BACKGROUD_SURFACE icon.color=$CONTENT_INACTIVE label.color=$CONTENT_INACTIVE
+  sketchybar --set $NAME background.color=$BACKGROUND_SURFACE label.color=$CONTENT_INACTIVE
 fi
