@@ -4,7 +4,7 @@ source "$CONFIG_DIR/colors.sh"
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
-sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=30 padding_left=2 padding_right=2 color=0x44000000
+sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=10 padding_left=2 padding_right=2 color=$BACKGROUND_BAR
 
 default=(
   padding_left=4
@@ -15,7 +15,6 @@ default=(
   label.color=0xffffffff
   icon.padding_left=4
   icon.padding_right=4
-  label.padding_left=4
   label.padding_right=4
   background.color=$BACKGROUND_SURFACE
   background.corner_radius=4
@@ -49,11 +48,16 @@ for sid in $(aerospace list-workspaces --monitor 1); do
     script="$CONFIG_DIR/plugins/aerospace.sh $sid"
 done
 
-sketchybar --add item clock center \
+# sketchybar --add item clock center \
+#   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
+#   background.drawing=off \
+#   icon.padding_right=0 \
+#   label.padding_left=0
+
+sketchybar --add item clock right \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-  background.drawing=off \
-  icon.padding_right=0 \
-  label.padding_left=0
+  icon.font="Hack Nerd Font:Bold:16.0" \
+  icon=
 
 sketchybar --add item battery right \
   --set battery \
@@ -65,7 +69,7 @@ sketchybar -m --add item network_down right \
   --set network_down label.font="SF Pro:Heavy:10" \
   icon.font="SF Pro:Black:10" \
   icon=􀱈 \
-  icon.highlight_color=0xff98ff98 \
+  icon.highlight_color=$GREEN \
   icon.y_offset=0 \
   icon.padding_right=4 \
   label.padding_left=0 \
@@ -81,7 +85,7 @@ sketchybar -m --add item network_down right \
   icon.font="SF Pro:Black:10" \
   icon=􀄮 \
   icon.color=0xffffffff \
-  icon.highlight_color=0xffffc0cb \
+  icon.highlight_color=$BLUE \
   icon.y_offset=0 \
   icon.padding_right=4 \
   label.padding_left=0 \
