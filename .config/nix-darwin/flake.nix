@@ -187,6 +187,10 @@
         };
         # Not sure how to avoid waiting, and have some sort of dependencies.
         script = ''
+          if [ ! -f $HOME/Library/Fonts/sketchybar-app-font.ttf] ; then
+            cp $HOME/dotfiles/assets/fonts/sketchybar-app-font.ttf $HOME/Library/Fonts
+          fi
+
           # Wait for font-hack-nerd-font to be installed (cask)
           while [ ! -f "/Library/Fonts/SF-Pro.ttf" ]; do
             echo "Waiting for font to be installed..." >> /tmp/sketchybar.out.log
