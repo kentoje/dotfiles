@@ -41,6 +41,7 @@
           gnupg
           coreutils
           gawk
+          atuin
           btop
           imagemagick
           wget

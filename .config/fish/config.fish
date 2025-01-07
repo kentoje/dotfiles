@@ -2,7 +2,9 @@
 
 starship init fish | source
 enable_transience
+
 zoxide init fish | source
+atuin init fish | source
 
 # oh-my-posh init fish --config ~/.config/oh-my-posh/config.toml | source
 
