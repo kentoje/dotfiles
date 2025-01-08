@@ -6,10 +6,6 @@ $hostname\
 $singularity\
 $kubernetes\
 $directory\
-$git_branch\
-$git_metrics\
-$git_state\
-$git_status\
 $memory_usage\
 $cmd_duration\
 $line_break\
@@ -22,9 +18,15 @@ $container\
 $shell\
 $character"""
 
+# $git_branch\
+# $git_metrics\
+# $git_state\
+# $git_status\
+
 [character] # The name of the module we are configuring is 'character'
 # success_symbol = '[](bold green)'
-success_symbol = '[~>](bold green)'
+# success_symbol = '[~>](bold green)'
+success_symbol = '[❯](bold green)'
 error_symbol = "[](bold red)"
 vimcmd_symbol = "[](bold purple)"
 
