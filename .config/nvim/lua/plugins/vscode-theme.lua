@@ -128,8 +128,15 @@ return {
 		--
 		vim.cmd("hi NormalFloat guifg=" .. "NONE" .. " guibg=" .. "NONE")
 		vim.cmd("hi FloatBorder guifg=" .. "NONE" .. " guibg=" .. "NONE")
+
 		-- Menu when intellisense is triggered
 		vim.cmd("hi Pmenu guibg=NONE")
+
+		-- vim.cmd("hi Character guifg=" .. colors.vscBlueGreen)
+		-- vim.cmd("hi String guifg=" .. colors.vscBlueGreen)
+
+		vim.cmd("hi @character guifg=" .. colors.vscBlue)
+		vim.cmd("hi @string guifg=" .. colors.vscBlueGreen)
 
 		vim.cmd("hi OilHidden guifg=" .. colors.vscGitUntracked)
 	end,
