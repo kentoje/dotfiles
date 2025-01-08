@@ -1,13 +1,10 @@
-iterm2
 assets
 zsh
-spacelauncher2
 setup
 
 .gitignore
 .git
 README.md
-scripts
 
 .config/nix-darwin
 
