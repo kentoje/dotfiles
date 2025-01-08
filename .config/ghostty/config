@@ -1,10 +1,7 @@
-config-file = "themes/vesper"
+config-file = "themes/vscode"
 
-font-family = "Liga SFMono Nerd Font"
-font-style = "SemiBold"
-font-style-bold = "Liga SFMono Nerd Font"
-font-style-italic = "Liga SFMono Nerd Font"
-font-style-bold-italic = "Liga SFMono Nerd Font"
+font-family = "CommitMono Nerd Font"
+font-style = "Bold"
 font-size = 14
 adjust-cell-width = -17%
 
@@ -12,7 +9,7 @@ window-decoration = true
 window-padding-x = 16
 window-padding-y = 12
 
-background-opacity = "0.75"
+background-opacity = "0.8"
 background-blur-radius = 60
 background = "1b1e28"
 foreground = "a6accd"
@@ -33,6 +30,7 @@ macos-option-as-alt = true
 clipboard-read = "allow"
 mouse-hide-while-typing = true
 shell-integration-features = "no-cursor"
+bold-is-bright = true
 
 quick-terminal-animation-duration = 0.08
 quick-terminal-position = "top"

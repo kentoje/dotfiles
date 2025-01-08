@@ -14,7 +14,7 @@ get_color() {
     echo $RED
     ;;
   "T")
-    echo $MAUVE_BRIGHT
+    echo $BLUE
     ;;
   "W")
     echo $GREEN_BRIGHT

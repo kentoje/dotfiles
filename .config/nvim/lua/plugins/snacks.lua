@@ -19,7 +19,6 @@ local function pick_random_jpg(directory)
 		if #files > 0 then
 			local index = random_number(1, #files)
 
-			print("index", index)
 			return files[index]
 		end
 	end

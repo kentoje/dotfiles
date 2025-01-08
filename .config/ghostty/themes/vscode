@@ -1,0 +1,24 @@
+# black
+palette = 0=#1F1F1F
+palette = 8=#252526
+# red
+palette = 1=#F44747
+palette = 9=#D16969
+# green
+palette = 2=#4EC9B0
+palette = 10=#73c991
+# yellow
+palette = 3=#FFD602
+palette = 11=#FFD602
+# blue
+palette = 4=#18a2fe
+palette = 12=#18a2fe
+# purple
+palette = 5=#C586C0
+palette = 13=#C586C0
+# aqua
+palette = 6=#8db9e2
+palette = 14=#8db9e2
+# white
+palette = 7=#fefefe
+palette = 15=#ffffff

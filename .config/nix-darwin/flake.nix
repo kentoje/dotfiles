@@ -92,6 +92,7 @@
         casks = [
           # "hammerspoon"
           # "logitech-options"
+          "font-commit-mono-nerd-font"
           "font-hack-nerd-font"
           "font-sf-pro"
           "nikitabobko/tap/aerospace"

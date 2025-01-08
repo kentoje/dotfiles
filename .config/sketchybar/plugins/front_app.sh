@@ -19,7 +19,7 @@ get_color() {
     echo $RED
     ;;
   "Ghostty")
-    echo $MAUVE_BRIGHT
+    echo $BLUE
     ;;
   "WhatsApp")
     echo $GREEN

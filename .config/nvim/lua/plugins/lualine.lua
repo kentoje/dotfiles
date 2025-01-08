@@ -12,10 +12,10 @@ end
 
 local icons = {
 	diagnostics = {
-		Error = " ",
-		Warn = " ",
-		Hint = " ",
-		Info = " ",
+		Error = " ",
+		Warn = " ",
+		Hint = " ",
+		Info = " ",
 	},
 	git = {
 		added = "",
@@ -57,7 +57,8 @@ return {
 		-- local wtf = require("wtf")
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")
 		-- local colors = require("poimandres.palette")
-		local colors = require("vesper.colors")
+		-- local colors = require("vesper.colors")
+		local colors = require("vscode.colors").get_colors()
 
 		require("lualine").setup({
 			options = {
@@ -117,7 +118,7 @@ return {
 						color = {
 							-- fg = colors.blue,
 							-- fg = colors.blue1,
-							fg = colors.green,
+							fg = colors.vscBlueGreen,
 							bg = "",
 						},
 
@@ -152,7 +153,8 @@ return {
 						},
 					},
 				},
-				lualine_c = { diff, diagnostics },
+				-- lualine_c = { diff, diagnostics },
+				lualine_c = {},
 				-- lualine_x = { wtf.get_status, "encoding", "fileformat", "filetype" },
 				-- lualine_x = { wtf.get_status, "filetype" },
 				lualine_x = { "encoding", "fileformat", "filetype" },

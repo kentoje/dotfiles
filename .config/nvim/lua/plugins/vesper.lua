@@ -15,6 +15,7 @@ end
 
 return {
 	"datsfilipe/vesper.nvim",
+	enabled = false,
 	lazy = false,
 	priority = 1000,
 	config = function()
@@ -89,6 +90,10 @@ return {
 		vim.cmd("hi FloatBorder guifg=" .. colors.orange .. " guibg=" .. "NONE")
 
 		vim.cmd("hi MatchParen guifg=" .. colors.orange .. " guibg=" .. "NONE")
+
+		vim.cmd("hi DiffAdd guifg=" .. colors.green)
+		vim.cmd("hi DiffDelete guifg=" .. colors.red)
+		vim.cmd("hi DiffChange guifg=" .. colors.orange)
 
 		vim.cmd("hi LspSignatureActiveParameter guifg=" .. "NONE" .. " guibg=" .. colors.orange)
 
