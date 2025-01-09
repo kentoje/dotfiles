@@ -132,8 +132,10 @@ return {
 		-- Menu when intellisense is triggered
 		vim.cmd("hi Pmenu guibg=NONE")
 
-		-- vim.cmd("hi Character guifg=" .. colors.vscBlueGreen)
-		-- vim.cmd("hi String guifg=" .. colors.vscBlueGreen)
+		-- Useful for nvim snack dashboard
+		vim.cmd("hi Special guifg=" .. colors.vscMediumBlue)
+		vim.cmd("hi Character guifg=" .. colors.vscBlue)
+		vim.cmd("hi String guifg=" .. colors.vscBlueGreen)
 
 		vim.cmd("hi @character guifg=" .. colors.vscBlue)
 		vim.cmd("hi @string guifg=" .. colors.vscBlueGreen)
