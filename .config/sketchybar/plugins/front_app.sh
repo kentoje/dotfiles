@@ -10,19 +10,19 @@ source "$CONFIG_DIR/colors.sh"
 get_color() {
   case "$1" in
   "Arc")
-    echo $BLUE
+    echo $BLUE_BRIGHT
     ;;
   "Spotify")
-    echo $GREEN
+    echo $GREEN_BRIGHT
     ;;
   "Slack")
-    echo $RED
+    echo $RED_BRIGHT
     ;;
   "Ghostty")
-    echo $BLUE
+    echo $BLUE_BRIGHT
     ;;
   "WhatsApp")
-    echo $GREEN
+    echo $GREEN_BRIGHT
     ;;
   *)
     echo $MAUVE_BRIGHT # default color

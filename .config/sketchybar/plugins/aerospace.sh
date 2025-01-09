@@ -5,16 +5,16 @@ source "$CONFIG_DIR/colors.sh"
 get_color() {
   case "$1" in
   "G")
-    echo $BLUE
+    echo $BLUE_BRIGHT
     ;;
   "M")
-    echo $GREEN
+    echo $GREEN_BRIGHT
     ;;
   "S")
-    echo $RED
+    echo $RED_BRIGHT
     ;;
   "T")
-    echo $BLUE
+    echo $BLUE_BRIGHT
     ;;
   "W")
     echo $GREEN_BRIGHT
