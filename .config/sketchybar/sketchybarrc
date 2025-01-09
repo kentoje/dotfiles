@@ -30,9 +30,12 @@ sketchybar --add event aerospace_workspace_change
 
 sketchybar --add item svim.mode left \
   --set svim.mode popup.align=left \
-  icon= \
-  icon.font="Hack Nerd Font Mono:Bold:28.0" \
+  icon= \
+  icon.font="Hack Nerd Font Mono:Bold:20.0" \
+  icon.padding_left=8 \
+  icon.padding_right=8 \
   label.font="Hack Nerd Font Mono:Bold:13.0" \
+  label.drawing="off" \
   background.color=$RED \
   icon.color=0xffffffff \
   script="sketchybar --set svim.mode popup.drawing=off" \
