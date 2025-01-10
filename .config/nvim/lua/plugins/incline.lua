@@ -13,9 +13,9 @@ local icons = {
 }
 
 local hi_groups = {
-	changed = "DiffChange",
-	deleted = "DiffDelete",
-	added = "DiffAdd",
+	changed = "DiagnosticInfo",
+	deleted = "DiagnosticVirtualTextError",
+	added = "DiagnosticOk",
 }
 
 local function get_diagnostic_label(props)
@@ -88,7 +88,6 @@ return {
 				},
 			},
 			render = function(props)
-				-- local bufname = vim.api.nvim_buf_get_name(props.buf)
 				--
 				-- local filename = vim.fn.fnamemodify(bufname, ":t")
 				-- local path = vim.fn.fnamemodify(bufname, ":p:.")
@@ -101,18 +100,24 @@ return {
 				--
 				-- local icon, color = require("nvim-web-devicons").get_icon_color(filename)
 				-- return { { icon, guifg = color }, { " " }, { path } }
-
-				local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
+				local bufname = vim.api.nvim_buf_get_name(props.buf)
+				local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":p")
 				local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(filename)
 				local modified = vim.api.nvim_get_option_value("modified", { buf = props.bufnr }) and "bold,italic"
 					or "normal"
+
+				local path = vim.fn.fnamemodify(bufname, ":p:.")
+
+				if starts_with(bufname, "oil://") then
+					path = "oil"
+				end
 
 				local buffer = {
 					{ get_git_diff(props) },
 					{ get_diagnostic_label(props) },
 					{ ft_icon, guifg = ft_color },
 					{ " " },
-					{ filename, gui = modified },
+					{ path, gui = modified },
 				}
 				return buffer
 			end,

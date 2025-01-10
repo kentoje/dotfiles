@@ -14,6 +14,8 @@ vim.g.firenvim_config = {
 
 return {
 	"glacambre/firenvim",
+	-- trying out svim
+	enabled = false,
 	-- Lazy load firenvim
 	lazy = not vim.g.started_by_firenvim,
 	module = false,
