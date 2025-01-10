@@ -1,24 +1,22 @@
 #!/bin/sh
 
-# This script is executed when either the mode changes,
-# or the commandline changes
-# This is just an example using sketchybar:
-# The variables $MODE and $CMDLINE hold the
-# current editor and cmdline info
+source "$HOME/dotfiles/.config/sketchybar/colors.sh"
 
-COLOR=0xff9dd274
+COLOR=$GREEN
+
 if [ "$MODE" = "" ]; then
-  COLOR=0xffF44747
+  COLOR=$RED
 fi
 
 DRAW_CMD="off"
+
 if [ "$CMDLINE" != "" ]; then
   DRAW_CMD="on"
 fi
 
 sketchybar --set svim.mode label="[$MODE]" \
   label.drawing=$(if [ "$MODE" = "" ]; then echo "off"; else echo "on"; fi) \
-  icon.color=0xFFFFFFFF \
-  background.color=$COLOR \
+  icon.color=$(if [ "$MODE" = "" ]; then echo $COLOR; else echo $WHITE; fi) \
+  background.color=$(if [ "$MODE" = "" ]; then echo $BACKGROUND_SURFACE; else echo $COLOR; fi) \
   popup.drawing=$DRAW_CMD \
   --set svim.cmdline label="$CMDLINE"

@@ -34,10 +34,9 @@ sketchybar --add item svim.mode left \
   icon.font="Hack Nerd Font Mono:Bold:20.0" \
   icon.padding_left=8 \
   icon.padding_right=8 \
+  icon.color=$WHITE \
   label.font="Hack Nerd Font Mono:Bold:13.0" \
   label.drawing="off" \
-  background.color=$RED \
-  icon.color=0xffffffff \
   script="sketchybar --set svim.mode popup.drawing=off" \
   --subscribe svim.mode front_app_switched window_focus \
   --add item svim.cmdline popup.svim.mode \
