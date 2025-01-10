@@ -7,6 +7,15 @@ get_color() {
   "G")
     echo $BLUE_BRIGHT
     ;;
+  "Z")
+    echo $BLUE_BRIGHT
+    ;;
+  "F")
+    echo $BLACK
+    ;;
+  "B")
+    echo $BLUE_BRIGHT
+    ;;
   "M")
     echo $GREEN_BRIGHT
     ;;

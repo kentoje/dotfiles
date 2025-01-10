@@ -28,6 +28,10 @@ sketchybar --default "${default[@]}"
 
 sketchybar --add event aerospace_workspace_change
 
+sketchybar --add item front_app left \
+  --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
+  --subscribe front_app front_app_switched
+
 sketchybar --add item svim.mode left \
   --set svim.mode popup.align=left \
   icon= \
@@ -38,13 +42,9 @@ sketchybar --add item svim.mode left \
   label.font="Hack Nerd Font Mono:Bold:13.0" \
   label.drawing="off" \
   script="sketchybar --set svim.mode popup.drawing=off" \
-  --subscribe svim.mode front_app_switched window_focus \
+  --subscribe svim.mode front_app_switched aerospace_workspace_change \
   --add item svim.cmdline popup.svim.mode \
   --set svim.cmdline icon="Command: "
-
-sketchybar --add item front_app left \
-  --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
-  --subscribe front_app front_app_switched
 
 # for sid in $(aerospace list-workspaces --monitor 1 --empty no); do
 for sid in $(aerospace list-workspaces --monitor 1); do
@@ -117,11 +117,6 @@ sketchybar --add item ram right \
   --set ram update_freq=4 \
   icon= \
   script="$PLUGIN_DIR/ram.sh"
-
-sketchybar --add item clock right \
-  --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-  icon.font="Hack Nerd Font:Bold:12.0" \
-  icon=
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --update
