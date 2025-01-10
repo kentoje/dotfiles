@@ -45,7 +45,6 @@
             # CLI tools
             neovim
             mkalias
-            awscli
             bat
             gnupg
             coreutils
