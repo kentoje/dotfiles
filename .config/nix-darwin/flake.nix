@@ -106,7 +106,6 @@
               "nikitabobko/tap/aerospace"
               "karabiner-elements"
               "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"
-              "jandedobbeleer/oh-my-posh/oh-my-posh"
             ];
             # Brews are formulaes
             brews = [
