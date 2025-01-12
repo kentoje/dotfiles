@@ -14,7 +14,7 @@
 # session_path = "~/.session"
 
 ## date format used, either "us" or "uk"
-# dialect = "us"
+dialect = "uk"
 
 ## default timezone to use when displaying time
 ## either "l", "local" to use the system's current local timezone, or an offset
