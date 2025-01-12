@@ -14,6 +14,6 @@ return {
 			go_to_preview.goto_preview_definition,
 			{ silent = true, desc = "Peek definition" }
 		)
-		-- vim.keymap.set("n", "gF", go_to_preview.goto_preview_references, { silent = true, desc = "Lookup references" })
+		-- vim.keymap.set("n", "gR", go_to_preview.goto_preview_references, { silent = true, desc = "Lookup references" })
 	end,
 }

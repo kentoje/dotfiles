@@ -8,7 +8,6 @@ local biome_config_names = { "biome.json" }
 local function config_exists(config_names)
 	for _, name in ipairs(config_names) do
 		if vim.loop.fs_stat(name) then
-			-- print("Found config file: " .. name)
 			return true
 		end
 	end

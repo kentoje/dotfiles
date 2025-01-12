@@ -1,16 +1,4 @@
-local icons = {
-	diagnostics = {
-		Error = " ",
-		Warn = " ",
-		Hint = " ",
-		Info = " ",
-	},
-	git = {
-		added = "",
-		changed = "",
-		deleted = "",
-	},
-}
+local icons = require("kentoje.icons").icons
 
 local hi_groups = {
 	changed = "DiagnosticInfo",

@@ -555,7 +555,6 @@ return {
 		vim.keymap.set("n", "<leader>xdc", ":DiffviewClose<CR>", { silent = true, desc = "Close diff view" })
 
 		vim.api.nvim_set_hl(0, "DiffviewDiffChange", {
-			bg = "#7390aa",
 			ctermbg = 14,
 		})
 	end,

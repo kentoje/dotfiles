@@ -140,6 +140,6 @@ return {
 		vim.cmd("hi @character guifg=" .. colors.vscBlue)
 		vim.cmd("hi @string guifg=" .. colors.vscBlueGreen)
 
-		vim.cmd("hi OilHidden guifg=" .. colors.vscGitUntracked)
+		vim.cmd("hi OilHidden guifg=" .. colors.vscDisabledBlue)
 	end,
 }

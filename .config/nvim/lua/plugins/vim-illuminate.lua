@@ -64,15 +64,21 @@ return {
 		-- vim.cmd("hi def IlluminatedWordWrite link=Search")
 		vim.api.nvim_set_hl(0, "IlluminatedCustom", {
 			-- fg = "#d0679d",
-			-- ctermfg = 14,
+			-- fg = "reverse",
+			bg = "#264f78",
+			-- reverse = true,
 			underline = true,
 			bold = true,
 			-- standout = true,
 			-- reverse = true,
 		})
 
-		vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "IlluminatedCustom" })
-		vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "IlluminatedCustom" })
-		vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "IlluminatedCustom" })
+		-- vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "IlluminatedCustom" })
+		-- vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "IlluminatedCustom" })
+		-- vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "IlluminatedCustom" })
+
+		vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "Visual" })
+		vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "Visual" })
+		vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "Visual" })
 	end,
 }

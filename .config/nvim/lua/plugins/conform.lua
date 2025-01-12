@@ -14,22 +14,15 @@ local function config_exists(config_names)
 end
 
 local function pick_js_formatter()
-	-- print("Picking JS formatter...")
-
-	-- Check for Prettier config files
 	if config_exists(prettier_config_names) then
-		-- print("Using Prettier.")
 		return { "prettierd" }
 	end
 
 	-- Check for Biome config files
 	if config_exists(biome_config_names) then
-		-- print("Using Biome.")
-		-- return { { "biome-check" } }
 		return { "biome" }
 	end
 
-	-- print("No formatter config files found, using Prettier.")
 	return { "prettierd" }
 
 	-- LSP are loaded conditionnally so it should already work
@@ -40,10 +33,6 @@ return {
 	"stevearc/conform.nvim",
 	config = function()
 		local conform = require("conform")
-
-		-- conform.formatters.prettier = {
-		-- 	prepend_args = { "--cache" },
-		-- }
 
 		conform.setup({
 			formatters_by_ft = {

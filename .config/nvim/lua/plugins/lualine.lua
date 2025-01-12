@@ -1,3 +1,5 @@
+local icons = require("kentoje.icons").icons
+
 local function get_harpoon_active_indicator(num)
 	return function(harpoon_entry)
 		return string.format(" %s %s", num, vim.fn.fnamemodify(harpoon_entry.value, ":t"))
@@ -9,20 +11,6 @@ local function get_harpoon_inactive_indicator(num)
 		return string.format("%s %s", num, vim.fn.fnamemodify(harpoon_entry.value, ":t"))
 	end
 end
-
-local icons = {
-	diagnostics = {
-		Error = " ",
-		Warn = " ",
-		Hint = " ",
-		Info = " ",
-	},
-	git = {
-		added = "",
-		changed = "",
-		deleted = "",
-	},
-}
 
 local diagnostics = {
 	"diagnostics",
@@ -62,9 +50,10 @@ return {
 
 		require("lualine").setup({
 			options = {
-				-- theme = "auto",
+				-- theme  "auto",
 				-- theme = "poimandres",
-				theme = "vesper",
+				-- theme = "vesper",
+				theme = "vscode",
 				globalstatus = true,
 				-- ░▒▓
 				-- section_separators = { left = "", right = "" },
