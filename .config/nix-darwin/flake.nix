@@ -127,6 +127,7 @@
 
           system.defaults = {
             ".GlobalPreferences"."com.apple.mouse.scaling" = -1.0;
+            screencapture.location = "/Users/kento/Pictures/screenshots";
             dock.autohide = true;
             dock.orientation = "left";
             finder.FXPreferredViewStyle = "clmv";

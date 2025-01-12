@@ -26,7 +26,7 @@ local function pick_random_jpg(directory)
 	return nil
 end
 
-local image = pick_random_jpg("/Users/kento/Pictures/samples")
+local image = pick_random_jpg("/Users/kento/Pictures/wallpapers/samples")
 
 return {
 	"folke/snacks.nvim",

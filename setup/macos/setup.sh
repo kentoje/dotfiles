@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p "$HOME/Pictures/screenshots"
+
 # Add a nix command to setup
 ./setup_nix.sh
 
@@ -8,3 +10,7 @@
 
 # Create symlinks
 stow .
+
+if [ ! -d "$HOME/Pictures/wallpapers" ]; then
+  ./setup_pictures.sh
+fi
