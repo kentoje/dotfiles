@@ -33,7 +33,6 @@
           # $ nix-env -qaP | grep wget
           environment.systemPackages = with pkgs; [
             # GUI Apps
-            # alacritty
             # arc-browser
             # spotify
             # raycast
