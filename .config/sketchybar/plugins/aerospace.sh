@@ -42,7 +42,7 @@ if [ "$1" = "$FOCUSED_WORKSPACE" ]; then
     background.border_color=$(get_color $1)
 else
   sketchybar --set $NAME \
-    background.color=$BACKGROUND_SURFACE_INACTIVE \
+    background.color=$BACKGROUND_SURFACE \
     label.color=$CONTENT_INACTIVE \
     background.border_width=0
 fi

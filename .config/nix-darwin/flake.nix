@@ -103,6 +103,7 @@
               "font-commit-mono-nerd-font"
               "font-hack-nerd-font"
               "font-sf-pro"
+              "sf-symbols"
               "nikitabobko/tap/aerospace"
               "karabiner-elements"
               "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"

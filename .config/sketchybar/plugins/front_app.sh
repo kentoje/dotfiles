@@ -6,14 +6,13 @@ source "$CONFIG_DIR/colors.sh"
 # variable. E.g. the front_app_switched event sends the name of the newly
 # focused application in the $INFO variable:
 # https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
-zoom.us
 
 get_color() {
   case "$1" in
   "WhatsApp")
     echo $GREEN_BRIGHT
     ;;
-  "zoom.us")
+  "zoom\.us")
     echo $BLUE_BRIGHT
     ;;
   "Figma")

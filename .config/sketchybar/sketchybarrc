@@ -4,13 +4,24 @@ source "$CONFIG_DIR/colors.sh"
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 
-sketchybar --bar position=top height=36 y_offset=8 margin=12 corner_radius=6 blur_radius=10 padding_left=2 padding_right=2 color=$BACKGROUND_BAR
+sketchybar --bar \
+  position=top \
+  height=36 \
+  y_offset=8 \
+  margin=12 \
+  corner_radius=6 \
+  blur_radius=10 \
+  padding_left=2 \
+  padding_right=2 \
+  color=$BACKGROUND_BAR \
+  shadow=on
 
 default=(
   padding_left=4
   padding_right=4
-  icon.font="Hack Nerd Font:Bold:13.0"
-  label.font="SF Pro:Semibold:13.0"
+  # icon.font="Hack Nerd Font:Bold:13.0"
+  icon.font="SF Pro:Bold:13.0"
+  label.font="SF Pro:Bold:13.0"
   icon.color=0xffffffff
   label.color=0xffffffff
   icon.padding_left=4
@@ -62,27 +73,19 @@ for sid in $(aerospace list-workspaces --monitor 1); do
     script="$CONFIG_DIR/plugins/aerospace.sh $sid"
 done
 
-# sketchybar --add item clock center \
-#   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-#   background.drawing=off \
-#   icon.padding_right=0 \
-#   label.padding_left=0
-
 sketchybar --add item clock right \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-  icon.font="Hack Nerd Font:Bold:16.0" \
-  icon=
+  icon=􀐫
 
 sketchybar --add item battery right \
   --set battery \
   update_freq=20 \
-  icon.font="Hack Nerd Font:Bold:12.0" \
   script="$PLUGIN_DIR/battery.sh"
 
 sketchybar -m --add item network_down right \
   --set network_down label.font="SF Pro:Heavy:10" \
   icon.font="SF Pro:Black:10" \
-  icon=􀱈 \
+  icon=􀄩 \
   icon.highlight_color=$GREEN \
   icon.y_offset=0 \
   icon.padding_right=4 \
@@ -97,7 +100,7 @@ sketchybar -m --add item network_down right \
   --add item network_up right \
   --set network_up label.font="SF Pro:Heavy:10" \
   icon.font="SF Pro:Black:10" \
-  icon=􀄮 \
+  icon=􀄨 \
   icon.color=0xffffffff \
   icon.highlight_color=$BLUE \
   icon.y_offset=0 \
@@ -110,12 +113,12 @@ sketchybar -m --add item network_down right \
 
 sketchybar --add item cpu right \
   --set cpu update_freq=4 \
-  icon= \
+  icon=􀫥 \
   script="$PLUGIN_DIR/cpu.sh"
 
 sketchybar --add item ram right \
   --set ram update_freq=4 \
-  icon= \
+  icon=􀫦 \
   script="$PLUGIN_DIR/ram.sh"
 
 ##### Force all scripts to run the first time (never do this in a script) #####
