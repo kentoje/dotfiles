@@ -10,4 +10,4 @@
 !.config/alacritty/themes/poimandres*.toml
 
 .config/tmux/plugins
-
+.config/btop/btop.log
