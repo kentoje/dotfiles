@@ -1,7 +1,7 @@
 local icons = require("kentoje.icons").icons
 
 local hi_groups = {
-	changed = "DiagnosticInfo",
+	changed = "Identifier",
 	deleted = "DiagnosticVirtualTextError",
 	added = "DiagnosticOk",
 }

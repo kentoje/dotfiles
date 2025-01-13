@@ -3,16 +3,16 @@ palette = 0=#1F1F1F
 palette = 8=#252526
 # red
 palette = 1=#F44747
-palette = 9=#D16969
+palette = 9=#F44747
 # green
 palette = 2=#4EC9B0
-palette = 10=#73c991
+palette = 10=#4EC9B0
 # yellow
 palette = 3=#FFD602
 palette = 11=#FFD602
 # blue
-palette = 4=#18a2fe
-palette = 12=#18a2fe
+palette = 4=#9CDCFE
+palette = 12=#9CDCFE
 # purple
 palette = 5=#C586C0
 palette = 13=#C586C0
