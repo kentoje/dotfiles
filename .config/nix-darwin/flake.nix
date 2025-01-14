@@ -94,6 +94,7 @@
           homebrew = {
             taps = [
               "zfdang/free-for-macOS"
+              "hashicorp/tap"
               "FelixKratz/formulae"
             ];
             enable = true;
@@ -115,6 +116,7 @@
               "ifstat"
               "free-for-macOS"
               "svim"
+              "hashicorp/tap/terraform"
             ];
             # Make sure to be logged in App Store.
             # masApps = {
