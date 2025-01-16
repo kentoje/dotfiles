@@ -80,6 +80,7 @@ sketchybar --add item clock right \
 sketchybar --add item battery right \
   --set battery \
   update_freq=20 \
+  drawing=off \
   script="$PLUGIN_DIR/battery.sh"
 
 sketchybar -m --add item network_down right \

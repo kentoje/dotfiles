@@ -12,7 +12,7 @@ get_color() {
   "WhatsApp")
     echo $GREEN_BRIGHT
     ;;
-  "zoom\.us")
+  "zoom.us")
     echo $BLUE_BRIGHT
     ;;
   "Figma")
