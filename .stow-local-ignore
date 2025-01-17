@@ -7,7 +7,3 @@ setup
 README.md
 
 .config/nix-darwin
-
-.gitconfig
-.gitconfig-github
-.gitconfig-gitlab
