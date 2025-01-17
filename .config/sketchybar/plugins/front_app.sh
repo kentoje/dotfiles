@@ -39,8 +39,6 @@ get_color() {
   esac
 }
 
-echo $INFO >>/tmp/sketchybar.out.log
-
 ICON=$($CONFIG_DIR/plugins/icon_map_fn.sh $INFO)
 
 if [ "$SENDER" = "front_app_switched" ]; then
