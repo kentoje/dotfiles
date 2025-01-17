@@ -47,7 +47,6 @@
             bat
             gnupg
             coreutils
-            gawk
             atuin
             btop
             imagemagick
@@ -69,24 +68,18 @@
             gum
             mods
             glow
-            # lua and co...
             fastfetch
             ripgrep
-            rustc
             starship
             stow
             pnpm
             tmux
-            zellij
             tree
             tldr
             typescript
             yq
-            nodePackages.yalc
             zoxide
             gitmux
-            prettierd
-            qmk
             yazi
             chafa
           ];
