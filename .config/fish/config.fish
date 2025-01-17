@@ -32,7 +32,12 @@ if test -f $path/includes/private-vars.fish
 end
 
 # pnpm
-set -gx PNPM_HOME "/Users/kento/Library/pnpm"
+if string match -q "/Volumes*" $HOME
+  set -gx PNPM_HOME "/Volumes/HomeX/kento/Library/pnpm"
+else
+  set -gx PNPM_HOME "/Users/kento/Library/pnpm"
+end
+
 if not string match -q -- $PNPM_HOME $PATH
   set -gx PATH "$PNPM_HOME" $PATH
 end
