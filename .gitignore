@@ -1,6 +1,7 @@
 .DS_Store
 
 .config/fish/includes/private-vars.fish
+.config/fish/fish_variables
 
 .config/wezterm/assets/*.webp
 !.config/wezterm/assets/5.webp
@@ -11,3 +12,5 @@
 
 .config/tmux/plugins
 .config/btop/btop.log
+
+.config/lazygit/state.yml
