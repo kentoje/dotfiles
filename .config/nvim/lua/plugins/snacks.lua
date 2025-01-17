@@ -1,3 +1,5 @@
+local has_home_with_volumes = require("kentoje.helpers").has_home_with_volumes
+
 local function random_number(min, max)
 	-- Seed the random number generator
 	math.randomseed(os.time())
@@ -26,7 +28,9 @@ local function pick_random_jpg(directory)
 	return nil
 end
 
-local image = pick_random_jpg("/Users/kento/Pictures/wallpapers/samples")
+local image_path = has_home_with_volumes and "/Volumes/HomeX/kento/Pictures/wallpapers/samples"
+	or "/Users/kento/Pictures/wallpapers/samples"
+local image = pick_random_jpg(image_path)
 
 return {
 	"folke/snacks.nvim",

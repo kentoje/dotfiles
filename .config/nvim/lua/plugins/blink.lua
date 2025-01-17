@@ -5,6 +5,7 @@ return {
 		"rafamadriz/friendly-snippets",
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
 		{ "saadparwaiz1/cmp_luasnip" },
+		{ "hrsh7th/nvim-cmp" },
 	},
 
 	-- use a release tag to download pre-built binaries

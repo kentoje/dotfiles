@@ -1,7 +1,10 @@
+local has_home_with_volumes = require("kentoje.helpers").has_home_with_volumes
+
 return {
 	"zbirenbaum/copilot.lua",
 	cmd = "Copilot",
 	event = "InsertEnter",
+	enabled = has_home_with_volumes and false or true,
 	config = function()
 		require("copilot").setup({
 			panel = {

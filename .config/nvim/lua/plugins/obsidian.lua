@@ -1,3 +1,5 @@
+local has_home_with_volumes = require("kentoje.helpers").has_home_with_volumes
+
 return {
 	"epwalsh/obsidian.nvim",
 	version = "*", -- recommended, use latest release instead of latest commit
@@ -24,7 +26,8 @@ return {
 			workspaces = {
 				{
 					name = "personal",
-					path = "/Users/kento/Documents/github/kentoje/obsidian-vault",
+					path = has_home_with_volumes and "/Volumes/HomeX/kento/Documents/github/kentoje/obsidian-vault"
+						or "/Users/kento/Documents/github/kentoje/obsidian-vault",
 				},
 			},
 
