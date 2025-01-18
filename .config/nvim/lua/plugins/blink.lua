@@ -20,7 +20,7 @@ return {
 	opts = {
 		completion = {
 			list = {
-				selection = "manual",
+				selection = { preselect = false, auto_insert = false },
 			},
 			documentation = {
 				auto_show = true,
@@ -100,44 +100,12 @@ return {
 				Operator = "󰪚",
 				TypeParameter = "󰬛",
 			},
-			-- kind_icons = {
-			-- 	Text = "Te",
-			-- 	Method = "Me",
-			-- 	Function = "Fu",
-			-- 	Constructor = "Co",
-			--
-			-- 	Field = "Fi",
-			-- 	Variable = "Va",
-			-- 	Property = "Pr",
-			--
-			-- 	Class = "Cl",
-			-- 	Interface = "In",
-			-- 	Struct = "St",
-			-- 	Module = "Mo",
-			--
-			-- 	Unit = "Un",
-			-- 	Value = "Va",
-			-- 	Enum = "En",
-			-- 	EnumMember = "Em",
-			--
-			-- 	Keyword = "Ke",
-			-- 	Constant = "Co",
-			--
-			-- 	Snippet = "Sn",
-			-- 	Color = "Co",
-			-- 	File = "Fi",
-			-- 	Reference = "Re",
-			-- 	Folder = "Fo",
-			-- 	Event = "Ev",
-			-- 	Operator = "Op",
-			-- 	TypeParameter = "Tp",
-			-- },
 		},
 
 		-- Default list of enabled providers defined so that you can extend it
 		-- elsewhere in your config, without redefining it, due to `opts_extend`
 		sources = {
-			default = { "lsp", "path", "snippets", "luasnip", "buffer" },
+			default = { "lsp", "path", "snippets", "buffer" },
 		},
 	},
 	opts_extend = { "sources.default" },
