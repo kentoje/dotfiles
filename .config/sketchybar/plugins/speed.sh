@@ -1,6 +1,9 @@
 #!/bin/sh
 
-UPDOWN=$(ifstat -i "en0" -b 0.1 1 | tail -n1)
+# Get the primary active interface (prioritize ethernet over wifi)
+INTERFACE=$(networksetup -listallhardwareports | awk '/Hardware Port: (Ethernet|Wi-Fi)/{interface=tolower($3)} /Device: /{device=$2; if(interface=="ethernet" || interface=="wi-fi") {print device; exit}}')
+
+UPDOWN=$(ifstat -i "$INTERFACE" -b 0.1 1 | tail -n1)
 DOWN=$(echo "$UPDOWN" | awk '{ print $1 }' | cut -f1 -d ".")
 UP=$(echo "$UPDOWN" | awk '{ print $2 }' | cut -f1 -d ".")
 
