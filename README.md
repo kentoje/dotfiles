@@ -47,6 +47,7 @@ $ darwin-rebuild switch --flake <PATH_TO_FLAKE>#<HOSTNAME>
 Install tmux plugins
 
 ```bash
+$ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 $ nvim .config/tmux/tmux.config
 ```
 
