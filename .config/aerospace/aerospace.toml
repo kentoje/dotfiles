@@ -263,7 +263,6 @@ run = 'move-node-to-workspace D'
 if.app-id = 'me.proton.pass.ios'
 run = 'move-node-to-workspace V'
 
-
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
 run = 'move-node-to-workspace W'
@@ -276,7 +275,10 @@ run = 'move-node-to-workspace W'
 if.app-id = 'com.readdle.smartemail-Mac'
 run = 'move-node-to-workspace B'
 
-
 [[on-window-detected]]
 if.app-id = 'org.chromium.Chromium'
-run = 'move-node-to-workspace 3'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.ledger.live'
+run = 'move-node-to-workspace 1'
