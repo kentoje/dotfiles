@@ -74,8 +74,8 @@ for sid in $(aerospace list-workspaces --monitor 1); do
 done
 
 sketchybar --add item clock right \
-  --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-  icon=􀐫
+  --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh"
+# icon=􀐫
 
 sketchybar --add item battery right \
   --set battery \
