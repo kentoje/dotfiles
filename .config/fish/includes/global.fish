@@ -9,3 +9,5 @@ set -Ux NIX_CONF_DIR $HOME/dotfiles/.config/nix-darwin
 
 set -Ux XDG_CONFIG_HOME $HOME/.config
 set -Ux XDG_DATA_HOME ~/.local/share
+set -Ux COINTOP_CONFIG $HOME/.config/cointop/config.toml
+set -Ux OLLAMA_HOST "127.0.0.1:11435"
