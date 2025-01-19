@@ -3,6 +3,8 @@
 .config/fish/includes/private-vars.fish
 .config/fish/fish_variables
 
+.config/cointop/config.toml
+
 .config/wezterm/assets/*.webp
 !.config/wezterm/assets/5.webp
 
