@@ -85,6 +85,7 @@ sketchybar --add item battery right \
 
 sketchybar -m --add item network_down right \
   --set network_down label.font="SF Pro:Heavy:10" \
+  drawing=off \
   icon.font="SF Pro:Black:10" \
   icon=􀄩 \
   icon.highlight_color=$GREEN \
@@ -100,6 +101,7 @@ sketchybar -m --add item network_down right \
   \
   --add item network_up right \
   --set network_up label.font="SF Pro:Heavy:10" \
+  drawing=off \
   icon.font="SF Pro:Black:10" \
   icon=􀄨 \
   icon.color=0xffffffff \
