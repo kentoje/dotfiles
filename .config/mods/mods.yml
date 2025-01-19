@@ -79,7 +79,7 @@ apis:
         aliases: ["claude3-opus", "opus"]
         max-input-chars: 680000
   ollama:
-    base-url: http://localhost:11435/api
+    base-url: http://localhost:11434/api
     models: # https://ollama.com/library
       "llama3.2":
         aliases: ["llama3.2"]
