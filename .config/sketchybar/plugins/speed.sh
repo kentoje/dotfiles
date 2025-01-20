@@ -7,8 +7,7 @@ case "$HOME" in
   ;;
 esac
 
-# Get the primary active interface (prioritize ethernet over wifi)
-INTERFACE=$(networksetup -listallhardwareports | awk '/Hardware Port: (Ethernet|Wi-Fi)/{interface=tolower($3)} /Device: /{device=$2; if(interface=="ethernet" || interface=="wi-fi") {print device; exit}}')
+INTERFACE="en0"
 
 UPDOWN=$(ifstat -i "$INTERFACE" -b 0.1 1 | tail -n1)
 DOWN=$(echo "$UPDOWN" | awk '{ print $1 }' | cut -f1 -d ".")
