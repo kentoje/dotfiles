@@ -45,6 +45,7 @@
             coreutils
             atuin
             btop
+            cointop
             imagemagick
             wget
             sad
@@ -73,6 +74,7 @@
             tree
             tldr
             typescript
+            nodePackages.yalc
             yq
             zoxide
             gitmux
@@ -105,6 +107,7 @@
               "ifstat"
               "free-for-macOS"
               "svim"
+              "glab"
               "hashicorp/tap/terraform"
             ];
             # Make sure to be logged in App Store.

@@ -113,6 +113,7 @@
               "ifstat"
               "free-for-macOS"
               "svim"
+              "glab"
               "hashicorp/tap/terraform"
             ];
             # Make sure to be logged in App Store.
