@@ -1,6 +1,21 @@
+local function focus_app(app_name)
+	local app = hs.application.get(app_name)
+
+	if not app then
+		hs.application.launchOrFocus(app_name)
+		return
+	end
+
+	if app:isFrontmost() then
+		app:hide()
+	else
+		app:activate()
+	end
+end
+
 local function bind_app(key, app_name)
 	hs.hotkey.bind({ "alt" }, key, function()
-		return hs.application.launchOrFocus(app_name)
+		return focus_app(app_name)
 	end)
 end
 
