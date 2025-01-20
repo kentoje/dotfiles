@@ -40,6 +40,7 @@
             # CLI tools
             neovim
             mkalias
+            bun
             bat
             gnupg
             coreutils
