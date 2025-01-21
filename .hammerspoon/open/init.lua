@@ -9,7 +9,7 @@ local function focus_app(app_name)
 	if app:isFrontmost() then
 		app:hide()
 	else
-		app:activate()
+		hs.application.launchOrFocus(app_name)
 	end
 end
 
@@ -19,8 +19,11 @@ local function bind_app(key, app_name)
 	end)
 end
 
+hs.hotkey.bind({ "alt" }, "x", function()
+	return hs.execute("open -a 'Finder'")
+end)
+
 bind_app("t", "Ghostty")
-bind_app("x", "Finder")
 bind_app("g", "Arc")
 bind_app("m", "Spotify")
 bind_app("s", "Slack")
