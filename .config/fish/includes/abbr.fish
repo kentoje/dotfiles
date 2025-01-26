@@ -3,6 +3,7 @@ abbr n "nvim"
 abbr v "nvim"
 
 # Day to day
+abbr ad "aider"
 abbr c "clear"
 abbr cm "nice_commit"
 abbr cd "z"
