@@ -40,7 +40,6 @@
             # CLI tools
             neovim
             mkalias
-            aider-chat
             bat
             gnupg
             coreutils
