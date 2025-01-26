@@ -2,6 +2,7 @@
 
 .config/fish/includes/private-vars.fish
 .config/fish/fish_variables
+.config/fish/fishd.tmp.*
 
 .config/cointop/config.toml
 
@@ -18,3 +19,4 @@
 .config/lazygit/state.yml
 .config/raycast/extensions
 .config/glab-cli
+.config/uv
