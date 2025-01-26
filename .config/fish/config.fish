@@ -10,10 +10,10 @@ atuin init fish | source
 
 # Nix darwin
 fish_add_path /run/current-system/sw/bin
-
 fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
+fish_add_path ~/.local/bin
 
 fish_add_path /opt/homebrew/bin
 fish_add_path ~/.local/share/nvim/mason/bin
