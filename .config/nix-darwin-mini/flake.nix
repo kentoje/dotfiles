@@ -40,6 +40,7 @@
             # CLI tools
             neovim
             mkalias
+            aider-chat
             bat
             gnupg
             coreutils
@@ -76,6 +77,7 @@
             tldr
             typescript
             nodePackages.yalc
+            bun
             yq
             zoxide
             gitmux
