@@ -1,5 +1,5 @@
 # https://github.com/charmbracelet/mods/blob/main/config_template.yml
-default-model: claude3.5-sonnet
+default-model: deepseek-r1
 # Text to append when using the -f flag.
 format-text:
   markdown: "Format the response as markdown without enclosing backticks."
@@ -87,8 +87,8 @@ apis:
       "llama3.2:1b":
         aliases: ["llama3.2_1b"]
         max-input-chars: 650000
-      "llama3:70b":
-        aliases: ["llama3"]
+      "deepseek-r1:8b":
+        aliases: ["deepseek-r1"]
         max-input-chars: 650000
   openai:
     base-url: https://api.openai.com/v1
