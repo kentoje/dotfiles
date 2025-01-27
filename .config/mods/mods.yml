@@ -1,5 +1,5 @@
 # https://github.com/charmbracelet/mods/blob/main/config_template.yml
-default-model: deepseek-r1
+default-model: sonnet-3.5
 # Text to append when using the -f flag.
 format-text:
   markdown: "Format the response as markdown without enclosing backticks."
