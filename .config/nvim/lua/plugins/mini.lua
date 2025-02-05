@@ -7,7 +7,12 @@ return {
 		local mini_comment = require("mini.comment")
 		local mini_splitjoin = require("mini.splitjoin")
 
-		mini_ai.setup()
+		mini_ai.setup({
+			mappings = {
+				around_last = "aB",
+				inside_last = "iB",
+			},
+		})
 		mini_splitjoin.setup()
 		mini_comment.setup()
 		mini_surround.setup()
