@@ -19,4 +19,5 @@
 .config/lazygit/state.yml
 .config/raycast/extensions
 .config/glab-cli
+.config/github-copilot
 .config/uv
