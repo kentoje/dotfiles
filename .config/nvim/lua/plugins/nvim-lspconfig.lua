@@ -189,6 +189,7 @@ return {
 					lspconfig.yamlls.setup({
 						settings = {
 							yaml = {
+								customTags = { "!reference sequence" },
 								schemas = {
 									["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
 								},
