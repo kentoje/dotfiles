@@ -74,7 +74,6 @@
             tmux
             tree
             tldr
-            typescript
             nodePackages.yalc
             bun
             yq
