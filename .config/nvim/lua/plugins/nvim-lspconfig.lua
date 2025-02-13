@@ -247,6 +247,13 @@ return {
 		vim.keymap.set("n", "gd", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
+		vim.keymap.set(
+			"i",
+			"<Tab>",
+			"copilot#Accept('<CR>')",
+			{ noremap = true, silent = true, expr = true, replace_keycodes = false }
+		)
+
 		if config_exists(biome_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
 				local current_path = vim.fn.expand("%:p")
