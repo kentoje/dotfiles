@@ -72,7 +72,6 @@
             rustc
             starship
             stow
-            pnpm
             tmux
             zellij
             tree

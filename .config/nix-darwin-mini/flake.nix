@@ -69,8 +69,6 @@
             ripgrep
             starship
             stow
-            pnpm
-            yarn
             tmux
             tree
             tldr
