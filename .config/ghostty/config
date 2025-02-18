@@ -9,7 +9,7 @@ window-decoration = true
 window-padding-x = 16
 window-padding-y = 12
 
-background-opacity = "0.6"
+background-opacity = "0.65"
 background-blur-radius = 60
 background = "000000"
 foreground = "a6accd"
