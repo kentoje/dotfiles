@@ -6,6 +6,9 @@ return {
 	config = function()
 		local fzf = require("fzf-lua")
 		fzf.setup({
+			-- grep = {
+			-- 	hidden = true,
+			-- },
 			files = {
 				-- formatter = "path.filename_first",
 				git_icons = true,
@@ -37,6 +40,10 @@ return {
 		-- 	})
 		-- end, { desc = "Find files" })
 
+		vim.keymap.set("n", "gr", function()
+			fzf.lsp_references()
+		end, { desc = "Search for references under the cursor" })
+
 		vim.keymap.set("n", "<leader>fr", function()
 			fzf.resume()
 		end, { desc = "Resume fzf" })
@@ -60,10 +67,10 @@ return {
 		-- vim.keymap.set("n", "<leader>G", function()
 		-- 	fzf.lsp_references()
 		-- end, { desc = "Find references" })
-		vim.keymap.set("n", "<leader>:", function()
+		vim.keymap.set("n", "<leader>f:", function()
 			fzf.commands()
 		end, { desc = "Display commands" })
-		vim.keymap.set("n", "<leader>?k", function()
+		vim.keymap.set("n", "<leader>fk", function()
 			fzf.keymaps()
 		end, { desc = "Display all keymaps" })
 	end,

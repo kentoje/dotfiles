@@ -1,3 +1,5 @@
+local helpers = require("kentoje.helpers")
+
 local function get_path()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local path = vim.api.nvim_buf_get_name(bufnr)
@@ -62,15 +64,6 @@ vim.keymap.set(
 	"<leader>Y",
 	':let @+ = expand("%:p")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
-)
-vim.keymap.set("n", "<leader>sr", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {
-	desc = "Search and replace current selection in file",
-})
-vim.keymap.set(
-	"v",
-	"<leader>sr",
-	'"hy:%s/<C-r>h//gIc<left><left><left><left>',
-	{ noremap = true, desc = "Replace selection" }
 )
 
 vim.keymap.set("n", "<leader>qw", function()
