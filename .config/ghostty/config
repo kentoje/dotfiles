@@ -48,11 +48,11 @@ keybind = cmd+8=text:\x01\x38
 keybind = cmd+9=text:\x01\x39
 
 keybind = cmd+o=text:\x01\x6f
-keybind = cmd+b=toggle_quick_terminal
+# keybind = cmd+b=toggle_quick_terminal
 
 keybind = ctrl+d=text:\x01\x25
 keybind = ctrl+shift+d=text:\x01\x22
 keybind = ctrl+s=text:\x01\x5b\x30
-keybind = ctrl+f=text:\x01\x7a
 keybind = ctrl+t=text:\x01\x63
+keybind = ctrl+g=text:\x01\x6a
 
