@@ -19,9 +19,9 @@ ls.add_snippets("custom", {
 
 ls.add_snippets("custom", {
 	s("snip_log", {
-		t("console.log({ "),
+		t("console.log("),
 		i(1),
-		t(" });"),
+		t(");"),
 	}),
 })
 
