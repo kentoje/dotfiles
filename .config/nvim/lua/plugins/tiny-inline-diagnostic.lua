@@ -1,5 +1,6 @@
 return {
 	"rachartier/tiny-inline-diagnostic.nvim",
+	enabled = false,
 	event = "LspAttach", -- Or `LspAttach`
 	priority = 1000, -- needs to be loaded in first
 	config = function()

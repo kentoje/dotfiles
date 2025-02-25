@@ -99,7 +99,7 @@ return {
 		--
 		-- vim.cmd("hi LspSignatureActiveParameter guifg=" .. "NONE" .. " guibg=" .. colors.orange)
 		--
-		vim.cmd("hi CursorLineNr guifg=" .. colors.vscBlueGreen)
+		vim.cmd("hi CursorLineNr guifg=" .. colors.vscPink)
 		-- vim.cmd("hi LineNr guifg=" .. colors.comment)
 		--
 		-- vim.cmd("hi FzfLuaBorder guifg=" .. colors.orange)

@@ -6,19 +6,21 @@ return {
 	config = function()
 		local fzf = require("fzf-lua")
 		fzf.setup({
-			-- grep = {
-			-- 	hidden = true,
-			-- },
 			files = {
 				-- formatter = "path.filename_first",
 				git_icons = true,
 			},
 			winopts = {
-				width = 0.95,
+				width = 0.85,
 				height = 0.85,
-				border = "rounded",
+				border = "none",
 				preview = {
 					delay = 10,
+					hidden = true,
+					title = false,
+					layout = "vertical", -- Ensures preview is on the bottom
+					scrollbar = false,
+					vertical = "down:50%",
 				},
 			},
 		})

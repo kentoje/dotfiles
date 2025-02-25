@@ -4,7 +4,21 @@ return {
 	lazy = false,
 	version = "*", -- set this if you want to always pull the latest change
 	opts = {
-		-- add any opts here
+		mappings = {
+			sidebar = {
+				switch_windows = "F1",
+				reverse_switch_windows = "F2",
+			},
+		},
+		windows = {
+			width = 40,
+			edit = {
+				start_insert = false,
+			},
+			ask = {
+				start_insert = false, -- Start insert mode when opening the ask window
+			},
+		},
 	},
 	-- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
 	build = "make",
