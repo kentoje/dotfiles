@@ -1,6 +1,6 @@
 set -Ux FZF_DEFAULT_OPTS "\
 --reverse \
---border rounded \
+--border none \
 --no-info \
 --pointer='' \
 --marker=' ' \
