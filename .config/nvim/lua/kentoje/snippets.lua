@@ -19,9 +19,9 @@ ls.add_snippets("custom", {
 
 ls.add_snippets("custom", {
 	s("snip_log", {
-		t("console.log({ "),
+		t("console.log("),
 		i(1),
-		t(" });"),
+		t(");"),
 	}),
 })
 
@@ -34,6 +34,28 @@ ls.add_snippets("custom", {
 		t(") => {"),
 		t({ "", "  " }),
 		i(3),
+		t({ "", "}" }),
+	}),
+})
+
+ls.add_snippets("custom", {
+	s("snip_obj", {
+		t("const "),
+		i(1),
+		t(" = {"),
+		t({ "", "  " }),
+		i(2),
+		t({ "", "}" }),
+	}),
+})
+
+ls.add_snippets("custom", {
+	s("snip_type", {
+		t("type "),
+		i(1),
+		t(" = {"),
+		t({ "", "  " }),
+		i(2),
 		t({ "", "}" }),
 	}),
 })
@@ -146,6 +168,18 @@ end, { noremap = true, silent = true, desc = "Insert if else snippet" })
 vim.keymap.set("n", "<leader>st", function()
 	trigger_snippet("custom", "snip_htmltag")
 end, { noremap = true, silent = true, desc = "Insert html tag" })
+
+vim.keymap.set("n", "<leader>sh", function()
+	trigger_snippet("custom", "snip_htmltag")
+end, { noremap = true, silent = true, desc = "Insert html tag" })
+
+vim.keymap.set("n", "<leader>so", function()
+	trigger_snippet("custom", "snip_obj")
+end, { noremap = true, silent = true, desc = "Insert object" })
+
+vim.keymap.set("n", "<leader>st", function()
+	trigger_snippet("custom", "snip_type")
+end, { noremap = true, silent = true, desc = "Insert object" })
 
 vim.keymap.set("n", "<leader>sL", function()
 	local word = vim.fn.expand("<cword>")
