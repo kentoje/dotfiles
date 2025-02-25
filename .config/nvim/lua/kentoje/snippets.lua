@@ -149,14 +149,11 @@ end, { noremap = true, silent = true, desc = "Insert html tag" })
 
 vim.keymap.set("n", "<leader>sL", function()
 	local word = vim.fn.expand("<cword>")
-	local snip = find_snippet("custom", "log")
 
-	if snip then
-		vim.cmd("normal! o")
-		ls.snip_expand(s("log", {
-			t("console.log({ "),
-			t(word),
-			t(" });"),
-		}))
-	end
+	vim.cmd("normal! o")
+	ls.snip_expand(s("snip_log", {
+		t("console.log({ "),
+		t(word),
+		t(" });"),
+	}))
 end, { noremap = true, silent = true, desc = "Insert console.log with word under cursor" })
