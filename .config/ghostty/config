@@ -16,7 +16,8 @@ foreground = "a6accd"
 
 unfocused-split-opacity = "0.7"
 
-cursor-invert-fg-bg = true
+# cursor-invert-fg-bg = true
+cursor-color = "#C586C0"
 cursor-style = "block"
 cursor-style-blink = false
 
@@ -53,6 +54,7 @@ keybind = cmd+o=text:\x01\x6f
 keybind = ctrl+d=text:\x01\x25
 keybind = ctrl+shift+d=text:\x01\x22
 keybind = ctrl+s=text:\x01\x5b\x30
+keybind = ctrl+f=text:\x01\x7a
 keybind = ctrl+t=text:\x01\x63
 keybind = ctrl+g=text:\x01\x6a
 
