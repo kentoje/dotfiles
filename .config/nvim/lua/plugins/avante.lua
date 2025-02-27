@@ -4,6 +4,13 @@ return {
 	lazy = false,
 	version = "*", -- set this if you want to always pull the latest change
 	opts = {
+		provider = "claude",
+		claude = {
+			endpoint = "https://api.anthropic.com",
+			model = "claude-3-7-sonnet-20250219",
+			temperature = 0,
+			max_tokens = 64000,
+		},
 		mappings = {
 			sidebar = {
 				switch_windows = "F1",
