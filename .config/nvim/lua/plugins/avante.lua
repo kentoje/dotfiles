@@ -18,12 +18,12 @@ return {
 			},
 		},
 		windows = {
-			width = 40,
+			width = 50,
 			edit = {
 				start_insert = false,
 			},
 			ask = {
-				start_insert = false, -- Start insert mode when opening the ask window
+				start_insert = false,
 			},
 		},
 	},

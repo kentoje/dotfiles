@@ -313,20 +313,20 @@ return {
 						fallback()
 					end
 				end),
-				["<Tab>"] = cmp.mapping(function(fallback)
-					if ls.locally_jumpable(1) then
-						ls.jump(1)
-					else
-						fallback()
-					end
-				end, { "i", "s" }),
-				["<S-Tab>"] = cmp.mapping(function(fallback)
-					if ls.locally_jumpable(-1) then
-						ls.jump(-1)
-					else
-						fallback()
-					end
-				end, { "i", "s" }),
+				-- ["<Tab>"] = cmp.mapping(function(fallback)
+				-- 	if ls.locally_jumpable(1) then
+				-- 		ls.jump(1)
+				-- 	else
+				-- 		fallback()
+				-- 	end
+				-- end, { "i", "s" }),
+				-- ["<S-Tab>"] = cmp.mapping(function(fallback)
+				-- 	if ls.locally_jumpable(-1) then
+				-- 		ls.jump(-1)
+				-- 	else
+				-- 		fallback()
+				-- 	end
+				-- end, { "i", "s" }),
 			}),
 			snippet = {
 				expand = function(args)

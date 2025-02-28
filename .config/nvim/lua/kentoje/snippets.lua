@@ -192,3 +192,34 @@ vim.keymap.set("n", "<leader>sL", function()
 		t(" });"),
 	}))
 end, { noremap = true, silent = true, desc = "Insert console.log with word under cursor" })
+
+vim.keymap.set("v", "<leader>sL", function()
+	-- Use a more reliable method to get the selected text
+	local mode = vim.fn.mode()
+
+	if mode ~= "v" and mode ~= "V" and mode ~= "" then
+		vim.cmd("normal! gv") -- Reselect the visual selection
+	end
+
+	-- Save the current register content
+	local saved_reg = vim.fn.getreg('"')
+	local saved_reg_type = vim.fn.getregtype('"')
+
+	-- Yank the selected text
+	vim.cmd("normal! y")
+	local selected_text = vim.fn.getreg('"')
+
+	-- Restore the register
+	vim.fn.setreg('"', saved_reg, saved_reg_type)
+
+	-- Move to the end of the selection and create a new line
+	vim.cmd("normal! `>")
+	vim.cmd("normal! o")
+
+	-- Expand the snippet with the selected text
+	ls.snip_expand(s("snip_log", {
+		t("console.log({ "),
+		t(selected_text),
+		t(" });"),
+	}))
+end, { noremap = true, silent = true, desc = "Insert console.log with selected text" })

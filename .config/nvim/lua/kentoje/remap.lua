@@ -66,41 +66,6 @@ vim.keymap.set(
 	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
 )
 
-vim.keymap.set("n", "<leader>qw", function()
-	if vim.bo.modified then
-		vim.cmd("w")
-	end
-
-	local buffers = vim.api.nvim_list_bufs()
-
-	if #buffers > 1 then
-		local bufnr = get_bufnr()
-
-		vim.cmd(":bprev")
-		vim.api.nvim_command("bdelete " .. bufnr)
-	else
-		vim.cmd("bd")
-	end
-end, { silent = true, desc = "Mimic MacOS close" })
-
--- local function surround_with(char)
--- 	vim.cmd("normal! d")
---
--- 	if char == "(" then
--- 		vim.cmd("normal! i" .. char .. ")")
--- 	elseif char == "{" then
--- 		vim.cmd("normal! i" .. char .. "}")
--- 	elseif char == "[" then
--- 		vim.cmd("normal! i" .. char .. "]")
--- 	end
---
--- 	vim.cmd("normal! P")
--- end
-
--- vim.keymap.set("v", "<leader>cs", function()
--- 	surround_with(vim.fn.input("Char to surround: "))
--- end, { silent = true, desc = "Surround visual mode selection with the given char" })
-
 vim.keymap.set(
 	"v",
 	"<leader>fh",
@@ -172,41 +137,6 @@ end, { noremap = true, silent = true, desc = "Open sibling test file in right pa
 vim.keymap.set("n", "<leader>T", function()
 	open_test_file(false)
 end, { noremap = true, silent = true, desc = "Open sibling test file" })
-
--------- GO TO BUFFER INDEX ---------------------------------------------------
-
-local function get_listed_buffers()
-	local buffers = vim.tbl_filter(function(b)
-		return vim.fn.buflisted(b) == 1
-	end, vim.api.nvim_list_bufs())
-	return buffers
-end
-
--- Get buffer id from buffer index
-local function go_to_buffer(buffer_list_index)
-	local buffer_list = get_listed_buffers()
-	local buffer_id = buffer_list[buffer_list_index]
-	if buffer_id ~= nil then
-		vim.api.nvim_command("buffer " .. buffer_id)
-	end
-end
-
--- mapped by kitty with ctrl+x
--- vim.keymap.set("n", "<leader>1", function()
--- 	go_to_buffer(1)
--- end, { noremap = true, silent = false })
--- vim.keymap.set("n", "<leader>2", function()
--- 	go_to_buffer(2)
--- end, { noremap = true, silent = false })
--- vim.keymap.set("n", "<leader>3", function()
--- 	go_to_buffer(3)
--- end, { noremap = true, silent = false })
--- vim.keymap.set("n", "<leader>4", function()
--- 	go_to_buffer(4)
--- end, { noremap = true, silent = false })
--- vim.keymap.set("n", "<leader>5", function()
--- 	go_to_buffer(5)
--- end, { noremap = true, silent = false })
 
 vim.keymap.set("n", "[[", function()
 	vim.cmd("normal! #")
