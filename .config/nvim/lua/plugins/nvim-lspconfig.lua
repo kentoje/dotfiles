@@ -3,8 +3,6 @@ local function file_exists(name)
 	return f ~= nil and io.close(f)
 end
 
-local dump = require("kentoje.helpers").dump
-
 local biome_config_names = { "biome.json" }
 
 local function config_exists(config_names)
@@ -27,11 +25,11 @@ return {
 		},
 
 		{ "williamboman/mason-lspconfig.nvim" },
-		{ "hrsh7th/nvim-cmp" },
-		{ "hrsh7th/cmp-nvim-lsp" },
-		{ "L3MON4D3/LuaSnip" },
-		{ "rafamadriz/friendly-snippets" },
-		{ "saadparwaiz1/cmp_luasnip" },
+		-- { "hrsh7th/nvim-cmp" },
+		-- { "hrsh7th/cmp-nvim-lsp" },
+		-- { "L3MON4D3/LuaSnip" },
+		-- { "rafamadriz/friendly-snippets" },
+		-- { "saadparwaiz1/cmp_luasnip" },
 		{ "yioneko/nvim-vtsls" },
 		-- { "saghen/blink.cmp" },
 		{ "williamboman/mason-lspconfig.nvim" },
@@ -74,8 +72,8 @@ return {
 
 		local lspconfig = require("lspconfig")
 
-		local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
-		-- local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
+		-- local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+		local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
 
 		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
 		local next_error_repeat, prev_error_repeat =
@@ -282,57 +280,57 @@ return {
 		-- 	vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
 		-- end, { silent = true, desc = "EslintFixAll" })
 
-		local cmp = require("cmp")
-		local ls = require("luasnip")
-
-		require("luasnip.loaders.from_vscode").lazy_load()
+		-- local cmp = require("cmp")
+		-- local ls = require("luasnip")
+		--
+		-- require("luasnip.loaders.from_vscode").lazy_load()
 		require("kentoje.snippets")
-
-		cmp.setup({
-			sources = {
-				{ name = "nvim_lsp" },
-				{ name = "luasnip" },
-			},
-			mapping = cmp.mapping.preset.insert({
-				["<C-b>"] = cmp.mapping.scroll_docs(-2),
-				["<C-f>"] = cmp.mapping.scroll_docs(2),
-				["<C-Space>"] = cmp.mapping.complete(),
-				-- ["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-				["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-				["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-				["<CR>"] = cmp.mapping(function(fallback)
-					if cmp.visible() then
-						if ls.expandable() then
-							ls.expand()
-						else
-							cmp.confirm({
-								select = true,
-							})
-						end
-					else
-						fallback()
-					end
-				end),
-				-- ["<Tab>"] = cmp.mapping(function(fallback)
-				-- 	if ls.locally_jumpable(1) then
-				-- 		ls.jump(1)
-				-- 	else
-				-- 		fallback()
-				-- 	end
-				-- end, { "i", "s" }),
-				-- ["<S-Tab>"] = cmp.mapping(function(fallback)
-				-- 	if ls.locally_jumpable(-1) then
-				-- 		ls.jump(-1)
-				-- 	else
-				-- 		fallback()
-				-- 	end
-				-- end, { "i", "s" }),
-			}),
-			snippet = {
-				expand = function(args)
-					require("luasnip").lsp_expand(args.body)
-				end,
-			},
-		})
+		--
+		-- cmp.setup({
+		-- 	sources = {
+		-- 		{ name = "nvim_lsp" },
+		-- 		{ name = "luasnip" },
+		-- 	},
+		-- 	mapping = cmp.mapping.preset.insert({
+		-- 		["<C-b>"] = cmp.mapping.scroll_docs(-2),
+		-- 		["<C-f>"] = cmp.mapping.scroll_docs(2),
+		-- 		["<C-Space>"] = cmp.mapping.complete(),
+		-- 		-- ["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+		-- 		["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+		-- 		["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+		-- 		["<CR>"] = cmp.mapping(function(fallback)
+		-- 			if cmp.visible() then
+		-- 				if ls.expandable() then
+		-- 					ls.expand()
+		-- 				else
+		-- 					cmp.confirm({
+		-- 						select = true,
+		-- 					})
+		-- 				end
+		-- 			else
+		-- 				fallback()
+		-- 			end
+		-- 		end),
+		-- 		-- ["<Tab>"] = cmp.mapping(function(fallback)
+		-- 		-- 	if ls.locally_jumpable(1) then
+		-- 		-- 		ls.jump(1)
+		-- 		-- 	else
+		-- 		-- 		fallback()
+		-- 		-- 	end
+		-- 		-- end, { "i", "s" }),
+		-- 		-- ["<S-Tab>"] = cmp.mapping(function(fallback)
+		-- 		-- 	if ls.locally_jumpable(-1) then
+		-- 		-- 		ls.jump(-1)
+		-- 		-- 	else
+		-- 		-- 		fallback()
+		-- 		-- 	end
+		-- 		-- end, { "i", "s" }),
+		-- 	}),
+		-- 	snippet = {
+		-- 		expand = function(args)
+		-- 			require("luasnip").lsp_expand(args.body)
+		-- 		end,
+		-- 	},
+		-- })
 	end,
 }

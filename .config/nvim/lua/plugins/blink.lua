@@ -1,6 +1,5 @@
 return {
 	"saghen/blink.cmp",
-	enabled = false,
 	-- optional: provides snippets for the snippet source
 	dependencies = {
 		"rafamadriz/friendly-snippets",
@@ -48,17 +47,32 @@ return {
 		-- See the full "keymap" documentation for information on defining your own keymap.
 		keymap = {
 			["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
-			["<C-e>"] = { "hide", "fallback" },
+			-- ["<C-e>"] = { "hide", "fallback" },
 			["<CR>"] = { "accept", "fallback" },
 
 			-- ["<Tab>"] = { "snippet_forward", "fallback" },
 			-- ["<S-Tab>"] = { "snippet_backward", "fallback" },
 
+			["<Tab>"] = {
+				function(cmp)
+					if require("copilot.suggestion").is_visible() then
+						return require("copilot.suggestion").accept()
+					end
+					if cmp.snippet_active() then
+						return cmp.accept()
+					else
+						return cmp.select_and_accept()
+					end
+				end,
+				"snippet_forward",
+				"fallback",
+			},
+
 			["<C-j>"] = { "select_next", "fallback" },
 			["<C-k>"] = { "select_prev", "fallback" },
 
-			["<Up>"] = { "scroll_documentation_up", "fallback" },
-			["<Down>"] = { "scroll_documentation_down", "fallback" },
+			-- ["<Up>"] = { "scroll_documentation_up", "fallback" },
+			-- ["<Down>"] = { "scroll_documentation_down", "fallback" },
 		},
 
 		appearance = {
