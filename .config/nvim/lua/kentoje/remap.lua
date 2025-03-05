@@ -1,14 +1,8 @@
-local helpers = require("kentoje.helpers")
-
 local function get_path()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local path = vim.api.nvim_buf_get_name(bufnr)
 	-- vim.api.nvim_command('let @+ = "' .. path .. '"')
 	return path
-end
-
-local function get_bufnr()
-	return vim.api.nvim_get_current_buf()
 end
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { silent = true, desc = "Move line down" })
@@ -36,9 +30,6 @@ vim.keymap.set("n", "]b", ":bnext<CR>", { silent = true, desc = "Buffer next" })
 vim.keymap.set("n", "<leader>xjs", ":%!jq -S .<CR>", { silent = true, desc = "Sort current JSON file" })
 vim.keymap.set("v", "<leader>xjs", ":'<,'>!jq -S .<CR>", { silent = true, desc = "Sort current JSON selection" })
 
-vim.keymap.set("n", "<Up>", ":cprev<CR>", { noremap = true, silent = true, desc = "Previous quickfix item (:cprev)" })
-vim.keymap.set("n", "<Down>", ":cnext<CR>", { noremap = true, silent = true, desc = "Next quickfix item (:cprev)" })
-
 vim.keymap.set("n", "<leader>bn", ":vnew<CR>", { silent = true, noremap = true, desc = "Open a new vertical buffer" })
 vim.keymap.set("n", "<leader>bN", ":new<CR>", { silent = true, noremap = true, desc = "Open a new horizontal buffer" })
 vim.keymap.set(
@@ -64,13 +55,6 @@ vim.keymap.set(
 	"<leader>Y",
 	':let @+ = expand("%:p")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
-)
-
-vim.keymap.set(
-	"v",
-	"<leader>fh",
-	[[:s/\s\{2,\}o\(\w\+\),\?/\to\1: handleO\1,<CR>]],
-	{ silent = true, desc = "Add handleOn for all on<Event>" }
 )
 
 -- yank path
