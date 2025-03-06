@@ -246,9 +246,9 @@ run = 'move-node-to-workspace F'
 if.app-id = 'so.amie.electron-app'
 run = 'move-node-to-workspace C'
 
-# Rise calendar app
+# Notion calendar
 [[on-window-detected]]
-if.app-id = '220419yyo1ujiy9'
+if.app-id = 'com.cron.electron'
 run = 'move-node-to-workspace C'
 
 [[on-window-detected]]
