@@ -18,7 +18,7 @@
 # Main model:
 
 ## Specify the model to use for the main chat
-model: claude-3-5-sonnet-20241022
+model: claude-3-7-sonnet-20250219
 ## Use claude-3-opus-20240229 model for the main chat
 #opus: false
 
