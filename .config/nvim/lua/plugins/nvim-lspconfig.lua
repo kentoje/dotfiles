@@ -27,7 +27,7 @@ return {
 		{ "williamboman/mason-lspconfig.nvim" },
 		-- { "hrsh7th/nvim-cmp" },
 		-- { "hrsh7th/cmp-nvim-lsp" },
-		-- { "L3MON4D3/LuaSnip" },
+		{ "L3MON4D3/LuaSnip", version = "v2.*" },
 		-- { "rafamadriz/friendly-snippets" },
 		-- { "saadparwaiz1/cmp_luasnip" },
 		{ "yioneko/nvim-vtsls" },
@@ -71,6 +71,16 @@ return {
 		end
 
 		local lspconfig = require("lspconfig")
+
+		lspconfig.sourcekit.setup({
+			capabilities = {
+				workspace = {
+					didChangeWatchedFiles = {
+						dynamicRegistration = true,
+					},
+				},
+			},
+		})
 
 		-- local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
@@ -273,6 +283,20 @@ return {
 				vim.cmd("EslintFixAll")
 			end, { silent = true, desc = "EslintFixAll" })
 		end
+
+		-- issue with Tab teleporting
+		vim.api.nvim_create_autocmd("ModeChanged", {
+			pattern = "*",
+			callback = function()
+				if
+					((vim.v.event.old_mode == "s" and vim.v.event.new_mode == "n") or vim.v.event.old_mode == "i")
+					and require("luasnip").session.current_nodes[vim.api.nvim_get_current_buf()]
+					and not require("luasnip").session.jump_active
+				then
+					require("luasnip").unlink_current()
+				end
+			end,
+		})
 
 		-- vim.keymap.set("n", "<leader>e", function()
 		-- 	local current_path = vim.fn.expand("%:p")

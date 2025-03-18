@@ -129,3 +129,13 @@ end, { noremap = true, silent = true, desc = "Go to previous occurence" })
 vim.keymap.set("n", "]]", function()
 	vim.cmd("normal! *")
 end, { noremap = true, silent = true, desc = "Go to next occurence" })
+
+vim.keymap.set("v", "<leader>ca", function()
+	local result = vim.fn.input("Append text to end of selected lines")
+	return ":'<,'>norm A" .. result .. "<CR>"
+end, { expr = true, desc = "Append text to end of selected lines" })
+
+vim.keymap.set("v", "<leader>ci", function()
+	local result = vim.fn.input("Insert text to beginning of selected lines")
+	return ":'<,'>norm I" .. result .. "<CR>"
+end, { expr = true, desc = "Insert text to beginning of selected lines" })
