@@ -24,6 +24,8 @@ hs.hotkey.bind({ "alt" }, "x", function()
 end)
 
 bind_app("t", "Ghostty")
+-- bind_app("g", "Zen Browser")
+-- bind_app("g", "Vivaldi")
 bind_app("g", "Arc")
 bind_app("m", "Spotify")
 bind_app("s", "Slack")
