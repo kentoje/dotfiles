@@ -1,5 +1,5 @@
 # https://github.com/charmbracelet/mods/blob/main/config_template.yml
-default-model: sonnet-3.7
+default-model: chatgpt-4o-latest
 # Text to append when using the -f flag.
 format-text:
   markdown: "Format the response as markdown without enclosing backticks."
@@ -100,6 +100,15 @@ apis:
     models:
       chatgpt-4o-latest:
         aliases: ["chatgpt"]
+        max-input-chars: 392000
+      o3-mini:
+        aliases: ["o3-mini"]
+        max-input-chars: 392000
+      o1-mini:
+        aliases: ["o1-mini"]
+        max-input-chars: 392000
+      o1:
+        aliases: ["o1"]
         max-input-chars: 392000
       gpt-4o-mini:
         aliases: ["4o-mini"]
