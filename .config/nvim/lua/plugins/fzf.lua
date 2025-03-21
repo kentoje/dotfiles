@@ -50,6 +50,10 @@ return {
 			fzf.resume()
 		end, { desc = "Resume fzf" })
 
+		vim.keymap.set("n", "<leader>fs", function()
+			fzf.lsp_live_workspace_symbols()
+		end, { desc = "Resume fzf" })
+
 		vim.keymap.set("n", "<leader>fb", function()
 			fzf.buffers()
 		end, { desc = "List buffers" })

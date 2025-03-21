@@ -1,6 +1,7 @@
 .DS_Store
 
 .config/fish/includes/private-vars.fish
+.config/fish/functions/get_token.fish
 .config/fish/fish_variables
 .config/fish/fishd.tmp.*
 
@@ -22,3 +23,5 @@
 .config/github-copilot
 .config/uv
 .config/glow
+.config/flipperdevices.com
+.config/vivaldi-css
