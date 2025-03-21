@@ -4,7 +4,7 @@ return {
 	lazy = false,
 	version = "*", -- set this if you want to always pull the latest change
 	opts = {
-		provider = "openai",
+		provider = "claude",
 		claude = {
 			endpoint = "https://api.anthropic.com",
 			model = "claude-3-7-sonnet-20250219",
