@@ -78,6 +78,14 @@ vim.keymap.set({ "n" }, "[e", function()
 	vscode.action("editor.action.marker.prev")
 end)
 
+vim.keymap.set({ "n" }, "]d", function()
+	vscode.action("editor.action.marker.next")
+end)
+
+vim.keymap.set({ "n" }, "[d", function()
+	vscode.action("editor.action.marker.prev")
+end)
+
 vim.keymap.set({ "n", "x" }, "]]", function()
 	vscode.action("editor.action.nextSelectionMatchFindAction")
 end)

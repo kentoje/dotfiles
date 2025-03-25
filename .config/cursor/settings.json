@@ -2,6 +2,7 @@
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
   },
+  "files.autoSave": "off",
   "explorer.sortOrder": "type",
   "explorer.autoReveal": false,
   "search.searchEditor.focusResultsOnSearch": false,
@@ -19,7 +20,6 @@
   "breadcrumbs.enabled": false,
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.iconTheme": "vscode-icons",
   "workbench.sideBar.location": "right",
   "window.title": " ",
   "[jsonc]": {
@@ -33,7 +33,12 @@
     "quickInputList.focusBackground": "#6DBC9966",
     "list.focusForeground": "#FFFFFF",
     "editorCursor.foreground": "#6DBC99",
-    "editorLineNumber.activeForeground": "#6DBC99"
+    "editorLineNumber.activeForeground": "#6DBC99",
+    "titleBar.activeBackground": "#000000",
+    "titleBar.activeForeground": "#222",
+    "titleBar.inactiveBackground": "#000000",
+    "titleBar.inactiveForeground": "#222"
   },
-  "editor.accessibilitySupport": "off"
+  "editor.accessibilitySupport": "off",
+  "workbench.iconTheme": "icons"
 }
