@@ -1,0 +1,39 @@
+{
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
+  "explorer.sortOrder": "type",
+  "explorer.autoReveal": false,
+  "search.searchEditor.focusResultsOnSearch": false,
+  "search.collapseResults": "alwaysCollapse",
+  "editor.cursorBlinking": "phase",
+  "editor.overviewRulerBorder": false,
+  "editor.padding.bottom": 16,
+  "editor.padding.top": 16,
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.lineNumbers": "relative",
+  "editor.fontSize": 16,
+  "editor.lineHeight": 1.5,
+  "editor.cursorSurroundingLines": 15,
+  "editor.fontFamily": "CommitMono Nerd Font",
+  "breadcrumbs.enabled": false,
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.sideBar.location": "right",
+  "window.title": " ",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "vsicons.dontShowNewVersionMessage": true,
+  "eslint.format.enable": true,
+  "workbench.colorTheme": "Oscura Midnight",
+  "workbench.colorCustomizations": {
+    "list.focusBackground": "#6DBC9966",
+    "quickInputList.focusBackground": "#6DBC9966",
+    "list.focusForeground": "#FFFFFF",
+    "editorCursor.foreground": "#6DBC99",
+    "editorLineNumber.activeForeground": "#6DBC99"
+  },
+  "editor.accessibilitySupport": "off"
+}
