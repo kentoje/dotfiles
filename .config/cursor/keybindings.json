@@ -52,7 +52,7 @@
   {
     "key": "-",
     "command": "workbench.view.explorer",
-    "when": "viewContainer.workbench.view.explorer.enabled && !inQuickInput && neovim.mode != 'insert'"
+    "when": "viewContainer.workbench.view.explorer.enabled && !inQuickInput && neovim.mode != 'insert' && !inChatInput && !inCompositeEditor && !inChat"
   },
   {
     "key": "cmd+l",
