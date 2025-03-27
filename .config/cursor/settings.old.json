@@ -1,0 +1,153 @@
+{
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[graphql]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "css.lint.unknownAtRules": "ignore",
+  "css.validate": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.accessibilitySupport": "off",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "never"
+  },
+  "editor.cursorBlinking": "phase",
+  "editor.cursorSmoothCaretAnimation": "off",
+  "editor.cursorSurroundingLines": 12,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.fontFamily": "SFMono Nerd Font",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14,
+  "editor.fontWeight": "400",
+  "editor.formatOnPaste": false, // required
+  "editor.formatOnSave": false,
+  "editor.formatOnSaveMode": "file", // required to format on save
+  "editor.formatOnType": false, // required
+  "editor.guides.bracketPairs": "active",
+  "editor.inlineSuggest.enabled": true,
+  "editor.lineHeight": 1.65,
+  "editor.linkedEditing": true,
+  "editor.minimap.autohide": true,
+  "editor.quickSuggestions": {
+    "comments": "off",
+    "other": "on",
+    "strings": "off"
+  },
+  "editor.quickSuggestionsDelay": 10,
+  "editor.renderLineHighlight": "none",
+  "editor.snippetSuggestions": "bottom",
+  "editor.stickyScroll.enabled": true,
+  "editor.suggest.insertMode": "insert",
+  // not sure about this one
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.suggestSelection": "first",
+  "editor.tabSize": 2,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "mdx"
+  ],
+  // Neovim
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
+  "files.autoSave": "onFocusChange",
+  // might improve the performance of vscode
+  "files.exclude": {
+    "**/node_modules": true,
+    // "@aircall/icons": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "git.mergeEditor": false,
+  "json.schemas": [],
+  "prettier.requireConfig": true,
+  "redhat.telemetry.enabled": false,
+  "scss.validate": false,
+  "security.workspace.trust.untrustedFiles": "open",
+  "stylelint.snippet": [
+    "css",
+    "less",
+    "postcss",
+    "typescript",
+    "typescriptreact",
+    "scss"
+  ],
+  "stylelint.validate": [
+    "css",
+    "scss",
+    "typescriptreact"
+  ],
+  "typescript.disableAutomaticTypeAcquisition": true,
+  // cursor CSS effect -  https://github.com/qwreey75/dotfiles/tree/master/vscode/trailCursorEffect
+  "vscode_custom_css.imports": [
+    "file:///Users/kento/Documents/js/foo/src/js/cursor.js"
+  ],
+  // "totalTypeScript.hideAllTips": true,
+  // "totalTypeScript.hideBasicTips": true,
+  "vscode-neovim.neovimExecutablePaths.darwin": "/run/current-system/sw/bin/nvim",
+  "vsicons.dontShowNewVersionMessage": true,
+  "window.commandCenter": false,
+  "workbench.colorCustomizations": {
+    // CMD + F search
+    "editor.findMatchBackground": "#0A84FF",
+    "editor.findMatchHighlightBackground": "#BF5AF288",
+    // "editorLineNumber.activeForeground": "#ffb86c",
+    "editorCursor.foreground": "#f4b8e4",
+    "editorLineNumber.activeForeground": "#f4b8e4",
+    "list.activeSelectionBackground": "#0A84FF",
+    "list.activeSelectionForeground": "#fff",
+    // Lists + tree
+    "list.focusBackground": "#0A84FF88",
+    "list.focusForeground": "#fff",
+    // CMD + G panel
+    "peekViewResult.selectionBackground": "#0A84FF",
+    "peekViewResult.selectionForeground": "#fff",
+    // CMD + P list
+    "quickInputList.focusBackground": "#0A84FF",
+    "quickInputList.focusForeground": "#fff",
+    "tab.activeBackground": "#0A84FF88",
+    "tab.activeBorderTop": "#0A84FF00",
+    "tab.activeForeground": "#fff",
+    "tab.unfocusedActiveBackground": "#0A84FF44",
+    "tree.indentGuidesStroke": "#f4b8e4"
+  },
+  "workbench.colorTheme": "Vesper",
+  "workbench.editor.enablePreview": false,
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "always",
+  "zenMode.hideLineNumbers": false,
+  "terminal.integrated.env.osx": {},
+  "workbench.iconTheme": "catppuccin-frappe",
+  "console-ninja.featureSet": "Community",
+  "typescript.tsserver.log": "off",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "workbench.sideBar.location": "right"
+}
