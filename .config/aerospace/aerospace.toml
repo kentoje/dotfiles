@@ -275,6 +275,9 @@ run = 'move-node-to-workspace 1'
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = 'move-node-to-workspace V'
 
+[[on-window-detected]]
+if.app-id = 'com.pvncher.repoprompt'
+run = 'move-node-to-workspace V'
 
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
