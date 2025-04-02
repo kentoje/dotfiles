@@ -277,7 +277,7 @@ run = 'move-node-to-workspace V'
 
 [[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
-run = 'move-node-to-workspace V'
+run = 'move-node-to-workspace B'
 
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
@@ -286,10 +286,6 @@ run = 'move-node-to-workspace W'
 [[on-window-detected]]
 if.app-id = 'com.facebook.archon.developerID'
 run = 'move-node-to-workspace W'
-
-[[on-window-detected]]
-if.app-id = 'com.readdle.smartemail-Mac'
-run = 'move-node-to-workspace B'
 
 [[on-window-detected]]
 if.app-id = 'org.chromium.Chromium'
