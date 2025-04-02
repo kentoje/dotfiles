@@ -82,5 +82,9 @@
     "key": "alt+l",
     "command": "-editor.action.inlineDiffs.nextDiffFile",
     "when": "editorTextFocus && (arbitrary function)"
+  },
+  {
+    "key": "cmd+i",
+    "command": "composerMode.agent"
   }
 ]
