@@ -20,19 +20,46 @@ function get_aws_credentials
     set -l credentials_json (aws configure export-credentials --profile $selected_profile 2>&1)
     
     # Check for SSO token error
-    if string match -q "*Error loading SSO Token*" $credentials_json
+    if string match -q "*Error loading SSO Token*" $credentials_json; or string match -q "*The SSO session associated with this profile has expired or is otherwise invalid*" $credentials_json
         echo "SSO token expired or invalid. Logging in..."
         aws sso login --profile $selected_profile
         # Try getting credentials again after login
         set credentials_json (aws configure export-credentials --profile $selected_profile)
     end
     
-    # Set each credential individually
-    set -gx AWS_ACCESS_KEY_ID (echo $credentials_json | jq -r '.AccessKeyId')
-    set -gx AWS_SECRET_ACCESS_KEY (echo $credentials_json | jq -r '.SecretAccessKey')
-    set -gx AWS_SESSION_TOKEN (echo $credentials_json | jq -r '.SessionToken')
+    # Extract credentials
+    set -l access_key_id (echo $credentials_json | jq -r '.AccessKeyId')
+    set -l secret_access_key (echo $credentials_json | jq -r '.SecretAccessKey')
+    set -l session_token (echo $credentials_json | jq -r '.SessionToken')
     
-    echo "AWS credentials set for profile: '$selected_profile'"
+    # Check for .env or .env.local files
+    set -l env_file
+    if test -f .env
+        set env_file .env
+    else if test -f .env.local
+        set env_file .env.local
+    end
+    
+    if test -n "$env_file"
+        # Remove existing AWS credentials from env file
+        sed -i '' '/^AWS_ACCESS_KEY_ID=/d' $env_file
+        sed -i '' '/^AWS_SECRET_ACCESS_KEY=/d' $env_file
+        sed -i '' '/^AWS_SESSION_TOKEN=/d' $env_file
+        
+        # Append new credentials
+        echo "AWS_ACCESS_KEY_ID=$access_key_id" >> $env_file
+        echo "AWS_SECRET_ACCESS_KEY=$secret_access_key" >> $env_file
+        echo "AWS_SESSION_TOKEN=$session_token" >> $env_file
+        
+        echo "AWS credentials updated in $env_file for profile: '$selected_profile'"
+    else
+        # Set fish variables if no env file exists
+        set -gx AWS_ACCESS_KEY_ID $access_key_id
+        set -gx AWS_SECRET_ACCESS_KEY $secret_access_key
+        set -gx AWS_SESSION_TOKEN $session_token
+        
+        echo "AWS credentials set as fish variables for profile: '$selected_profile'"
+    end
 end
 
 # aws configure list-profiles
