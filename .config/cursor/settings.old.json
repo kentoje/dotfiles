@@ -12,7 +12,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
-    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[graphql]": {
@@ -39,10 +38,10 @@
   "editor.fontLigatures": true,
   "editor.fontSize": 14,
   "editor.fontWeight": "400",
-  "editor.formatOnPaste": false, // required
+  "editor.formatOnPaste": false,
   "editor.formatOnSave": false,
-  "editor.formatOnSaveMode": "file", // required to format on save
-  "editor.formatOnType": false, // required
+  "editor.formatOnSaveMode": "file",
+  "editor.formatOnType": false,
   "editor.guides.bracketPairs": "active",
   "editor.inlineSuggest.enabled": true,
   "editor.lineHeight": 1.65,
@@ -58,7 +57,6 @@
   "editor.snippetSuggestions": "bottom",
   "editor.stickyScroll.enabled": true,
   "editor.suggest.insertMode": "insert",
-  // not sure about this one
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.suggestOnTriggerCharacters": true,
   "editor.suggestSelection": "first",
@@ -74,15 +72,12 @@
     "typescriptreact",
     "mdx"
   ],
-  // Neovim
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
   },
   "files.autoSave": "onFocusChange",
-  // might improve the performance of vscode
   "files.exclude": {
-    "**/node_modules": true,
-    // "@aircall/icons": true
+    "**/node_modules": true
   },
   "files.trimTrailingWhitespace": true,
   "git.mergeEditor": false,
@@ -99,37 +94,25 @@
     "typescriptreact",
     "scss"
   ],
-  "stylelint.validate": [
-    "css",
-    "scss",
-    "typescriptreact"
-  ],
+  "stylelint.validate": ["css", "scss", "typescriptreact"],
   "typescript.disableAutomaticTypeAcquisition": true,
-  // cursor CSS effect -  https://github.com/qwreey75/dotfiles/tree/master/vscode/trailCursorEffect
   "vscode_custom_css.imports": [
     "file:///Users/kento/Documents/js/foo/src/js/cursor.js"
   ],
-  // "totalTypeScript.hideAllTips": true,
-  // "totalTypeScript.hideBasicTips": true,
   "vscode-neovim.neovimExecutablePaths.darwin": "/run/current-system/sw/bin/nvim",
   "vsicons.dontShowNewVersionMessage": true,
   "window.commandCenter": false,
   "workbench.colorCustomizations": {
-    // CMD + F search
     "editor.findMatchBackground": "#0A84FF",
     "editor.findMatchHighlightBackground": "#BF5AF288",
-    // "editorLineNumber.activeForeground": "#ffb86c",
     "editorCursor.foreground": "#f4b8e4",
     "editorLineNumber.activeForeground": "#f4b8e4",
     "list.activeSelectionBackground": "#0A84FF",
     "list.activeSelectionForeground": "#fff",
-    // Lists + tree
     "list.focusBackground": "#0A84FF88",
     "list.focusForeground": "#fff",
-    // CMD + G panel
     "peekViewResult.selectionBackground": "#0A84FF",
     "peekViewResult.selectionForeground": "#fff",
-    // CMD + P list
     "quickInputList.focusBackground": "#0A84FF",
     "quickInputList.focusForeground": "#fff",
     "tab.activeBackground": "#0A84FF88",
