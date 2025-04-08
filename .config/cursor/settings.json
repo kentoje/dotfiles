@@ -18,14 +18,12 @@
   "editor.cursorSurroundingLines": 15,
   "editor.fontFamily": "CommitMono Nerd Font",
   "breadcrumbs.enabled": false,
-  "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.sideBar.location": "right",
   "window.title": " ",
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "vsicons.dontShowNewVersionMessage": true,
   "eslint.format.enable": true,
   "workbench.colorTheme": "Oscura Midnight",
   "workbench.colorCustomizations": {
@@ -40,5 +38,6 @@
     "titleBar.inactiveForeground": "#222"
   },
   "editor.accessibilitySupport": "off",
-  "workbench.iconTheme": "icons"
+  "workbench.iconTheme": "icons",
+  "workbench.editor.enablePreview": false
 }

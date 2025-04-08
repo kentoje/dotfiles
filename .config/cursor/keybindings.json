@@ -50,9 +50,9 @@
     "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus || suggestWidgetVisible && textInputFocus && !suggestWidgetHasFocusedSuggestion"
   },
   {
-    "key": "-",
+    "key": "cmd+e",
     "command": "workbench.view.explorer",
-    "when": "viewContainer.workbench.view.explorer.enabled && !inQuickInput && neovim.mode != 'insert' && !inChatInput && !inCompositeEditor && !inChat"
+    "when": "viewContainer.workbench.view.explorer.enabled"
   },
   {
     "key": "cmd+l",
