@@ -9,7 +9,7 @@ function get_aws_credentials
     end
     
     # Select a profile using fzf
-    set -l selected_profile (echo $available_profiles | fzf)
+    set -l selected_profile (aws configure list-profiles | grep -v "default" | fzf)
     
     if test -z "$selected_profile"
         echo "No profile selected"
