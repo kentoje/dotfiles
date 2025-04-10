@@ -50,6 +50,10 @@
     "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus || suggestWidgetVisible && textInputFocus && !suggestWidgetHasFocusedSuggestion"
   },
   {
+    "key": "cmd+e",
+    "command": "workbench.view.explorer"
+  },
+  {
     "key": "shift+cmd+e",
     "command": "workbench.files.action.collapseExplorerFolders"
   },
