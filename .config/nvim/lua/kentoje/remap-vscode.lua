@@ -93,3 +93,7 @@ end)
 vim.keymap.set({ "n", "x" }, "[[", function()
 	vscode.action("editor.action.previousSelectionMatchFindAction")
 end)
+
+vim.keymap.set({ "n" }, "-", function()
+	vscode.action("workbench.files.action.showActiveFileInExplorer")
+end)

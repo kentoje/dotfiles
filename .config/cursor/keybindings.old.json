@@ -144,7 +144,6 @@
     "command": "spaceBlockJumper.moveDown"
   },
   {
-    // "key": "shift+cmd+-",
     "key": "",
     "command": "-workbench.action.zoomOut"
   },
