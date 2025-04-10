@@ -38,6 +38,10 @@ vim.keymap.set({ "n" }, "<leader>d", function()
 	vscode.action("workbench.action.splitEditor")
 end)
 
+vim.keymap.set({ "n" }, "<leader>i", function()
+	vscode.action("composer.openChatAsEditor")
+end)
+
 vim.keymap.set({ "n" }, "gd", function()
 	vscode.action("editor.action.showHover")
 end)

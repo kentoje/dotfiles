@@ -5,6 +5,11 @@
   "files.autoSave": "off",
   "explorer.sortOrder": "type",
   "explorer.autoReveal": false,
+  "editor.formatOnSave": true,
+  "html.autoClosingTags": false,
+  "typescript.autoClosingTags": false,
+  "javascript.autoClosingTags": false,
+  "editor.autoClosingBrackets": "never",
   "search.searchEditor.focusResultsOnSearch": false,
   "search.collapseResults": "alwaysCollapse",
   "editor.cursorBlinking": "phase",
@@ -39,5 +44,6 @@
   },
   "editor.accessibilitySupport": "off",
   "workbench.iconTheme": "icons",
-  "workbench.editor.enablePreview": false
+  "workbench.editor.enablePreview": false,
+  "editor.autoClosingQuotes": "never"
 }
