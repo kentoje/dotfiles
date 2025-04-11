@@ -72,12 +72,20 @@ vim.keymap.set({ "n" }, "gp", function()
 	vscode.action("workbench.action.quickOpen")
 end)
 
-vim.keymap.set({ "n" }, "<leader>fg", function()
-	vscode.action("workbench.action.findInFiles")
-end)
+-- vim.keymap.set({ "n" }, "<leader>fg", function()
+-- 	vscode.action("workbench.action.findInFiles")
+-- end)
 
 vim.keymap.set({ "n" }, "<leader>fr", function()
 	vscode.action("search.action.focusSearchList")
+end)
+
+vim.keymap.set({ "n" }, "<leader>fs", function()
+	vscode.action("workbench.action.showAllSymbols")
+end)
+
+vim.keymap.set({ "n" }, "<leader>fg", function()
+	vscode.action("workbench.action.quickTextSearch")
 end)
 
 vim.keymap.set({ "n" }, "<leader>cr", function()
@@ -113,10 +121,6 @@ vim.keymap.set({ "n", "x" }, "[[", function()
 end)
 
 -- Plugins
-vim.keymap.set({ "n" }, "-", function()
-	vscode.action("vsnetrw.open")
-end)
-
 vim.keymap.set({ "n" }, "<leader>xgb", function()
 	vscode.action("gitlens.toggleFileBlame")
 end)

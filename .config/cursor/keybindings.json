@@ -112,5 +112,45 @@
     "key": "ctrl+space",
     "command": "-editor.action.triggerSuggest",
     "when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !suggestWidgetVisible"
+  },
+  {
+    "key": "-",
+    "command": "voil.openPanelCurrentDir",
+    "when": "!voilDoc && neovim.mode == 'normal' && editorFocus"
+  },
+  {
+    "key": "-",
+    "command": "voil.gotoParentDir",
+    "when": "voilDoc && neovim.mode == 'normal' && editorFocus"
+  },
+  {
+    "key": "enter",
+    "command": "voil.enter",
+    "when": "voilDoc"
+  },
+  {
+    "key": "cmd+s",
+    "command": "voil.save",
+    "when": "voilDoc"
+  },
+  {
+    "key": "cmd+s",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "!voilDoc"
+  },
+  {
+    "key": "cmd+w",
+    "command": "voil.close",
+    "when": "voilDoc"
+  },
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.closePanel",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "cmd+b",
+    "command": "terminal.focus",
+    "when": "!terminalFocus && neovim.mode == 'normal'"
   }
 ]
