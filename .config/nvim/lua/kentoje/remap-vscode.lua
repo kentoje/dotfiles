@@ -46,6 +46,10 @@ vim.keymap.set({ "n" }, "<leader>e", function()
 	vscode.action("editor.action.formatDocument")
 end)
 
+vim.keymap.set({ "n" }, "<leader>E", function()
+	vscode.action("editor.action.autoFix")
+end)
+
 vim.keymap.set({ "n", "x" }, "g.", function()
 	vscode.with_insert(function()
 		vscode.action("editor.action.quickFix")
@@ -108,6 +112,11 @@ vim.keymap.set({ "n", "x" }, "[[", function()
 	vscode.action("editor.action.previousSelectionMatchFindAction")
 end)
 
+-- Plugins
 vim.keymap.set({ "n" }, "-", function()
-	vscode.action("workbench.files.action.showActiveFileInExplorer")
+	vscode.action("vsnetrw.open")
+end)
+
+vim.keymap.set({ "n" }, "<leader>xgb", function()
+	vscode.action("gitlens.toggleFileBlame")
 end)
