@@ -2,6 +2,7 @@ return {
 	"Mofiqul/vscode.nvim",
 	lazy = false,
 	priority = 1000,
+	enabled = false,
 	config = function()
 		require("vscode").setup({
 			transparent = true,
