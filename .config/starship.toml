@@ -28,10 +28,10 @@ $character"""
 # success_symbol = '[~>](bold green)'
 success_symbol = '[❯](bold green)'
 error_symbol = "[](bold red)"
-vimcmd_symbol = "[](bold purple)"
+vimcmd_symbol = "[](bold yellow)"
 
 [directory]
-style = "blue bold"
+style = "green bold"
 
 [git_status]
 format = "[[($conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed) ]($style)"
