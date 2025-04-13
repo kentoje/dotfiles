@@ -55,6 +55,6 @@
   "workbench.editor.enablePreview": false,
   "workbench.editor.showTabs": "single",
   "vscode_custom_css.imports": [
-    "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
+    "file://$HOME/dotfiles/.config/cursor/js/cursor-animation.js"
   ]
 }
