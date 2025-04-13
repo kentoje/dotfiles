@@ -130,6 +130,16 @@
     "when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly && !suggestWidgetVisible"
   },
   {
+    "key": "ctrl+space",
+    "command": "editor.action.smartSelect.expand",
+    "when": "editorTextFocus && (neovim.mode == 'normal' || neovim.mode == 'visual')"
+  },
+  {
+    "key": "backspace",
+    "command": "editor.action.smartSelect.shrink",
+    "when": "editorTextFocus && neovim.mode == 'visual'"
+  },
+  {
     "key": "-",
     "command": "voil.openPanelCurrentDir",
     "when": "!voilDoc && neovim.mode == 'normal' && editorFocus"
