@@ -50,12 +50,28 @@
     "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus || suggestWidgetVisible && textInputFocus && !suggestWidgetHasFocusedSuggestion"
   },
   {
-    "key": "cmd+e",
-    "command": "workbench.view.explorer"
+    "key": "cmd+-",
+    "command": "workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
   },
   {
-    "key": "shift+cmd+e",
+    "key": "shift+cmd+-",
     "command": "workbench.files.action.collapseExplorerFolders"
+  },
+  {
+    "key": "cmd+e",
+    "command": "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup",
+    "when": "!activeEditorGroupEmpty"
+  },
+  {
+    "key": "cmd+e",
+    "command": "workbench.action.quickOpenNavigateNextInEditorPicker",
+    "when": "inEditorsPicker && inQuickOpen"
+  },
+  {
+    "key": "cmd+shift+e",
+    "command": "workbench.action.quickOpenNavigatePreviousInEditorPicker",
+    "when": "inEditorsPicker && inQuickOpen"
   },
   {
     "key": "cmd+l",
@@ -152,5 +168,10 @@
     "key": "cmd+b",
     "command": "terminal.focus",
     "when": "!terminalFocus && neovim.mode == 'normal'"
+  },
+  {
+    "key": "shift+cmd+e",
+    "command": "-workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
   }
 ]

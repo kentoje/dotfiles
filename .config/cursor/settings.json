@@ -12,6 +12,8 @@
   "editor.autoClosingBrackets": "never",
   "search.searchEditor.focusResultsOnSearch": false,
   "search.collapseResults": "alwaysCollapse",
+  "editor.stickyScroll.enabled": true,
+  "editor.minimap.enabled": false,
   "editor.cursorBlinking": "phase",
   "editor.overviewRulerBorder": false,
   "editor.padding.bottom": 16,
@@ -35,8 +37,9 @@
     "list.focusBackground": "#6DBC9966",
     "list.focusForeground": "#FFFFFF",
     "quickInputList.focusBackground": "#6DBC9966",
-    "editorCursor.foreground": "#6DBC99",
-    "editorLineNumber.activeForeground": "#6DBC99",
+    "editorCursor.foreground": "#A052FF",
+    "editorCursor.background": "#FFF",
+    "editorLineNumber.activeForeground": "#A052FF",
     "titleBar.activeBackground": "#000000",
     "titleBar.activeForeground": "#222",
     "titleBar.inactiveBackground": "#000000",
@@ -47,7 +50,11 @@
     "list.activeSelectionForeground": "#FFFFFF"
   },
   "editor.accessibilitySupport": "off",
+  "editor.autoClosingQuotes": "never",
   "workbench.iconTheme": "icons",
   "workbench.editor.enablePreview": false,
-  "editor.autoClosingQuotes": "never"
+  "workbench.editor.showTabs": "single",
+  "vscode_custom_css.imports": [
+    "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
+  ]
 }
