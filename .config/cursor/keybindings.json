@@ -170,6 +170,15 @@
     "when": "voilDoc"
   },
   {
+    "key": "cmd+w",
+    "command": "workbench.action.closeEditorsInGroup",
+    "when": "!voilDoc"
+  },
+  {
+    "key": "cmd+shift+w",
+    "command": "workbench.action.closeActiveEditor"
+  },
+  {
     "key": "cmd+b",
     "command": "workbench.action.closePanel",
     "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"

@@ -42,13 +42,17 @@ vim.keymap.set({ "n" }, "<leader>i", function()
 	vscode.action("composer.openChatAsEditor")
 end)
 
+-- vim.keymap.set({ "n" }, "<leader>e", function()
+-- 	vscode.action("editor.action.formatDocument")
+-- end)
+
 vim.keymap.set({ "n" }, "<leader>e", function()
-	vscode.action("editor.action.formatDocument")
+	vscode.action("eslint.executeAutofix")
 end)
 
-vim.keymap.set({ "n" }, "<leader>E", function()
-	vscode.action("editor.action.autoFix")
-end)
+-- vim.keymap.set({ "n" }, "<leader>E", function()
+-- 	vscode.action("editor.action.autoFix")
+-- end)
 
 vim.keymap.set({ "n", "x" }, "g.", function()
 	vscode.with_insert(function()

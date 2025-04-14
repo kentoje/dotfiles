@@ -34,6 +34,7 @@
   "eslint.format.enable": true,
   "workbench.colorTheme": "Oscura Midnight",
   "workbench.colorCustomizations": {
+    "editor.selectionBackground": "#A052FF55",
     "list.focusBackground": "#6DBC9966",
     "list.focusForeground": "#FFFFFF",
     "quickInputList.focusBackground": "#6DBC9966",
@@ -51,10 +52,11 @@
   },
   "editor.accessibilitySupport": "off",
   "editor.autoClosingQuotes": "never",
-  "workbench.iconTheme": "icons",
   "workbench.editor.enablePreview": false,
   "workbench.editor.showTabs": "single",
   "vscode_custom_css.imports": [
     "file://$HOME/dotfiles/.config/cursor/js/cursor-animation.js"
-  ]
+  ],
+  "workbench.iconTheme": "chalice-icon-theme",
+  "biome.enabled": false
 }
