@@ -1,4 +1,4 @@
-config-file = "themes/oscura"
+config-file = "themes/vesper"
 
 font-family = "CommitMono Nerd Font"
 font-style = "Bold"
@@ -9,7 +9,7 @@ window-decoration = true
 window-padding-x = 16
 window-padding-y = 12
 
-background-opacity = "0.8"
+background-opacity = "0.7"
 background-blur-radius = 60
 background = "000000"
 foreground = "a6accd"
@@ -17,7 +17,7 @@ foreground = "a6accd"
 unfocused-split-opacity = "0.7"
 
 # cursor-invert-fg-bg = true
-cursor-color = "#4EBE96"
+cursor-color = "#99ffe4"
 cursor-style = "block"
 cursor-style-blink = false
 
