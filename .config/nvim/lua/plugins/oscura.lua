@@ -3,6 +3,7 @@ local dump = require("kentoje.helpers").dump
 return {
 	"jwbaldwin/oscura.nvim",
 	lazy = false,
+	enabled = false,
 	priority = 1000,
 	opts = {
 		transparent_background = true,
@@ -194,7 +195,9 @@ return {
 		--
 		-- vim.cmd("hi @character guifg=" .. colors.vscBlue)
 		-- vim.cmd("hi @string guifg=" .. colors.vscBlueGreen)
-		--
+
+		vim.cmd("hi @type.builtin guifg=" .. colors.green_05)
+
 		-- vim.cmd("hi OilHidden guifg=" .. colors.vscDisabledBlue)
 	end,
 }

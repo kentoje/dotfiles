@@ -45,9 +45,9 @@ return {
 		-- local wtf = require("wtf")
 		-- local colors = require("catppuccin.palettes").get_palette("mocha")
 		-- local colors = require("poimandres.palette")
-		-- local colors = require("vesper.colors")
+		local colors = require("vesper.colors")
 		-- local colors = require("vscode.colors").get_colors()
-		local colors = require("oscura.colors")
+		-- local colors = require("oscura.colors")
 
 		require("lualine").setup({
 			options = {
@@ -108,7 +108,7 @@ return {
 						color = {
 							-- fg = colors.blue,
 							-- fg = colors.blue1,
-							fg = colors.light_04,
+							fg = colors.green,
 							-- bg = "",
 						},
 
