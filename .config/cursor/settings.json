@@ -10,6 +10,7 @@
   "typescript.autoClosingTags": false,
   "javascript.autoClosingTags": false,
   "editor.autoClosingBrackets": "never",
+  "editor.bracketPairColorization.enabled": false,
   "search.searchEditor.focusResultsOnSearch": false,
   "search.collapseResults": "alwaysCollapse",
   "editor.stickyScroll.enabled": true,
@@ -27,27 +28,36 @@
   "breadcrumbs.enabled": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.sideBar.location": "right",
-  "window.title": " ",
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "editor.tokenColorCustomizations": {
+    "comments": "#6C6C6C",
+    "textMateRules": [
+      {
+        "scope": "comment",
+        "settings": {
+          "foreground": "#6C6C6C"
+        }
+      }
+    ]
+  },
   "eslint.format.enable": true,
-  "workbench.colorTheme": "Oscura Midnight",
   "workbench.colorCustomizations": {
-    "editor.selectionBackground": "#A052FF55",
-    "list.focusBackground": "#6DBC9966",
     "list.focusForeground": "#FFFFFF",
-    "quickInputList.focusBackground": "#6DBC9966",
-    "editorCursor.foreground": "#A052FF",
     "editorCursor.background": "#FFF",
-    "editorLineNumber.activeForeground": "#A052FF",
+    "editor.selectionBackground": "#ffc79955",
+    "list.focusBackground": "#ffc79955",
+    "quickInputList.focusBackground": "#ffc79955",
+    "menu.selectionForeground": "#ffc79955",
+    "list.activeSelectionBackground": "#ffc79955",
+    "editor.selectionForeground": "#ffc79955",
+    "editorCursor.foreground": "#ffc799",
+    "editorLineNumber.activeForeground": "#ffc799",
     "titleBar.activeBackground": "#000000",
     "titleBar.activeForeground": "#222",
     "titleBar.inactiveBackground": "#000000",
     "titleBar.inactiveForeground": "#222",
-    "editor.selectionForeground": "#6DBC9966",
-    "menu.selectionForeground": "#6DBC9966",
-    "list.activeSelectionBackground": "#6DBC9966",
     "list.activeSelectionForeground": "#FFFFFF"
   },
   "editor.accessibilitySupport": "off",
@@ -55,8 +65,9 @@
   "workbench.editor.enablePreview": false,
   "workbench.editor.showTabs": "single",
   "vscode_custom_css.imports": [
-    "file://$HOME/dotfiles/.config/cursor/js/cursor-animation.js"
+    "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
   ],
   "workbench.iconTheme": "chalice-icon-theme",
-  "biome.enabled": false
+  "biome.enabled": false,
+  "workbench.colorTheme": "Monochrome Dark"
 }
