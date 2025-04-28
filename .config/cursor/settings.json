@@ -46,18 +46,18 @@
   "workbench.colorCustomizations": {
     "list.focusForeground": "#FFFFFF",
     "editorCursor.background": "#FFF",
-    "editor.selectionBackground": "#ffc79955",
-    "list.focusBackground": "#ffc79955",
-    "quickInputList.focusBackground": "#ffc79955",
-    "menu.selectionForeground": "#ffc79955",
-    "list.activeSelectionBackground": "#ffc79955",
-    "editor.selectionForeground": "#ffc79955",
-    "editorCursor.foreground": "#ffc799",
-    "editorLineNumber.activeForeground": "#ffc799",
-    "titleBar.activeBackground": "#000000",
-    "titleBar.activeForeground": "#222",
-    "titleBar.inactiveBackground": "#000000",
-    "titleBar.inactiveForeground": "#222",
+    "editor.selectionBackground": "#7E91B255",
+    "list.focusBackground": "#7E91B255",
+    "quickInputList.focusBackground": "#7E91B255",
+    "menu.selectionForeground": "#7E91B255",
+    "list.activeSelectionBackground": "#7E91B255",
+    "editor.selectionForeground": "#7E91B255",
+    "editorCursor.foreground": "#7E91B2",
+    "editorLineNumber.activeForeground": "#7E91B2",
+    // "titleBar.activeBackground": "#000000",
+    // "titleBar.activeForeground": "#222",
+    // "titleBar.inactiveBackground": "#000000",
+    // "titleBar.inactiveForeground": "#222",
     "list.activeSelectionForeground": "#FFFFFF"
   },
   "editor.accessibilitySupport": "off",
@@ -67,7 +67,6 @@
   "vscode_custom_css.imports": [
     "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
   ],
-  "workbench.iconTheme": "chalice-icon-theme",
-  "biome.enabled": false,
-  "workbench.colorTheme": "Monochrome Dark"
+  "workbench.colorTheme": "GitHub Light",
+  "workbench.iconTheme": "symbols"
 }

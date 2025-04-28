@@ -1,8 +1,8 @@
 // Set the color of the cursor trail to match the user's cursor color
-const Color = "#ffc799"; // If set to "default," it will use the theme's cursor color.
+const Color = "#7E91B2"; // If set to "default," it will use the theme's cursor color.
 // ! default will only reference editorCursor.background
 // "workbench.colorCustomizations": {
-//     "editorCursor.background": "#ffc799",
+//     "editorCursor.background": "#7E91B2",
 // }
 
 // Set the style of the cursor to either a line or block
@@ -23,7 +23,7 @@ const ShadowBlur = 15;
 // imported from https://github.com/tholman/cursor-effects/blob/master/src/rainbowCursor.js
 function createTrail(options) {
   const totalParticles = options?.length || 20;
-  let particlesColor = options?.color || "#ffc799";
+  let particlesColor = options?.color || "#7E91B2";
   const style = options?.style || "block";
   const canvas = options?.canvas;
   const context = canvas.getContext("2d");
