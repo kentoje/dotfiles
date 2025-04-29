@@ -45,14 +45,14 @@
   "eslint.format.enable": true,
   "workbench.colorCustomizations": {
     "list.focusForeground": "#FFFFFF",
-    "editorCursor.background": "#FFF",
-    "editor.selectionBackground": "#7E91B255",
+    // "editor.selectionBackground": "#7E91B255",
     "list.focusBackground": "#7E91B255",
     "quickInputList.focusBackground": "#7E91B255",
     "menu.selectionForeground": "#7E91B255",
     "list.activeSelectionBackground": "#7E91B255",
     "editor.selectionForeground": "#7E91B255",
     "editorCursor.foreground": "#7E91B2",
+    "editorCursor.background": "#FFF",
     "editorLineNumber.activeForeground": "#7E91B2",
     // "titleBar.activeBackground": "#000000",
     // "titleBar.activeForeground": "#222",
@@ -68,5 +68,6 @@
     "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
   ],
   "workbench.colorTheme": "GitHub Light",
-  "workbench.iconTheme": "symbols"
+  "workbench.iconTheme": "symbols",
+  "cursor.composer.shouldQueueWhenGenerating": true
 }
