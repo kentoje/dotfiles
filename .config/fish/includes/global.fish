@@ -1,6 +1,7 @@
 set -U fish_greeting
 set -U fish_key_bindings fish_vi_key_bindings
 set -U fish_color_autosuggestion a5adce
+set fish_cursor_insert block
 set -gx EDITOR nvim
 set -Ux VISUAL nvim
 set -Ux HOMEBREW_NO_AUTO_UPDATE 1
