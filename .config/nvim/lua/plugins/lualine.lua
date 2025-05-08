@@ -54,7 +54,7 @@ return {
 				-- theme  "auto",
 				-- theme = "poimandres",
 				-- theme = "vesper",
-				theme = "vscode",
+				theme = "melange",
 				globalstatus = true,
 				-- ░▒▓
 				-- section_separators = { left = "", right = "" },
