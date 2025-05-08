@@ -1,5 +1,4 @@
 #config-file = "themes/melange_light"
-# theme = "rose-pine-dawn"
 theme = "Melange_dark"
 
 font-family = "CommitMono Nerd Font"
