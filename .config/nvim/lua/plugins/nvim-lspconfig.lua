@@ -19,12 +19,14 @@ return {
 	dependencies = {
 		{
 			"williamboman/mason.nvim",
+			version = "v1.*",
 			build = function()
 				pcall(vim.cmd, "MasonUpdate")
 			end,
 		},
 
-		{ "williamboman/mason-lspconfig.nvim" },
+		-- Check for new "vim.lsp.config" config mechanism from nvim v11
+		{ "williamboman/mason-lspconfig.nvim", version = "v1.*" },
 		-- { "hrsh7th/nvim-cmp" },
 		-- { "hrsh7th/cmp-nvim-lsp" },
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
