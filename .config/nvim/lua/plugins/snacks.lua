@@ -71,14 +71,14 @@ return {
 				},
 			},
 			sections = {
-				{
-					section = "terminal",
-					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x17 --stretch /Users/kento/Pictures/wallpapers/abstract/Yellow\\ white.jpg",
-					-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x20 --stretch /Users/kento/Pictures/samples/pp.jpg",
-					cmd = string.format("chafa --symbols vhalf --dither bayer --dither-grain 4 --stretch %s", image),
-					height = 18,
-					padding = 1,
-				},
+				-- {
+				-- 	section = "terminal",
+				-- 	-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x17 --stretch /Users/kento/Pictures/wallpapers/abstract/Yellow\\ white.jpg",
+				-- 	-- cmd = "clear; chafa --format symbols --symbols vhalf --size 60x20 --stretch /Users/kento/Pictures/samples/pp.jpg",
+				-- 	cmd = string.format("chafa --symbols vhalf --dither bayer --dither-grain 4 --stretch %s", image),
+				-- 	height = 18,
+				-- 	padding = 1,
+				-- },
 
 				{ icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
 				{ icon = " ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },

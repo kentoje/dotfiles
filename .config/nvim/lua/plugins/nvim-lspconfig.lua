@@ -19,16 +19,16 @@ return {
 	dependencies = {
 		{
 			"williamboman/mason.nvim",
-			-- version = "v2.*",
-			version = "v1.*",
+			version = "v2.*",
+			-- version = "v1.*",
 			build = function()
 				pcall(vim.cmd, "MasonUpdate")
 			end,
 		},
 
 		-- Check for new "vim.lsp.config" config mechanism from nvim v11
-		-- { "williamboman/mason-lspconfig.nvim", version = "v2.*" },
-		{ "williamboman/mason-lspconfig.nvim", version = "v1.*" },
+		{ "williamboman/mason-lspconfig.nvim", version = "v2.*" },
+		-- { "williamboman/mason-lspconfig.nvim", version = "v1.*" },
 		-- { "hrsh7th/nvim-cmp" },
 		-- { "hrsh7th/cmp-nvim-lsp" },
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
@@ -40,10 +40,10 @@ return {
 		{ "yioneko/nvim-vtsls" },
 	},
 	config = function()
-		vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "LspDiagnosticsDefaultError" })
-		vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "LspDiagnosticsDefaultWarning" })
-		vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
-		vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
+		-- vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "LspDiagnosticsDefaultError" })
+		-- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "LspDiagnosticsDefaultWarning" })
+		-- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
+		-- vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
 
 		local move_next_error = function()
 			vim.diagnostic.goto_next({
@@ -106,6 +106,14 @@ return {
 					severity_sort = true,
 					-- tiny-inline-diagnostic
 					virtual_text = false,
+					signs = {
+						text = {
+							[vim.diagnostic.severity.ERROR] = "",
+							[vim.diagnostic.severity.WARN] = "",
+							[vim.diagnostic.severity.INFO] = "",
+							[vim.diagnostic.severity.HINT] = "",
+						},
+					},
 				})
 
 				vim.keymap.set("n", "gf", function()

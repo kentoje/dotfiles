@@ -1,7 +1,6 @@
 return {
 	"nvim-telescope/telescope.nvim",
 	version = "0.1.x",
-	enabled = false,
 	cmd = "Telescope",
 	dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
 	config = function()
