@@ -7,6 +7,16 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
+  # darwin-rebuild switch needs to be run as root now.
+  # I had to add a /var/root/.gitconfig file to make it work.
+  # ❯ sudo bat /var/root/.gitconfig
+  # ───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  #        │ File: /var/root/.gitconfig
+  # ───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  #    1   │ [safe]
+  #    2   │     directory = /Volumes/HomeX/kento/dotfiles
+  # ───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
   outputs =
     inputs@{
       self,
@@ -117,7 +127,7 @@
               rm -rf /Applications/Nix\ Apps
               mkdir -p /Applications/Nix\ Apps
               find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-              while read src; do
+              while read -r src; do
                 app_name=$(basename "$src")
                 echo "copying $src" >&2
                 ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
@@ -125,37 +135,38 @@
             '';
 
           # Trick because of custom mount volume.
-          system.activationScripts.postUserActivation.text = ''
+          # Note: postUserActivation is no longer available, using system.activationScripts instead
+          system.activationScripts.extraActivation.text = ''
             echo "Running post-activation script for LaunchAgents..." >&2
             # This ensures this script runs after user setup
             if [ ! -d /Users/kento/Library/LaunchAgents ]; then
               echo "Creating LaunchAgents directory..." >&2
-              mkdir -p /Users/kento/Library/LaunchAgents
+              sudo -u kento mkdir -p /Users/kento/Library/LaunchAgents
             fi
 
             if [ ! -f /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist ]; then
-              cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.sketchybar.plist /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+              sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.sketchybar.plist /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
             fi
 
             if [ ! -f /Users/kento/Library/LaunchAgents/org.nixos.svim.plist ]; then
-              cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.svim.plist /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
+              sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.svim.plist /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
             fi
 
             # Check and restart sketchybar service
-            if launchctl print "gui/$(id -u)/org.nixos.sketchybar" >/dev/null 2>&1; then
+            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.sketchybar" >/dev/null 2>&1; then
               echo "Stopping existing sketchybar service..." >&2
-              launchctl bootout gui/$(id -u) /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
             fi
             echo "Starting sketchybar service..." >&2
-            launchctl bootstrap gui/$(id -u) /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
 
             # Check and restart svim service
-            if launchctl print "gui/$(id -u)/org.nixos.svim" >/dev/null 2>&1; then
+            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.svim" >/dev/null 2>&1; then
               echo "Stopping existing svim service..." >&2
-              launchctl bootout gui/$(id -u) /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
+              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
             fi
             echo "Starting svim service..." >&2
-            launchctl bootstrap gui/$(id -u) /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
+            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
           '';
           #   sf-mono-liga-bin  # Your custom font from the overlay
           #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
@@ -166,7 +177,7 @@
           # };
 
           # Auto upgrade nix package and the daemon service.
-          services.nix-daemon.enable = true;
+          # services.nix-daemon.enable = true;  # No longer needed
           # nix.package = pkgs.nix;
 
           # Launch sketchybar on login
@@ -239,8 +250,11 @@
             home = "/Volumes/HomeX/kento";
           };
 
-          nix.configureBuildUsers = true;
-          nix.useDaemon = true;
+          # Set the primary user for nix-darwin
+          system.primaryUser = "kento";
+
+          # nix.configureBuildUsers = true;  # No longer needed
+          # nix.useDaemon = true;  # No longer needed
         };
     in
     {
