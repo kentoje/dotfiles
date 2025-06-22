@@ -9,6 +9,7 @@
 
 [safe]
 	directory = /Users/kento/Documents/gitlab/dashboard-v4
+	directory = /Volumes/HomeX/kento/dotfiles
 
 [alias]
   undo = reset --mixed HEAD~1
