@@ -1,5 +1,6 @@
 return {
 	"rmagatti/goto-preview",
+	enabled = false,
 	event = "BufEnter",
 	config = function()
 		local go_to_preview = require("goto-preview")

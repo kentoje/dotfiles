@@ -19,6 +19,7 @@ return {
 	dependencies = {
 		{
 			"williamboman/mason.nvim",
+			-- version = "v2.*",
 			version = "v1.*",
 			build = function()
 				pcall(vim.cmd, "MasonUpdate")
@@ -26,6 +27,7 @@ return {
 		},
 
 		-- Check for new "vim.lsp.config" config mechanism from nvim v11
+		-- { "williamboman/mason-lspconfig.nvim", version = "v2.*" },
 		{ "williamboman/mason-lspconfig.nvim", version = "v1.*" },
 		-- { "hrsh7th/nvim-cmp" },
 		-- { "hrsh7th/cmp-nvim-lsp" },
@@ -74,15 +76,15 @@ return {
 
 		local lspconfig = require("lspconfig")
 
-		lspconfig.sourcekit.setup({
-			capabilities = {
-				workspace = {
-					didChangeWatchedFiles = {
-						dynamicRegistration = true,
-					},
-				},
-			},
-		})
+		-- lspconfig.sourcekit.setup({
+		-- 	capabilities = {
+		-- 		workspace = {
+		-- 			didChangeWatchedFiles = {
+		-- 				dynamicRegistration = true,
+		-- 			},
+		-- 		},
+		-- 	},
+		-- })
 
 		-- local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
