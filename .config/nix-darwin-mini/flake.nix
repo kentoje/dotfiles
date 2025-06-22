@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
   outputs =
@@ -13,7 +12,6 @@
       self,
       nix-darwin,
       nixpkgs,
-      nix-homebrew,
       ...
     }:
     let
@@ -80,44 +78,6 @@
             yazi
             chafa
           ];
-
-          homebrew = {
-            taps = [
-              "zfdang/free-for-macOS"
-              "hashicorp/tap"
-              "FelixKratz/formulae"
-            ];
-            enable = true;
-            casks = [
-              "hammerspoon"
-              # "logitech-options"
-              "font-commit-mono-nerd-font"
-              "font-hack-nerd-font"
-              "font-sf-pro"
-              "sf-symbols"
-              "nikitabobko/tap/aerospace"
-              "karabiner-elements"
-              "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"
-            ];
-            # Brews are formulaes
-            brews = [
-              "mas"
-              "sketchybar"
-              "ifstat"
-              "free-for-macOS"
-              "svim"
-              "glab"
-              "hashicorp/tap/terraform"
-            ];
-            # Make sure to be logged in App Store.
-            # masApps = {
-            #   "Tayasui" = 1178074963;
-            #   "Spark" = 1176895641;
-            # };
-            # onActivation.cleanup = "zap";
-            onActivation.autoUpdate = true;
-            onActivation.upgrade = true;
-          };
 
           system.defaults = {
             ".GlobalPreferences"."com.apple.mouse.scaling" = -1.0;
@@ -224,7 +184,7 @@
               };
               # Not sure how to avoid waiting, and have some sort of dependencies.
               script = ''
-                if [ ! -f $HOME/Library/Fonts/sketchybar-app-font.ttf] ; then
+                if [ ! -f $HOME/Library/Fonts/sketchybar-app-font.ttf ] ; then
                   cp $HOME/dotfiles/assets/fonts/sketchybar-app-font.ttf $HOME/Library/Fonts
                 fi
 
@@ -289,26 +249,6 @@
       darwinConfigurations."kento" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         modules = [
-
-          nix-homebrew.darwinModules.nix-homebrew
-          {
-            nix-homebrew = {
-              # Install Homebrew under the default prefix
-              enable = true;
-
-              # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
-              enableRosetta = true;
-
-              # User owning the Homebrew prefix
-              user = "kento";
-
-              # Optional: Enable fully-declarative tap management
-              #
-              # With mutableTaps disabled, taps can no longer be added imperatively with `brew tap`.
-              # mutableTaps = false;
-            };
-          }
-
           configuration
         ];
       };
