@@ -108,6 +108,22 @@ vim.keymap.set({ "n" }, "[e", function()
 	vscode.action("editor.action.marker.prev")
 end)
 
+vim.keymap.set({ "n" }, "]c", function()
+	vscode.action("editor.action.inlineDiffs.nextChange")
+end)
+
+vim.keymap.set({ "n" }, "[c", function()
+	vscode.action("editor.action.inlineDiffs.previousChange")
+end)
+
+vim.keymap.set({ "n" }, "]f", function()
+	vscode.action("editor.action.inlineDiffs.nextDiffFile")
+end)
+
+vim.keymap.set({ "n" }, "[f", function()
+	vscode.action("editor.action.inlineDiffs.previousDiffFile")
+end)
+
 vim.keymap.set({ "n" }, "]d", function()
 	vscode.action("editor.action.marker.next")
 end)
@@ -116,13 +132,8 @@ vim.keymap.set({ "n" }, "[d", function()
 	vscode.action("editor.action.marker.prev")
 end)
 
-vim.keymap.set({ "n", "x" }, "]]", function()
-	vscode.action("editor.action.nextSelectionMatchFindAction")
-end)
-
-vim.keymap.set({ "n", "x" }, "[[", function()
-	vscode.action("editor.action.previousSelectionMatchFindAction")
-end)
+vim.keymap.set({ "n", "x" }, "]]", "*")
+vim.keymap.set({ "n", "x" }, "[[", "#")
 
 -- Plugins
 vim.keymap.set({ "n" }, "<leader>xgb", function()
