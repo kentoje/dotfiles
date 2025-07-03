@@ -2,7 +2,7 @@
   description = "Darwin system flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -20,7 +20,6 @@
         {
           nixpkgs = {
             config.allowUnfree = true;
-            # overlays = [];
           };
 
           # List packages installed in system profile. To search by name, run:
@@ -122,50 +121,35 @@
               rm -rf /Applications/Nix\ Apps
               mkdir -p /Applications/Nix\ Apps
               find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-              while read src; do
+              while read -r src; do
                 app_name=$(basename "$src")
                 echo "copying $src" >&2
                 ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
               done
             '';
 
-          # fonts.fontDir.enable = true;
-          # fonts.packages = with pkgs; [
-          #   sf-mono-liga-bin  # Your custom font from the overlay
-          #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
-          # ];
-
-          # fonts = {
-          #   fonts = with pkgs; [ sf-mono-liga-bin ];
-          # };
-
-          # Auto upgrade nix package and the daemon service.
-          services.nix-daemon.enable = true;
-          # nix.package = pkgs.nix;
-
-          # Necessary for using flakes on this system.
           nix.settings.experimental-features = "nix-command flakes";
 
-          # Create /etc/zshrc that loads the nix-darwin environment.
-          # programs.zsh.enable = true;  # default shell on catalina
-          # programs.fish.enable = true;
+          # Determinate uses its own daemon to manage the Nix installation that
+          # conflicts with nix-darwin’s native Nix management.
+          #
+          # To turn off nix-darwin’s management of the Nix installation, set:
+          #
+          #     nix.enable = false;
+          #
+          # This will allow you to use nix-darwin with Determinate. Some nix-darwin
+          # functionality that relies on managing the Nix installation, like the
+          # `nix.*` options to adjust Nix settings or configure a Linux builder,
+          # will be unavailable.
+          nix.enable = false;
 
-          # Set Git commit hash for darwin-version.
           system.configurationRevision = self.rev or self.dirtyRev or null;
-
-          # Used for backwards compatibility, please read the changelog before changing.
-          # $ darwin-rebuild changelog
           system.stateVersion = 5;
-
-          # The platform the configuration will be used on.
           nixpkgs.hostPlatform = "aarch64-darwin";
-
+          system.primaryUser = "kento";
           users.users.kento = {
             home = "/Users/kento";
           };
-
-          nix.configureBuildUsers = true;
-          nix.useDaemon = true;
         };
     in
     {
