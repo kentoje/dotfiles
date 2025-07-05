@@ -18,7 +18,6 @@
 .config/btop/btop.log
 
 .config/lazygit/state.yml
-.config/raycast/extensions
 .config/glab-cli
 .config/github-copilot
 .config/uv
@@ -27,3 +26,5 @@
 .config/vivaldi-css
 .config/zed
 .config/claude
+.config/configstore
+.config/raycast
