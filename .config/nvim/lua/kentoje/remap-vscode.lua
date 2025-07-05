@@ -139,3 +139,23 @@ vim.keymap.set({ "n", "x" }, "[[", "#")
 vim.keymap.set({ "n" }, "<leader>xgb", function()
 	vscode.action("gitlens.toggleFileBlame")
 end)
+
+vim.keymap.set({ "n" }, "<leader>a", function()
+	vscode.action("harpoon.add")
+end)
+
+vim.keymap.set({ "n" }, "<leader>1", function()
+	vscode.action("harpoon.yoink", { args = { 0 } })
+end)
+
+vim.keymap.set({ "n" }, "<leader>2", function()
+	vscode.action("harpoon.yoink", { args = { 1 } })
+end)
+
+vim.keymap.set({ "n" }, "<leader>3", function()
+	vscode.action("harpoon.yoink", { args = { 2 } })
+end)
+
+vim.keymap.set({ "n" }, "<leader><leader>", function()
+	vscode.action("harpoon.show")
+end)
