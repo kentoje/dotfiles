@@ -69,5 +69,6 @@
   ],
   "workbench.colorTheme": "GitHub Light",
   "workbench.iconTheme": "symbols",
-  "cursor.composer.shouldQueueWhenGenerating": true
+  "cursor.composer.shouldQueueWhenGenerating": true,
+  "cursor.composer.shouldChimeAfterChatFinishes": true
 }
