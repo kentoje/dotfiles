@@ -144,6 +144,10 @@ vim.keymap.set({ "n" }, "<leader>a", function()
 	vscode.action("harpoon.add")
 end)
 
+vim.keymap.set({ "n" }, "<leader>ca", function()
+	vscode.action("editor.action.addSymbolToChat")
+end)
+
 vim.keymap.set({ "n" }, "<leader>1", function()
 	vscode.action("harpoon.yoink", { args = { 0 } })
 end)
