@@ -51,6 +51,7 @@
             bat
             gnupg
             coreutils
+            poppler-utils
             atuin
             btop
             cointop
