@@ -15,7 +15,7 @@ function get_flowchart --description "Generate mermaid flowchart from TypeScript
         return 1
     end
     
-    # Run claude with mermaid-flowchart-output slash command and save to temp file
+    # Run claude with mermaid-flowchart-react-output slash command and save to temp file
     echo "Generating mermaid flowchart for: $selected_path"
     set -l temp_file "/tmp/mermaid_output.txt"
     
@@ -23,7 +23,7 @@ function get_flowchart --description "Generate mermaid flowchart from TypeScript
     fish -c 'while true; printf "\rGenerating"; sleep 0.3; printf "\rGenerating."; sleep 0.3; printf "\rGenerating.."; sleep 0.3; printf "\rGenerating..."; sleep 0.3; end' &
     set -l loader_pid $last_pid
     
-    claude -p "/mermaid-flowchart-output $selected_path" > "$temp_file" 2>&1
+    claude -p "/mermaid-flowchart-react-output $selected_path" > "$temp_file" 2>&1
     
     # Stop the loader
     kill $loader_pid 2>/dev/null
