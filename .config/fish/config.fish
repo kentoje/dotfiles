@@ -46,5 +46,7 @@ end
 # Added by Windsurf
 fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
 
-alias claude="/Volumes/HomeX/kento/.config/claude/local/claude"
 bind -M insert ctrl-space accept-autosuggestion
+
+alias cl="~/.claude/local/claude"
+alias claude="~/.claude/local/claude"
