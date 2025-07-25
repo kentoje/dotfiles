@@ -1,6 +1,7 @@
-function sync_claude_commands
-    set -l source_dir ~/dotfiles/.config/claude/commands
-    set -l target_dir ~/.claude/commands
+
+function sync_claude_agents
+    set -l source_dir ~/dotfiles/.config/claude/agents
+    set -l target_dir ~/.claude/agents
 
     # Create ~/.claude directory if it doesn't exist
     if not test -d ~/.claude
