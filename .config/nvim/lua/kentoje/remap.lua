@@ -139,3 +139,14 @@ vim.keymap.set("v", "<leader>ci", function()
 	local result = vim.fn.input("Insert text to beginning of selected lines")
 	return ":'<,'>norm I" .. result .. "<CR>"
 end, { expr = true, desc = "Insert text to beginning of selected lines" })
+
+vim.keymap.set("v", "<leader>y", function()
+	local start_pos = vim.fn.getpos("v")
+	local end_pos = vim.fn.getpos(".")
+	local start_line = math.min(start_pos[2], end_pos[2])
+	local end_line = math.max(start_pos[2], end_pos[2])
+	local path = vim.fn.expand("%")
+	local result = "(FILE: @" .. path .. " LINES: [start: " .. start_line .. ", end: " .. end_line .. "])"
+	vim.fn.setreg("+", result)
+	print("Copied: " .. result)
+end, { desc = "Copy path with line range" })
