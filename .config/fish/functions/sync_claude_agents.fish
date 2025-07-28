@@ -1,4 +1,3 @@
-
 function sync_claude_agents
     set -l source_dir ~/dotfiles/.config/claude/agents
     set -l target_dir ~/.claude/agents
