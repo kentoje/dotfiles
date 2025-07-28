@@ -23,14 +23,20 @@ fi
 
 [[ -z "$CLAUDE_PID" ]] && exit 0
 
-# Set status: only "r" for running, everything else is "w" (waiting)  
-[[ "$HOOK_EVENT" == "UserPromptSubmit" ]] && STATUS="r" || STATUS="w"
+# Set status based on hook event
+if [[ "$HOOK_EVENT" == "UserPromptSubmit" ]]; then
+  STATUS="r"
+elif [[ "$HOOK_EVENT" == "Notification" ]]; then
+  STATUS="n"
+else
+  STATUS="w"
+fi
 
 # Create session directory if needed
 mkdir -p /tmp/claude_sessions
 
 # Store session data
-cat > "/tmp/claude_sessions/$CLAUDE_PID" <<EOF
+cat >"/tmp/claude_sessions/$CLAUDE_PID" <<EOF
 CWD=$CWD
 DIR_NAME=$(basename "$CWD")
 STATUS=$STATUS

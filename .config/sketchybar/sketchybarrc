@@ -86,6 +86,12 @@ sketchybar --add item claude_cooking left \
   script="$PLUGIN_DIR/claude_cooking.sh" \
   --subscribe claude_cooking claude_session_update
 
+sketchybar --add item claude_notify left \
+  --set claude_notify \
+  update_freq=10 \
+  script="$PLUGIN_DIR/claude_notify.sh" \
+  --subscribe claude_notify claude_session_update
+
 sketchybar --add item clock right \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh"
 # icon=􀐫
