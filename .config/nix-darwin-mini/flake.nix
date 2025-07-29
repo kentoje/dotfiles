@@ -61,6 +61,7 @@
             ffmpeg
             entr
             fish
+            csvq
             nixfmt-rfc-style
             fd
             fnm
