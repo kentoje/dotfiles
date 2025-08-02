@@ -1,8 +1,10 @@
 # dotfiles
 
-## Screenshot
+## Screenshots
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a196dd6e-398c-46a4-8c6e-606b878d9d30" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4a863c6f-eb55-440d-89cc-957c26378fed" />
+
 
 ## Flow
 
