@@ -1,5 +1,6 @@
 return {
 	"christoomey/vim-tmux-navigator",
+	enable = false,
 	config = function()
 		vim.g.tmux_navigator_save_on_switch = 1
 

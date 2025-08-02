@@ -42,6 +42,27 @@ return {
 		-- or leave it empty to use the default settings
 		-- refer to the configuration section below
 		bigfile = { enabled = true },
+		terminal = {
+			bo = {
+				filetype = "snacks_terminal",
+			},
+			enabled = true,
+			keys = {
+				gg = function()
+					return nil
+				end,
+				-- term_normal = {
+				-- 	"<esc>",
+				-- 	function()
+				-- 		print("hi")
+				-- 		vim.cmd("stopinsert")
+				-- 		vim.cmd("wincmd h")
+				-- 	end,
+				-- 	mode = "t",
+				-- 	desc = "Focus left pane",
+				-- },
+			},
+		},
 		bufdelete = { enabled = true },
 		dashboard = {
 			enabled = true,
@@ -106,6 +127,13 @@ return {
 				Snacks.scratch.select()
 			end,
 			desc = "Select Scratch Buffer",
+		},
+		{
+			"<C-o>",
+			function()
+				vim.cmd("wincmd h")
+			end,
+			mode = { "t" },
 		},
 	},
 }
