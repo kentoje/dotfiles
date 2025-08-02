@@ -27,3 +27,5 @@
 .config/zed
 .config/configstore
 .config/raycast
+
+.claude/settings.local.json
