@@ -65,3 +65,4 @@ keybind = ctrl+f=text:\x01\x7a
 keybind = ctrl+t=text:\x01\x63
 keybind = ctrl+g=text:\x01\x6a
 
+keybind = shift+enter=text:\n
