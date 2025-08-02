@@ -1,5 +1,9 @@
 # dotfiles
 
+## Screenshot
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a196dd6e-398c-46a4-8c6e-606b878d9d30" />
+
 ## Flow
 
 Nix is in charge of managing the system configuration. The dotfiles are managed by stow and are symlinked to the home directory.
