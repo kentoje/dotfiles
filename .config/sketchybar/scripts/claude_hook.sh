@@ -26,6 +26,8 @@ fi
 # Set status based on hook event
 if [[ "$HOOK_EVENT" == "UserPromptSubmit" ]]; then
   STATUS="r"
+elif [[ "$HOOK_EVENT" == "PostToolUse" ]]; then
+  STATUS="r"
 elif [[ "$HOOK_EVENT" == "Notification" ]]; then
   STATUS="n"
 else
