@@ -3,7 +3,10 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     set -l desired_taps \
         "zfdang/free-for-macOS" \
         "hashicorp/tap" \
-        "FelixKratz/formulae"
+        "FelixKratz/formulae" \
+        "nikitabobko/tap" \
+        "charmbracelet/tap" \
+        "shaunsingh/SFMono-Nerd-Font-Ligaturized"
     
     set -l desired_casks \
         "hammerspoon" \
@@ -11,18 +14,19 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         "font-hack-nerd-font" \
         "font-sf-pro" \
         "sf-symbols" \
-        "nikitabobko/tap/aerospace" \
+        "aerospace" \
         "karabiner-elements" \
-        "shaunsingh/SFMono-Nerd-Font-Ligaturized/font-sf-mono-nerd-font-ligaturized"
+        "font-sf-mono-nerd-font-ligaturized"
     
     set -l desired_brews \
         "mas" \
         "sketchybar" \
         "ifstat" \
-        "free-for-macOS" \
+        "free-for-macos" \
         "svim" \
         "glab" \
-        "hashicorp/tap/terraform"
+        "crush" \
+        "terraform"
 
     echo "🍺 Starting homebrew sync..."
     
@@ -33,7 +37,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     end
 
     # Sync taps
-    echo "\n📋 Syncing taps..."
+    echo "📋 Syncing taps..."
     set -l current_taps (brew tap)
     
     # Install missing taps
@@ -58,7 +62,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     end
 
     # Sync casks
-    echo "\n📦 Syncing casks..."
+    echo "📦 Syncing casks..."
     set -l current_casks (brew list --cask)
     
     # Install missing casks
@@ -80,7 +84,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     end
 
     # Sync brews (formulae)
-    echo "\n🍺 Syncing brews..."
+    echo "🍺 Syncing brews..."
     set -l current_brews (brew list --formula)
     
     # Install missing brews
@@ -102,8 +106,8 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     end
 
     # Cleanup
-    echo "\n🧹 Cleaning up..."
+    echo "🧹 Cleaning up..."
     brew cleanup
     
-    echo "\n✨ Homebrew sync complete!"
+    echo "✨ Homebrew sync complete!"
 end 
