@@ -88,7 +88,6 @@
             zoxide
             gitmux
             yazi
-            chafa
           ];
 
           system.defaults = {
