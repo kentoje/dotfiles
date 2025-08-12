@@ -149,10 +149,6 @@
               sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.sketchybar.plist /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
             fi
 
-            if [ ! -f /Users/kento/Library/LaunchAgents/org.nixos.svim.plist ]; then
-              sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.svim.plist /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
-            fi
-
             # Check and restart sketchybar service
             if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.sketchybar" >/dev/null 2>&1; then
               echo "Stopping existing sketchybar service..." >&2
@@ -160,14 +156,6 @@
             fi
             echo "Starting sketchybar service..." >&2
             sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
-
-            # Check and restart svim service
-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.svim" >/dev/null 2>&1; then
-              echo "Stopping existing svim service..." >&2
-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
-            fi
-            echo "Starting svim service..." >&2
-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.svim.plist
           '';
           #   sf-mono-liga-bin  # Your custom font from the overlay
           #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
@@ -210,22 +198,6 @@
                 sleep 2
 
                 /opt/homebrew/bin/sketchybar
-              '';
-            };
-
-            svim = {
-              serviceConfig = {
-                RunAtLoad = true;
-                KeepAlive = true;
-                ProcessType = "Interactive";
-                StandardOutPath = "/tmp/svim.out.log";
-                StandardErrorPath = "/tmp/svim.err.log";
-                EnvironmentVariables = {
-                  PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-                };
-              };
-              script = ''
-                /opt/homebrew/bin/svim
               '';
             };
           };
