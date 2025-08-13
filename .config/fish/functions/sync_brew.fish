@@ -23,7 +23,6 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         "sketchybar" \
         "ifstat" \
         "free-for-macos" \
-        "svim" \
         "glab" \
         "crush" \
         "terraform"
