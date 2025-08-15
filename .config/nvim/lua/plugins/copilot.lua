@@ -1,8 +1,6 @@
--- weird issue with Tab. It does not always complete, and jumps to the next line instead
 return {
 	"zbirenbaum/copilot.lua",
 	cmd = "Copilot",
-	-- enabled = false,
 	event = "InsertEnter",
 	config = function()
 		require("copilot").setup({
@@ -52,7 +50,3 @@ return {
 		})
 	end,
 }
-
--- return {
--- 	"github/copilot.vim",
--- }
