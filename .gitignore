@@ -1,5 +1,7 @@
 .DS_Store
 
+.crush/
+
 .config/fish/includes/private-vars.fish
 .config/fish/functions/get_token.fish
 .config/fish/fish_variables
