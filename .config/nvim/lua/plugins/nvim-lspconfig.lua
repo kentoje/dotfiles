@@ -54,46 +54,35 @@ end
 -- end
 
 local function setup_typescript(lsp_capabilities, custom_typescript_config)
-	local util = require("lspconfig.util")
-
 	-- vtsls: Full-featured TypeScript LSP server
 	-- Handles: completion, code actions, refactoring, imports, rename, call hierarchy, code lens,
 	--          document highlight, folding, inlay hints, semantic tokens, workspace operations,
 	--          hover, definition, references, formatting, diagnostics (everything enabled)
-	local vtsls_config = {
-		default_config = {
-			cmd = { "vtsls", "--stdio" },
-			filetypes = {
-				"javascript",
-				"javascriptreact",
-				"javascript.jsx",
-				"typescript",
-				"typescriptreact",
-				"typescript.tsx",
+
+	-- Configure vtsls using new vim.lsp.config API
+	vim.lsp.config.vtsls = {
+		cmd = { "vtsls", "--stdio" },
+		filetypes = {
+			"javascript",
+			"javascriptreact",
+			"javascript.jsx",
+			"typescript",
+			"typescriptreact",
+			"typescript.tsx",
+		},
+		root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+		capabilities = lsp_capabilities,
+		settings = {
+			typescript = custom_typescript_config,
+			javascript = {
+				updateImportsOnFileMove = "always",
 			},
-			root_dir = function(fname)
-				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
-					or util.root_pattern("package.json", ".git")(fname)
-			end,
-			single_file_support = true,
-			settings = {
-				typescript = custom_typescript_config,
-				javascript = {
-					updateImportsOnFileMove = "always",
-				},
-				vtsls = {
-					enableMoveToFileCodeAction = true,
-					autoUseWorkspaceTsdk = true,
-				},
+			vtsls = {
+				enableMoveToFileCodeAction = true,
+				autoUseWorkspaceTsdk = true,
 			},
 		},
 	}
-
-	require("lspconfig.configs").vtsls = vtsls_config
-	require("lspconfig").vtsls.setup({
-		capabilities = lsp_capabilities,
-		-- No capabilities disabled - vtsls handles everything for TypeScript 4.x
-	})
 end
 
 -- tsgo does is not usable as of now... I had some issues with my local tsconfig, like aliases not working.
@@ -217,12 +206,9 @@ return {
 				pcall(vim.cmd, "MasonUpdate")
 			end,
 		},
-
-		-- Check for new "vim.lsp.config" config mechanism from nvim v11
 		{ "williamboman/mason-lspconfig.nvim", version = "v2.*" },
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
 		{ "yioneko/nvim-vtsls" },
-		{ "williamboman/mason-lspconfig.nvim" },
 	},
 	config = function()
 		local move_next_error = function()
@@ -253,8 +239,6 @@ return {
 		local move_prev_diag = function()
 			vim.diagnostic.goto_prev()
 		end
-
-		local lspconfig = require("lspconfig")
 
 		-- lspconfig.sourcekit.setup({
 		-- 	capabilities = {
@@ -310,14 +294,23 @@ return {
 		})
 
 		local default_setup = function(server)
-			-- Skip tsserver to use custom tool "https://github.com/pmizio/typescript-tools.nvim"
+			-- Skip ts_ls to use custom vtsls setup
 			if server == "ts_ls" then
 				return
 			end
 
-			lspconfig[server].setup({
+			-- Skip yamlls to use manual setup
+			if server == "yamlls" then
+				return
+			end
+
+			-- Configure server using new vim.lsp.config API
+			vim.lsp.config[server] = {
 				capabilities = lsp_capabilities,
-			})
+			}
+
+			-- Enable the server
+			vim.lsp.enable(server)
 		end
 
 		local custom_typescript_config = {
@@ -339,25 +332,12 @@ return {
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
-			ensure_installed = {},
+			ensure_installed = { "yamlls" },
 			handlers = {
 				default_setup,
 
-				yamlls = function()
-					lspconfig.yamlls.setup({
-						settings = {
-							yaml = {
-								customTags = { "!reference sequence" },
-								schemas = {
-									["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-								},
-							},
-						},
-					})
-				end,
-
 				eslint = function()
-					lspconfig.eslint.setup({
+					vim.lsp.config.eslint = {
 						capabilities = lsp_capabilities,
 						flags = {
 							debounce_text_changes = 300,
@@ -365,19 +345,45 @@ return {
 						settings = {
 							packageManager = "yarn",
 						},
-					})
+					}
+					vim.lsp.enable("eslint")
 				end,
 
 				graphql = function()
-					lspconfig.graphql.setup({
+					vim.lsp.config.graphql = {
+						capabilities = lsp_capabilities,
 						filetypes = { "graphql", "typescriptreact", "javascriptreact", "typescript" },
-						root_dir = function(fname)
-							return lspconfig.util.root_pattern(".git")(fname) or lspconfig.util.path.dirname(fname)
-						end,
-					})
+						root_markers = { ".git" },
+					}
+					vim.lsp.enable("graphql")
 				end,
 			},
 		})
+
+		-- Enable LSP servers using new vim.lsp.enable API
+		vim.lsp.enable("vtsls")
+
+		-- Manual yamlls setup using vim.lsp.config API
+		vim.lsp.config.yamlls = {
+			capabilities = lsp_capabilities,
+			settings = {
+				yaml = {
+					customTags = { "!reference sequence" },
+					schemas = {
+						["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+						["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = {
+							".gitlab-ci.yml",
+							"**/.gitlab-ci.yml",
+							"**/.gitlab/**/*.yml",
+							"**/.gitlab/**/*.yaml",
+							"**/*gitlab-ci*.yml",
+							"**/*gitlab-ci*.yaml",
+						},
+					},
+				},
+			},
+		}
+		vim.lsp.enable("yamlls")
 
 		vim.keymap.set("n", "gd", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
