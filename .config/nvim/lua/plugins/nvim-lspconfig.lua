@@ -4,6 +4,16 @@ local function file_exists(name)
 end
 
 local biome_config_names = { "biome.json" }
+local prettier_config_names = {
+	".prettierrc",
+	".prettierrc.json",
+	".prettierrc.yml",
+	".prettierrc.yaml",
+	".prettierrc.js",
+	".prettierrc.cjs",
+	"prettier.config.js",
+	"prettier.config.cjs",
+}
 
 local function config_exists(config_names)
 	for _, name in ipairs(config_names) do
@@ -14,13 +24,195 @@ local function config_exists(config_names)
 	return false
 end
 
+-- local function is_typescript_version_4()
+-- 	local util = require("lspconfig.util")
+-- 	local package_json_path = util.root_pattern("package.json")(vim.fn.getcwd())
+--
+-- 	if not package_json_path then
+-- 		return false -- Default to gte5 setup
+-- 	end
+--
+-- 	local file = io.open(package_json_path .. "/package.json", "r")
+-- 	if not file then
+-- 		return false -- Default to gte5 setup
+-- 	end
+--
+-- 	local content = file:read("*all")
+-- 	file:close()
+--
+-- 	local ok, package_data = pcall(vim.json.decode, content)
+-- 	if not ok or not package_data.devDependencies then
+-- 		return false -- Default to gte5 setup
+-- 	end
+--
+-- 	local ts_version = package_data.devDependencies.typescript
+-- 	if ts_version and ts_version:match("^[~^]?4%.") then
+-- 		return true -- TypeScript 4.x found
+-- 	end
+--
+-- 	return false -- Default to gte5 setup for all other cases
+-- end
+
+local function setup_typescript(lsp_capabilities, custom_typescript_config)
+	local util = require("lspconfig.util")
+
+	-- vtsls: Full-featured TypeScript LSP server
+	-- Handles: completion, code actions, refactoring, imports, rename, call hierarchy, code lens,
+	--          document highlight, folding, inlay hints, semantic tokens, workspace operations,
+	--          hover, definition, references, formatting, diagnostics (everything enabled)
+	local vtsls_config = {
+		default_config = {
+			cmd = { "vtsls", "--stdio" },
+			filetypes = {
+				"javascript",
+				"javascriptreact",
+				"javascript.jsx",
+				"typescript",
+				"typescriptreact",
+				"typescript.tsx",
+			},
+			root_dir = function(fname)
+				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
+					or util.root_pattern("package.json", ".git")(fname)
+			end,
+			single_file_support = true,
+			settings = {
+				typescript = custom_typescript_config,
+				javascript = {
+					updateImportsOnFileMove = "always",
+				},
+				vtsls = {
+					enableMoveToFileCodeAction = true,
+					autoUseWorkspaceTsdk = true,
+				},
+			},
+		},
+	}
+
+	require("lspconfig.configs").vtsls = vtsls_config
+	require("lspconfig").vtsls.setup({
+		capabilities = lsp_capabilities,
+		-- No capabilities disabled - vtsls handles everything for TypeScript 4.x
+	})
+end
+
+-- tsgo does is not usable as of now... I had some issues with my local tsconfig, like aliases not working.
+-- local function setup_typescript_gte5(lsp_capabilities, custom_typescript_config)
+-- 	local util = require("lspconfig.util")
+-- 	local tsgo_cmd = { "tsgo", "--lsp", "--stdio" }
+--
+-- 	-- tsgo: Fast TypeScript compiler with LSP support
+-- 	-- Handles: diagnostics, hover, definition, references, formatting
+-- 	local tsgo_config = {
+-- 		default_config = {
+-- 			cmd = tsgo_cmd,
+-- 			root_markers = {
+-- 				"tsconfig.json",
+-- 				"jsconfig.json",
+-- 				"package.json",
+-- 				".git",
+-- 				"tsconfig.base.json",
+-- 			},
+-- 			filetypes = {
+-- 				"javascript",
+-- 				"javascriptreact",
+-- 				"javascript.jsx",
+-- 				"typescript",
+-- 				"typescriptreact",
+-- 				"typescript.tsx",
+-- 			},
+-- 			root_dir = function(fname)
+-- 				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
+-- 					or util.root_pattern("package.json", ".git")(fname)
+-- 			end,
+-- 			single_file_support = true,
+-- 			settings = {
+-- 				typescript = custom_typescript_config,
+-- 				javascript = {
+-- 					updateImportsOnFileMove = "always",
+-- 				},
+-- 			},
+-- 		},
+-- 	}
+--
+-- 	require("lspconfig.configs").tsgo = tsgo_config
+-- 	require("lspconfig").tsgo.setup({
+-- 		capabilities = lsp_capabilities,
+-- 		on_attach = function(client)
+-- 			print("tsgo capabilities:", vim.inspect(client.server_capabilities))
+-- 			-- does not fully work yet
+-- 			client.server_capabilities.completionProvider = false
+-- 		end,
+-- 	})
+--
+-- 	-- vtsls: Full-featured TypeScript LSP server
+-- 	-- Handles: completion, code actions, refactoring, imports, rename, call hierarchy, code lens,
+-- 	--          document highlight, folding, inlay hints, semantic tokens, workspace operations
+-- 	-- Disabled: hover, definition, references, formatting, etc. (handled by tsgo)
+-- 	local vtsls_config = {
+-- 		default_config = {
+-- 			cmd = { "vtsls", "--stdio" },
+-- 			filetypes = {
+-- 				"javascript",
+-- 				"javascriptreact",
+-- 				"javascript.jsx",
+-- 				"typescript",
+-- 				"typescriptreact",
+-- 				"typescript.tsx",
+-- 			},
+-- 			root_dir = function(fname)
+-- 				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
+-- 					or util.root_pattern("package.json", ".git")(fname)
+-- 			end,
+-- 			single_file_support = true,
+-- 			settings = {
+-- 				typescript = custom_typescript_config,
+-- 				javascript = {
+-- 					updateImportsOnFileMove = "always",
+-- 				},
+-- 				vtsls = {
+-- 					enableMoveToFileCodeAction = true,
+-- 					autoUseWorkspaceTsdk = true,
+-- 				},
+-- 			},
+-- 		},
+-- 	}
+--
+-- 	require("lspconfig.configs").vtsls = vtsls_config
+-- 	require("lspconfig").vtsls.setup({
+-- 		capabilities = lsp_capabilities,
+-- 		handlers = {
+-- 			["textDocument/publishDiagnostics"] = function() end,
+-- 		},
+-- 		on_attach = function(client, bufnr)
+-- 			-- Disable capabilities already handled by tsgo
+-- 			client.server_capabilities.hoverProvider = false
+-- 			client.server_capabilities.definitionProvider = false
+-- 			client.server_capabilities.referencesProvider = false
+-- 			client.server_capabilities.implementationProvider = false
+-- 			client.server_capabilities.typeDefinitionProvider = false
+-- 			client.server_capabilities.documentFormattingProvider = false
+-- 			client.server_capabilities.documentRangeFormattingProvider = false
+-- 			client.server_capabilities.documentOnTypeFormattingProvider = false
+-- 			client.server_capabilities.documentSymbolProvider = false
+-- 			client.server_capabilities.workspaceSymbolProvider = false
+-- 			client.server_capabilities.signatureHelpProvider = false
+--
+-- 			-- Keep vtsls-specific capabilities enabled:
+-- 			-- codeActionProvider, codeLensProvider, renameProvider, executeCommandProvider,
+-- 			-- callHierarchyProvider, documentHighlightProvider, foldingRangeProvider,
+-- 			-- inlayHintProvider, linkedEditingRangeProvider, selectionRangeProvider,
+-- 			-- semanticTokensProvider, workspace.fileOperations
+-- 		end,
+-- 	})
+-- end
+
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
 		{
 			"williamboman/mason.nvim",
 			version = "v2.*",
-			-- version = "v1.*",
 			build = function()
 				pcall(vim.cmd, "MasonUpdate")
 			end,
@@ -28,23 +220,11 @@ return {
 
 		-- Check for new "vim.lsp.config" config mechanism from nvim v11
 		{ "williamboman/mason-lspconfig.nvim", version = "v2.*" },
-		-- { "williamboman/mason-lspconfig.nvim", version = "v1.*" },
-		-- { "hrsh7th/nvim-cmp" },
-		-- { "hrsh7th/cmp-nvim-lsp" },
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
-		-- { "rafamadriz/friendly-snippets" },
-		-- { "saadparwaiz1/cmp_luasnip" },
 		{ "yioneko/nvim-vtsls" },
-		-- { "saghen/blink.cmp" },
 		{ "williamboman/mason-lspconfig.nvim" },
-		{ "yioneko/nvim-vtsls" },
 	},
 	config = function()
-		-- vim.fn.sign_define("DiagnosticSignError", { text = "", texthl = "LspDiagnosticsDefaultError" })
-		-- vim.fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "LspDiagnosticsDefaultWarning" })
-		-- vim.fn.sign_define("DiagnosticSignInfo", { text = "", texthl = "LspDiagnosticsDefaultInformation" })
-		-- vim.fn.sign_define("DiagnosticSignHint", { text = "", texthl = "LspDiagnosticsDefaultHint" })
-
 		local move_next_error = function()
 			vim.diagnostic.goto_next({
 				severity = vim.diagnostic.severity.ERROR,
@@ -140,10 +320,6 @@ return {
 			})
 		end
 
-		-- local vtsls = require("vtsls")
-		local util = require("lspconfig.util")
-		local cmd = { "vtsls", "--stdio" }
-
 		local custom_typescript_config = {
 			updateImportsOnFileMove = "always",
 		}
@@ -152,68 +328,20 @@ return {
 			custom_typescript_config.tsdk = ".yarn/sdks/typescript/lib"
 		end
 
-		local vtsls_config = {
-			default_config = {
-				cmd = cmd,
-				filetypes = {
-					"javascript",
-					"javascriptreact",
-					"javascript.jsx",
-					"typescript",
-					"typescriptreact",
-					"typescript.tsx",
-				},
-				root_dir = function(fname)
-					return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
-						or util.root_pattern("package.json", ".git")(fname)
-				end,
-				single_file_support = true,
-				settings = {
-					typescript = custom_typescript_config,
-					javascript = {
-						updateImportsOnFileMove = "always",
-					},
-					vtsls = {
-						enableMoveToFileCodeAction = true,
-						autoUseWorkspaceTsdk = true,
-						-- typescript = {
-						-- 	tsdk = ".yarn/sdks/typescript/lib",
-						-- },
-					},
-				},
-			},
-		}
+		-- Setup TypeScript LSP based on version
+		-- if is_typescript_version_4() then
 
-		require("lspconfig.configs").vtsls = vtsls_config
-		require("lspconfig").vtsls.setup({
-			on_attach = function(client, bufnr)
-				-- require("twoslash-queries").attach(client, bufnr)
-			end,
-		})
+		setup_typescript(lsp_capabilities, custom_typescript_config)
 
-		vim.keymap.set("n", "<leader>E", function()
-			vim.cmd("VtsExec add_missing_imports")
-			vim.cmd("VtsExec remove_unused_imports")
-		end, { desc = "Magic import fix" })
-
-		-- vim.keymap.set("n", "<leader>cf", function()
-		-- 	vtsls.rename(vim.fn.input("Current filename: "), vim.fn.input("New filename: "))
-		-- end, { desc = "Change file name" })
+		-- else
+		-- 	setup_typescript_gte5(lsp_capabilities, custom_typescript_config)
+		-- end
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
 			ensure_installed = {},
 			handlers = {
 				default_setup,
-
-				-- tsserver = function()
-				-- 	local capabilities =
-				-- 		vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), lsp_capabilities)
-				--
-				-- 	lspconfig.tsserver.setup({
-				-- 		capabilities = capabilities,
-				-- 	})
-				-- end,
 
 				yamlls = function()
 					lspconfig.yamlls.setup({
@@ -228,17 +356,6 @@ return {
 					})
 				end,
 
-				-- nil_ls = function()
-				-- 	lspconfig.nil_ls.setup({
-				-- 		capabilities = lsp_capabilities,
-				-- 		settings = {
-				-- 			nil_ls = {
-				-- 				formatter = { command = { "nixpkgs-fmt" } },
-				-- 			},
-				-- 		},
-				-- 	})
-				-- end,
-
 				eslint = function()
 					lspconfig.eslint.setup({
 						capabilities = lsp_capabilities,
@@ -248,18 +365,6 @@ return {
 						settings = {
 							packageManager = "yarn",
 						},
-						-- on_attach = function(client, bufnr)
-						-- vim.api.nvim_create_autocmd("BufWritePost", {
-						-- vim.api.nvim_create_autocmd("BufWritePre", {
-						-- 	buffer = bufnr,
-						-- 	command = "EslintFixAll",
-						-- })
-						-- does not work
-						-- vim.api.nvim_create_autocmd({ "BufNewFile" }, {
-						-- 	buffer = bufnr,
-						-- 	command = "LspR",
-						-- })
-						-- end,
 					})
 				end,
 
@@ -277,12 +382,10 @@ return {
 		vim.keymap.set("n", "gd", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
-		-- vim.keymap.set(
-		-- 	"i",
-		-- 	"<Tab>",
-		-- 	"copilot#Accept('<CR>')",
-		-- 	{ noremap = true, silent = true, expr = true, replace_keycodes = false }
-		-- )
+		vim.keymap.set("n", "<leader>E", function()
+			vim.cmd("VtsExec add_missing_imports")
+			vim.cmd("VtsExec remove_unused_imports")
+		end, { desc = "Magic import fix" })
 
 		if config_exists(biome_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
@@ -290,9 +393,15 @@ return {
 
 				vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
 			end, { silent = true, desc = "Biome fix all mimic" })
+		elseif config_exists(prettier_config_names) then
+			vim.keymap.set("n", "<leader>e", function()
+				vim.cmd("LspEslintFixAll")
+				local current_path = vim.fn.expand("%:p")
+				vim.cmd(":%! prettier --write " .. current_path)
+			end, { silent = true, desc = "ESLint + Prettier format" })
 		else
 			vim.keymap.set("n", "<leader>e", function()
-				vim.cmd("EslintFixAll")
+				vim.cmd("LspEslintFixAll")
 			end, { silent = true, desc = "EslintFixAll" })
 		end
 
@@ -310,63 +419,6 @@ return {
 			end,
 		})
 
-		-- vim.keymap.set("n", "<leader>e", function()
-		-- 	local current_path = vim.fn.expand("%:p")
-		--
-		-- 	vim.cmd(":%! biome check --write --unsafe --stdin-file-path=" .. current_path)
-		-- end, { silent = true, desc = "EslintFixAll" })
-
-		-- local cmp = require("cmp")
-		-- local ls = require("luasnip")
-		--
-		-- require("luasnip.loaders.from_vscode").lazy_load()
 		require("kentoje.snippets")
-		--
-		-- cmp.setup({
-		-- 	sources = {
-		-- 		{ name = "nvim_lsp" },
-		-- 		{ name = "luasnip" },
-		-- 	},
-		-- 	mapping = cmp.mapping.preset.insert({
-		-- 		["<C-b>"] = cmp.mapping.scroll_docs(-2),
-		-- 		["<C-f>"] = cmp.mapping.scroll_docs(2),
-		-- 		["<C-Space>"] = cmp.mapping.complete(),
-		-- 		-- ["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-		-- 		["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-		-- 		["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-		-- 		["<CR>"] = cmp.mapping(function(fallback)
-		-- 			if cmp.visible() then
-		-- 				if ls.expandable() then
-		-- 					ls.expand()
-		-- 				else
-		-- 					cmp.confirm({
-		-- 						select = true,
-		-- 					})
-		-- 				end
-		-- 			else
-		-- 				fallback()
-		-- 			end
-		-- 		end),
-		-- 		-- ["<Tab>"] = cmp.mapping(function(fallback)
-		-- 		-- 	if ls.locally_jumpable(1) then
-		-- 		-- 		ls.jump(1)
-		-- 		-- 	else
-		-- 		-- 		fallback()
-		-- 		-- 	end
-		-- 		-- end, { "i", "s" }),
-		-- 		-- ["<S-Tab>"] = cmp.mapping(function(fallback)
-		-- 		-- 	if ls.locally_jumpable(-1) then
-		-- 		-- 		ls.jump(-1)
-		-- 		-- 	else
-		-- 		-- 		fallback()
-		-- 		-- 	end
-		-- 		-- end, { "i", "s" }),
-		-- 	}),
-		-- 	snippet = {
-		-- 		expand = function(args)
-		-- 			require("luasnip").lsp_expand(args.body)
-		-- 		end,
-		-- 	},
-		-- })
 	end,
 }
