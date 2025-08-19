@@ -16,6 +16,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         "sf-symbols" \
         "aerospace" \
         "karabiner-elements" \
+        "keycastr" \
         "font-sf-mono-nerd-font-ligaturized"
     
     set -l desired_brews \
