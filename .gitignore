@@ -23,11 +23,13 @@
 .config/glab-cli
 .config/github-copilot
 .config/uv
-.config/glow
 .config/flipperdevices.com
 .config/vivaldi-css
 .config/zed
 .config/configstore
 .config/raycast
+.config/glow
+.config/amp
 
 .claude/settings.local.json
+
