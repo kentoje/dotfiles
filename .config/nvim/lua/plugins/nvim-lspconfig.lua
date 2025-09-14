@@ -342,9 +342,9 @@ return {
 						flags = {
 							debounce_text_changes = 300,
 						},
-						settings = {
-							packageManager = "yarn",
-						},
+						-- settings = {
+						-- 	packageManager = "yarn",
+						-- },
 					}
 					vim.lsp.enable("eslint")
 				end,
@@ -402,8 +402,8 @@ return {
 		elseif config_exists(prettier_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
 				vim.cmd("LspEslintFixAll")
-				local current_path = vim.fn.expand("%:p")
-				vim.cmd(":%! prettier --write " .. current_path)
+				-- local current_path = vim.fn.expand("%:p")
+				-- vim.cmd(":%! prettier --write " .. current_path)
 			end, { silent = true, desc = "ESLint + Prettier format" })
 		else
 			vim.keymap.set("n", "<leader>e", function()
