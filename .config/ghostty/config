@@ -1,5 +1,5 @@
 #config-file = "themes/melange_light"
-theme = "Melange_dark"
+theme = "Melange Dark"
 
 # custom-shader = "shaders/cursor-frozen.glsl"
 custom-shader = "shaders/cursor-blaze-tapered.glsl"
@@ -16,7 +16,7 @@ window-padding-x = 16
 window-padding-y = 12
 
 background-opacity = "0.9"
-#background-opacity = "1"
+# background-opacity = "1"
 background-blur-radius = 60
 #background = "000000"
 foreground = "a6accd"
@@ -45,15 +45,15 @@ quick-terminal-animation-duration = 0.08
 quick-terminal-position = "top"
 
 
-keybind = cmd+1=text:\x01\x31
-keybind = cmd+2=text:\x01\x32
-keybind = cmd+3=text:\x01\x33
-keybind = cmd+4=text:\x01\x34
-keybind = cmd+5=text:\x01\x35
-keybind = cmd+6=text:\x01\x36
-keybind = cmd+7=text:\x01\x37
-keybind = cmd+8=text:\x01\x38
-keybind = cmd+9=text:\x01\x39
+keybind = ctrl+1=text:\x01\x31
+keybind = ctrl+2=text:\x01\x32
+keybind = ctrl+3=text:\x01\x33
+keybind = ctrl+4=text:\x01\x34
+keybind = ctrl+5=text:\x01\x35
+keybind = ctrl+6=text:\x01\x36
+keybind = ctrl+7=text:\x01\x37
+keybind = ctrl+8=text:\x01\x38
+keybind = ctrl+9=text:\x01\x39
 
 keybind = cmd+o=text:\x01\x6f
 # keybind = cmd+b=toggle_quick_terminal
