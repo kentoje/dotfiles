@@ -6,10 +6,23 @@ CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
 SESSION_DIR="/tmp/claude_sessions"
 mkdir -p "$SESSION_DIR"
 
-# Clean up stale sessions
-for f in "$SESSION_DIR"/*; do
-  [[ -f "$f" ]] && ! kill -0 "$(basename "$f")" 2>/dev/null && rm -f "$f"
-done
+# Throttled PID-based cleanup (every 20 seconds)
+CURRENT_TIME=$(date +%s)
+CLEANUP_MARKER="$SESSION_DIR/.last_cleanup"
+LAST_CLEANUP=$(cat "$CLEANUP_MARKER" 2>/dev/null || echo 0)
+
+if [[ $((CURRENT_TIME - LAST_CLEANUP)) -gt 20 ]]; then
+  for f in "$SESSION_DIR"/*; do
+    [[ -f "$f" ]] || continue
+    [[ "$(basename "$f")" == ".last_cleanup" ]] && continue
+    source "$f"
+    # Remove session if process doesn't exist
+    if [[ -n "$PID" ]] && ! kill -0 "$PID" 2>/dev/null; then
+      rm -f "$f"
+    fi
+  done
+  echo "$CURRENT_TIME" > "$CLEANUP_MARKER"
+fi
 
 # Collect sessions by status
 IDLE_SESSIONS=()
