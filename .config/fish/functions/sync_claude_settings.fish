@@ -14,7 +14,10 @@ function sync_claude_settings
         return 1
     end
 
-    # Copy the settings file
-    cp $source_file $target_file
+    # Symlink the settings file
+    ln -sf $source_file $target_file
     echo "Synced Claude settings: $source_file -> $target_file"
+
+    # Symlink the statusline script
+    ln -sf ~/dotfiles/.config/claude/statusline.sh ~/.claude/statusline.sh
 end
