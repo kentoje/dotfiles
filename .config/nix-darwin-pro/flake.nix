@@ -47,6 +47,7 @@
             imagemagick
             wget
             sad
+            csvq
             ffmpeg
             entr
             fish
@@ -69,7 +70,6 @@
             starship
             stow
             tmux
-            zellij
             tree
             tldr
             typescript
@@ -80,7 +80,6 @@
             prettierd
             qmk
             yazi
-            chafa
           ];
 
           system.defaults = {
