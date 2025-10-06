@@ -123,6 +123,18 @@ ls.add_snippets("custom", {
 	}),
 })
 
+ls.add_snippets("custom", {
+	s("snip_reactdefault", {
+		t("export default function "),
+		i(1),
+		t("() {"),
+		t({ "", "  return (" }),
+		t({ "", "    <></>" }),
+		t({ "", "  )" }),
+		t({ "", "}" }),
+	}),
+})
+
 local function find_snippet(snippet_type, snippet_name)
 	local snippets = ls.get_snippets(snippet_type)
 	for _, snip in ipairs(snippets) do
@@ -181,6 +193,10 @@ end, { noremap = true, silent = true, desc = "Insert object" })
 vim.keymap.set("n", "<leader>st", function()
 	trigger_snippet("custom", "snip_type")
 end, { noremap = true, silent = true, desc = "Insert object" })
+
+vim.keymap.set("n", "<leader>sd", function()
+	trigger_snippet("custom", "snip_reactdefault")
+end, { noremap = true, silent = true, desc = "Insert React default export component" })
 
 vim.keymap.set("n", "<leader>sL", function()
 	local word = vim.fn.expand("<cword>")
