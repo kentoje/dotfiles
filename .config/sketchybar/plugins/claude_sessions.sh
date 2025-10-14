@@ -21,21 +21,34 @@ if [[ $((CURRENT_TIME - LAST_CLEANUP)) -gt 20 ]]; then
       rm -f "$f"
     fi
   done
-  echo "$CURRENT_TIME" > "$CLEANUP_MARKER"
+  echo "$CURRENT_TIME" >"$CLEANUP_MARKER"
 fi
 
 # Collect sessions by status
 IDLE_SESSIONS=()
 COOKING_SESSIONS=()
 NOTIFY_SESSIONS=()
+declare -A IDLE_COUNT COOKING_COUNT NOTIFY_COUNT
 
 for f in "$SESSION_DIR"/*; do
   [[ -f "$f" ]] || continue
   source "$f"
   case "$STATUS" in
-  "w") IDLE_SESSIONS+=("$DIR_NAME") ;;
-  "r") COOKING_SESSIONS+=("$DIR_NAME") ;;
-  "n") NOTIFY_SESSIONS+=("$DIR_NAME") ;;
+  "w")
+    idx=${IDLE_COUNT["$DIR_NAME"]:-0}
+    IDLE_SESSIONS+=("$DIR_NAME :: $idx")
+    IDLE_COUNT["$DIR_NAME"]=$((idx + 1))
+    ;;
+  "r")
+    idx=${COOKING_COUNT["$DIR_NAME"]:-0}
+    COOKING_SESSIONS+=("$DIR_NAME :: $idx")
+    COOKING_COUNT["$DIR_NAME"]=$((idx + 1))
+    ;;
+  "n")
+    idx=${NOTIFY_COUNT["$DIR_NAME"]:-0}
+    NOTIFY_SESSIONS+=("$DIR_NAME :: $idx")
+    NOTIFY_COUNT["$DIR_NAME"]=$((idx + 1))
+    ;;
   esac
 done
 
