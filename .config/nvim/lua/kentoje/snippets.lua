@@ -162,9 +162,13 @@ vim.keymap.set("n", "<leader>sfa", function()
 	trigger_snippet("custom", "snip_funcarrow")
 end, { noremap = true, silent = true, desc = "Insert arrow function snippet" })
 
-vim.keymap.set("n", "<leader>sc", function()
+vim.keymap.set("n", "<leader>sfc", function()
 	trigger_snippet("custom", "snip_reactcomp")
 end, { noremap = true, silent = true, desc = "Insert react component" })
+
+vim.keymap.set("n", "<leader>sfd", function()
+	trigger_snippet("custom", "snip_reactdefault")
+end, { noremap = true, silent = true, desc = "Insert React default export component" })
 
 vim.keymap.set("n", "<leader>sl", function()
 	trigger_snippet("custom", "snip_log")
@@ -193,10 +197,6 @@ end, { noremap = true, silent = true, desc = "Insert object" })
 vim.keymap.set("n", "<leader>st", function()
 	trigger_snippet("custom", "snip_type")
 end, { noremap = true, silent = true, desc = "Insert object" })
-
-vim.keymap.set("n", "<leader>sd", function()
-	trigger_snippet("custom", "snip_reactdefault")
-end, { noremap = true, silent = true, desc = "Insert React default export component" })
 
 vim.keymap.set("n", "<leader>sL", function()
 	local word = vim.fn.expand("<cword>")
