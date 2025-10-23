@@ -28,26 +28,23 @@ fi
 IDLE_SESSIONS=()
 COOKING_SESSIONS=()
 NOTIFY_SESSIONS=()
-declare -A IDLE_COUNT COOKING_COUNT NOTIFY_COUNT
 
 for f in "$SESSION_DIR"/*; do
   [[ -f "$f" ]] || continue
   source "$f"
+
+  # Skip sessions with dead or missing PIDs
+  [[ -z "$PID" ]] || ! kill -0 "$PID" 2>/dev/null && continue
+
   case "$STATUS" in
   "w")
-    idx=${IDLE_COUNT["$DIR_NAME"]:-0}
-    IDLE_SESSIONS+=("$DIR_NAME :: $idx")
-    IDLE_COUNT["$DIR_NAME"]=$((idx + 1))
+    IDLE_SESSIONS+=("$DIR_NAME :: $PID")
     ;;
   "r")
-    idx=${COOKING_COUNT["$DIR_NAME"]:-0}
-    COOKING_SESSIONS+=("$DIR_NAME :: $idx")
-    COOKING_COUNT["$DIR_NAME"]=$((idx + 1))
+    COOKING_SESSIONS+=("$DIR_NAME :: $PID")
     ;;
   "n")
-    idx=${NOTIFY_COUNT["$DIR_NAME"]:-0}
-    NOTIFY_SESSIONS+=("$DIR_NAME :: $idx")
-    NOTIFY_COUNT["$DIR_NAME"]=$((idx + 1))
+    NOTIFY_SESSIONS+=("$DIR_NAME :: $PID")
     ;;
   esac
 done
