@@ -25,6 +25,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         "ifstat" \
         "free-for-macos" \
         "glab" \
+        "croc" \
         "crush" \
         "terraform"
 
