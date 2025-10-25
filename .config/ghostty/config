@@ -57,7 +57,7 @@ keybind = super+digit_8=text:\x01\x38
 keybind = super+digit_9=text:\x01\x39
 
 keybind = super+o=text:\x01\x6f
-# keybind = super+b=text:\x1b\x02
+keybind = super+b=text:\x02
 
 keybind = super+d=text:\x01\x25
 keybind = super+shift+d=text:\x01\x22
