@@ -24,17 +24,23 @@ if [[ $((CURRENT_TIME - LAST_CLEANUP)) -gt 20 ]]; then
   echo "$CURRENT_TIME" >"$CLEANUP_MARKER"
 fi
 
-# Collect sessions by status
+# Collect sessions by status (deduplicated by PID)
 IDLE_SESSIONS=()
 COOKING_SESSIONS=()
 NOTIFY_SESSIONS=()
+declare -A SEEN_PIDS
 
 for f in "$SESSION_DIR"/*; do
   [[ -f "$f" ]] || continue
   source "$f"
 
   # Skip sessions with dead or missing PIDs
-  [[ -z "$PID" ]] || ! kill -0 "$PID" 2>/dev/null && continue
+  [[ -z "$PID" ]] && continue
+  kill -0 "$PID" 2>/dev/null || continue
+
+  # Skip if we've already seen this PID (deduplication)
+  [[ -n "${SEEN_PIDS[$PID]}" ]] && continue
+  SEEN_PIDS[$PID]=1
 
   case "$STATUS" in
   "w")
