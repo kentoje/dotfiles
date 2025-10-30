@@ -13,6 +13,7 @@ local prettier_config_names = {
 	".prettierrc.cjs",
 	"prettier.config.js",
 	"prettier.config.cjs",
+	"prettier.config.mjs",
 }
 
 local function config_exists(config_names)
@@ -319,6 +320,8 @@ return {
 
 		if file_exists(".yarn/sdks/typescript/lib") then
 			custom_typescript_config.tsdk = ".yarn/sdks/typescript/lib"
+		elseif file_exists("node_modules/typescript/lib") then
+			custom_typescript_config.tsdk = "node_modules/typescript/lib"
 		end
 
 		-- Setup TypeScript LSP based on version
@@ -402,13 +405,9 @@ return {
 		elseif config_exists(prettier_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
 				vim.cmd("LspEslintFixAll")
-				-- local current_path = vim.fn.expand("%:p")
-				-- vim.cmd(":%! prettier --write " .. current_path)
+				local current_path = vim.fn.expand("%:p")
+				vim.cmd(":%! prettier --write " .. current_path)
 			end, { silent = true, desc = "ESLint + Prettier format" })
-		else
-			vim.keymap.set("n", "<leader>e", function()
-				vim.cmd("LspEslintFixAll")
-			end, { silent = true, desc = "EslintFixAll" })
 		end
 
 		-- issue with Tab teleporting
