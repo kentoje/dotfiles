@@ -28,7 +28,7 @@ return {
 			sections = {
 				{
 					section = "terminal",
-					cmd = "cat ~/dotfiles/.config/nvim/lua/headers/nvim.txt | lolcrab",
+					cmd = "lolcrab ~/dotfiles/.config/nvim/lua/headers/nvim.txt",
 					height = 8,
 					align = "center",
 					indent = -6,

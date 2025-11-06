@@ -47,13 +47,13 @@ vim.keymap.set(
 vim.keymap.set(
 	"n",
 	"<leader>y",
-	':let @+ = "@" . expand("%:.")<CR>',
+	':let @+ = expand("%")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the relative path of the current file" }
 )
 vim.keymap.set(
 	"n",
 	"<leader>Y",
-	':let @+ = "@" . expand("%:p")<CR>',
+	':let @+ = expand("%:p")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
 )
 
@@ -147,6 +147,7 @@ vim.keymap.set("v", "<leader>y", function()
 	local end_line = math.max(start_pos[2], end_pos[2])
 	local path = vim.fn.expand("%:.")
 	local result = "(FILE: @" .. path .. " LINES: [start: " .. start_line .. ", end: " .. end_line .. "])"
+
 	vim.fn.setreg("+", result)
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 	print("Copied: " .. result)
