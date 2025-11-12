@@ -57,12 +57,5 @@ return {
 			end,
 			desc = "Select Scratch Buffer",
 		},
-		{
-			"<C-o>",
-			function()
-				vim.cmd("wincmd h")
-			end,
-			mode = { "t" },
-		},
 	},
 }
