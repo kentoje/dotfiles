@@ -284,7 +284,7 @@ return {
 				vim.keymap.set("n", "gf", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				vim.keymap.set("n", "gD", vim.diagnostic.open_float, opts) -- open error
+				vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "]d", next_diag_repeat, opts) -- go to next diagnostic
 				vim.keymap.set("n", "[d", prev_diag_repeat, opts) -- go to prev diagnostic
 				vim.keymap.set("n", "]e", next_error_repeat, opts)

@@ -11,16 +11,18 @@ return {
 				git_icons = true,
 			},
 			winopts = {
-				width = 0.85,
-				height = 0.85,
+				width = 0.95,
+				height = 0.95,
 				border = "none",
 				preview = {
+					border = "none",
 					delay = 10,
-					hidden = true,
+					-- hidden = true,
 					title = false,
-					layout = "vertical", -- Ensures preview is on the bottom
+					-- layout = "vertical", -- Ensures preview is on the bottom
 					scrollbar = false,
-					vertical = "down:50%",
+					horizontal = "right:40%",
+					-- vertical = "down:50%",
 				},
 			},
 		})
@@ -42,7 +44,7 @@ return {
 		-- 	})
 		-- end, { desc = "Find files" })
 
-		vim.keymap.set("n", "gr", function()
+		vim.keymap.set("n", "gF", function()
 			fzf.lsp_references()
 		end, { desc = "Search for references under the cursor" })
 

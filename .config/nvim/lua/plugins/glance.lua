@@ -1,5 +1,6 @@
 return {
 	"dnlhc/glance.nvim",
+	enabled = false,
 	config = function()
 		local glance = require("glance")
 		local actions = glance.actions
@@ -27,5 +28,5 @@ return {
 		})
 	end,
 
-	vim.keymap.set("n", "gF", ":Glance references<CR>", { silent = true, desc = "Lookup references" }),
+	-- vim.keymap.set("n", "gF", ":Glance references<CR>", { silent = true, desc = "Lookup references" }),
 }
