@@ -284,7 +284,7 @@ return {
 				vim.keymap.set("n", "gf", function()
 					vim.lsp.buf.definition()
 				end, opts)
-				vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts) -- open error
+				vim.keymap.set("n", "gd", vim.diagnostic.open_float, opts) -- open error
 				vim.keymap.set("n", "]d", next_diag_repeat, opts) -- go to next diagnostic
 				vim.keymap.set("n", "[d", prev_diag_repeat, opts) -- go to prev diagnostic
 				vim.keymap.set("n", "]e", next_error_repeat, opts)
@@ -388,7 +388,7 @@ return {
 		}
 		vim.lsp.enable("yamlls")
 
-		vim.keymap.set("n", "gd", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
+		vim.keymap.set("n", "gh", vim.lsp.buf.hover, { silent = true, desc = "Hover documentation" })
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
 		vim.keymap.set("n", "<leader>E", function()
@@ -405,8 +405,8 @@ return {
 		elseif config_exists(prettier_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
 				vim.cmd("LspEslintFixAll")
-				local current_path = vim.fn.expand("%:p")
-				vim.cmd(":%! prettier --write " .. current_path)
+				-- local current_path = vim.fn.expand("%:p")
+				-- vim.cmd(":%! prettier --write " .. current_path)
 			end, { silent = true, desc = "ESLint + Prettier format" })
 		end
 

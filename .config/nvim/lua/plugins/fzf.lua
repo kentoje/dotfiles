@@ -13,9 +13,9 @@ return {
 			winopts = {
 				width = 0.95,
 				height = 0.95,
-				border = "none",
+				-- border = "none",
 				preview = {
-					border = "none",
+					-- border = "none",
 					delay = 10,
 					-- hidden = true,
 					title = false,
