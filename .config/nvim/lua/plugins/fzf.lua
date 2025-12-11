@@ -54,7 +54,7 @@ return {
 
 		vim.keymap.set("n", "<leader>fs", function()
 			fzf.lsp_live_workspace_symbols()
-		end, { desc = "Resume fzf" })
+		end, { desc = "Workspace symbols lookup" })
 
 		vim.keymap.set("n", "<leader>fb", function()
 			fzf.buffers()

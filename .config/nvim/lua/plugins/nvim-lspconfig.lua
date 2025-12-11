@@ -253,8 +253,17 @@ return {
 		-- Setup TypeScript LSP based on tsconfig baseUrl
 		if should_use_vtsls() then
 			setup_vtsls(lsp_capabilities, custom_typescript_config)
+			vim.lsp.config.tsgo = {
+				filetypes = {}, -- Empty filetypes prevents auto-start
+			}
 		else
 			setup_tsgo(lsp_capabilities, custom_typescript_config)
+			-- Override lspconfig's built-in vtsls to prevent auto-start
+			-- lspconfig has vtsls built-in, which auto-starts if the binary exists
+			-- We disable it by setting filetypes to empty when using tsgo
+			vim.lsp.config.vtsls = {
+				filetypes = {}, -- Empty filetypes prevents auto-start
+			}
 		end
 
 		require("mason").setup({})
