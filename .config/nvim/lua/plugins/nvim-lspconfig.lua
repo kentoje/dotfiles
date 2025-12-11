@@ -25,40 +25,75 @@ local function config_exists(config_names)
 	return false
 end
 
--- local function is_typescript_version_4()
--- 	local util = require("lspconfig.util")
--- 	local package_json_path = util.root_pattern("package.json")(vim.fn.getcwd())
---
--- 	if not package_json_path then
--- 		return false -- Default to gte5 setup
--- 	end
---
--- 	local file = io.open(package_json_path .. "/package.json", "r")
--- 	if not file then
--- 		return false -- Default to gte5 setup
--- 	end
---
--- 	local content = file:read("*all")
--- 	file:close()
---
--- 	local ok, package_data = pcall(vim.json.decode, content)
--- 	if not ok or not package_data.devDependencies then
--- 		return false -- Default to gte5 setup
--- 	end
---
--- 	local ts_version = package_data.devDependencies.typescript
--- 	if ts_version and ts_version:match("^[~^]?4%.") then
--- 		return true -- TypeScript 4.x found
--- 	end
---
--- 	return false -- Default to gte5 setup for all other cases
--- end
+local function find_tsconfig()
+	local cwd = vim.fn.getcwd()
 
-local function setup_typescript(lsp_capabilities, custom_typescript_config)
+	-- Look for tsconfig.json in current directory and parent directories
+	local tsconfig_path = vim.fn.findfile("tsconfig.json", cwd .. ";")
+
+	if tsconfig_path ~= "" then
+		return vim.fn.fnamemodify(tsconfig_path, ":p")
+	end
+
+	return nil
+end
+
+local function has_tsconfig_base_url()
+	local tsconfig_path = find_tsconfig()
+
+	if not tsconfig_path then
+		return false
+	end
+
+	local file = io.open(tsconfig_path, "r")
+	if not file then
+		return false
+	end
+
+	local content = file:read("*all")
+	file:close()
+
+	-- Simply check if "baseUrl" appears in the file
+	return content:find("baseUrl", 1, true) ~= nil
+	-- Note: third parameter `true` makes it a plain text search (no patterns)
+end
+
+local function should_use_vtsls()
+	-- Use vtsls if project has baseUrl (indicates path aliases/complex config)
+	return has_tsconfig_base_url()
+end
+
+local function setup_tsgo(lsp_capabilities, custom_typescript_config)
+	-- tsgo: Fast TypeScript compiler with LSP support
+	-- Handles: diagnostics, hover, definition, references, formatting, completion, and all other LSP features
+
+	-- Configure tsgo using new vim.lsp.config API
+	vim.lsp.config.tsgo = {
+		cmd = { "tsgo", "--lsp", "--stdio" },
+		filetypes = {
+			"javascript",
+			"javascriptreact",
+			"javascript.jsx",
+			"typescript",
+			"typescriptreact",
+			"typescript.tsx",
+		},
+		root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+		capabilities = lsp_capabilities,
+		settings = {
+			typescript = custom_typescript_config,
+			javascript = {
+				updateImportsOnFileMove = "always",
+			},
+		},
+	}
+
+	vim.lsp.enable("tsgo")
+end
+
+local function setup_vtsls(lsp_capabilities, custom_typescript_config)
 	-- vtsls: Full-featured TypeScript LSP server
-	-- Handles: completion, code actions, refactoring, imports, rename, call hierarchy, code lens,
-	--          document highlight, folding, inlay hints, semantic tokens, workspace operations,
-	--          hover, definition, references, formatting, diagnostics (everything enabled)
+	-- Handles: diagnostics, hover, definition, references, formatting, completion, code actions, and all other LSP features
 
 	-- Configure vtsls using new vim.lsp.config API
 	vim.lsp.config.vtsls = {
@@ -84,118 +119,9 @@ local function setup_typescript(lsp_capabilities, custom_typescript_config)
 			},
 		},
 	}
-end
 
--- tsgo does is not usable as of now... I had some issues with my local tsconfig, like aliases not working.
--- local function setup_typescript_gte5(lsp_capabilities, custom_typescript_config)
--- 	local util = require("lspconfig.util")
--- 	local tsgo_cmd = { "tsgo", "--lsp", "--stdio" }
---
--- 	-- tsgo: Fast TypeScript compiler with LSP support
--- 	-- Handles: diagnostics, hover, definition, references, formatting
--- 	local tsgo_config = {
--- 		default_config = {
--- 			cmd = tsgo_cmd,
--- 			root_markers = {
--- 				"tsconfig.json",
--- 				"jsconfig.json",
--- 				"package.json",
--- 				".git",
--- 				"tsconfig.base.json",
--- 			},
--- 			filetypes = {
--- 				"javascript",
--- 				"javascriptreact",
--- 				"javascript.jsx",
--- 				"typescript",
--- 				"typescriptreact",
--- 				"typescript.tsx",
--- 			},
--- 			root_dir = function(fname)
--- 				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
--- 					or util.root_pattern("package.json", ".git")(fname)
--- 			end,
--- 			single_file_support = true,
--- 			settings = {
--- 				typescript = custom_typescript_config,
--- 				javascript = {
--- 					updateImportsOnFileMove = "always",
--- 				},
--- 			},
--- 		},
--- 	}
---
--- 	require("lspconfig.configs").tsgo = tsgo_config
--- 	require("lspconfig").tsgo.setup({
--- 		capabilities = lsp_capabilities,
--- 		on_attach = function(client)
--- 			print("tsgo capabilities:", vim.inspect(client.server_capabilities))
--- 			-- does not fully work yet
--- 			client.server_capabilities.completionProvider = false
--- 		end,
--- 	})
---
--- 	-- vtsls: Full-featured TypeScript LSP server
--- 	-- Handles: completion, code actions, refactoring, imports, rename, call hierarchy, code lens,
--- 	--          document highlight, folding, inlay hints, semantic tokens, workspace operations
--- 	-- Disabled: hover, definition, references, formatting, etc. (handled by tsgo)
--- 	local vtsls_config = {
--- 		default_config = {
--- 			cmd = { "vtsls", "--stdio" },
--- 			filetypes = {
--- 				"javascript",
--- 				"javascriptreact",
--- 				"javascript.jsx",
--- 				"typescript",
--- 				"typescriptreact",
--- 				"typescript.tsx",
--- 			},
--- 			root_dir = function(fname)
--- 				return util.root_pattern("tsconfig.json", "jsconfig.json")(fname)
--- 					or util.root_pattern("package.json", ".git")(fname)
--- 			end,
--- 			single_file_support = true,
--- 			settings = {
--- 				typescript = custom_typescript_config,
--- 				javascript = {
--- 					updateImportsOnFileMove = "always",
--- 				},
--- 				vtsls = {
--- 					enableMoveToFileCodeAction = true,
--- 					autoUseWorkspaceTsdk = true,
--- 				},
--- 			},
--- 		},
--- 	}
---
--- 	require("lspconfig.configs").vtsls = vtsls_config
--- 	require("lspconfig").vtsls.setup({
--- 		capabilities = lsp_capabilities,
--- 		handlers = {
--- 			["textDocument/publishDiagnostics"] = function() end,
--- 		},
--- 		on_attach = function(client, bufnr)
--- 			-- Disable capabilities already handled by tsgo
--- 			client.server_capabilities.hoverProvider = false
--- 			client.server_capabilities.definitionProvider = false
--- 			client.server_capabilities.referencesProvider = false
--- 			client.server_capabilities.implementationProvider = false
--- 			client.server_capabilities.typeDefinitionProvider = false
--- 			client.server_capabilities.documentFormattingProvider = false
--- 			client.server_capabilities.documentRangeFormattingProvider = false
--- 			client.server_capabilities.documentOnTypeFormattingProvider = false
--- 			client.server_capabilities.documentSymbolProvider = false
--- 			client.server_capabilities.workspaceSymbolProvider = false
--- 			client.server_capabilities.signatureHelpProvider = false
---
--- 			-- Keep vtsls-specific capabilities enabled:
--- 			-- codeActionProvider, codeLensProvider, renameProvider, executeCommandProvider,
--- 			-- callHierarchyProvider, documentHighlightProvider, foldingRangeProvider,
--- 			-- inlayHintProvider, linkedEditingRangeProvider, selectionRangeProvider,
--- 			-- semanticTokensProvider, workspace.fileOperations
--- 		end,
--- 	})
--- end
+	vim.lsp.enable("vtsls")
+end
 
 return {
 	"neovim/nvim-lspconfig",
@@ -324,14 +250,12 @@ return {
 			custom_typescript_config.tsdk = "node_modules/typescript/lib"
 		end
 
-		-- Setup TypeScript LSP based on version
-		-- if is_typescript_version_4() then
-
-		setup_typescript(lsp_capabilities, custom_typescript_config)
-
-		-- else
-		-- 	setup_typescript_gte5(lsp_capabilities, custom_typescript_config)
-		-- end
+		-- Setup TypeScript LSP based on tsconfig baseUrl
+		if should_use_vtsls() then
+			setup_vtsls(lsp_capabilities, custom_typescript_config)
+		else
+			setup_tsgo(lsp_capabilities, custom_typescript_config)
+		end
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
@@ -363,9 +287,6 @@ return {
 			},
 		})
 
-		-- Enable LSP servers using new vim.lsp.enable API
-		vim.lsp.enable("vtsls")
-
 		-- Manual yamlls setup using vim.lsp.config API
 		vim.lsp.config.yamlls = {
 			capabilities = lsp_capabilities,
@@ -392,9 +313,14 @@ return {
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
 		vim.keymap.set("n", "<leader>E", function()
-			vim.cmd("VtsExec add_missing_imports")
-			vim.cmd("VtsExec remove_unused_imports")
-		end, { desc = "Magic import fix" })
+			if should_use_vtsls() then
+				vim.cmd("VtsExec add_missing_imports")
+				vim.cmd("VtsExec remove_unused_imports")
+			else
+				-- tsgo doesn't support organize imports yet
+				print("Organize imports not supported in tsgo")
+			end
+		end, { desc = "Organize imports (vtsls only)" })
 
 		if config_exists(biome_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
