@@ -26,7 +26,12 @@
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
-      "Read(./secrets/**)"
+      "Read(./secrets/**)",
+      "Read(~dotfiles/.config/fish/includes/private-vars.fish)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(mv:*)"
     ]
   },
   "hooks": {
