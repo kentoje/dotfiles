@@ -13,17 +13,41 @@
     }
   },
   {
+    "context": "Editor && (showing_code_actions || showing_completions)",
+    "use_key_equivalents": true,
+    // context menu when pressing "ctrl+space"
+    "bindings": {
+      "ctrl-k": "editor::ContextMenuPrevious",
+      "ctrl-j": "editor::ContextMenuNext"
+    }
+  },
+  {
+    "use_key_equivalents": true,
     "bindings": {
       "ctrl-k": "menu::SelectPrevious",
       "ctrl-j": "menu::SelectNext",
       "cmd-s": "workspace::ToggleLeftDock",
+      "cmd-shift-s": "workspace::ToggleRightDock",
       "cmd-b": "workspace::NewTerminal"
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-k": "workspace::ActivatePaneUp"
     }
   },
   {
     "context": "Editor && vim_mode == normal",
     "bindings": {
       "ctrl-space": "editor::ShowCompletions"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl+j": "editor::MoveDown",
+      "ctrl+k": "editor::MoveUp"
     }
   },
   {
@@ -44,8 +68,24 @@
     "bindings": {
       "ctrl-space": "editor::SelectLargerSyntaxNode", // Expand selection
       "g p": "file_finder::Toggle",
+      "g P": "projects::OpenRecent",
       "g f": "editor::GoToDefinition",
       "g F": "editor::FindAllReferences",
+
+      // "J": {
+      //   "command": "vim::Normal",
+      //   "args": { "keys": "10j" }
+      // },
+      "shift-j": [
+        "workspace::SendKeystrokes",
+        // Did not find a better way
+        "down down down down down down down down down down"
+      ],
+      "shift-k": [
+        "workspace::SendKeystrokes",
+        // Did not find a better way
+        "up up up up up up up up up up"
+      ],
 
       "H": [
         "editor::MoveToBeginningOfLine",
@@ -55,17 +95,23 @@
 
       "-": "vim::ToggleProjectPanelFocus",
 
+      "space e": "editor::Format",
       "space f r": "search::FocusSearch",
+      "space f b": "tab_switcher::ToggleAll",
       "space f g": ["pane::DeploySearch", { "replace_enabled": true }],
       "space c r": "editor::Rename",
       "space d": "pane::SplitRight",
       "space y": "workspace::CopyPath",
       "space x g b": "git::Blame",
+      "space x g d": "git::Diff",
+      "space x d e": "diagnostics::Deploy",
 
       "cmd-i": "agent::ToggleFocus",
 
-      "ctrl-l": "workspace::ActivateNextPane",
-      "ctrl-h": "workspace::ActivatePreviousPane",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
 
       "cmd-1": ["pane::ActivateItem", 0],
       "cmd-2": ["pane::ActivateItem", 1],
@@ -79,19 +125,21 @@
       "cmd-l": "pane::ActivateNextItem",
       "cmd-h": "pane::ActivatePreviousItem",
 
-      "]d": [
+      "] h": "editor::GoToHunk",
+      "[ h": "editor::GoToPreviousHunk",
+      "] d": [
         "editor::GoToDiagnostic",
         { "severity": { "min": "hint", "max": "error" } }
       ],
-      "[d": [
+      "[ d": [
         "editor::GoToPreviousDiagnostic",
         { "severity": { "min": "hint", "max": "error" } }
       ],
-      "]e": [
+      "] e": [
         "editor::GoToDiagnostic",
         { "severity": { "min": "error", "max": "error" } }
       ],
-      "[e": [
+      "[ e": [
         "editor::GoToPreviousDiagnostic",
         { "severity": { "min": "error", "max": "error" } }
       ]
