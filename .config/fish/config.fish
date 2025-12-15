@@ -64,6 +64,5 @@ fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
 
 bind -M insert ctrl-space accept-autosuggestion
 
-alias cl="~/.claude/local/claude"
-alias claude="~/.claude/local/claude"
+alias cl="~/.local/bin/claude"
 

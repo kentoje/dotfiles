@@ -28,13 +28,14 @@
       "ctrl-j": "menu::SelectNext",
       "cmd-s": "workspace::ToggleLeftDock",
       "cmd-shift-s": "workspace::ToggleRightDock",
-      "cmd-b": "workspace::NewTerminal"
+      "cmd-b": "terminal_panel::Toggle"
     }
   },
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-k": "workspace::ActivatePaneUp"
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "cmd-b": "terminal_panel::Toggle"
     }
   },
   {
@@ -93,7 +94,8 @@
       ],
       "L": ["editor::MoveToEndOfLine", { "stop_at_soft_wraps": false }],
 
-      "-": "vim::ToggleProjectPanelFocus",
+      // "-": "vim::ToggleProjectPanelFocus",
+      "-": ["task::Spawn", { "task_name": "Oil", "reveal_target": "center" }],
 
       "space e": "editor::Format",
       "space f r": "search::FocusSearch",
