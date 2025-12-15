@@ -60,7 +60,7 @@ vim.keymap.set({ "n", "x" }, "g.", function()
 	end)
 end)
 
-vim.keymap.set({ "n" }, "gd", function()
+vim.keymap.set({ "n" }, "gh", function()
 	vscode.action("editor.action.showHover")
 end)
 

@@ -148,7 +148,7 @@ alt-v = 'workspace V'
 alt-w = 'workspace W'
 # alt-x = 'workspace X'
 # alt-y = 'workspace Y'
-# alt-z = 'workspace Z'
+alt-z = 'workspace Z'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 # alt-shift-0 = 'move-node-to-workspace 0'
@@ -182,7 +182,7 @@ alt-shift-v = 'move-node-to-workspace V'
 alt-shift-w = 'move-node-to-workspace W'
 # alt-shift-x = 'move-node-to-workspace X'
 # alt-shift-y = 'move-node-to-workspace Y'
-# alt-shift-z = 'move-node-to-workspace Z'
+alt-shift-z = 'move-node-to-workspace Z'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
 alt-tab = 'workspace-back-and-forth'
@@ -264,6 +264,10 @@ run = 'move-node-to-workspace D'
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = 'move-node-to-workspace V'
 
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace V'
+
 # [[on-window-detected]]
 # if.app-id = 'com.pvncher.repoprompt'
 # run = 'move-node-to-workspace B'
@@ -275,6 +279,11 @@ run = 'move-node-to-workspace W'
 [[on-window-detected]]
 if.app-id = 'com.facebook.archon.developerID'
 run = 'move-node-to-workspace W'
+
+[[on-window-detected]]
+if.app-id = 'com.utmapp.UTM'
+run = 'move-node-to-workspace Z'
+
 
 # [[on-window-detected]]
 # if.app-id = 'org.chromium.Chromium'
