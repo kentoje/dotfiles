@@ -25,7 +25,9 @@
 .config/uv
 .config/flipperdevices.com
 .config/vivaldi-css
-.config/zed
+.config/zed/*
+!.config/zed/settings.json
+!.config/zed/keymap.json
 .config/configstore
 .config/raycast
 .config/glow

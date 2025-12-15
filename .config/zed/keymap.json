@@ -1,0 +1,102 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-k": "menu::SelectPrevious",
+      "ctrl-j": "menu::SelectNext",
+      "cmd-s": "workspace::ToggleLeftDock",
+      "cmd-b": "workspace::NewTerminal"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "ctrl-space": "editor::ShowCompletions"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == visual",
+    "bindings": {
+      "ctrl-space": "editor::SelectLargerSyntaxNode",
+      "cmd-i": "agent::AddSelectionToThread"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "-": ["workspace::ActivatePane", 0]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "ctrl-space": "editor::SelectLargerSyntaxNode", // Expand selection
+      "g p": "file_finder::Toggle",
+      "g f": "editor::GoToDefinition",
+      "g F": "editor::FindAllReferences",
+
+      "H": [
+        "editor::MoveToBeginningOfLine",
+        { "stop_at_soft_wraps": false, "stop_at_indent": false }
+      ],
+      "L": ["editor::MoveToEndOfLine", { "stop_at_soft_wraps": false }],
+
+      "-": "vim::ToggleProjectPanelFocus",
+
+      "space f r": "search::FocusSearch",
+      "space f g": ["pane::DeploySearch", { "replace_enabled": true }],
+      "space c r": "editor::Rename",
+      "space d": "pane::SplitRight",
+      "space y": "workspace::CopyPath",
+      "space x g b": "git::Blame",
+
+      "cmd-i": "agent::ToggleFocus",
+
+      "ctrl-l": "workspace::ActivateNextPane",
+      "ctrl-h": "workspace::ActivatePreviousPane",
+
+      "cmd-1": ["pane::ActivateItem", 0],
+      "cmd-2": ["pane::ActivateItem", 1],
+      "cmd-3": ["pane::ActivateItem", 2],
+      "cmd-4": ["pane::ActivateItem", 3],
+      "cmd-5": ["pane::ActivateItem", 4],
+      "cmd-6": ["pane::ActivateItem", 5],
+      "cmd-7": ["pane::ActivateItem", 6],
+      "cmd-8": ["pane::ActivateItem", 7],
+      "cmd-9": ["pane::ActivateItem", 8],
+      "cmd-l": "pane::ActivateNextItem",
+      "cmd-h": "pane::ActivatePreviousItem",
+
+      "]d": [
+        "editor::GoToDiagnostic",
+        { "severity": { "min": "hint", "max": "error" } }
+      ],
+      "[d": [
+        "editor::GoToPreviousDiagnostic",
+        { "severity": { "min": "hint", "max": "error" } }
+      ],
+      "]e": [
+        "editor::GoToDiagnostic",
+        { "severity": { "min": "error", "max": "error" } }
+      ],
+      "[e": [
+        "editor::GoToPreviousDiagnostic",
+        { "severity": { "min": "error", "max": "error" } }
+      ]
+
+      // "j k": "vim::NormalBefore"
+    }
+  }
+]
