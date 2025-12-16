@@ -31,6 +31,51 @@
   "buffer_font_family": "CommitMono Nerd Font",
   "cursor_blink": false,
   "experimental.theme_overrides": {
+    "background.appearance": "blurred",
+
+    // Melange Dark translucent overrides (95% opacity)
+    "background": "#292522f2", // base background
+    "status_bar.background": "#292522f2",
+    "title_bar.background": "#292522f2",
+    "elevated_surface.background": "#292522f2",
+    "surface.background": "#292522f2",
+    "editor.background": "#00000000",
+    "editor.gutter.background": "#00000000",
+    "editor.line_number": "#86746299",
+    "editor.active_line_number": "#FFB929",
+    "editor.active_line.background": "#00000000",
+    "editor.indent_guide": "#A3A9CE1a",
+    "editor.indent_guide_active": "#A3A9CE33",
+
+    "border": "#86746240",
+    "border.variant": "#86746220",
+    "hint.background": "#403A36cc",
+
+    "tab_bar.background": "#00000000",
+    "tab.active_background": "#A3A9CE20",
+    "tab.inactive_background": "#00000000",
+    "element.selected": "#A3A9CE20",
+
+    "panel.background": "#00000000",
+    "panel.indent_guide": "#A3A9CE12",
+    "panel.indent_guide_hover": "#A3A9CE16",
+    "panel.indent_guide_active": "#A3A9CE1a",
+    "panel.focused_border": "#00000000",
+
+    "toolbar.background": "#00000000",
+    "terminal.background": "#00000000",
+    "scrollbar.track.background": "#00000000",
+    "scrollbar.track.border": "#00000000",
+    "scrollbar.thumb.background": "#A3A9CE20",
+
+    "ghost_element.background": "#A3A9CE05",
+    "ghost_element.hover": "#A3A9CE10",
+    "ghost_element.active": "#A3A9CE15",
+    "ghost_element.selected": "#A3A9CE20",
+    "drop_target.background": "#A3A9CE20",
+    "element.hover": "#A3A9CE10",
+    "editor.highlighted_line.background": "#A3A9CE25",
+
     "players": [
       {
         "cursor": "#FFB929"
