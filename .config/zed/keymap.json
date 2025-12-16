@@ -73,20 +73,8 @@
       "g f": "editor::GoToDefinition",
       "g F": "editor::FindAllReferences",
 
-      // "J": {
-      //   "command": "vim::Normal",
-      //   "args": { "keys": "10j" }
-      // },
-      "shift-j": [
-        "workspace::SendKeystrokes",
-        // Did not find a better way
-        "down down down down down down down down down down"
-      ],
-      "shift-k": [
-        "workspace::SendKeystrokes",
-        // Did not find a better way
-        "up up up up up up up up up up"
-      ],
+      "shift-j": ["workspace::SendKeystrokes", "1 0 j"],
+      "shift-k": ["workspace::SendKeystrokes", "1 0 k"],
 
       "H": [
         "editor::MoveToBeginningOfLine",
