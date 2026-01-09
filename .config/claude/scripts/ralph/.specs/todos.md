@@ -1,0 +1,4 @@
+- add custom commands?
+- add better logs when ralph is running
+- instead of using fish/bash/zsh, make a proper cli program?
+- make any agent cli pluggable?
