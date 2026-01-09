@@ -1,0 +1,52 @@
+# Ralph Progress Log
+Project: /Volumes/HomeX/kento/Documents/gitlab/assets-page
+Started: Fri Jan  9 18:34:18 CET 2026
+---
+
+## Codebase Patterns
+- AgentSpeaker is a GraphQL type, not a React component
+- Speaker variants are assigned in `mapToSpeakers()` function in `src/states/call/speakers/speakers.utility.ts`
+- Color mapping from variants to Tractor tokens happens in `SPEAKERS_COLORS` constant in `src/constants/style.constants.ts`
+- The avatar variant determines both the Avatar component color and the transcript bar color
+
+## 2026-01-09 18:45 - US-001
+Session: /Volumes/HomeX/kento/Documents/gitlab/assets-page on branch ralph/agentspeaker-color-blue
+- Completed investigation of AgentSpeaker component locations
+- Files identified:
+  - `src/states/call/speakers/speakers.utility.ts` (lines 49, 64) - where variant "green" is assigned
+  - `src/constants/style.constants.ts` (line 61) - where green variant maps to "primary-500" color token
+  - `src/components/SpeakerAvatar/SpeakerAvatar.tsx` - renders avatars with variant
+  - `src/components/TranscriptionItem/TranscriptionItem.tsx` - uses avatars and colored bars
+  - `src/components/PlayerSpeakersList/PlayerSpeakersList.tsx` - player timeline avatars
+  - `src/hooks/useHasReadLinePermission/useHasReadLinePermission.ts` - useSpeakerColor hook
+  - `src/components/Transcription/Transcription.hooks.ts` - useTranscriptItemStyle hook
+- Current color: variant "green" → Tractor token "primary-500"
+- Typecheck passes ✅
+
+**Learnings for future iterations:**
+- AgentSpeaker is a GraphQL union type member, not a UI component
+- The color change requires modifying the variant assignment in the mapToSpeakers reducer function
+- Both AgentSpeaker and VirtualAgentSpeaker need to be updated (lines 49 and 64)
+- The existing blue variant is already used for ExternalSpeaker, so we're swapping roles
+---
+
+## 2026-01-09 19:05 - US-002
+Session: /Volumes/HomeX/kento/Documents/gitlab/assets-page on branch ralph/agentspeaker-color-blue
+- Changed AgentSpeaker and VirtualAgentSpeaker color from green to blue
+- Modified src/states/call/speakers/speakers.utility.ts:
+  - Line 49: Changed AgentSpeaker variant from "green" to "blue"
+  - Line 64: Changed VirtualAgentSpeaker variant from "green" to "blue"
+- Blue variant maps to Tractor color token "informative-500"
+- All quality checks passed:
+  - TypeScript compilation ✅
+  - Biome lint/format ✅
+  - Unit tests ✅ (34 tests passed)
+- Committed with message: "feat: US-002 - Update AgentSpeaker color to blue"
+
+**Learnings for future iterations:**
+- The color system uses a two-step mapping: variant name → Tractor color token
+- Changing speaker colors only requires updating the variant in mapToSpeakers()
+- The SPEAKERS_COLORS constant handles the mapping to actual color tokens
+- Browser verification in staging requires authentication credentials
+- All speaker-related UI components automatically pick up the variant changes
+---

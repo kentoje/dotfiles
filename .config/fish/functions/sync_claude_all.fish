@@ -18,6 +18,12 @@ function sync_claude_all
         echo "Error syncing Claude settings"
         return 1
     end
+
+    sync_claude_skills
+    if test $status -ne 0
+        echo "Error syncing Claude skills"
+        return 1
+    end
     
     echo "All Claude configuration synced successfully!"
 end

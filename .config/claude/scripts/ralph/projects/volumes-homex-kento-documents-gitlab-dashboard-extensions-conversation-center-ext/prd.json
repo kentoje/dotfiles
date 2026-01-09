@@ -1,0 +1,19 @@
+{
+  "project": "conversation-center-ext",
+  "branchName": "ralph/test-feature",
+  "description": "Test feature for Ralph verification",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Test story - read a file",
+      "description": "As a developer, I want to verify Ralph is working by reading the README.md file.",
+      "acceptanceCriteria": [
+        "Read README.md and summarize its contents",
+        "Append summary to progress.txt"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
