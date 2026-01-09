@@ -2,6 +2,7 @@ return {
 	"zbirenbaum/copilot.lua",
 	cmd = "Copilot",
 	event = "InsertEnter",
+	commit = "46f4b7d026cba9497159dcd3e6aa61a185cb1c48",
 	config = function()
 		require("copilot").setup({
 			panel = {
@@ -36,6 +37,7 @@ return {
 			},
 			filetypes = {
 				yaml = false,
+				oil = false,
 				markdown = false,
 				help = false,
 				gitcommit = false,

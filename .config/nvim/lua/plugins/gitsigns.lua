@@ -38,4 +38,21 @@ return {
 			col = 1,
 		},
 	},
+	config = function(_, opts)
+		local gs = require("gitsigns")
+		gs.setup(opts)
+
+		vim.keymap.set("n", "]h", function()
+			gs.nav_hunk("next")
+		end, { desc = "Next hunk" })
+
+		vim.keymap.set("n", "[h", function()
+			gs.nav_hunk("prev")
+		end, { desc = "Previous hunk" })
+
+		-- Quickfix list of all modified files
+		vim.keymap.set("n", "<leader>xgq", function()
+			gs.setqflist("all")
+		end, { desc = "Quickfix list of modified files" })
+	end,
 }

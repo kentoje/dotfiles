@@ -21,12 +21,10 @@ return {
 					enable = true,
 					goto_next_start = {
 						["]f"] = "@function.outer",
-						["]c"] = "@class.outer",
 						["]i"] = "@conditional.outer",
 					},
 					goto_previous_start = {
 						["[f"] = "@function.outer",
-						["[c"] = "@class.outer",
 						["[i"] = "@conditional.outer",
 					},
 				},
