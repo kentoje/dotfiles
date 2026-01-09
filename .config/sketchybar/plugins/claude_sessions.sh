@@ -44,13 +44,17 @@ for f in "$SESSION_DIR"/*; do
 
   case "$STATUS" in
   "w")
-    IDLE_SESSIONS+=("$DIR_NAME :: $PID")
+    IDLE_SESSIONS+=("$DIR_NAME<$PID>")
     ;;
   "r")
-    COOKING_SESSIONS+=("$DIR_NAME :: $PID")
+    if [[ -n "$LAST_TOOL" ]]; then
+      COOKING_SESSIONS+=("$DIR_NAME<$PID> → $LAST_TOOL")
+    else
+      COOKING_SESSIONS+=("$DIR_NAME<$PID>")
+    fi
     ;;
   "n")
-    NOTIFY_SESSIONS+=("$DIR_NAME :: $PID")
+    NOTIFY_SESSIONS+=("$DIR_NAME<$PID>")
     ;;
   esac
 done

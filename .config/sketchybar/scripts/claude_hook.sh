@@ -35,6 +35,11 @@ if [[ -n "$JSON_CWD" ]]; then
   DIR_NAME=$(basename "$CWD")
 fi
 
+# Extract tool name for tool events
+if [[ "$HOOK_EVENT" == "PreToolUse" || "$HOOK_EVENT" == "PostToolUse" ]]; then
+  LAST_TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+fi
+
 # Handle SessionStart - initialize with placeholder
 if [[ "$HOOK_EVENT" == "SessionStart" ]]; then
   # SessionStart doesn't have cwd, use placeholder until first tool use
@@ -47,6 +52,7 @@ CWD=$CWD
 DIR_NAME=$DIR_NAME
 STATUS=w
 PID=$PPID
+LAST_TOOL=
 LAST_UPDATED=$(date +%s)
 EOF
   sketchybar --trigger claude_session_update 2>/dev/null
@@ -81,6 +87,7 @@ CWD=$CWD
 DIR_NAME=$DIR_NAME
 STATUS=$STATUS
 PID=$PPID
+LAST_TOOL=$LAST_TOOL
 LAST_UPDATED=$(date +%s)
 EOF
 
