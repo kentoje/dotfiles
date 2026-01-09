@@ -21,7 +21,8 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_press_key",
-      "mcp__language-server__hover"
+      "mcp__language-server__hover",
+      "Skill(dev-browser:dev-browser)"
     ],
     "deny": [
       "Read(./.env)",
@@ -121,6 +122,11 @@
     "type": "command",
     "command": "~/.claude/statusline.sh",
     "padding": 0
+  },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "dev-browser@dev-browser-marketplace": true
   },
   "alwaysThinkingEnabled": true,
   "feedbackSurveyState": {
