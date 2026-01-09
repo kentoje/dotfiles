@@ -30,7 +30,7 @@ Take a PRD (markdown file or text) and convert it to `prd.json`.
 
 3. Save `prd.json` to:
    ```
-   $HOME/dotfiles/.config/claude/scripts/ralph/projects/<project-id>/prd.json
+   $(ralph home)/projects/<project-id>/prd.json
    ```
 
 **CRITICAL: Path Handling**

@@ -146,7 +146,7 @@ The PRD reader may be a junior developer or AI agent. Therefore:
    ```
    Example: `/Volumes/HomeX/kento/Documents/gitlab/assets-page` → `volumes-homex-kento-documents-gitlab-assets-page`
 
-3. Save to: `$HOME/dotfiles/.config/claude/scripts/ralph/projects/<project-id>/prd.md`
+3. Save to: `$(ralph home)/projects/<project-id>/prd.md`
 
 **Path Handling:**
 - NEVER assume `$HOME` equals `/Users/username` — it varies by system

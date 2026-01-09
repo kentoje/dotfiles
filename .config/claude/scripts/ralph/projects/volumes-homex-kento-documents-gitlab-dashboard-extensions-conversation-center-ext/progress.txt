@@ -1,4 +1,0 @@
-# Ralph Progress Log
-Project: /Volumes/HomeX/kento/Documents/gitlab/dashboard-extensions/conversation-center-ext
-Started: Fri Jan  9 18:29:11 CET 2026
----
