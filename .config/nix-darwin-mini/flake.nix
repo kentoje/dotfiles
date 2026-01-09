@@ -69,6 +69,8 @@
             delta
             go
             gnugrep
+            p7zip
+            qemu
             jq
             lazygit
             lsd
