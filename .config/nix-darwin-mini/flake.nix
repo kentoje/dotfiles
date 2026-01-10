@@ -56,6 +56,7 @@
             btop
             cointop
             imagemagick
+            wireguard-tools
             wget
             sad
             ffmpeg
