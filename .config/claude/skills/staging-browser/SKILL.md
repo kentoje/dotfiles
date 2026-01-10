@@ -1,3 +1,8 @@
+---
+name: staging-browser
+description: Open a dev-browser instance authenticated with Aircall staging credentials
+---
+
 # Staging Browser
 
 Opens a dev-browser instance authenticated with staging credentials.
