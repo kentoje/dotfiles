@@ -26,8 +26,11 @@ echo "Token: ${ID_TOKEN:0:20}..."
 ```
 
 ```bash
-# Start server if not running
-if ! lsof -i:9222 > /dev/null 2>&1; then
+# Check if dev-browser is already running - DO NOT kill existing processes
+if lsof -i:9222 > /dev/null 2>&1; then
+  echo "dev-browser already running on port 9222, reusing existing instance"
+else
+  echo "Starting dev-browser server..."
   cd /Volumes/HomeX/kento/.claude/plugins/cache/dev-browser-marketplace/dev-browser/66682fb0513a/skills/dev-browser && ./server.sh &
   sleep 3
 fi
