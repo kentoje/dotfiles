@@ -11,12 +11,49 @@ Create detailed Product Requirements Documents that are clear, actionable, and s
 
 ## The Job
 
-1. Receive a feature description from the user
-2. Ask 3-5 essential clarifying questions (with lettered options)
-3. Generate a structured PRD based on answers
-4. Save to the global Ralph projects directory (see Output section)
+1. **Extract explicit instructions** from the user's prompt (Step 0)
+2. **Check project conventions** - git history, CLAUDE.md (Step 0)
+3. Ask 3-5 essential clarifying questions (with lettered options)
+4. Generate a structured PRD based on answers
+5. Save to the global Ralph projects directory (see Output section)
 
 **Important:** Do NOT start implementing. Just create the PRD.
+
+---
+
+## Step 0: Extract Context Before Asking Questions
+
+### A. Parse User's Explicit Instructions
+
+**CRITICAL:** Before asking clarifying questions, carefully parse the user's initial prompt for:
+
+- **Specific files mentioned** (e.g., "add to `src/pages/playground/Playground.tsx`")
+- **Tools or skills to use** (e.g., "use the staging-browser-localhost skill to test")
+- **Workflows described** (e.g., "to debug it, you will have to...")
+- **Integration points** (e.g., "add it to the playground page")
+- **Testing requirements** (e.g., "interact with it in the browser")
+
+These are **non-negotiable requirements** that MUST appear in the PRD as user stories. Do NOT ask the user to repeat themselves — extract and incorporate automatically.
+
+### B. Check Project Conventions
+
+Run these commands to understand the project's conventions:
+
+```bash
+# Check commit message format
+git log --oneline -10
+
+# Check for project instructions
+cat CLAUDE.md 2>/dev/null | head -50
+```
+
+Look for:
+
+- **Commit message format** (e.g., `feat: [US-XXX] description`, `fix: description [CI-0000]`)
+- **Branch naming conventions** (e.g., `ralph/feature-name`, `feature/XXX-description`)
+- **Required checks** (e.g., `pnpm ts:check`, `pnpm biome:check`, `pnpm test`)
+
+Incorporate these conventions into the PRD's acceptance criteria.
 
 ---
 
@@ -60,13 +97,17 @@ This lets users respond with "1A, 2C, 3B" for quick iteration.
 Generate the PRD with these sections:
 
 ### 1. Introduction/Overview
+
 Brief description of the feature and the problem it solves.
 
 ### 2. Goals
+
 Specific, measurable objectives (bullet list).
 
 ### 3. User Stories
+
 Each story needs:
+
 - **Title:** Short descriptive name
 - **Description:** "As a [user], I want [feature] so that [benefit]"
 - **Acceptance Criteria:** Verifiable checklist of what "done" means
@@ -74,11 +115,14 @@ Each story needs:
 Each story should be small enough to implement in one focused session.
 
 **Format:**
+
 ```markdown
 ### US-001: [Title]
+
 **Description:** As a [user], I want [feature] so that [benefit].
 
 **Acceptance Criteria:**
+
 - [ ] Specific verifiable criterion
 - [ ] Another criterion
 - [ ] Typecheck/lint passes
@@ -86,35 +130,44 @@ Each story should be small enough to implement in one focused session.
 ```
 
 **Important:**
+
 - Acceptance criteria must be verifiable, not vague. "Works correctly" is bad. "Button shows confirmation dialog before deleting" is good.
 - **For any story with UI changes:** Always include "Verify in browser using dev-browser skill" as acceptance criteria. This ensures visual verification of frontend work.
 
 ### 4. Functional Requirements
+
 Numbered list of specific functionalities:
+
 - "FR-1: The system must allow users to..."
 - "FR-2: When a user clicks X, the system must..."
 
 Be explicit and unambiguous.
 
 ### 5. Non-Goals (Out of Scope)
+
 What this feature will NOT include. Critical for managing scope.
 
 ### 6. Design Considerations (Optional)
+
 - UI/UX requirements
 - Link to mockups if available
 - Relevant existing components to reuse
 
 ### 7. Technical Considerations (Optional)
+
 - Known constraints or dependencies
 - Integration points with existing systems
 - Performance requirements
 
 ### 8. Success Metrics
+
 How will success be measured?
+
 - "Reduce time to complete X by 50%"
 - "Increase conversion rate by 10%"
 
 ### 9. Open Questions
+
 Remaining questions or areas needing clarification.
 
 ---
@@ -135,23 +188,13 @@ The PRD reader may be a junior developer or AI agent. Therefore:
 
 **CRITICAL: Always save to the global Ralph projects directory, never the project itself.**
 
-1. Get home directory:
+1. Get project directory:
+
    ```bash
-   echo $HOME
+   ralph project-dir
    ```
 
-2. Get project ID from current working directory:
-   ```bash
-   pwd | sed 's|^/||' | tr '/' '-' | tr '[:upper:]' '[:lower:]'
-   ```
-   Example: `/Volumes/HomeX/kento/Documents/gitlab/assets-page` → `volumes-homex-kento-documents-gitlab-assets-page`
-
-3. Save to: `$(ralph home)/projects/<project-id>/prd.md`
-
-**Path Handling:**
-- NEVER assume `$HOME` equals `/Users/username` — it varies by system
-- ALWAYS use bash to expand `$HOME` first
-- Use the full expanded path in Write tool calls
+2. Save to: `$(ralph project-dir)/prd.md`
 
 ---
 
@@ -174,26 +217,32 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 ## User Stories
 
 ### US-001: Add priority field to database
+
 **Description:** As a developer, I need to store task priority so it persists across sessions.
 
 **Acceptance Criteria:**
+
 - [ ] Add priority column to tasks table: 'high' | 'medium' | 'low' (default 'medium')
 - [ ] Generate and run migration successfully
 - [ ] Typecheck passes
 
 ### US-002: Display priority indicator on task cards
+
 **Description:** As a user, I want to see task priority at a glance so I know what needs attention first.
 
 **Acceptance Criteria:**
+
 - [ ] Each task card shows colored priority badge (red=high, yellow=medium, gray=low)
 - [ ] Priority visible without hovering or clicking
 - [ ] Typecheck passes
 - [ ] Verify in browser using dev-browser skill
 
 ### US-003: Add priority selector to task edit
+
 **Description:** As a user, I want to change a task's priority when editing it.
 
 **Acceptance Criteria:**
+
 - [ ] Priority dropdown in task edit modal
 - [ ] Shows current priority as selected
 - [ ] Saves immediately on selection change
@@ -201,9 +250,11 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 - [ ] Verify in browser using dev-browser skill
 
 ### US-004: Filter tasks by priority
+
 **Description:** As a user, I want to filter the task list to see only high-priority items when I'm focused.
 
 **Acceptance Criteria:**
+
 - [ ] Filter dropdown with options: All | High | Medium | Low
 - [ ] Filter persists in URL params
 - [ ] Empty state message when no tasks match filter
@@ -248,9 +299,12 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 
 Before saving the PRD:
 
+- [ ] **Extracted explicit instructions from user's prompt** (files, tools, workflows, testing requirements)
+- [ ] **Checked project conventions** (git log, CLAUDE.md) and incorporated them
 - [ ] Asked clarifying questions with lettered options
 - [ ] Incorporated user's answers
 - [ ] User stories are small and specific
+- [ ] **User stories include all user-specified requirements** (e.g., specific files to modify, skills to use for testing)
 - [ ] Functional requirements are numbered and unambiguous
 - [ ] Non-goals section defines clear boundaries
 - [ ] Saved to global Ralph projects directory (see Output section)
