@@ -35,4 +35,5 @@
 .config/amp
 
 .claude/settings.local.json
+.config/.jira
 
