@@ -59,6 +59,7 @@
             wireguard-tools
             wget
             sad
+            jira-cli-go
             ffmpeg
             entr
             fish
