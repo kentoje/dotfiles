@@ -11,6 +11,7 @@ function clo --description "Claude Code Orchestrator (Opus, DELEG mode, delegate
   set -l A_CODE_SIMPLIFIER "$AGENT_DIR/DELEG_CODE_SIMPLIFIER.md"
   set -l A_GIT            "$AGENT_DIR/DELEG_GIT.md"
   set -l A_TEST           "$AGENT_DIR/DELEG_TEST.md"
+  set -l A_PKG_TYPES "$AGENT_DIR/DELEG_PKG_TYPES.md"
 
   set -l ORCH_PROMPT "
 You are the Orchestrator running in **DELEG mode** (model: Opus). Your job is to minimize main-context usage by delegating execution.
@@ -46,6 +47,7 @@ flowchart LR
         CS[DELEG_CODE_SIMPLIFIER<br/>opus]
         GT[DELEG_GIT<br/>haiku]
         TS[DELEG_TEST<br/>haiku]
+        PT[DELEG_PKG_TYPES<br/>haiku]
     end
 
     O -->|tracks tasks| TW
@@ -64,6 +66,7 @@ flowchart LR
     T -->|simplify code| CS
     T -->|git ops| GT
     T -->|run tests| TS
+    T -->|get pkg types| PT
 \`\`\`
 
 HARD RULES:
@@ -159,6 +162,12 @@ SUBAGENTS (file-based; stored under $AGENT_DIR):
   - model: haiku
   - tools: Bash
   - use for: running tests, parsing failures, coverage reports (never watch mode)
+
+- DELEG_PKG_TYPES
+  - file: $A_PKG_TYPES
+  - model: haiku
+  - tools: Glob, Grep, Read
+  - use for: retrieving type definitions and API signatures from node_modules
 
 When delegating with Task:
 - Always specify the exact subagent name above.
