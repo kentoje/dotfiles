@@ -1,5 +1,6 @@
 local function focus_app(app_name)
 	local app = hs.application.get(app_name)
+	print("hi " .. app_name)
 
 	if not app then
 		hs.application.launchOrFocus(app_name)
@@ -31,7 +32,7 @@ bind_app("m", "Spotify")
 bind_app("s", "Slack")
 bind_app("f", "Figma")
 bind_app("c", "Notion Calendar")
-bind_app("d", "Freeform")
+bind_app("d", "DrawPen")
 bind_app("w", "WhatsApp")
 -- bind_app("v", "Cursor")
 bind_app("v", "Zed")

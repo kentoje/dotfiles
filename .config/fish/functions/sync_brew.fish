@@ -9,6 +9,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         "shaunsingh/SFMono-Nerd-Font-Ligaturized"
     
     set -l desired_casks \
+        "drawpen" \
         "hammerspoon" \
         "font-commit-mono-nerd-font" \
         "font-hack-nerd-font" \
