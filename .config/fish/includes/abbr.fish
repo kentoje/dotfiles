@@ -42,4 +42,5 @@ abbr :wq "exit"
 abbr aicommit "git --no-pager diff | mods --model claude3.5-sonnet --role commit-message > .git/gcai && git commit -a -n -F .git/gcai -e"
 abbr aireview "git --no-pager diff HEAD | mods --model claude3.5-sonnet --role code-review | glow -p -"
 abbr aitldr "echo -e (gum input --prompt='Enter shell command to explore: ') | mods --model chatgpt --role explain-command | glow -p -"
+abbr op OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
 

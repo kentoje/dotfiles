@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "DELEG_ORCHESTRATOR",
+  "tui": {
+    "scroll_speed": 3,
+    "scroll_acceleration": {
+      "enabled": false
+    },
+    "diff_style": "auto"
+  },
+  // TODO: add:
+  // - planning subagent with detailed plan with subagent references
+  // - figma subagent
+  // - agent-browser in the main agent?
+  // - check temp, and other settings
+  // - add keybinds to scroll
+  "agent": {
+    "DELEG_ORCHESTRATOR": {
+      "description": "Opus orchestrator that delegates to subagents. Minimizes main-context usage.",
+      "mode": "primary",
+      "reasoningEffort": "max",
+      "model": "anthropic/claude-opus-4-5",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "write": "allow",
+        "todowrite": "allow",
+        "todoread": "allow",
+        "question": "allow",
+        "lsp": "deny",
+        "bash": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "task": {
+          "*": "deny",
+          "DELEG_*": "allow",
+          "explore": "allow",
+          "general": "allow",
+        },
+      },
+      "prompt": "{file:./prompts/DELEG_ORCHESTRATOR.md}"
+    },
+    "DELEG_WEB": {
+      "description": "Web research using WebSearch/WebFetch. Extracts authoritative sections and returns concise factual summary with sources.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-sonnet-4-5",
+      "temperature": 0.2,
+      "permission": {
+        "websearch": "allow",
+        "webfetch": "allow",
+        "read": "deny",
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_WEB.md}"
+    },
+    "DELEG_SHELL": {
+      "description": "Runs Bash commands and reports results succinctly (command, exit status, trimmed output). No file edits.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "bash": "allow",
+        "read": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_SHELL.md}"
+    },
+    "DELEG_FILE_SEARCH": {
+      "description": "Fast repo discovery using Glob/Grep. Returns relevant file paths + pointers (line ranges) and concise factual bullets.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "glob": "allow",
+        "grep": "allow",
+        "bash": "deny",
+        "read": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_FILE_SEARCH.md}"
+    },
+    "DELEG_CODE_SIMPLIFIER": {
+      "description": "Refines *already-modified* code for clarity, consistency, and maintainability while preserving exact behavior. Produces minimal diffs + pointers.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "glob": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_CODE_SIMPLIFIER.md}"
+    },
+    "DELEG_REVIEW": {
+      "description": "High-rigor reviewer for correctness, edge cases, security/perf, and test gaps. Produces prioritized findings with pointers.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "bash": "deny",
+        "glob": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_REVIEW.md}"
+    },
+    "DELEG_TEST": {
+      "description": "Test runner specialist. Runs tests, parses failures, reports coverage. Never uses watch mode.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "bash": "allow",
+        "read": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_TEST.md}"
+    },
+    "DELEG_GIT": {
+      "description": "Git operations specialist. Handles status, diff, commits, branches, logs. No co-authorship metadata.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "bash": "allow",
+        "read": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_GIT.md}"
+    },
+    "DELEG_SUMMARIZE": {
+      "description": "Summarizes files/code regions and returns concise pointers. Use for exploratory reads to save tokens.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "read": "allow",
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_SUMMARIZE.md}"
+    },
+    "DELEG_PKG_TYPES": {
+      "description": "Retrieve type definitions and API signatures from installed packages in node_modules.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "glob": "allow",
+        "grep": "allow",
+        "read": "allow",
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_PKG_TYPES.md}"
+    },
+    "DELEG_LSP_ACTION": {
+      "description": "LSP operations specialist. Handles hover, go-to-definition, find-references, implementations, call hierarchy, and symbol searches.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "lsp": "allow",
+        "read": "deny",
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "webfetch": "deny",
+        "websearch": "deny",
+        "glob": "deny",
+        "grep": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_LSP_ACTION.md}"
+    }
+  },
+  "lsp": {
+    "custom-lsp": {
+      "command": [
+        "vtsls",
+        "--stdio"
+      ],
+      "extensions": [
+        ".tsx",
+        ".ts",
+        ".jsx",
+        ".js"
+      ]
+    }
+  }
+}
