@@ -28,12 +28,9 @@
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
-      "Read(~dotfiles/.config/fish/includes/private-vars.fish)"
+      "Read(~/dotfiles/.config/fish/includes/private-vars.fish)"
     ],
-    "ask": [
-      "Bash(rm:*)",
-      "Bash(mv:*)"
-    ]
+    "ask": ["Bash(rm:*)", "Bash(mv:*)"]
   },
   "model": "opus",
   "hooks": {
