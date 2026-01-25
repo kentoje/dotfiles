@@ -15,7 +15,8 @@
   },
   // TODO: add:
   // - check temp, and other settings
-  // - add formatter configuration
+  // - create a PlanWriter Tool that uses DELEG_PLAN to create plans.
+  // - add formatter configuration, per project? (prettier, eslint, biome)
   // - add hook equivalent https://opencode.ai/docs/plugins/#send-notifications , maybe via a JS program.
   // - create tmux plugins to list panes with agents, and their statuses, PID, kill ability.
   // - add custom tools for aircall?
@@ -33,6 +34,7 @@
         "todowrite": "allow",
         "todoread": "allow",
         "question": "allow",
+        "external_directory": "ask",
         "bash": {
           "fish -c \"agent-browser *": "allow"
         },
@@ -67,6 +69,7 @@
         "websearch": "allow",
         "lsp": "allow",
         "edit": "ask",
+        "external_directory": "ask",
         "bash": "ask",
         "task": {
           "DELEG_*": "allow",
@@ -281,6 +284,8 @@
     }
   },
   "plugin": [
-    "cc-safety-net"
+    "cc-safety-net",
+    "./plugins/agent-gossips",
+    "./plugins/sound-notification"
   ]
 }

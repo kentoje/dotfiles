@@ -66,3 +66,6 @@ bind -M insert ctrl-space accept-autosuggestion
 
 alias cl="~/.local/bin/claude"
 
+
+# opencode
+fish_add_path /Volumes/HomeX/kento/.opencode/bin
