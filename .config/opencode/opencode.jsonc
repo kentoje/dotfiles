@@ -8,8 +8,12 @@
     },
     "diff_style": "auto"
   },
+  "permission": {
+    "read": {
+      "~/dotfiles/.config/fish/includes/private-vars.fish": "deny"
+    }
+  },
   // TODO: add:
-  // - agent-browser in the main agent?
   // - check temp, and other settings
   // - add formatter configuration
   // - add hook equivalent https://opencode.ai/docs/plugins/#send-notifications , maybe via a JS program.
@@ -22,6 +26,7 @@
       "reasoningEffort": "max",
       "model": "anthropic/claude-opus-4-5",
       "permission": {
+        "*": "deny",
         "read": "allow",
         "edit": "allow",
         "write": "allow",
@@ -29,22 +34,13 @@
         "todoread": "allow",
         "question": "allow",
         "bash": {
-          "*": "deny",
           "fish -c \"agent-browser *": "allow"
         },
-        "lsp": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "figma_*": "deny",
         "AircallStagingAuthToken": "allow",
         "skill": {
-          "*": "deny",
           "agent-browser-aircall-local": "allow"
         },
         "task": {
-          "*": "deny",
           "DELEG_*": "allow",
           "explore": "allow",
           "general": "allow",
@@ -59,6 +55,7 @@
       "reasoningEffort": "max",
       "temperature": 0.3,
       "permission": {
+        "*": "deny",
         "write": "ask",
         "read": "allow",
         "glob": "allow",
@@ -71,9 +68,7 @@
         "lsp": "allow",
         "edit": "ask",
         "bash": "ask",
-        "AircallStagingAuthToken": "deny",
         "task": {
-          "*": "deny",
           "DELEG_*": "allow",
           "explore": "allow"
         }
@@ -87,15 +82,9 @@
       "model": "anthropic/claude-sonnet-4-5",
       "temperature": 0.2,
       "permission": {
+        "*": "deny",
         "websearch": "allow",
         "webfetch": "allow",
-        "read": "deny",
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_WEB.md}"
     },
@@ -106,15 +95,8 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "bash": "allow",
-        "read": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_SHELL.md}"
     },
@@ -125,15 +107,9 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "glob": "allow",
         "grep": "allow",
-        "bash": "deny",
-        "read": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_FILE_SEARCH.md}"
     },
@@ -144,15 +120,10 @@
       "model": "anthropic/claude-opus-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "read": "allow",
         "grep": "allow",
         "edit": "allow",
-        "bash": "deny",
-        "glob": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_CODE_SIMPLIFIER.md}"
     },
@@ -163,18 +134,13 @@
       "model": "anthropic/claude-opus-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "read": "allow",
         "grep": "allow",
-        "bash": "deny",
-        "glob": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_REVIEW.md}"
     },
+    // I had to update the .zshenv, since I am using fish
     "DELEG_TEST": {
       "description": "Test runner specialist. Runs tests, parses failures, reports coverage. Never uses watch mode.",
       "mode": "subagent",
@@ -182,15 +148,21 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
-        "bash": "allow",
-        "read": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
+        "*": "deny",
+        "bash": {
+          "pnpm test *": "allow",
+          "yarn test *": "allow",
+          "bun test *": "allow",
+          "npm run test *": "allow",
+          "pnpm jest *": "allow",
+          "yarn jest *": "allow",
+          "bun jest *": "allow",
+          "npm run jest *": "allow",
+          "pnpm vitest *": "allow",
+          "yarn vitest *": "allow",
+          "bun vitest *": "allow",
+          "npm run vitest *": "allow"
+        },
       },
       "prompt": "{file:./prompts/DELEG_TEST.md}"
     },
@@ -201,15 +173,12 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
-        "bash": "allow",
-        "read": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
+        "*": "deny",
+        "bash": {
+          "git *": "allow",
+          "git rm *": "ask",
+          "git reset --hard *": "ask"
+        },
       },
       "prompt": "{file:./prompts/DELEG_GIT.md}"
     },
@@ -220,15 +189,8 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "read": "allow",
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_SUMMARIZE.md}"
     },
@@ -239,15 +201,10 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "glob": "allow",
         "grep": "allow",
         "read": "allow",
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_PKG_TYPES.md}"
     },
@@ -258,16 +215,8 @@
       "model": "anthropic/claude-haiku-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "lsp": "allow",
-        "read": "deny",
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_LSP_ACTION.md}"
     },
@@ -278,6 +227,7 @@
       "model": "anthropic/claude-sonnet-4-5",
       "temperature": 0.1,
       "permission": {
+        "*": "deny",
         "figma_get_design_context": "allow",
         "figma_get_screenshot": "allow",
         "figma_get_metadata": "allow",
@@ -288,15 +238,6 @@
         "figma_send_get_strategy_response": "allow",
         "figma_create_design_system_rules": "allow",
         "figma_get_figjam": "allow",
-        "read": "deny",
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "glob": "deny",
-        "grep": "deny",
-        "webfetch": "deny",
-        "websearch": "deny",
-        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_FIGMA.md}"
     }
@@ -338,5 +279,8 @@
         ".js"
       ]
     }
-  }
+  },
+  "plugin": [
+    "cc-safety-net"
+  ]
 }
