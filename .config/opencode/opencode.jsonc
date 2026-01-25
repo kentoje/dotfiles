@@ -9,7 +9,6 @@
     "diff_style": "auto"
   },
   // TODO: add:
-  // - figma subagent
   // - agent-browser in the main agent?
   // - check temp, and other settings
   // - add formatter configuration
@@ -35,6 +34,7 @@
         "grep": "deny",
         "webfetch": "deny",
         "websearch": "deny",
+        "figma_*": "deny",
         "task": {
           "*": "deny",
           "DELEG_*": "allow",
@@ -51,7 +51,7 @@
       "reasoningEffort": "max",
       "temperature": 0.3,
       "permission": {
-        "write": "allow",
+        "write": "ask",
         "read": "allow",
         "glob": "allow",
         "grep": "allow",
@@ -251,6 +251,34 @@
         "grep": "deny"
       },
       "prompt": "{file:./prompts/DELEG_LSP_ACTION.md}"
+    },
+    "DELEG_FIGMA": {
+      "description": "Figma design operations. Extracts design context, generates UI code, manages Code Connect mappings, and captures screenshots.",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "anthropic/claude-sonnet-4-5",
+      "temperature": 0.1,
+      "permission": {
+        "figma_get_design_context": "allow",
+        "figma_get_screenshot": "allow",
+        "figma_get_metadata": "allow",
+        "figma_get_variable_defs": "allow",
+        "figma_get_code_connect_map": "allow",
+        "figma_add_code_connect_map": "allow",
+        "figma_get_strategy_for_mapping": "allow",
+        "figma_send_get_strategy_response": "allow",
+        "figma_create_design_system_rules": "allow",
+        "figma_get_figjam": "allow",
+        "read": "deny",
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "webfetch": "deny",
+        "websearch": "deny"
+      },
+      "prompt": "{file:./prompts/DELEG_FIGMA.md}"
     }
   },
   "keybinds": {
@@ -269,6 +297,13 @@
     "messages_previous": "ctrl+shift+n",
     "app_exit": "ctrl+c",
     "editor_open": "<leader>e",
+  },
+  "mcp": {
+    "figma": {
+      "type": "remote",
+      "url": "http://127.0.0.1:3845/mcp",
+      "enabled": true
+    }
   },
   "lsp": {
     "custom-lsp": {

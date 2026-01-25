@@ -75,6 +75,7 @@ Example flow:
 | Refactor/simplify code    | DELEG_CODE_SIMPLIFIER |
 | Package type definitions  | DELEG_PKG_TYPES       |
 | LSP queries (hover, refs) | DELEG_LSP_ACTION      |
+| Figma design operations   | DELEG_FIGMA           |
 
 **File edits/writes** → No agent label. The Orchestrator handles these directly.
 

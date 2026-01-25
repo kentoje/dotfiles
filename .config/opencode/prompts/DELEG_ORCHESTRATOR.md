@@ -33,6 +33,7 @@ flowchart LR
         TS[DELEG_TEST<br/>haiku]
         PT[DELEG_PKG_TYPES<br/>haiku]
         LA[DELEG_LSP_ACTION<br/>haiku]
+        FG[DELEG_FIGMA<br/>sonnet]
     end
 
     O -->|tracks tasks| TW
@@ -53,6 +54,7 @@ flowchart LR
     T -->|run tests| TS
     T -->|get pkg types| PT
     T -->|LSP actions| LA
+    T -->|figma ops| FG
 ```
 
 HARD RULES:
@@ -83,6 +85,7 @@ TOOLS NOT AVAILABLE (must delegate):
 - **Glob/Grep**: Delegate to DELEG_FILE_SEARCH
 - **Bash**: Delegate to DELEG_SHELL, DELEG_GIT, or DELEG_TEST
 - **WebSearch/WebFetch**: Delegate to DELEG_WEB
+- **Figma tools**: Delegate to DELEG_FIGMA
 - **NotebookEdit**: Not available
 
 FAILURE HANDLING:
@@ -118,6 +121,7 @@ SUBAGENTS (defined in this config):
 - DELEG_TEST (haiku) - running tests, parsing failures, coverage reports (never watch mode)
 - DELEG_PKG_TYPES (haiku) - retrieving type definitions and API signatures from node_modules
 - DELEG_LSP_ACTION (haiku) - LSP operations: hover, go-to-definition, find-references, implementations, call hierarchy
+- DELEG_FIGMA (sonnet) - Figma design extraction, UI code generation, Code Connect mappings, screenshots
 
 When delegating with Task:
 
