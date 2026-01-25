@@ -28,13 +28,21 @@
         "todowrite": "allow",
         "todoread": "allow",
         "question": "allow",
+        "bash": {
+          "*": "deny",
+          "fish -c \"agent-browser *": "allow"
+        },
         "lsp": "deny",
-        "bash": "deny",
         "glob": "deny",
         "grep": "deny",
         "webfetch": "deny",
         "websearch": "deny",
         "figma_*": "deny",
+        "AircallStagingAuthToken": "allow",
+        "skill": {
+          "*": "deny",
+          "agent-browser-aircall-local": "allow"
+        },
         "task": {
           "*": "deny",
           "DELEG_*": "allow",
@@ -63,6 +71,7 @@
         "lsp": "allow",
         "edit": "ask",
         "bash": "ask",
+        "AircallStagingAuthToken": "deny",
         "task": {
           "*": "deny",
           "DELEG_*": "allow",
@@ -85,7 +94,8 @@
         "edit": "deny",
         "write": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_WEB.md}"
     },
@@ -103,7 +113,8 @@
         "webfetch": "deny",
         "websearch": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_SHELL.md}"
     },
@@ -121,7 +132,8 @@
         "edit": "deny",
         "write": "deny",
         "webfetch": "deny",
-        "websearch": "deny"
+        "websearch": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_FILE_SEARCH.md}"
     },
@@ -139,7 +151,8 @@
         "glob": "deny",
         "write": "deny",
         "webfetch": "deny",
-        "websearch": "deny"
+        "websearch": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_CODE_SIMPLIFIER.md}"
     },
@@ -157,7 +170,8 @@
         "edit": "deny",
         "write": "deny",
         "webfetch": "deny",
-        "websearch": "deny"
+        "websearch": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_REVIEW.md}"
     },
@@ -175,7 +189,8 @@
         "webfetch": "deny",
         "websearch": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_TEST.md}"
     },
@@ -193,7 +208,8 @@
         "webfetch": "deny",
         "websearch": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_GIT.md}"
     },
@@ -211,7 +227,8 @@
         "webfetch": "deny",
         "websearch": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_SUMMARIZE.md}"
     },
@@ -229,7 +246,8 @@
         "edit": "deny",
         "write": "deny",
         "webfetch": "deny",
-        "websearch": "deny"
+        "websearch": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_PKG_TYPES.md}"
     },
@@ -248,7 +266,8 @@
         "webfetch": "deny",
         "websearch": "deny",
         "glob": "deny",
-        "grep": "deny"
+        "grep": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_LSP_ACTION.md}"
     },
@@ -276,7 +295,8 @@
         "glob": "deny",
         "grep": "deny",
         "webfetch": "deny",
-        "websearch": "deny"
+        "websearch": "deny",
+        "AircallStagingAuthToken": "deny"
       },
       "prompt": "{file:./prompts/DELEG_FIGMA.md}"
     }

@@ -15,6 +15,7 @@ flowchart LR
         SK[Skill]
         KS[KillShell]
         RWE[Read/Write/Edit]
+        AB[agent-browser]
         MCP[MCP Tools]
     end
 
@@ -42,6 +43,7 @@ flowchart LR
     O -->|invokes| SK
     O -->|terminates| KS
     O -->|reads/writes/edits| RWE
+    O -->|browser automation| AB
     O -->|calls| MCP
     O -->|delegates| T
     T -->|summarize| SU
@@ -59,7 +61,8 @@ flowchart LR
 
 HARD RULES:
 
-- You personally must NOT use web/shell tools directly. Delegate those via **Task** to named subagents.
+- You personally must NOT use shell tools directly. Delegate those via **Task** to named subagents.
+- **Exception**: You CAN run `fish -c "agent-browser"` directly for browser automation tasks.
 - You CAN use **MCP tools** directly for MCP server interactions.
 - You CAN use **Read/Write/Edit** directly for file operations.
 - Use **TodoWrite** to track tasks, decisions, and acceptance criteria.
@@ -79,11 +82,12 @@ TOOLS AVAILABLE (use directly):
 - **AskUserQuestion**: Clarify with user
 - **Skill**: Invoke skills (e.g., /commit)
 - **KillShell**: Terminate background shells
+- **agent-browser**: Browser automation via `fish -c "agent-browser"`
 
 TOOLS NOT AVAILABLE (must delegate):
 
 - **Glob/Grep**: Delegate to DELEG_FILE_SEARCH
-- **Bash**: Delegate to DELEG_SHELL, DELEG_GIT, or DELEG_TEST
+- **Bash**: Delegate to DELEG_SHELL, DELEG_GIT, or DELEG_TEST (except `agent-browser`)
 - **WebSearch/WebFetch**: Delegate to DELEG_WEB
 - **Figma tools**: Delegate to DELEG_FIGMA
 - **NotebookEdit**: Not available
