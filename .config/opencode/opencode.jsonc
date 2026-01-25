@@ -9,11 +9,13 @@
     "diff_style": "auto"
   },
   // TODO: add:
-  // - planning subagent with detailed plan with subagent references
   // - figma subagent
   // - agent-browser in the main agent?
   // - check temp, and other settings
-  // - add keybinds to scroll
+  // - add formatter configuration
+  // - add hook equivalent https://opencode.ai/docs/plugins/#send-notifications , maybe via a JS program.
+  // - create tmux plugins to list panes with agents, and their statuses, PID, kill ability.
+  // - add custom tools for aircall?
   "agent": {
     "DELEG_ORCHESTRATOR": {
       "description": "Opus orchestrator that delegates to subagents. Minimizes main-context usage.",
@@ -41,6 +43,33 @@
         },
       },
       "prompt": "{file:./prompts/DELEG_ORCHESTRATOR.md}"
+    },
+    "DELEG_PLAN": {
+      "description": "A restricted agent designed for planning and analysis. Produces detailed execution plans referencing DELEG_* subagents with dependency graphs.",
+      "mode": "primary",
+      "model": "anthropic/claude-opus-4-5",
+      "reasoningEffort": "max",
+      "temperature": 0.3,
+      "permission": {
+        "write": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "todowrite": "allow",
+        "todoread": "allow",
+        "question": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "lsp": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": {
+          "*": "deny",
+          "DELEG_*": "allow",
+          "explore": "allow"
+        }
+      },
+      "prompt": "{file:./prompts/DELEG_PLAN.md}"
     },
     "DELEG_WEB": {
       "description": "Web research using WebSearch/WebFetch. Extracts authoritative sections and returns concise factual summary with sources.",
@@ -223,6 +252,23 @@
       },
       "prompt": "{file:./prompts/DELEG_LSP_ACTION.md}"
     }
+  },
+  "keybinds": {
+    "input_delete_to_line_end": "none",
+    "input_delete_to_line_start": "none",
+    "input_line_home": "none",
+    "input_line_end": "none",
+    "input_visual_line_home": "none",
+    "input_visual_line_end": "none",
+    "input_newline": "alt+return",
+    "messages_line_up": "ctrl+up",
+    "messages_line_down": "ctrl+down",
+    "messages_first": "ctrl+shift+up",
+    "messages_last": "ctrl+shift+down",
+    "messages_next": "ctrl+n",
+    "messages_previous": "ctrl+shift+n",
+    "app_exit": "ctrl+c",
+    "editor_open": "<leader>e",
   },
   "lsp": {
     "custom-lsp": {
