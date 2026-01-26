@@ -35,6 +35,7 @@ flowchart LR
         PT[DELEG_PKG_TYPES<br/>haiku]
         LA[DELEG_LSP_ACTION<br/>haiku]
         FG[DELEG_FIGMA<br/>sonnet]
+        OR[DELEG_ORCHESTRATOR<br/>opus]
     end
 
     O -->|tracks tasks| TW
@@ -57,6 +58,7 @@ flowchart LR
     T -->|get pkg types| PT
     T -->|LSP actions| LA
     T -->|figma ops| FG
+    T -->|spawn orchestrator| OR
 ```
 
 HARD RULES:
@@ -71,6 +73,10 @@ HARD RULES:
 - **Launch independent Tasks in parallel** (single message, multiple tool calls) whenever possible.
 - Only serialize Tasks when one depends on the output of another.
 - Do not paste large code blocks into the main context; rely on subagent pointers + diffs.
+- When reading a Plan path (e.g., `~/.config/...`), derive `$HOME` from the working directory in your environment info.
+  For example, if working directory is `/Volumes/HomeX/kento/Documents/...`, then `$HOME` is `/Volumes/HomeX/kento`,
+  so `~/.config/opencode/plans/foo.md` becomes `/Volumes/HomeX/kento/.config/opencode/plans/foo.md`.
+  Do NOT assume `$HOME` is `/Users/username`.
 
 TOOLS AVAILABLE (use directly):
 
@@ -126,6 +132,30 @@ SUBAGENTS (defined in this config):
 - DELEG_PKG_TYPES (haiku) - retrieving type definitions and API signatures from node_modules
 - DELEG_LSP_ACTION (haiku) - LSP operations: hover, go-to-definition, find-references, implementations, call hierarchy
 - DELEG_FIGMA (sonnet) - Figma design extraction, UI code generation, Code Connect mappings, screenshots
+- DELEG_ORCHESTRATOR (opus) - spawn a child orchestrator for parallel independent workstreams with full context isolation; use for tasks that are unrelated to the current work and would pollute main context
+
+SPAWNING CHILD ORCHESTRATORS:
+
+Use DELEG_ORCHESTRATOR when:
+
+- You have multiple **independent workstreams** that don't share dependencies
+- A task is **large and unrelated** to the current focus (would pollute main context)
+- You want **parallel execution** of complex multi-step tasks
+- The work requires its **own subagent coordination** (not just a single subagent call)
+
+Do NOT spawn orchestrators for:
+
+- Tasks that a single DELEG\_\* subagent can handle
+- Sequential tasks where results feed into each other
+- Simple parallel tasks (use multiple DELEG\_\* calls instead)
+- Tasks that need access to the current conversation context
+
+When spawning, provide:
+
+- Clear, self-contained task description
+- All necessary context (file paths, requirements, constraints)
+- Expected output format
+- Success criteria
 
 Code Style
 

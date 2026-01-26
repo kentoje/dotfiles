@@ -15,7 +15,6 @@
   },
   // TODO: add:
   // - debug and think about a way to hook the start, and kill of opencode
-  // - check temp, and other settings
   // - add formatter configuration, per project? (prettier, eslint, biome)
   // - create tmux plugins to list panes with agents, and their statuses, PID, kill ability.
   // - add custom tools for aircall?
@@ -34,7 +33,10 @@
         "todowrite": "allow",
         "todoread": "allow",
         "question": "allow",
-        "external_directory": "ask",
+        "external_directory": {
+          "*": "ask",
+          "~/.config/opencode/plans/*": "allow"
+        },
         "bash": {
           "fish -c \"agent-browser *": "allow"
         },
@@ -44,6 +46,7 @@
         },
         "task": {
           "DELEG_*": "allow",
+          "DELEG_ORCHESTRATOR": "allow",
           "explore": "allow",
           "general": "allow",
         },
@@ -268,7 +271,10 @@
     }
   },
   "lsp": {
-    "custom-lsp": {
+    "typescript": {
+      "disabled": true
+    },
+    "vtsls-lsp": {
       "command": [
         "vtsls",
         "--stdio"

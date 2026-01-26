@@ -95,8 +95,29 @@ Example flow:
 | Package type definitions  | DELEG_PKG_TYPES       |
 | LSP queries (hover, refs) | DELEG_LSP_ACTION      |
 | Figma design operations   | DELEG_FIGMA           |
+| Independent workstreams   | DELEG_ORCHESTRATOR    |
 
 **File edits/writes** → No agent label. The Orchestrator handles these directly.
+
+### When to Use DELEG_ORCHESTRATOR
+
+Spawn a child orchestrator when a task:
+1. **Is independent** — No dependencies on other tasks in the current plan
+2. **Is complex** — Requires multiple subagent calls and coordination
+3. **Would pollute context** — Large scope that's unrelated to main work
+4. **Benefits from isolation** — Has its own sub-workflow (research → implement → test)
+
+**Examples of good DELEG_ORCHESTRATOR tasks:**
+- "Implement feature X" while parent works on "Feature Y" (parallel features)
+- "Refactor module A" as a self-contained workstream
+- "Research and document API patterns" while parent implements UI
+
+**DO NOT use DELEG_ORCHESTRATOR for:**
+- Single-agent tasks (use the specific DELEG_* instead)
+- Tasks with dependencies on the current plan's outputs
+- Quick lookups or simple operations
+
+**Note:** You (DELEG_PLAN) *reference* DELEG_ORCHESTRATOR in plans you write. The Orchestrator *executes* those spawns.
 
 ## Plan Output Format
 
@@ -426,3 +447,58 @@ flowchart LR
 > - Focus returns to trigger after close
 > - Animation respects `prefers-reduced-motion`
 > - Edge case: rapid open/close, double-click confirm
+
+## Example: Parallel Workstreams with DELEG_ORCHESTRATOR
+
+**Goal:** Implement both user authentication and dashboard analytics in parallel
+
+### Dependency Graph
+
+```mermaid
+flowchart LR
+    B((Start))
+    
+    B --> T1((T1<br/>DELEG_ORCHESTRATOR))
+    B --> T2((T2<br/>DELEG_ORCHESTRATOR))
+    
+    T1 -. parallel .- T2
+    
+    T1 --> T3((T3<br/>direct))
+    T2 --> T3
+```
+
+### Execution Table
+
+| # | Task | Agent | Priority | Blocks | Parallel With |
+|---|------|-------|----------|--------|---------------|
+| 1 | Implement user authentication flow | DELEG_ORCHESTRATOR | 3 | 3 | 2 |
+| 2 | Implement dashboard analytics | DELEG_ORCHESTRATOR | 2 | 3 | 1 |
+| 3 | Integration testing across features | — | 1 | — | — |
+
+### Task Details
+
+**Task 1** (DELEG_ORCHESTRATOR) — Priority: 3
+
+> Implement complete user authentication flow:
+> - Research existing auth patterns in codebase
+> - Create login/signup forms
+> - Implement auth state management  
+> - Add protected route wrapper
+> - Write tests
+> 
+> Success criteria: Users can register, login, logout. Protected routes redirect unauthenticated users.
+
+**Task 2** (DELEG_ORCHESTRATOR) — Priority: 2
+
+> Implement dashboard analytics:
+> - Research charting libraries in use
+> - Create analytics data fetching hooks
+> - Build chart components
+> - Add analytics dashboard page
+> - Write tests
+>
+> Success criteria: Dashboard displays user metrics with interactive charts.
+
+**Task 3** (direct) — Priority: 1
+
+> Integration test: Verify authenticated users can access analytics dashboard.
