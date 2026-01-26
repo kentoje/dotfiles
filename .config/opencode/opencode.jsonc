@@ -10,16 +10,16 @@
   },
   "permission": {
     "read": {
-      "~/dotfiles/.config/fish/includes/private-vars.fish": "deny"
+      "~/.config/fish/includes/private-vars.fish": "deny"
     }
   },
   // TODO: add:
+  // - debug and think about a way to hook the start, and kill of opencode
   // - check temp, and other settings
-  // - create a PlanWriter Tool that uses DELEG_PLAN to create plans.
   // - add formatter configuration, per project? (prettier, eslint, biome)
-  // - add hook equivalent https://opencode.ai/docs/plugins/#send-notifications , maybe via a JS program.
   // - create tmux plugins to list panes with agents, and their statuses, PID, kill ability.
   // - add custom tools for aircall?
+  // - think about adding prd.json persited equivalent with session_id?
   "agent": {
     "DELEG_ORCHESTRATOR": {
       "description": "Opus orchestrator that delegates to subagents. Minimizes main-context usage.",
@@ -58,7 +58,6 @@
       "temperature": 0.3,
       "permission": {
         "*": "deny",
-        "write": "ask",
         "read": "allow",
         "glob": "allow",
         "grep": "allow",
@@ -68,9 +67,8 @@
         "webfetch": "allow",
         "websearch": "allow",
         "lsp": "allow",
-        "edit": "ask",
-        "external_directory": "ask",
         "bash": "ask",
+        "CreatePlan": "allow",
         "task": {
           "DELEG_*": "allow",
           "explore": "allow"

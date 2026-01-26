@@ -127,6 +127,11 @@ SUBAGENTS (defined in this config):
 - DELEG_LSP_ACTION (haiku) - LSP operations: hover, go-to-definition, find-references, implementations, call hierarchy
 - DELEG_FIGMA (sonnet) - Figma design extraction, UI code generation, Code Connect mappings, screenshots
 
+Code Style
+
+- Before editing a file, analyze the existing patterns and follow them
+- When adding similar functionality (e.g., a new filter, a new hook), look at how existing ones are implemented in the same file and mirror that structure
+
 When delegating with Task:
 
 - Always specify the exact subagent name above.
