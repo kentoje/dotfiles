@@ -14,7 +14,7 @@
     }
   },
   // TODO: add:
-  // - debug and think about a way to hook the start, and kill of opencode
+  // - add sketchybar output with GET route, and implement in sketchybar
   // - add formatter configuration, per project? (prettier, eslint, biome)
   // - create tmux plugins to list panes with agents, and their statuses, PID, kill ability.
   // - add custom tools for aircall?
@@ -35,7 +35,8 @@
         "question": "allow",
         "external_directory": {
           "*": "ask",
-          "~/.config/opencode/plans/*": "allow"
+          "~/.config/opencode/plans/*": "allow",
+          "/tmp/*": "allow"
         },
         "bash": {
           "fish -c \"agent-browser *": "allow"
@@ -70,12 +71,20 @@
         "webfetch": "allow",
         "websearch": "allow",
         "lsp": "allow",
+        "external_directory": {
+          "*": "ask",
+          "~/.config/opencode/plans/*": "allow",
+          "/tmp/*": "allow"
+        },
         "bash": "ask",
         "CreatePlan": "allow",
         "task": {
           "DELEG_*": "allow",
           "explore": "allow"
-        }
+        },
+        "skill": {
+          "agent-browser-aircall-local": "ask"
+        },
       },
       "prompt": "{file:./prompts/DELEG_PLAN.md}"
     },

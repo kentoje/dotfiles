@@ -12,10 +12,15 @@ const EVENTS = new Set([
   "question.asked",
   "session.idle",
   "session.created",
-  "session.deleted",
   "session.status",
+  // not triggered as of right now, seems to be a bug.
+  // "session.deleted",
   // "server.instance.disposed",
 ]);
+
+const CUSTOM_EVENT = {
+  SESSION_PID: "session.pid",
+};
 
 /**
  * Send raw event to the gossip server
@@ -41,6 +46,8 @@ async function sendEvent(event: unknown): Promise<void> {
 }
 
 export const plugin: Plugin = async () => {
+  const pid = process.pid;
+
   return {
     event: async ({ event }) => {
       fs.appendFileSync(LOG_FILE, `${JSON.stringify(event)}\n`);
@@ -49,7 +56,12 @@ export const plugin: Plugin = async () => {
         return;
       }
 
-      await sendEvent(event);
+      // Attach PID to session.created events since OpenCode does not provide it.
+      if (event.type === "session.created") {
+        await sendEvent({ ...event, pid });
+      } else {
+        await sendEvent(event);
+      }
     },
   };
 };
