@@ -38,7 +38,8 @@ default=(
 sketchybar --default "${default[@]}"
 
 sketchybar --add event aerospace_workspace_change
-sketchybar --add event claude_session_update
+sketchybar --add event agent_gossip_update
+# sketchybar --add event claude_session_update
 
 sketchybar --add item front_app left \
   --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
@@ -60,23 +61,38 @@ for sid in $(aerospace list-workspaces --monitor 1); do
     script="$CONFIG_DIR/plugins/aerospace.sh $sid"
 done
 
-sketchybar --add item claude_idle left \
-  --set claude_idle \
-  update_freq=10 \
-  script="$PLUGIN_DIR/claude_sessions.sh" \
-  --subscribe claude_idle claude_session_update
+# sketchybar --add item claude_idle left \
+#   --set claude_idle \
+#   update_freq=10 \
+#   script="$PLUGIN_DIR/claude_sessions.sh" \
+#   --subscribe claude_idle claude_session_update
+#
+# sketchybar --add item claude_cooking left \
+#   --set claude_cooking \
+#   update_freq=10 \
+#   script="$PLUGIN_DIR/claude_sessions.sh" \
+#   --subscribe claude_cooking claude_session_update
+#
+# sketchybar --add item claude_notify left \
+#   --set claude_notify \
+#   update_freq=10 \
+#   script="$PLUGIN_DIR/claude_sessions.sh" \
+#   --subscribe claude_notify claude_session_update
 
-sketchybar --add item claude_cooking left \
-  --set claude_cooking \
-  update_freq=10 \
-  script="$PLUGIN_DIR/claude_sessions.sh" \
-  --subscribe claude_cooking claude_session_update
+sketchybar --add item agent_gossips_idle left \
+  --set agent_gossips_idle \
+  script="$PLUGIN_DIR/agent-gossips.sh" \
+  --subscribe agent_gossips_idle agent_gossip_update
 
-sketchybar --add item claude_notify left \
-  --set claude_notify \
-  update_freq=10 \
-  script="$PLUGIN_DIR/claude_sessions.sh" \
-  --subscribe claude_notify claude_session_update
+sketchybar --add item agent_gossips_cooking left \
+  --set agent_gossips_cooking \
+  script="$PLUGIN_DIR/agent-gossips.sh" \
+  --subscribe agent_gossips_cooking agent_gossip_update
+
+sketchybar --add item agent_gossips_notify left \
+  --set agent_gossips_notify \
+  script="$PLUGIN_DIR/agent-gossips.sh" \
+  --subscribe agent_gossips_notify agent_gossip_update
 
 sketchybar --add item clock right \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh"
