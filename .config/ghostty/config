@@ -65,5 +65,6 @@ keybind = super+s=text:\x01\x5b\x30
 keybind = super+f=text:\x01\x7a
 keybind = super+t=text:\x01\x63
 keybind = super+g=text:\x01\x6a
+keybind = super+a=text:\x01\x6b
 
 keybind = shift+enter=text:\n

@@ -17,7 +17,7 @@
 !.config/alacritty/themes/poimandres*.toml
 
 .config/tmux/plugins
-.config/btop/btop.log
+.config/btop
 
 .config/lazygit/state.yml
 .config/glab-cli
@@ -33,6 +33,7 @@
 .config/raycast
 .config/glow
 .config/amp
+.config/solana
 
 .claude/settings.local.json
 .config/.jira
