@@ -24,7 +24,7 @@
       "description": "Opus orchestrator that delegates to subagents. Minimizes main-context usage.",
       "mode": "primary",
       "reasoningEffort": "max",
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "permission": {
         "*": "deny",
         "read": "allow",
@@ -57,8 +57,9 @@
     "DELEG_PLAN": {
       "description": "A restricted agent designed for planning and analysis. Produces detailed execution plans referencing DELEG_* subagents with dependency graphs.",
       "mode": "primary",
-      "model": "anthropic/claude-opus-4-5",
-      "reasoningEffort": "max",
+      "model": "openai/gpt-5.3-codex",
+      // OpenAI reasoningEffort settings
+      "reasoningEffort": "xhigh",
       "temperature": 0.3,
       "permission": {
         "*": "deny",
@@ -130,7 +131,7 @@
       "description": "Refines *already-modified* code for clarity, consistency, and maintainability while preserving exact behavior. Produces minimal diffs + pointers.",
       "mode": "subagent",
       "hidden": true,
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "temperature": 0.1,
       "permission": {
         "*": "deny",
@@ -144,7 +145,7 @@
       "description": "High-rigor reviewer for correctness, edge cases, security/perf, and test gaps. Produces prioritized findings with pointers.",
       "mode": "subagent",
       "hidden": true,
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "temperature": 0.1,
       "permission": {
         "*": "deny",
@@ -277,6 +278,11 @@
       "type": "remote",
       "url": "http://127.0.0.1:3845/mcp",
       "enabled": true
+    },
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "headers": {}
     }
   },
   "lsp": {
