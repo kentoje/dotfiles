@@ -30,7 +30,10 @@
       "Read(./secrets/**)",
       "Read(~/dotfiles/.config/fish/includes/private-vars.fish)"
     ],
-    "ask": ["Bash(rm:*)", "Bash(mv:*)"]
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(mv:*)"
+    ]
   },
   "model": "opus",
   "hooks": {
@@ -100,6 +103,17 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
@@ -124,14 +138,15 @@
   "enabledPlugins": {
     "lua-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "dev-browser@dev-browser-marketplace": true,
     "gopls-lsp@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "safety-net@cc-marketplace": true,
     "frontend-design@claude-plugins-official": true,
-    "open-prose@prose": true
+    "open-prose@prose": true,
+    "swift-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754051040989
   }
