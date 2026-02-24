@@ -68,6 +68,7 @@
             fd
             fnm
             fzf
+            nmap
             delta
             go
             gnugrep
