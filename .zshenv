@@ -8,6 +8,8 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/bin:$PATH"
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 export PATH="$HOME/Library/pnpm:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
+
 
 # fnm (Fast Node Manager)
 eval "$(fnm env --use-on-cd --shell zsh)"
