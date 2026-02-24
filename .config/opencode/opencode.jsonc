@@ -20,6 +20,39 @@
   // - add custom tools for aircall?
   // - think about adding prd.json persited equivalent with session_id?
   "agent": {
+    "BLOCK_PARADIGM": {
+      "description": "Block paradigm agent with specific framework.",
+      "mode": "primary",
+      "color": "success",
+      "reasoningEffort": "high",
+      "model": "anthropic/claude-opus-4-6",
+      "prompt": "{file:./prompts/BLOCK_PARADIGM.md}",
+      "permission": {
+        "external_directory": {
+          "*": "ask",
+          "~/.config/opencode/plans/*": "allow",
+          "/tmp/*": "allow"
+        },
+        "bash": {
+          "fish -c \"agent-browser *": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "BLOCK_PARADIGM": "allow",
+          "compaction": "allow",
+          "title": "allow",
+          "summary": "allow",
+          "plan": "allow",
+          // "plan": {},
+          // "build": {},
+          // "general": {},
+          // "explore": {},
+          // "title": {},
+          // "summary": {},
+          // "compaction": {}
+        },
+      },
+    },
     "DELEG_ORCHESTRATOR": {
       "description": "Opus orchestrator that delegates to subagents. Minimizes main-context usage.",
       "mode": "primary",
@@ -287,6 +320,9 @@
   },
   "lsp": {
     "typescript": {
+      "disabled": true
+    },
+    "sourcekit-lsp": {
       "disabled": true
     },
     "vtsls-lsp": {
