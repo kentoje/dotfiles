@@ -1,12 +1,12 @@
 # Nvim
-abbr n "nvim"
-abbr v "nvim"
+abbr n nvim
+abbr v nvim
 
 # Day to day
-abbr ad "aider"
-abbr c "clear"
-abbr cm "nice_commit"
-abbr cd "z"
+abbr ad aider
+abbr c clear
+abbr cm nice_commit
+abbr cd z
 abbr ta "tmux attach"
 abbr tn "tmux new -s (basename (pwd))"
 abbr treh "tmux select-layout even-horizontal"
@@ -21,26 +21,26 @@ abbr la "lsd  --group-dirs first -A"
 abbr l "lsd  --group-dirs first -Al"
 abbr ll "lsd  --group-dirs first -Al"
 abbr lt "lsd  --group-dirs last -A --tree"
-abbr lz "lazygit"
-abbr ol "ollama"
-abbr pn "pnpm"
+abbr lz lazygit
+abbr ol ollama
+abbr pn pnpm
 abbr zn "zellij -s aircall --layout ~/.config/zellij/layouts/work.kdl"
 abbr za "zellij attach"
 abbr zl "zellij list-sessions"
 
 # Misc
-abbr yz "yazi"
+abbr yz yazi
 abbr shutd "osascript -e 'tell app \"System Events\" to shut down'"
 abbr fcat "fzf --preview 'bat --color=always {}' | xargs nvim"
 abbr fhistory "history | fzf | fish"
 abbr gbr "git branch --sort=-committerdate | fzf-tmux -p | xargs -I {} git checkout {}"
 abbr gacp "git add . && git commit --amend -n --no-edit && git push --force-with-lease"
-abbr :q "exit"
-abbr :wq "exit"
+abbr :q exit
+abbr :wq exit
 
 # Mods commands
 abbr aicommit "git --no-pager diff | mods --model claude3.5-sonnet --role commit-message > .git/gcai && git commit -a -n -F .git/gcai -e"
 abbr aireview "git --no-pager diff HEAD | mods --model claude3.5-sonnet --role code-review | glow -p -"
 abbr aitldr "echo -e (gum input --prompt='Enter shell command to explore: ') | mods --model chatgpt --role explain-command | glow -p -"
 abbr op OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
-
+abbr wm workmux

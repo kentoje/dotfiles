@@ -5,6 +5,7 @@ enable_transience
 
 zoxide init fish | source
 # atuin init fish | source
+workmux completions fish | source
 
 # Temp fix
 # fish 4.0 deprecates `bind -k`. transform's Atuin's init to drop -k and ensure up-binding works

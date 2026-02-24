@@ -1,0 +1,18 @@
+nerdfont: true # Enable nerdfont icons (prompted on first run)
+merge_strategy: rebase # Make workmux merge do rebase by default
+agent: claude
+
+status_icons:
+  working: ""
+  waiting: ""
+  done: ""
+
+panes:
+  - command: <agent>
+    focus: true
+  - command:
+    split: horizontal
+    percentage: 65
+  - command: pnpm dev
+    split: vertical
+    percentage: 30
