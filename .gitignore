@@ -40,3 +40,4 @@
 .config/ngrok
 .config/swiftpm
 
+node_modules/
