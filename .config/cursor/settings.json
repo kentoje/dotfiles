@@ -1,7 +1,5 @@
 {
-  "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
-  },
+  "typescript.experimental.useTsgo": true,
   "files.autoSave": "off",
   "explorer.sortOrder": "type",
   "explorer.autoReveal": false,
