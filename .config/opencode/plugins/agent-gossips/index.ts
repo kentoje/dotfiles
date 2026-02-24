@@ -1,67 +1,108 @@
 import type { Plugin } from "@opencode-ai/plugin";
-import * as fs from "fs";
 
-const SERVER_URL = "http://localhost:4000/events";
-const LOG_FILE = "/tmp/agent-gossips.log";
+const SYNC_URL = "http://localhost:4000/sync";
 
-// /Volumes/HomeX/kento/dotfiles/.config/opencode/plugins/agent-gossips/node_modules/@opencode-ai/sdk/dist/gen/types.gen.d.ts
-// Events do not work as expected. Maybe we can spy on PIDs, and attach the PID to the latest session with matching DIR.
-// When we lose a PID, we can delete the attached session.
-const EVENTS = new Set([
-  "permission.asked",
-  "question.asked",
-  "session.idle",
-  "session.created",
-  "session.status",
-  // not triggered as of right now, seems to be a bug.
-  // "session.deleted",
-  // "server.instance.disposed",
-]);
-
-const CUSTOM_EVENT = {
-  SESSION_PID: "session.pid",
-};
+type SessionState =
+  | "idle"
+  | "running"
+  | "waiting_for_permission"
+  | "waiting_for_answer"
+  | "retry"
+  | "terminated";
 
 /**
- * Send raw event to the gossip server
+ * Map an OpenCode plugin event to a unified session state.
+ * Returns null if the event is not relevant for state tracking.
  */
-async function sendEvent(event: unknown): Promise<void> {
-  try {
-    const response = await fetch(SERVER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(event),
-    });
+function deriveState(event: { type: string; properties: Record<string, unknown> }): SessionState | null {
+  switch (event.type) {
+    case "session.created":
+    case "session.idle":
+      return "idle";
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`HTTP ${response.status}: ${text}`);
+    case "session.deleted":
+      return "terminated";
+
+    case "session.status": {
+      const status = event.properties.status as { type?: string } | undefined;
+      if (status?.type === "busy") return "running";
+      if (status?.type === "idle") return "idle";
+      if (status?.type === "retry") return "retry";
+      return null;
     }
-  } catch {
-    // const message = error instanceof Error ? error.message : String(error);
-    // console.error(`[agent-gossips] Failed to send ${eventType}:`, message);
+
+    case "permission.asked":
+      return "waiting_for_permission";
+
+    case "question.asked":
+      return "waiting_for_answer";
+
+    default:
+      return null;
   }
 }
 
-export const plugin: Plugin = async () => {
+/**
+ * Extract session ID from an OpenCode event.
+ * session.created / session.deleted store it in properties.info.id;
+ * all other events use properties.sessionID.
+ */
+function extractSessionId(event: { type: string; properties: Record<string, unknown> }): string | null {
+  if (event.type === "session.created" || event.type === "session.deleted") {
+    const info = event.properties.info as { id?: string } | undefined;
+    return info?.id ?? null;
+  }
+  const sid = event.properties.sessionID;
+  return typeof sid === "string" ? sid : null;
+}
+
+/**
+ * Send a sync payload to the agent-gossips server.
+ * Errors are silently swallowed to avoid disrupting OpenCode.
+ */
+async function sync(payload: {
+  pid: number;
+  session_id: string;
+  state: SessionState;
+  directory: string;
+  source: string;
+}): Promise<void> {
+  try {
+    await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // silent — the gossip server may be down
+  }
+}
+
+/**
+ * agent-gossips plugin for OpenCode.
+ *
+ * Uses the plugin context (directory) and event data to send
+ * authoritative state updates to the agent-gossips server via POST /sync.
+ * The server deduplicates by PID: only one session per OpenCode process.
+ */
+export const plugin: Plugin = async ({ directory }) => {
   const pid = process.pid;
 
   return {
     event: async ({ event }) => {
-      fs.appendFileSync(LOG_FILE, `${JSON.stringify(event)}\n`);
+      const state = deriveState(event as { type: string; properties: Record<string, unknown> });
+      if (state === null) return;
 
-      if (!EVENTS.has(event.type)) {
-        return;
-      }
+      const sessionId = extractSessionId(event as { type: string; properties: Record<string, unknown> });
+      if (!sessionId) return;
 
-      // Attach PID to session.created events since OpenCode does not provide it.
-      if (event.type === "session.created") {
-        await sendEvent({ ...event, pid });
-      } else {
-        await sendEvent(event);
-      }
+      await sync({
+        pid,
+        session_id: sessionId,
+        state,
+        directory,
+        source: "opencode",
+      });
     },
   };
 };
