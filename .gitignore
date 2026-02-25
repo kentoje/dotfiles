@@ -41,3 +41,8 @@
 .config/swiftpm
 
 node_modules/
+
+.config/agents/commands
+.config/agents/skills
+.config/opencode/commands
+.config/opencode/skills
