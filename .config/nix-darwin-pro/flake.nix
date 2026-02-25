@@ -53,6 +53,7 @@
             fish
             nixfmt-rfc-style
             fd
+            lua
             fnm
             fzf
             delta
