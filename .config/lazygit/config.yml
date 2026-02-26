@@ -7,9 +7,10 @@ gui:
     #   - black
   showFileTree: true # for rendering changes files in a tree format
 os:
-  editPreset: "nvim"
-  edit: "nvim"
-  editAtLine: "{{editor}} {{filename}}"
+  edit: "nvim {{filename}}"
+  editAtLine: "nvim +{{line}} {{filename}}"
+  editAtLineAndWait: "nvim +{{line}} {{filename}}"
+  editInTerminal: true
 keybinding:
   universal:
     quit: "q"
