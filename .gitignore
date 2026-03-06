@@ -39,6 +39,7 @@
 .config/.jira
 .config/ngrok
 .config/swiftpm
+.config/caddy
 
 node_modules/
 
