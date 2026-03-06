@@ -21,11 +21,16 @@ function sync_agents_dir -d "Sync .agents/{skills,commands} to all AI tool confi
         echo "Syncing $subdir from $source..."
 
         # Whole-directory symlink targets
+        # Note: OpenCode commands need format conversion, handled separately below
         set -l target_dirs \
             $HOME/.claude/$subdir \
-            $HOME/dotfiles/.config/opencode/$subdir \
             $HOME/dotfiles/.config/amp/$subdir \
             $HOME/dotfiles/.config/agents/$subdir
+
+        # OpenCode supports skills via symlink (same SKILL.md format)
+        if test "$subdir" = skills
+            set -a target_dirs $HOME/dotfiles/.config/opencode/$subdir
+        end
 
         for target_dir in $target_dirs
             set -l parent_dir (dirname $target_dir)
@@ -71,6 +76,30 @@ function sync_agents_dir -d "Sync .agents/{skills,commands} to all AI tool confi
                 ln -s $source/$name $target
                 and echo "    Linked: $name"
             end
+        end
+    end
+
+    # Generate OpenCode commands from AGENTS.md files
+    # OpenCode expects commands/<name>.md with description in frontmatter
+    # Claude Code uses commands/<name>/AGENTS.md with name + description
+    set -l oc_cmd_dir $HOME/dotfiles/.config/opencode/commands
+    set -l cmd_source $agents_dir/commands
+
+    if test -d $cmd_source
+        mkdir -p $oc_cmd_dir
+        echo "Generating OpenCode commands from AGENTS.md..."
+
+        for cmd_dir in $cmd_source/*/
+            set -l name (basename $cmd_dir)
+            set -l agents_file $cmd_dir/AGENTS.md
+
+            if not test -f $agents_file
+                continue
+            end
+
+            # Convert: strip `name:` line, keep everything else
+            sed '/^name:.*$/d' $agents_file >$oc_cmd_dir/$name.md
+            and echo "  Generated: $oc_cmd_dir/$name.md"
         end
     end
 
