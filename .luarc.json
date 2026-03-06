@@ -1,8 +1,12 @@
 {
     "diagnostics.globals": [
-        "vim"
+        "vim",
+        "hs"
     ],
     "diagnostics.disable": [
-        "undefined-global"
+        "undefined-global",
+        "different-requires",
+        "lowercase-global",
+        "undefined-doc-name"
     ]
 }
