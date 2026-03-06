@@ -8,7 +8,7 @@ status_icons:
   done: ""
 
 panes:
-  - command: <agent>
+  - command: "claude --dangerously-skip-permissions"
     focus: true
   - command:
     split: horizontal
