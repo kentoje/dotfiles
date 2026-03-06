@@ -1,13 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "build",
-  "tui": {
-    "scroll_speed": 3,
-    "scroll_acceleration": {
-      "enabled": false
-    },
-    "diff_style": "auto"
-  },
   "permission": {
     "read": {
       "~/.config/fish/includes/private-vars.fish": "deny"
@@ -289,28 +282,19 @@
       "prompt": "{file:./prompts/DELEG_FIGMA.md}"
     }
   },
-  "keybinds": {
-    "input_delete_to_line_end": "none",
-    "input_delete_to_line_start": "none",
-    "input_line_home": "none",
-    "input_line_end": "none",
-    "input_visual_line_home": "none",
-    "input_visual_line_end": "none",
-    "input_newline": "alt+return",
-    "messages_line_up": "ctrl+up",
-    "messages_line_down": "ctrl+down",
-    "messages_first": "ctrl+shift+up",
-    "messages_last": "ctrl+shift+down",
-    "messages_next": "ctrl+n",
-    "messages_previous": "ctrl+shift+n",
-    "app_exit": "ctrl+c",
-    "editor_open": "<leader>e",
-  },
   "mcp": {
     "figma": {
       "type": "remote",
       "url": "http://127.0.0.1:3845/mcp",
       "enabled": true
+    },
+    "Ref": {
+      "type": "remote",
+      "url": "https://api.ref.tools/mcp",
+      "headers": {
+        // TODO: remove this key
+        "x-ref-api-key": ""
+      }
     },
     "exa": {
       "type": "remote",
