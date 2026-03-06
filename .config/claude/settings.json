@@ -37,40 +37,36 @@
   },
   "model": "opus",
   "hooks": {
-    "SessionStart": [
+    "Notification": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          },
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
           }
         ]
-      }
-    ],
-    "UserPromptSubmit": [
+      },
       {
-        "matcher": "",
+        "matcher": "permission_prompt|elicitation_dialog",
         "hooks": [
           {
             "type": "command",
-            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+            "command": "workmux set-window-status waiting"
+          },
+          {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
           }
         ]
       }
     ],
-    "PreToolUse": [
+    "PermissionRequest": [
       {
         "matcher": "",
         "hooks": [
@@ -90,6 +86,57 @@
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status working"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          },
+          {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          },
+          {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [
@@ -99,32 +146,43 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff"
           },
           {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status done"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          },
+          {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status working"
           }
         ]
       }
@@ -136,14 +194,14 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "lua-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "safety-net@cc-marketplace": true,
     "frontend-design@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
     "open-prose@prose": true,
-    "swift-lsp@claude-plugins-official": true
+    "safety-net@cc-marketplace": true,
+    "swift-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true,
