@@ -292,8 +292,7 @@
       "type": "remote",
       "url": "https://api.ref.tools/mcp",
       "headers": {
-        // TODO: remove this key
-        "x-ref-api-key": ""
+        "x-ref-api-key": "{env:REF_MCP_API_KEY}"
       }
     },
     "exa": {
