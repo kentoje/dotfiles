@@ -46,13 +46,13 @@ vim.keymap.set(
 )
 vim.keymap.set(
 	"n",
-	"<leader>y",
+	"<leader>Y",
 	':let @+ = expand("%")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the relative path of the current file" }
 )
 vim.keymap.set(
 	"n",
-	"<leader>Y",
+	"<leader>y",
 	':let @+ = expand("%:p")<CR>',
 	{ silent = true, noremap = true, desc = "Copy the absolute path of the current file" }
 )
