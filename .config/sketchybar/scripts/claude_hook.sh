@@ -34,7 +34,18 @@ case "$HOOK_EVENT" in
 "Stop") gossip_send "idle" ;;
 "PermissionRequest") gossip_send "waiting_for_permission" ;;
 "Notification") gossip_send "waiting_for_answer" ;;
-	# PreToolUse, PostToolUse, SubagentStart, etc. — too noisy for dashboard
+"PreToolUse" | "PostToolUse")
+	# Only send when transitioning FROM a non-running state (e.g. after
+	# answering a question where UserPromptSubmit doesn't fire).
+	# Avoids flooding gossips on every tool call during normal operation.
+	local_session="/tmp/claude_sessions/$SESSION_ID"
+	if [[ -f "$local_session" ]]; then
+		prev=$(sed -n 's/^STATUS=//p' "$local_session" 2>/dev/null)
+		[[ "$prev" != "r" ]] && gossip_send "running"
+	else
+		gossip_send "running"
+	fi
+	;;
 esac
 # --- end agent-gossips ---
 

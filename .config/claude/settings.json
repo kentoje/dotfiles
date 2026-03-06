@@ -84,6 +84,11 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          },
+          {
+            "type": "http",
+            "url": "http://localhost:4000/events",
+            "timeout": 5
           }
         ]
       },
