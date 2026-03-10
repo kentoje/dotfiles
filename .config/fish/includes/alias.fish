@@ -9,7 +9,6 @@ function git_current_branch
     end
     echo $ref | sed "s#^refs/heads/##"
 end
-funcsave -q git_current_branch
 
 function zz
     set -l result (zoxide query --list | fzf-tmux -p)
@@ -17,7 +16,6 @@ function zz
         cd $result
     end
 end
-funcsave -q zz
 
 alias g 'git'
 

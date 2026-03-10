@@ -1,11 +1,18 @@
 # eval (/usr/local/bin/brew shellenv)
 
-starship init fish | source
-enable_transience
+# starship init fish | source
+# enable_transience
+set -g fish_transient_prompt 1
 
 zoxide init fish | source
 # atuin init fish | source
-workmux completions fish | source
+
+# if we update workmux, we need to remove this file.
+set -l _workmux_cache ~/.config/fish/completions/workmux.fish
+if not test -f $_workmux_cache
+    workmux completions fish >$_workmux_cache
+end
+source $_workmux_cache
 
 # Temp fix
 # fish 4.0 deprecates `bind -k`. transform's Atuin's init to drop -k and ensure up-binding works
@@ -31,6 +38,7 @@ fish_add_path ~/.config/bin
 fish_add_path ~/.config/fish/functions
 fish_add_path ~/.cargo/bin
 fish_add_path ~/.local/bin
+fish_add_path ~/.local/share/solana/install/active_release/bin
 fish_add_path ~/.bun/bin
 
 fish_add_path /opt/homebrew/bin
@@ -66,3 +74,22 @@ alias cl="~/.local/bin/claude --dangerously-skip-permissions"
 
 # opencode
 fish_add_path /Volumes/HomeX/kento/.opencode/bin
+
+# speech-to-text smart bridge for fzf-like file search.
+function _voicebridge_write_pwd_file --on-event fish_prompt
+    # Only do this inside tmux (optional guard)
+    if not set -q TMUX
+        return
+    end
+
+    set -l f /tmp/voicebridge_state
+    set -l tmp "$f.$fish_pid"
+
+    # Atomic write: write to temp then mv into place
+    echo "$PWD" >"$tmp"
+    mv "$tmp" "$f"
+end
+
+# Added by LM Studio CLI (lms)
+set -gx PATH $PATH /Volumes/HomeX/kento/.lmstudio/bin
+# End of LM Studio CLI section
