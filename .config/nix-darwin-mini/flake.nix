@@ -164,8 +164,10 @@
             # agent-gossips and agent-gossips-daemon plist files
             # Note: launchd cannot load plist files from /Volumes/HomeX/ (custom home directory).
             # We must copy them to /Users/kento/Library/LaunchAgents/ for launchd to recognize them.
-            sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
-            sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
 
             # Bootstrap agent-gossips services
             if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.agent-gossips" >/dev/null 2>&1; then
