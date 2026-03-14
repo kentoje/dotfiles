@@ -3,8 +3,9 @@ name: DELEG_PKG_TYPES
 description: Retrieve type definitions and API signatures from installed packages in node_modules.
 model: haiku
 tools:
-  - Glob
-  - Grep
+  - mcp__fff__find_files
+  - mcp__fff__grep
+  - mcp__fff__multi_grep
   - Read
 ---
 
@@ -32,9 +33,10 @@ Retrieve **full type definitions** and **API signatures** from packages in `node
   5. `**/node_modules/{package}/README.md` - API documentation
   6. `**/node_modules/{package}/docs/**` - Documentation folders
   7. `**/node_modules/{package}/examples/**` - Example code
-- Use Glob to find type definition files for a specific package.
-- Use Grep to locate specific interfaces, types, classes, or functions.
+- Use `mcp__fff__find_files` to find type definition files for a specific package.
+- Use `mcp__fff__grep` / `mcp__fff__multi_grep` to locate specific interfaces, types, classes, or functions.
 - Use Read to extract complete type definitions.
+- **Do NOT use** Glob, Grep, or shell commands like `grep`/`find`/`rg`. They are blocked.
 - Prioritize top-level package docs over nested dependencies (avoid `node_modules/**/node_modules`).
 - If package name is ambiguous, search for variations (e.g., `@scope/package`, `package`).
 

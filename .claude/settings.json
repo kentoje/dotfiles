@@ -1,9 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
-      "Bash(find:*)",
-      "Bash(grep:*)",
       "Bash(mkdir:*)",
       "Bash(pnpm:*)",
       "Bash(curl:*)",
@@ -14,28 +15,34 @@
       "mcp__figma-dev-mode-mcp-server__get_code_connect_map",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_type",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_press_key",
       "mcp__language-server__hover",
       "Skill(dev-browser:dev-browser)"
     ],
     "deny": [
+      "Grep",
+      "Glob",
+      "Bash(grep:*)",
+      "Bash(find:*)",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
-      "Read(~/dotfiles/.config/fish/includes/private-vars.fish)"
+      "Read(~/dotfiles/.config/fish/includes/private-vars.fish)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git push --force:*)",
+      "Bash(git stash clear:*)"
     ],
     "ask": [
       "Bash(rm:*)",
-      "Bash(mv:*)"
-    ]
+      "Bash(mv:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git stash drop:*)"
+    ],
+    "_deny_comment": "Grep/Glob/Bash(grep)/Bash(find) blocked in favor of FFF MCP tools. Hooks don't propagate to subagents, so deny is needed to enforce globally."
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [
       {
@@ -57,11 +64,6 @@
           {
             "type": "command",
             "command": "workmux set-window-status waiting"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       }
@@ -84,11 +86,6 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       },
@@ -103,11 +100,21 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/rtk-rewrite.sh"
+            "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-grep-glob.sh",
+            "timeout": 10
           }
         ]
       }
@@ -119,11 +126,6 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       }
@@ -135,11 +137,6 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       }
@@ -151,11 +148,6 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       },
@@ -175,11 +167,6 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
-          },
-          {
-            "type": "http",
-            "url": "http://localhost:4000/events",
-            "timeout": 5
           }
         ]
       },
@@ -195,7 +182,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh",
+    "command": "npx -y ccstatusline@latest",
     "padding": 0
   },
   "enabledPlugins": {
@@ -204,11 +191,22 @@
     "gopls-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "open-prose@prose": true,
-    "safety-net@cc-marketplace": true,
+    "safety-net@cc-marketplace": false,
     "swift-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "context-mode@context-mode": true
+  },
+  "extraKnownMarketplaces": {
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
+      }
+    }
   },
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "voiceEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754051040989

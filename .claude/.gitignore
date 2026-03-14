@@ -1,0 +1,30 @@
+# Ephemeral runtime data
+backups/
+cache/
+context-mode/
+debug/
+downloads/
+file-history/
+ide/
+local/
+paste-cache/
+plans/
+plugins/
+projects/
+session-env/
+sessions/
+shell-snapshots/
+statsig/
+tasks/
+teams/
+telemetry/
+todos/
+usage-data/
+
+# Ephemeral files
+history.jsonl
+*-cache.json
+readout-*.json
+
+# Dependencies
+node_modules/
