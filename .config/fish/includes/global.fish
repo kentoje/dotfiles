@@ -11,3 +11,6 @@ set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_DATA_HOME ~/.local/share
 set -gx COINTOP_CONFIG $HOME/.config/cointop/config.toml
 set -gx OLLAMA_HOST "127.0.0.1:11434"
+
+# Enables rust native mode for agent-browser
+set -gx AGENT_BROWSER_NATIVE 1
