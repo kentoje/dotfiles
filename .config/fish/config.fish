@@ -72,6 +72,8 @@ bind -M insert ctrl-space accept-autosuggestion
 
 alias cl="~/.local/bin/claude --dangerously-skip-permissions"
 
+alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_reasoning_summary="detailed" -c model_supports_reasoning_summaries=true"
+
 # opencode
 fish_add_path /Volumes/HomeX/kento/.opencode/bin
 
