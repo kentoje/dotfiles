@@ -49,12 +49,22 @@ return {
 		-- local colors = require("vscode.colors").get_colors()
 		-- local colors = require("oscura.colors")
 
+		-- Make lualine middle sections (b, c) transparent
+		local custom_theme = require("lualine.themes.melange")
+		for _, mode in pairs(custom_theme) do
+			for section_name, section in pairs(mode) do
+				if section_name == "b" or section_name == "c" then
+					section.bg = "NONE"
+				end
+			end
+		end
+
 		require("lualine").setup({
 			options = {
 				-- theme  "auto",
 				-- theme = "poimandres",
 				-- theme = "vesper",
-				theme = "melange",
+				theme = custom_theme,
 				globalstatus = true,
 				-- ░▒▓
 				-- section_separators = { left = "", right = "" },

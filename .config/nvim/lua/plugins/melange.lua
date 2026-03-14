@@ -16,5 +16,7 @@ return {
 		vim.cmd("hi FloatBorder guifg=" .. "NONE" .. " guibg=" .. "NONE")
 
 		vim.api.nvim_set_hl(0, "Visual", { bg = "#403A36", fg = "#EAC16C" })
+		vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
+		vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE" })
 	end,
 }
