@@ -17,20 +17,23 @@ function get_aws_credentials
     end
     
     # Export credentials for the selected profile and parse with jq
-    set -l credentials_json (aws configure export-credentials --profile $selected_profile 2>&1)
+    set -l credentials_json (aws configure export-credentials --profile $selected_profile 2>&1 | string collect)
     
-    # Check for SSO token error
-    if string match -q "*Error loading SSO Token*" $credentials_json; or string match -q "*The SSO session associated with this profile has expired or is otherwise invalid*" $credentials_json
+    # If output is not valid JSON, assume SSO token issue and login
+    if not echo "$credentials_json" | jq -e . >/dev/null 2>&1
         echo "SSO token expired or invalid. Logging in..."
         aws sso login --profile $selected_profile
-        # Try getting credentials again after login
-        set credentials_json (aws configure export-credentials --profile $selected_profile)
+        set credentials_json (aws configure export-credentials --profile $selected_profile 2>&1 | string collect)
+        if not echo "$credentials_json" | jq -e . >/dev/null 2>&1
+            echo "Failed to get credentials: $credentials_json"
+            return 1
+        end
     end
-    
+
     # Extract credentials
-    set -l access_key_id (echo $credentials_json | jq -r '.AccessKeyId')
-    set -l secret_access_key (echo $credentials_json | jq -r '.SecretAccessKey')
-    set -l session_token (echo $credentials_json | jq -r '.SessionToken')
+    set -l access_key_id (echo "$credentials_json" | jq -r '.AccessKeyId')
+    set -l secret_access_key (echo "$credentials_json" | jq -r '.SecretAccessKey')
+    set -l session_token (echo "$credentials_json" | jq -r '.SessionToken')
     
     # Check for .env or .env.local files
     set -l env_file
