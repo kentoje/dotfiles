@@ -9,7 +9,7 @@ return {
 	end,
 	init = function()
 		vim.cmd("colorscheme melange")
-		-- vim.cmd("hi CursorLineNr guifg=#625D86")
+		vim.cmd("hi CursorLineNr guifg=#EB1664")
 
 		vim.cmd("hi NormalFloat guifg=" .. "NONE" .. " guibg=" .. "NONE")
 		vim.cmd("hi Normal guifg=" .. "NONE" .. " guibg=" .. "NONE")

@@ -27,14 +27,14 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "gp", function()
-			fzf.files({
-				hidden = true,
-				-- path_shorten = 1,
-				-- cmd = "fd",
-				-- fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
-			})
-		end, { desc = "Find files" })
+		-- vim.keymap.set("n", "gp", function()
+		-- 	fzf.files({
+		-- 		hidden = true,
+		-- 		-- path_shorten = 1,
+		-- 		-- cmd = "fd",
+		-- 		-- fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
+		-- 	})
+		-- end, { desc = "Find files" })
 		-- vim.keymap.set("n", "<leader>qp", function()
 		-- 	fzf.files({
 		-- 		hidden = true,
@@ -48,9 +48,9 @@ return {
 			fzf.lsp_references()
 		end, { desc = "Search for references under the cursor" })
 
-		vim.keymap.set("n", "<leader>fr", function()
-			fzf.resume()
-		end, { desc = "Resume fzf" })
+		-- vim.keymap.set("n", "<leader>fr", function()
+		-- 	fzf.resume()
+		-- end, { desc = "Resume fzf" })
 
 		vim.keymap.set("n", "<leader>fs", function()
 			fzf.lsp_live_workspace_symbols()
@@ -60,13 +60,13 @@ return {
 			fzf.buffers()
 		end, { desc = "List buffers" })
 
-		vim.keymap.set("n", "<leader>fg", function()
-			fzf.live_grep_native()
-		end, { desc = "Search for pattern" })
+		-- vim.keymap.set("n", "<leader>fg", function()
+		-- 	fzf.live_grep_native()
+		-- end, { desc = "Search for pattern" })
 
-		vim.keymap.set("n", "<leader>fc", function()
-			fzf.grep_cword()
-		end, { desc = "Search for current word" })
+		-- vim.keymap.set("n", "<leader>fc", function()
+		-- 	fzf.grep_cword()
+		-- end, { desc = "Search for current word" })
 
 		vim.keymap.set("v", "/", function()
 			fzf.grep_visual()

@@ -26,5 +26,9 @@ return {
 			-- Double % means escape the % character.
 			vim.cmd(string.format("Gvsplit %s:%%", vim.fn.input("Target branch: ")))
 		end, { desc = "Git open current file on given branch" })
+
+		vim.keymap.set("n", "<leader>xgS", function()
+			vim.cmd(string.format("Gedit %s", vim.fn.input("Commit: ")))
+		end, { desc = "Git show commit" })
 	end,
 }

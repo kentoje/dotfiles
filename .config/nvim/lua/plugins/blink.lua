@@ -73,19 +73,74 @@ return {
 			-- ["<S-Tab>"] = { "snippet_backward", "fallback" },
 
 			["<Tab>"] = {
-				function(cmp)
+				-- 1. Snippet forward (highest priority)
+				"snippet_forward",
+
+				-- 2. Copilot accept
+				function()
 					if require("copilot.suggestion").is_visible() then
-						return require("copilot.suggestion").accept()
+						require("copilot.suggestion").accept()
+						return true
 					end
+					return false
+				end,
+
+				-- 3. NES suggestion
+				function()
+					local nes = package.loaded["nes"]
+					if nes and nes.has_suggestion() then
+						return nes.accept()
+					end
+					return false
+				end,
+
+				-- 4. blink.cmp completion
+				function(cmp)
 					if cmp.snippet_active() then
-						return cmp.accept()
+						cmp.accept()
+						return true
 					else
-						return cmp.select_and_accept()
+						cmp.select_and_accept()
+						return true
 					end
 				end,
-				"snippet_forward",
+
+				-- 5. Fallback
 				"fallback",
 			},
+
+			-- ["<Tab>"] = {
+			-- 	"snippet_forward",
+			-- 	function() -- sidekick next edit suggestion
+			-- 		return require("sidekick").nes_jump_or_apply()
+			-- 	end,
+			-- 	function(cmp)
+			-- 		if require("copilot.suggestion").is_visible() then
+			-- 			return require("copilot.suggestion").accept()
+			-- 		end
+			-- 		if cmp.snippet_active() then
+			-- 			return cmp.accept()
+			-- 		else
+			-- 			return cmp.select_and_accept()
+			-- 		end
+			-- 	end,
+			-- 	"fallback",
+			-- },
+
+			-- ["<Tab>"] = {
+			-- 	function(cmp)
+			-- 		if require("copilot.suggestion").is_visible() then
+			-- 			return require("copilot.suggestion").accept()
+			-- 		end
+			-- 		if cmp.snippet_active() then
+			-- 			return cmp.accept()
+			-- 		else
+			-- 			return cmp.select_and_accept()
+			-- 		end
+			-- 	end,
+			-- 	"snippet_forward",
+			-- 	"fallback",
+			-- },
 
 			["<C-j>"] = { "select_next", "fallback" },
 			["<C-k>"] = { "select_prev", "fallback" },
