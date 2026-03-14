@@ -35,7 +35,6 @@
 .config/amp
 .config/solana
 
-.claude/settings.local.json
 .config/.jira
 .config/ngrok
 .config/swiftpm
