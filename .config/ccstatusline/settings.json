@@ -1,0 +1,96 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "yellow"
+      },
+      {
+        "id": "2",
+        "type": "separator"
+      },
+      {
+        "id": "d13a7e63-1dd2-4534-8dea-21988cf661ea",
+        "type": "context-bar",
+        "color": "brightWhite"
+      },
+      {
+        "id": "efe30fde-afb6-45e3-a181-515a3e0c0c12",
+        "type": "separator"
+      },
+      {
+        "id": "3c8678d5-5708-46be-b44b-ca222b07bfad",
+        "type": "output-speed",
+        "color": "brightWhite"
+      },
+      {
+        "id": "c1a3ae2d-2109-4c38-ac67-8b9b64929ab8",
+        "type": "separator"
+      }
+    ],
+    [
+      {
+        "id": "6c786066-2119-44be-9875-1ec7be329ad4",
+        "type": "free-memory",
+        "color": "brightWhite"
+      },
+      {
+        "id": "87de53c9-86a9-41ef-8ebf-5d8d1ce61adc",
+        "type": "separator"
+      },
+      {
+        "id": "4159c6bf-5f67-45da-a07e-ee8f6ec6572a",
+        "type": "session-clock",
+        "color": ""
+      },
+      {
+        "id": "90f9ae29-be89-45fe-afa7-9b3984af4766",
+        "type": "separator"
+      },
+      {
+        "id": "40f1e97e-7612-42ac-9cf9-f2d7e6b05482",
+        "type": "session-cost",
+        "color": "green"
+      },
+      {
+        "id": "488b47b6-b10e-460c-8a8f-7cd458350d5c",
+        "type": "separator"
+      }
+    ],
+    [
+      {
+        "id": "d903bd80-2dc7-496c-8cd6-8ee07304e190",
+        "type": "current-working-dir",
+        "color": ""
+      },
+      {
+        "id": "6c6b60ab-ac8c-4e3c-9818-f023bb10a6b3",
+        "type": "separator"
+      },
+      {
+        "id": "110631c8-f86a-4123-8e1f-14db94f55ca2",
+        "type": "session-name",
+        "color": ""
+      }
+    ]
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 1,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false
+  }
+}
