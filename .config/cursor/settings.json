@@ -1,5 +1,4 @@
 {
-  "typescript.experimental.useTsgo": true,
   "files.autoSave": "off",
   "explorer.sortOrder": "type",
   "explorer.autoReveal": false,
