@@ -162,9 +162,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     vec4 trail = TRAIL_COLOR;
     trail = saturate(trail, 2.5);
-    // Color temperature: hot (bright yellow-white) at head → deep orange/red at tail
-    vec4 hotColor = trail + vec4(0.3, 0.15, 0.0, 0.0);      // bright warm orange at head
-    vec4 coolColor = vec4(0.6, 0.1, 0.05, 1.0);             // deep red at tail
+    // Color temperature: bright ruby at head → deep crimson at tail
+    vec4 hotColor = trail + vec4(0.15, 0.0, 0.05, 0.0);     // bright ruby at head
+    vec4 coolColor = vec4(0.4, 0.02, 0.08, 1.0);            // deep crimson at tail
     vec4 tempTrail = mix(hotColor, coolColor, trailParam);
     // Flickering: noise-based intensity variation over time and position
     float flicker = 0.85 + 0.15 * sin(iTime * 25.0 + trailParam * 12.0)
@@ -175,15 +175,22 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     newColor = mix(newColor, tempTrail, glow);
     // Draw trail with gradient fade
     newColor = mix(newColor, tempTrail, antialising(sdfTrail) * trailFade * flicker);
-    // Inner core: bright white-hot center line
+    // Inner core: bright ruby-white center line
     float coreDist = abs(sdfTrail); // distance from trail edge (negative = inside)
     float coreWidth = currentCursor.w * 0.15; // thin line relative to cursor height
     float core = exp(-coreDist / coreWidth) * trailFade * flicker * step(sdfTrail, 0.0);
-    vec4 coreColor = vec4(1.0, 0.95, 0.8, 1.0); // white-hot
+    vec4 coreColor = vec4(1.0, 0.85, 0.9, 1.0); // pinkish white-hot
     newColor = mix(newColor, coreColor, core * 0.6);
     // Draw current cursor
     newColor = mix(newColor, trail, antialising(sdfCurrentCursor));
     newColor = mix(newColor, fragColor, step(sdfCurrentCursor, 0.));
+
+    // Typing pulse: cursor glow that expands and contracts on each keystroke
+    float typePulse = easedProgress; // 1 at keystroke, eases to 0
+    float pulseRadius = typePulse * 0.03;
+    float cursorGlow = exp(-max(sdfCurrentCursor, 0.0) / max(pulseRadius, 0.001)) * typePulse;
+    vec4 pulseColor = trail + vec4(0.1, 0.0, 0.05, 0.0);
+    newColor = mix(newColor, pulseColor, cursorGlow * 0.5);
 
     // Flame reflections: bright highlights sweeping across cursor
     float insideCursor = step(sdfCurrentCursor, 0.0);
@@ -191,25 +198,25 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         vec2 curCenter = currentCursor.xy - (currentCursor.zw * offsetFactor);
         vec2 localPos = (vu - curCenter) / (currentCursor.zw * 0.5);
 
-        // Wave 1: white-hot highlight
+        // Wave 1: bright ruby highlight
         float a1 = localPos.x * 2.5 + localPos.y * 1.5 + iTime * FLAME_REFLECT_SPEED;
         float w1 = pow(sin(a1) * 0.5 + 0.5, 2.0);
-        vec3 hot = vec3(1.0, 0.4, 0.2); // bright orange-red
+        vec3 hot = vec3(0.9, 0.15, 0.25); // bright ruby
 
-        // Wave 2: deep red
+        // Wave 2: deep crimson
         float a2 = localPos.x * 1.2 - localPos.y * 2.0 + iTime * FLAME_REFLECT_SPEED * 0.6;
         float w2 = sin(a2) * 0.5 + 0.5;
-        vec3 deep = vec3(0.7, 0.05, 0.05); // strong red
+        vec3 deep = vec3(0.5, 0.02, 0.1); // deep crimson
 
-        // Wave 3: warm pink
+        // Wave 3: ruby pink
         float a3 = localPos.x * 1.8 + localPos.y * 2.5 + iTime * FLAME_REFLECT_SPEED * 1.3;
         float w3 = sin(a3) * 0.5 + 0.5;
-        vec3 pink = vec3(1.0, 0.25, 0.5); // vivid pink
+        vec3 pink = vec3(0.85, 0.1, 0.35); // ruby pink
 
-        // Wave 4: purple
+        // Wave 4: dark ruby-purple
         float a4 = localPos.x * 0.8 + localPos.y * 3.0 + iTime * FLAME_REFLECT_SPEED * 0.9;
         float w4 = sin(a4) * 0.5 + 0.5;
-        vec3 purple = vec3(0.6, 0.1, 0.7);
+        vec3 purple = vec3(0.45, 0.05, 0.4);
 
         // Combine all four waves
         vec3 reflect = mix(deep, hot, w1);
@@ -223,7 +230,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float smokeFade = pow(1.0 - smokeTime, 2.0) * smoothstep(0.0, 0.15, heatTime); // fade in then out
     float smokeNoise = 0.7 + 0.3 * sin(vu.x * 50.0 + iTime * 3.0) * sin(vu.y * 40.0 + iTime * 2.3);
     float smokeShape = exp(-max(sdfTrail, 0.0) / 0.02) * smokeFade * smokeNoise;
-    vec4 smokeColor = vec4(0.05, 0.03, 0.02, 1.0); // dark warm smoke
+    vec4 smokeColor = vec4(0.05, 0.01, 0.03, 1.0); // dark ruby-tinted smoke
     newColor = mix(newColor, smokeColor, smokeShape * SMOKE_OPACITY);
 
     // Ember particles along the trail (only for longer movements)
@@ -251,8 +258,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         float size = PARTICLE_SIZE * (0.5 + 0.5 * seed) * fadeOut / speed;
         float d = length(vu - spawnPos);
         float ember = smoothstep(size, size * 0.3, d) * fadeOut * fadeIn;
-        // Warm color shift: brighter/yellower embers
-        vec4 emberCol = trail + vec4(0.3 * seed, 0.15 * seed, 0.0, 0.0);
+        // Ruby color shift: brighter/pinker embers
+        vec4 emberCol = trail + vec4(0.2 * seed, 0.0, 0.1 * seed, 0.0);
         particleColor += emberCol * ember;
         particleAlpha += ember;
     }
@@ -261,7 +268,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // newColor = mix(fragColor, newColor, OPACITY);
     // Smooth transition instead of hard step; skip trail for tiny movements
     float trailRadius = easedProgress * lineLength * TRAIL_SCALE * softSpeed;
-    float trailMask = (lineLength > 0.04)
+    float trailMask = (lineLength > 0.005)
         ? smoothstep(trailRadius + 0.005, trailRadius - 0.005, sdfCurrentCursor)
         : step(sdfCurrentCursor, 0.0);
     fragColor = mix(fragColor, newColor, trailMask);

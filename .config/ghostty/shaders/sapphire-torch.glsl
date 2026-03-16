@@ -187,6 +187,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec4 cursorFill = mix(fragColor, vec4(TRAIL_COLOR.rgb, fragColor.a), 0.7);
     newColor = mix(newColor, cursorFill, step(sdfCurrentCursor, 0.));
 
+    // Typing pulse: cursor glow that expands and contracts on each keystroke
+    float typePulse = easedProgress; // 1 at keystroke, eases to 0
+    float pulseRadius = typePulse * 0.03;
+    float cursorGlow = exp(-max(sdfCurrentCursor, 0.0) / max(pulseRadius, 0.001)) * typePulse;
+    vec4 pulseColor = trail + vec4(0.0, 0.1, 0.15, 0.0);
+    newColor = mix(newColor, pulseColor, cursorGlow * 0.5);
+
     // Flame reflections: bright highlights sweeping across cursor
     float insideCursor = step(sdfCurrentCursor, 0.0);
     if (insideCursor > 0.5) {
@@ -263,7 +270,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // newColor = mix(fragColor, newColor, OPACITY);
     // Smooth transition instead of hard step; skip trail for tiny movements
     float trailRadius = easedProgress * lineLength * TRAIL_SCALE * softSpeed;
-    float trailMask = (lineLength > 0.04)
+    float trailMask = (lineLength > 0.005)
         ? smoothstep(trailRadius + 0.005, trailRadius - 0.005, sdfCurrentCursor)
         : step(sdfCurrentCursor, 0.0);
     fragColor = mix(fragColor, newColor, trailMask);
