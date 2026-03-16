@@ -3,7 +3,7 @@
 	email = kento.monthubert@aircall.io
 [core]
 	editor = nvim
-  pager = delta
+  pager = diffnav
 [interactive]
   diffFilter = delta --color-only
 

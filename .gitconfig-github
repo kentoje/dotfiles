@@ -3,7 +3,7 @@
 	email = k.monthubert@gmail.com
 [core]
   editor = nvim
-  pager = delta
+  pager = diffnav
 [interactive]
   diffFilter = delta --color-only
 
