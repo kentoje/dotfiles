@@ -27,6 +27,33 @@
       "skillFolderHash": "262130632e186c3ee2d153b6d5b5dd6e60b8236f",
       "installedAt": "2026-03-01T17:36:56.824Z",
       "updatedAt": "2026-03-01T17:36:56.824Z"
+    },
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "grill-me/SKILL.md",
+      "skillFolderHash": "5a116da73f4e186f2ad9ce29aae23f5fdaa41017",
+      "installedAt": "2026-03-16T19:52:26.174Z",
+      "updatedAt": "2026-03-16T19:52:26.174Z"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "tdd/SKILL.md",
+      "skillFolderHash": "28d7822c112f22cf499099881856fdec07bc83a8",
+      "installedAt": "2026-03-16T20:03:45.663Z",
+      "updatedAt": "2026-03-16T20:03:45.663Z"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "improve-codebase-architecture/SKILL.md",
+      "skillFolderHash": "78b2029cbf4a74fa798c97ea27bc02bdeb2e3237",
+      "installedAt": "2026-03-16T20:06:45.529Z",
+      "updatedAt": "2026-03-16T20:06:45.529Z"
     }
   },
   "lastSelectedAgents": [
@@ -38,6 +65,7 @@
     "github-copilot",
     "kimi-cli",
     "opencode",
+    "warp",
     "claude-code"
   ],
   "dismissed": {
