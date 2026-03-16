@@ -69,6 +69,7 @@ end
 fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
 
 bind -M insert ctrl-space accept-autosuggestion
+bind -M insert ctrl-d delete-char
 
 alias cl="~/.local/bin/claude --dangerously-skip-permissions"
 
