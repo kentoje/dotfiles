@@ -51,8 +51,6 @@ bold-is-bright = true
 quick-terminal-animation-duration = 0.08
 quick-terminal-position = "top"
 
-keybind = ctrl+d=ignore
-
 keybind = super+digit_1=text:\x01\x31
 keybind = super+digit_2=text:\x01\x32
 keybind = super+digit_3=text:\x01\x33

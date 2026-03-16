@@ -91,6 +91,7 @@
             yq
             zoxide
             gitmux
+            diffnav
             yazi
           ];
 

@@ -80,6 +80,7 @@
             gitmux
             prettierd
             qmk
+            diffnav
             yazi
           ];
 
