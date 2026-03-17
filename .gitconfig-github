@@ -2,8 +2,11 @@
 	name = Kento Monthubert
 	email = k.monthubert@gmail.com
 [core]
-  editor = nvim
-  pager = diffnav
+	editor = nvim
+  pager = delta
+[pager]
+  diff = diffnav
+  show = diffnav
 [interactive]
   diffFilter = delta --color-only
 

@@ -18,5 +18,5 @@ keybinding:
 git:
   paging:
     colorArg: always
-    pager: diffnav -s
-    # pager: delta --dark --paging=never
+    pager: delta --dark --paging=never
+    # pager: diffnav -s
