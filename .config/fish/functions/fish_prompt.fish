@@ -11,10 +11,9 @@ function fish_prompt
 
     # Directory (blue bold) - starship-style: repo root + relative path, or truncated to 3 segments
     set_color --bold blue
-    set -l git_root (command git rev-parse --show-toplevel 2>/dev/null)
-    if test -n "$git_root"
-        set -l repo_name (string replace -r '.*/' '' $git_root)
-        set -l rel (string replace "$git_root" '' $PWD)
+    if test -n "$__fish_cached_git_root"
+        set -l repo_name (string replace -r '.*/' '' $__fish_cached_git_root)
+        set -l rel (string replace "$__fish_cached_git_root" '' $PWD)
         echo -n "$repo_name$rel"
     else
         # Outside git: show last 3 segments, with ~ for home
@@ -43,3 +42,11 @@ function fish_prompt
     end
     set_color normal
 end
+
+# Cache git root — only re-evaluate on directory change, not every prompt
+function __fish_update_git_root --on-variable PWD
+    set -g __fish_cached_git_root (command git rev-parse --show-toplevel 2>/dev/null)
+end
+
+# Initialize cache for current directory
+__fish_update_git_root
