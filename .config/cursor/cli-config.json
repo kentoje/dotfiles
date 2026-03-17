@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(ls)"
+    ],
+    "deny": []
+  },
+  "version": 1,
+  "editor": {
+    "vimMode": false
+  },
+  "model": {
+    "modelId": "gpt-5-codex",
+    "displayModelId": "gpt-5-codex",
+    "displayName": "GPT-5 Codex",
+    "displayNameShort": "GPT-5 Codex",
+    "aliases": [
+      "gpt-5-codex"
+    ]
+  },
+  "hasChangedDefaultModel": true,
+  "privacyCache": {
+    "ghostMode": true,
+    "privacyMode": 2,
+    "updatedAt": 1762355593520
+  },
+  "network": {
+    "useHttp1ForAgent": false
+  },
+  "approvalMode": "allowlist",
+  "sandbox": {
+    "mode": "disabled",
+    "networkAccess": "allowlist"
+  }
+}
