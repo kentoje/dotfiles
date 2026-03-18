@@ -1,0 +1,92 @@
+# btop Melange Dark
+# Based on savq/melange-nvim melange_dark.json
+# Repo: https://github.com/savq/melange-nvim
+
+# Colors should be in 6 or 2 character hexadecimal or single spaced rgb decimal: "#RRGGBB", "#BW" or "0-255 0-255 0-255"
+
+# Main background, empty for terminal default, need to be empty if you want transparent background
+theme[main_bg]="#292522"
+
+# Main text color
+theme[main_fg]="#ECE1D7"
+
+# Title color for boxes
+theme[title]="#ECE1D7"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#E49B5D"
+
+# Background color of selected items
+theme[selected_bg]="#403A36"
+
+# Foreground color of selected items
+theme[selected_fg]="#CF9BC2"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#867462"
+
+# Color of text appearing on top of graphs
+theme[graph_text]="#C1A78E"
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="#78997A"
+
+# Cpu box outline color
+theme[cpu_box]="#867462"
+
+# Memory/disks box outline color
+theme[mem_box]="#867462"
+
+# Net up/down box outline color
+theme[net_box]="#867462"
+
+# Processes box outline color
+theme[proc_box]="#867462"
+
+# Box divider line and small boxes line color
+theme[div_line]="#867462"
+
+# Temperature graph colors
+theme[temp_start]="#78997A"
+theme[temp_mid]="#EBC06D"
+theme[temp_end]="#D47766"
+
+# CPU graph colors
+theme[cpu_start]="#7F91B2"
+theme[cpu_mid]="#EBC06D"
+theme[cpu_end]="#D47766"
+
+# Mem/Disk free meter
+theme[free_start]="#D47766"
+theme[free_mid]="#EBC06D"
+theme[free_end]="#85B695"
+
+# Mem/Disk cached meter
+theme[cached_start]="#7B9695"
+theme[cached_mid]="#89B3B6"
+theme[cached_end]="#A3A9CE"
+
+# Mem/Disk available meter
+theme[available_start]="#D47766"
+theme[available_mid]="#E49B5D"
+theme[available_end]="#EBC06D"
+
+# Mem/Disk used meter
+theme[used_start]="#85B695"
+theme[used_mid]="#E49B5D"
+theme[used_end]="#D47766"
+
+# Download graph colors
+theme[download_start]="#78997A"
+theme[download_mid]="#7B9695"
+theme[download_end]="#89B3B6"
+
+# Upload graph colors
+theme[upload_start]="#BD8183"
+theme[upload_mid]="#E49B5D"
+theme[upload_end]="#EBC06D"
+
+# Process box color gradient for threads, mem and cpu usage
+theme[process_start]="#85B695"
+theme[process_mid]="#E49B5D"
+theme[process_end]="#D47766"
