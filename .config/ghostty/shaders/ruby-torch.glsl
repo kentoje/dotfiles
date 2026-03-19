@@ -267,9 +267,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     // newColor = mix(fragColor, newColor, OPACITY);
     // Smooth transition instead of hard step; skip trail for tiny movements
-    float trailRadius = easedProgress * lineLength * TRAIL_SCALE * softSpeed;
     float trailMask = (lineLength > 0.005)
-        ? smoothstep(trailRadius + 0.005, trailRadius - 0.005, sdfCurrentCursor)
+        ? smoothstep(0., max(sdfCurrentCursor, 0.002), easedProgress * lineLength * TRAIL_SCALE * max(softSpeed, 1.0))
         : step(sdfCurrentCursor, 0.0);
     fragColor = mix(fragColor, newColor, trailMask);
 
