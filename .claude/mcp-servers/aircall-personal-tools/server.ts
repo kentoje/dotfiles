@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { stagingAuth } from "./tools/staging-auth.js";
+import { z } from "zod";
+import { persistBrowserAuth } from "./tools/persist-browser-auth.js";
 
 const server = new McpServer({
   name: "aircall-personal-tools",
@@ -8,10 +9,17 @@ const server = new McpServer({
 });
 
 server.tool(
-  "aircall_staging_auth_token",
-  "Fetch a fresh JWT token from Aircall staging environment. Returns accessToken and refreshToken.",
-  {},
-  stagingAuth
+  "aircall_persist_browser_auth",
+  "Persist Aircall staging auth cookies as a browser state file for use with agent-browser. Pass the target URL to scope cookies to the correct domain.",
+  {
+    url: z
+      .string()
+      .url()
+      .describe(
+        "Target URL (e.g. http://localhost:3000). Domain is extracted for cookie scoping."
+      ),
+  },
+  persistBrowserAuth
 );
 
 const transport = new StdioServerTransport();
