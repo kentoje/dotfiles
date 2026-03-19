@@ -268,11 +268,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     particleAlpha = clamp(particleAlpha, 0.0, 1.0);
 
     // newColor = mix(fragColor, newColor, OPACITY);
-    // Smooth transition instead of hard step; skip trail for tiny movements
-    float trailRadius = easedProgress * lineLength * TRAIL_SCALE * softSpeed;
+    // Smooth trail for movement + persistent soft glow around cursor
+    float smoothTrail = smoothstep(0., max(sdfCurrentCursor, 0.002), easedProgress * lineLength * TRAIL_SCALE * max(softSpeed, 1.0));
+    float cursorGlowMask = smoothstep(0.005, -0.005, sdfCurrentCursor);
     float trailMask = (lineLength > 0.005)
-        ? smoothstep(trailRadius + 0.005, trailRadius - 0.005, sdfCurrentCursor)
-        : step(sdfCurrentCursor, 0.0);
+        ? max(smoothTrail, cursorGlowMask)
+        : cursorGlowMask;
     fragColor = mix(fragColor, newColor, trailMask);
 
     // Render particles on top, independent of trail mask
