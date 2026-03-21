@@ -62,6 +62,7 @@
             jira-cli-go
             ffmpeg
             entr
+            potrace
             fish
             csvq
             nixfmt-rfc-style

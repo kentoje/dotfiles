@@ -19,10 +19,6 @@
       "Skill(dev-browser:dev-browser)"
     ],
     "deny": [
-      "Grep",
-      "Glob",
-      "Bash(grep:*)",
-      "Bash(find:*)",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
