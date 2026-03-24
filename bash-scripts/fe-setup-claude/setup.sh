@@ -129,6 +129,11 @@ if confirm "Set up the Aircall staging auth MCP server?"; then
     fi
     ok "Credentials captured"
 
+    # Persist credentials to ~/.zshenv so they survive across shell sessions
+    persist_env "AIRCALL_EMAIL" "${AIRCALL_EMAIL}"
+    persist_env "AIRCALL_PASSWORD" "${AIRCALL_PASSWORD}"
+    ok "Credentials persisted to ~/.zshenv"
+
     # Copy MCP server files (asks before overwrite)
     install_mcp_files "aircall-personal-tools" "${SCRIPT_DIR}/mcp-servers/aircall-personal-tools"
 

@@ -35,6 +35,26 @@ read_secret() {
   echo ""
 }
 
+# Write an export to ~/.zshenv. Adds if missing, updates if value changed, skips if identical.
+persist_env() {
+  local var_name="$1"
+  local var_value="$2"
+  local zshenv="${HOME}/.zshenv"
+  local export_line="export ${var_name}=\"${var_value}\""
+
+  touch "${zshenv}"
+
+  if grep -q "^export ${var_name}=" "${zshenv}" 2>/dev/null; then
+    # Already present — replace with new value (handles reconfigure)
+    local tmp
+    tmp=$(mktemp)
+    sed "s|^export ${var_name}=.*|${export_line}|" "${zshenv}" > "${tmp}" && mv "${tmp}" "${zshenv}"
+  else
+    # Not present — append
+    echo "${export_line}" >> "${zshenv}"
+  fi
+}
+
 install_skill() {
   local skill_name="$1"
   local source_dir="$2"

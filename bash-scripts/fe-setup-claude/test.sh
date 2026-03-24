@@ -94,6 +94,37 @@ check "install_mcp_files overwrites on confirm" bash -c '
   ! grep -q "MARKER_OLD_CONTENT" "${MCP_SERVERS_DIR}/test-mcp2/server.ts"
 '
 
+# ─── persist_env Tests ─────────────────────────────────────────────────────
+
+header "persist_env Tests"
+
+# Test: persist_env writes to file
+check "persist_env writes new var" bash -c '
+  source "'"${SCRIPT_DIR}"'/lib/utils.sh"
+  export HOME=$(mktemp -d)
+  persist_env "TEST_VAR" "hello"
+  grep -q "^export TEST_VAR=\"hello\"" "${HOME}/.zshenv"
+'
+
+# Test: persist_env is idempotent (no duplicates)
+check "persist_env no duplicates on re-run" bash -c '
+  source "'"${SCRIPT_DIR}"'/lib/utils.sh"
+  export HOME=$(mktemp -d)
+  persist_env "TEST_VAR" "hello"
+  persist_env "TEST_VAR" "hello"
+  [ "$(grep -c "^export TEST_VAR=" "${HOME}/.zshenv")" -eq 1 ]
+'
+
+# Test: persist_env updates existing value
+check "persist_env updates existing value" bash -c '
+  source "'"${SCRIPT_DIR}"'/lib/utils.sh"
+  export HOME=$(mktemp -d)
+  persist_env "TEST_VAR" "old_value"
+  persist_env "TEST_VAR" "new_value"
+  grep -q "^export TEST_VAR=\"new_value\"" "${HOME}/.zshenv"
+  ! grep -q "old_value" "${HOME}/.zshenv"
+'
+
 # Cleanup test artifacts
 rm -rf "${SKILLS_DIR}/test-skill" "${SKILLS_DIR}/test-skill2" \
        "${MCP_SERVERS_DIR}/test-mcp" "${MCP_SERVERS_DIR}/test-mcp2" 2>/dev/null
