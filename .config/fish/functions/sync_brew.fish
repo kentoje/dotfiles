@@ -1,5 +1,5 @@
 function sync_brew -d "Sync homebrew packages to match defined lists"
-    argparse 'd/dry-run' 'u/update' -- $argv; or return
+    argparse d/dry-run u/update -- $argv; or return
 
     set -l dry_run 0
     if set -q _flag_dry_run
@@ -11,6 +11,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     # Define the desired packages
     set -l desired_taps \
         zfdang/free-for-macos \
+        gemfury/tap \
         hashicorp/tap \
         felixkratz/formulae \
         nikitabobko/tap \
@@ -33,6 +34,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     set -l desired_brews \
         mas \
         sketchybar \
+        fury-cli \
         ifstat \
         free-for-macos \
         glab \
@@ -168,7 +170,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         end
 
         read -l -P "Proceed with removals? [y/N] " confirm
-        if string match -qi "y" $confirm
+        if string match -qi y $confirm
             # Remove brews first (while tap info is still available)
             for brew_pkg in $brews_to_remove
                 echo "  ➖ Removing brew: $brew_pkg"
