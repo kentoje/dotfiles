@@ -71,7 +71,8 @@ fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
 bind -M insert ctrl-space accept-autosuggestion
 bind -M insert ctrl-d delete-char
 
-alias cl="~/.local/bin/claude --dangerously-skip-permissions"
+# requires https://github.com/louislva/claude-peers-mcp
+alias cl="CLAUDE_CODE_NO_FLICKER=1 ~/.local/bin/claude --dangerously-skip-permissions --dangerously-load-development-channels server:claude-peers"
 
 alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_reasoning_summary="detailed" -c model_supports_reasoning_summaries=true"
 
