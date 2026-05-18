@@ -62,6 +62,8 @@
             jira-cli-go
             ffmpeg
             entr
+            qmk
+            gcc-arm-embedded
             potrace
             fish
             csvq
