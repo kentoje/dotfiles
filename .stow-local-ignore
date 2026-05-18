@@ -7,3 +7,4 @@ setup
 README.md
 
 .config/nix-darwin
+.factory/settings.json
