@@ -28,7 +28,8 @@ return {
 			sections = {
 				{
 					section = "terminal",
-					cmd = "lolcrab ~/dotfiles/.config/nvim/lua/headers/nvim.txt",
+					-- melange-themed gradient: 50% warm (magenta/red/yellow), 50% cool (green/cyan/blue)
+					cmd = "lolcrab -c '#CF9BC2 0%,#D47766 17%,#EBC06D 33%,#85B695 50%,#89B3B6 67%,#A3A9CE 83%,#CF9BC2 100%' ~/dotfiles/.config/nvim/lua/headers/nvim.txt",
 					height = 8,
 					align = "center",
 					indent = -6,
