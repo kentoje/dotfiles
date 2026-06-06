@@ -16,7 +16,7 @@ async function runAgentBrowser(...args: string[]): Promise<string> {
   return stdout.trim();
 }
 
-export async function persistBrowserAuth({ url }: { url: string }) {
+export async function persistAgentBrowserAuth({ url }: { url: string }) {
   try {
     const password = Bun.env.STAGING_509_PASSWORD;
     if (!password) {
