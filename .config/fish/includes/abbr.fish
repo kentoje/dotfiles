@@ -41,3 +41,12 @@ abbr :wq exit
 abbr op opencode
 abbr dro droid
 abbr wm workmux
+abbr cmra claude-mr-approver
+
+# # Docker Sandbox
+# abbr dsbb "docker build --build-context claude-home=$HOME --build-context claude-dotfiles=$HOME/dotfiles -t claude-ts:latest $HOME/dotfiles/.config/docker-sandbox/"
+# abbr dsb "docker sandbox run --load-local-template -t claude-ts:latest claude"
+# abbr dsbl "docker sandbox ls"
+# abbr dsbx "docker sandbox exec -it"
+# abbr dsbr "docker sandbox rm"
+# abbr dsbrm "docker sandbox ls -q | xargs docker sandbox rm"
