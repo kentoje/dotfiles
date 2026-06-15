@@ -126,6 +126,42 @@
       "pluginName": "mattpocock-skills",
       "installedAt": "2026-06-06T16:30:13.855Z",
       "updatedAt": "2026-06-06T16:30:13.855Z"
+    },
+    "vocabulary": {
+      "source": "index-how/vocabulary",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/index-how/vocabulary.git",
+      "skillPath": "skills/vocabulary/SKILL.md",
+      "skillFolderHash": "c4b30f520e995bf1399659886ea6df4b9d5eea5b",
+      "installedAt": "2026-06-13T16:14:02.536Z",
+      "updatedAt": "2026-06-13T16:14:02.536Z"
+    },
+    "dx-cli": {
+      "source": "get-dx/cli",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/get-dx/cli.git",
+      "skillPath": "skills/dx-cli/SKILL.md",
+      "skillFolderHash": "597489e973501fc31539685ef7e1b5b324ba2426",
+      "installedAt": "2026-06-15T11:40:49.019Z",
+      "updatedAt": "2026-06-15T11:40:49.019Z"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills.git",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "skillFolderHash": "bf90d0a4b83ea054653350f9c67f6de235d3a368",
+      "installedAt": "2026-06-15T12:28:51.893Z",
+      "updatedAt": "2026-06-15T12:28:51.893Z"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills.git",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "skillFolderHash": "343db72180d05814949fef7d46be96b5c6ee86b3",
+      "installedAt": "2026-06-15T12:28:51.893Z",
+      "updatedAt": "2026-06-15T12:28:51.893Z"
     }
   },
   "lastSelectedAgents": [

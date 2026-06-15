@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "organization": "Aircall",
+  "date": "June 2026",
+  "targetRepo": "Aircall Hydra monorepo (paths in `references` are relative to the Hydra repo root, not this skill)",
+  "abstract": "Conventions for building components in Aircall's UI libraries — @aircall/ds (design system on Tailwind 4 + Base UI + CVA) and @aircall/blocks (higher-level compositions) — as they live in the Aircall Hydra monorepo. Captures the rules the TypeScript types can't express: compound-by-default architecture, CVA + cn + data-slot styling, Base UI render-prop polymorphism, flat-file layout with a single top-level barrel, and the spec-first build workflow.",
+  "references": [
+    "<hydra>/packages/ds/AGENTS.md",
+    "<hydra>/packages/blocks/AGENTS.md",
+    "<hydra>/.agents/skills/build-ds-component/SKILL.md",
+    "<hydra>/.agents/skills/write-ds-story/SKILL.md",
+    "https://base-ui.com",
+    "https://cva.style"
+  ],
+  "relatedSkills": [
+    "vercel-composition-patterns",
+    "vercel-react-best-practices"
+  ]
+}
