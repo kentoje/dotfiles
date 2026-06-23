@@ -63,9 +63,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/emilkowalski/skill.git",
       "skillPath": "skills/emil-design-eng/SKILL.md",
-      "skillFolderHash": "42244c68fa853423b28f9c2ac53adf38bb45d60f",
+      "skillFolderHash": "0e6f8d7223a0abe73f81e890b3ec76257029a834",
       "installedAt": "2026-03-19T22:12:52.255Z",
-      "updatedAt": "2026-03-19T22:12:52.255Z"
+      "updatedAt": "2026-06-20T16:01:42.099Z"
     },
     "grill-with-docs": {
       "source": "mattpocock/skills",
@@ -162,6 +162,15 @@
       "skillFolderHash": "343db72180d05814949fef7d46be96b5c6ee86b3",
       "installedAt": "2026-06-15T12:28:51.893Z",
       "updatedAt": "2026-06-15T12:28:51.893Z"
+    },
+    "review-animations": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/emilkowalski/skill.git",
+      "skillPath": "skills/review-animations/SKILL.md",
+      "skillFolderHash": "babe81c1ca0ae3c735fc537486cb120cd6645198",
+      "installedAt": "2026-06-20T16:01:42.100Z",
+      "updatedAt": "2026-06-20T16:01:42.100Z"
     }
   },
   "lastSelectedAgents": [
