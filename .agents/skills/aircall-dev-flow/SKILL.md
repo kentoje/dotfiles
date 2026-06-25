@@ -95,9 +95,22 @@ agent work — no sub-skill.
 
 ### 4. Debug (when UI verification is needed)
 
-Use the **`agent-browser-aircall-local`** skill (it auto-authenticates; always
-`--session aircall-local`) to load the local/staging URL, snapshot, and verify the
-change renders/behaves correctly. Iterate against it until the behaviour is right.
+**Start the dev server with `portless`** — never a bare port. The proxy runs as a
+service (already `portless service install`-ed), so there's nothing to start first.
+From the worktree, run the repo's dev script through the proxy: portless gives each
+worktree a **stable `.localhost` URL** (the branch name becomes a subdomain, so
+parallel tickets never collide on ports or cookies).
+
+```bash
+portless run                   # runs the repo's `dev` script through the proxy — run it in the background (long-lived)
+URL=$(portless get <project>)  # -> https://<branch>.<project>.localhost (worktree prefix auto-applied)
+```
+
+`<project>` is portless's inferred name (the `package.json` name / repo dir); if
+unsure, `portless list` shows the active route. Wait until it's actually serving,
+then hand `$URL` to the **`agent-browser-aircall-local`** skill (it auto-authenticates;
+always `--session aircall-local`) to load it, snapshot, and verify the change
+renders/behaves correctly. Iterate against it until the behaviour is right.
 
 - → manifest: `dev-flow-set.py phase=debugging`
 
