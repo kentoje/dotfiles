@@ -27,6 +27,13 @@ function fish_prompt
     end
     set_color normal
 
+    # Git status (gitmux-style), inline next to the path. Computed asynchronously
+    # by conf.d/git_async_prompt.fish into $__git_async_str (empty when clean,
+    # non-repo, or not yet computed), so this adds no latency to the prompt.
+    if test -n "$__git_async_str"
+        echo -n "  $__git_async_str"
+    end
+
     echo
 
     # Character: ❯ insert,  normal (vim), red on error
