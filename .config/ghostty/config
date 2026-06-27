@@ -16,6 +16,8 @@ cursor-color = "#EB1664"
 
 font-family = "CommitMono Nerd Font"
 font-style = "Bold"
+font-style-italic = false
+font-style-bold-italic = false
 font-size = 14
 adjust-cell-width = -17%
 
@@ -49,8 +51,13 @@ shell-integration-features = "no-cursor"
 bold-is-bright = true
 
 quick-terminal-animation-duration = 0.08
-quick-terminal-position = "top"
+quick-terminal-position = "center"
+quick-terminal-size = 70%,70%
 
+# Cmd-layer forwarding. \x01 == Ctrl-A, the prefix for BOTH tmux and herdr (both
+# set prefix = ctrl+a), so each Cmd chord = "send prefix, then <key>". These bytes
+# are tuned to the tmux keymap; herdr's config.toml is mapped to answer the same
+# chords, so this block is shared, unchanged, by both multiplexers.
 keybind = super+digit_1=text:\x01\x31
 keybind = super+digit_2=text:\x01\x32
 keybind = super+digit_3=text:\x01\x33
@@ -62,7 +69,15 @@ keybind = super+digit_8=text:\x01\x38
 keybind = super+digit_9=text:\x01\x39
 
 keybind = super+o=text:\x01\x6f
-keybind = super+b=text:\x01\x62
+# Cmd+b → Ghostty quick terminal (Quake-style dropdown scratchpad), replacing the
+# old tmux-floax float (which was also Cmd+b). Non-global: toggles only while
+# Ghostty is focused, matching floax's terminal-scoped behavior. The quick
+# terminal is a separate shell surface, NOT part of the herdr session.
+# Was: forwarded to herdr as prefix+b → toggle_sidebar (now unbound from Cmd).
+# keybind = super+b=text:\x01\x62
+keybind = super+b=toggle_quick_terminal
+# Cmd+shift+b → prefix+shift+b (B) → herdr toggle_sidebar.
+keybind = super+shift+b=text:\x01\x42
 
 keybind = super+d=text:\x01\x25
 keybind = super+shift+d=text:\x01\x22
@@ -72,5 +87,11 @@ keybind = super+t=text:\x01\x63
 keybind = super+g=text:\x01\x6a
 keybind = super+a=text:\x01\x6b
 keybind = super+p=text:\x01\x70
+# Cmd+n → prefix+shift+n (N) → herdr new_workspace. Overrides Ghostty's default
+# super+n = new_window (new OS window), repurposed as "new herdr workspace".
+keybind = super+n=text:\x01\x4e
+# Cmd+r → prefix+& → herdr rename_tab. herdr-specific: in tmux prefix+& is
+# kill-window (confirm-gated), so avoid Cmd+r while running tmux.
+# keybind = super+r=text:\x01\x26
 
 keybind = shift+enter=text:\n
