@@ -34,6 +34,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
     set -l desired_brews \
         mas \
         sketchybar \
+        herdr \
         fury-cli \
         ifstat \
         free-for-macos \

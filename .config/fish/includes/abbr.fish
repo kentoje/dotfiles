@@ -42,6 +42,8 @@ abbr op opencode
 abbr dro droid
 abbr wm workmux
 abbr cmra claude-mr-approver
+abbr pt portless
+abbr fab fabric
 
 # # Docker Sandbox
 # abbr dsbb "docker build --build-context claude-home=$HOME --build-context claude-dotfiles=$HOME/dotfiles -t claude-ts:latest $HOME/dotfiles/.config/docker-sandbox/"
