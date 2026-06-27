@@ -2,8 +2,7 @@
 
 ## Screenshots
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a196dd6e-398c-46a4-8c6e-606b878d9d30" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4a863c6f-eb55-440d-89cc-957c26378fed" />
+<img width="1920" height="1080" alt="SCR-20260627-ugeq" src="https://github.com/user-attachments/assets/40712719-8f65-4886-9d37-455fdf54e627" />
 
 
 ## Flow
