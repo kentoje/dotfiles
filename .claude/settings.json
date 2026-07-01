@@ -35,8 +35,7 @@
       "Bash(git restore:*)",
       "Bash(git branch -D:*)",
       "Bash(git stash drop:*)"
-    ],
-    "_deny_comment": "Grep/Glob/Bash(grep)/Bash(find) blocked in favor of FFF MCP tools. Hooks don't propagate to subagents, so deny is needed to enforce globally."
+    ]
   },
   "model": "opus[1m]",
   "hooks": {
@@ -190,7 +189,9 @@
     "safety-net@cc-marketplace": false,
     "swift-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "context-mode@context-mode": true
+    "context-mode@context-mode": true,
+    "chrome-devtools-mcp@claude-plugins-official": false,
+    "oh-my-claudecode@omc": false
   },
   "extraKnownMarketplaces": {
     "context-mode": {
