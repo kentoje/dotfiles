@@ -14,39 +14,14 @@ HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty')
 JSON_CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 
 # --- agent-gossips integration ---
-GOSSIP_URL="http://localhost:4000/events"
-
-gossip_send() {
-	local state="$1"
-	local dir="${JSON_CWD:-null}"
-	[[ "$dir" != "null" ]] && dir="\"$dir\"" || dir="null"
-
-	curl -sf -o /dev/null -X POST "$GOSSIP_URL" \
-		-H "Content-Type: application/json" \
-		-d "{\"session_id\":\"$SESSION_ID\",\"event_type\":\"$HOOK_EVENT\",\"state\":\"$state\",\"source\":\"claude-code\",\"pid\":$PPID,\"directory\":$dir}" 2>/dev/null &
-}
-
-# Map hooks to session states and send to agent-gossips
-case "$HOOK_EVENT" in
-"SessionStart") gossip_send "idle" ;;
-"SessionEnd") gossip_send "terminated" ;;
-"UserPromptSubmit") gossip_send "running" ;;
-"Stop") gossip_send "idle" ;;
-"PermissionRequest") gossip_send "waiting_for_permission" ;;
-"Notification") gossip_send "waiting_for_answer" ;;
-"PreToolUse" | "PostToolUse")
-	# Only send when transitioning FROM a non-running state (e.g. after
-	# answering a question where UserPromptSubmit doesn't fire).
-	# Avoids flooding gossips on every tool call during normal operation.
-	local_session="/tmp/claude_sessions/$SESSION_ID"
-	if [[ -f "$local_session" ]]; then
-		prev=$(sed -n 's/^STATUS=//p' "$local_session" 2>/dev/null)
-		[[ "$prev" != "r" ]] && gossip_send "running"
-	else
-		gossip_send "running"
-	fi
-	;;
-esac
+# Forward the RAW Claude hook payload to agent-gossips. The server-side
+# claude-code adapter owns ALL event->state mapping, including sub-agent
+# filtering (agent_id), SubagentStop handling, and Notification subtypes.
+# We only inject the PID (Claude hook JSON carries no pid) and tag the source.
+printf '%s' "$INPUT" \
+	| jq -c --argjson pid "$PPID" '. + {pid: $pid, source: "claude-code"}' 2>/dev/null \
+	| curl -sf -o /dev/null -X POST "http://localhost:4000/events" \
+		-H "Content-Type: application/json" --data-binary @- 2>/dev/null &
 # --- end agent-gossips ---
 
 # Create session directory if needed

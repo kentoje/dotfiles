@@ -2,27 +2,29 @@
 
 # Agent Gossips SketchyBar Plugin
 # Reads state from /tmp/agent-gossips/instances.json
-# Updates 3 display items: idle, cooking, notify
+# Updates 5 display items: idle, cooking, and the three "needs you" reasons
+# (perm = waiting_for_permission, answer = waiting_for_answer, retry = retry).
 
 CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
 [[ -f "$CONFIG_DIR/colors.sh" ]] && source "$CONFIG_DIR/colors.sh"
 
 STATE_FILE="/tmp/agent-gossips/instances.json"
 
+ALL_ITEMS="agent_gossips_idle agent_gossips_cooking agent_gossips_perm agent_gossips_answer agent_gossips_retry"
+
+hide_all() {
+  for it in $ALL_ITEMS; do sketchybar --set "$it" drawing=off; done
+}
+
 # Read state file
 if [[ ! -f "$STATE_FILE" ]]; then
-  # No state file - hide all items
-  sketchybar --set agent_gossips_idle drawing=off \
-    --set agent_gossips_cooking drawing=off \
-    --set agent_gossips_notify drawing=off
+  hide_all
   exit 0
 fi
 
 STATE=$(cat "$STATE_FILE" 2>/dev/null)
 if [[ -z "$STATE" || "$STATE" == "null" ]]; then
-  sketchybar --set agent_gossips_idle drawing=off \
-    --set agent_gossips_cooking drawing=off \
-    --set agent_gossips_notify drawing=off
+  hide_all
   exit 0
 fi
 
@@ -34,7 +36,8 @@ ICON_DROID=$($CONFIG_DIR/plugins/icon_map_fn.sh "Bilibili")
 ICON_COLOR_CLAUDE="${RED_BRIGHT:-0xffD47766}"
 ICON_COLOR_DROID="${GREEN_BRIGHT:-0xff85B695}"
 
-# Build combined icon string + color from unique sources in a state category
+# Build combined icon string + color from unique sources in a state category.
+# $1 is a filter keyword: idle | running | perm | answer | retry
 # Sets: _icons (string) and _icon_color (hex)
 get_icons_for_state() {
   local state_filter="$1"
@@ -44,7 +47,10 @@ get_icons_for_state() {
     select(
       if $sf == "idle" then .state == "idle"
       elif $sf == "running" then .state == "running"
-      else (.state == "waiting_for_permission" or .state == "waiting_for_answer" or .state == "retry")
+      elif $sf == "perm" then .state == "waiting_for_permission"
+      elif $sf == "answer" then .state == "waiting_for_answer"
+      elif $sf == "retry" then .state == "retry"
+      else false
       end
     ) | .source // "claude-code"] | unique | .[]
   ')
@@ -60,27 +66,30 @@ get_icons_for_state() {
   _icons="$icons"
   if [[ $has_droid -eq 1 && $has_claude -eq 0 ]]; then
     _icon_color="$ICON_COLOR_DROID"
-  elif [[ $has_claude -eq 1 && $has_droid -eq 0 ]]; then
-    _icon_color="$ICON_COLOR_CLAUDE"
   else
     _icon_color="$ICON_COLOR_CLAUDE"
   fi
 }
 
-# Categorize instances by state
-IDLE_DIRS=$(echo "$STATE" | jq -r '.instances[] | select(.state == "idle") | .directory // "unknown" | split("/") | .[-1]' | paste -sd ', ' -)
-COOKING_DIRS=$(echo "$STATE" | jq -r '.instances[] | select(.state == "running") | .directory // "unknown" | split("/") | .[-1]' | paste -sd ', ' -)
-NOTIFY_DIRS=$(echo "$STATE" | jq -r '.instances[] | select(.state == "waiting_for_permission" or .state == "waiting_for_answer" or .state == "retry") | .directory // "unknown" | split("/") | .[-1]' | paste -sd ', ' -)
+# Project basenames per category, comma-separated (consistent ", " join)
+dirs_for() {
+  echo "$STATE" | jq -r --arg s "$1" '[.instances[] | select(.state == $s) | (.directory // "unknown" | split("/") | .[-1])] | join(", ")'
+}
+count_for() {
+  echo "$STATE" | jq --arg s "$1" '[.instances[] | select(.state == $s)] | length'
+}
 
-# Get combined icons + colors per category
-get_icons_for_state "idle";    IDLE_ICONS="$_icons";    IDLE_ICON_COLOR="$_icon_color"
-get_icons_for_state "running"; COOKING_ICONS="$_icons";  COOKING_ICON_COLOR="$_icon_color"
-get_icons_for_state "notify";  NOTIFY_ICONS="$_icons";   NOTIFY_ICON_COLOR="$_icon_color"
+IDLE_DIRS=$(dirs_for "idle")
+COOKING_DIRS=$(dirs_for "running")
+PERM_DIRS=$(dirs_for "waiting_for_permission")
+ASK_DIRS=$(dirs_for "waiting_for_answer")
+RETRY_DIRS=$(dirs_for "retry")
 
-# Count instances per category
-IDLE_COUNT=$(echo "$STATE" | jq '[.instances[] | select(.state == "idle")] | length')
-COOKING_COUNT=$(echo "$STATE" | jq '[.instances[] | select(.state == "running")] | length')
-NOTIFY_COUNT=$(echo "$STATE" | jq '[.instances[] | select(.state == "waiting_for_permission" or .state == "waiting_for_answer" or .state == "retry")] | length')
+IDLE_COUNT=$(count_for "idle")
+COOKING_COUNT=$(count_for "running")
+PERM_COUNT=$(count_for "waiting_for_permission")
+ASK_COUNT=$(count_for "waiting_for_answer")
+RETRY_COUNT=$(count_for "retry")
 
 # Update function
 update_item() {
@@ -89,37 +98,36 @@ update_item() {
   local color="$3"
   local dirs="$4"
   local count="$5"
-  local icons="$6"
-  local icon_color="$7"
+  local filter="$6"
 
   if [[ "$count" -eq 0 || -z "$dirs" ]]; then
     sketchybar --set "$item" drawing=off
-  else
-    local display_text="[$prefix]: $dirs"
-    sketchybar --set "$item" \
-      icon="$icons" \
-      icon.font="sketchybar-app-font:Regular:13.0" \
-      icon.color="$icon_color" \
-      label="$display_text" \
-      label.color="$color" \
-      drawing=on
+    return
   fi
+
+  get_icons_for_state "$filter"
+
+  sketchybar --set "$item" \
+    icon="$_icons" \
+    icon.font="sketchybar-app-font:Regular:13.0" \
+    icon.color="$_icon_color" \
+    label="[$prefix]: $dirs" \
+    label.color="$color" \
+    drawing=on
 }
 
-# Update all items based on NAME or update all
+set_idle()    { update_item "agent_gossips_idle"    "IDLE"    "${YELLOW_BRIGHT:-0xffEBC06D}" "$IDLE_DIRS"    "$IDLE_COUNT"    "idle"; }
+set_cooking() { update_item "agent_gossips_cooking" "COOKING" "${GREEN_BRIGHT:-0xff85B695}"  "$COOKING_DIRS" "$COOKING_COUNT" "running"; }
+set_perm()    { update_item "agent_gossips_perm"    "PERM"    "${RED_BRIGHT:-0xffD47766}"    "$PERM_DIRS"    "$PERM_COUNT"    "perm"; }
+set_answer()  { update_item "agent_gossips_answer"  "ASK"     "${PURPLE_BRIGHT:-0xffCF9BC2}" "$ASK_DIRS"     "$ASK_COUNT"     "answer"; }
+set_retry()   { update_item "agent_gossips_retry"   "RETRY"   "${MAUVE_BRIGHT:-0xff89B3B6}"  "$RETRY_DIRS"   "$RETRY_COUNT"   "retry"; }
+
+# Update the item matching this invocation's NAME, or all when called bare.
 case "${NAME}" in
-*idle*)
-  update_item "agent_gossips_idle" "IDLE" "${YELLOW_BRIGHT:-0xffEBC06D}" "$IDLE_DIRS" "$IDLE_COUNT" "$IDLE_ICONS" "$IDLE_ICON_COLOR"
-  ;;
-*cooking*)
-  update_item "agent_gossips_cooking" "COOKING" "${GREEN_BRIGHT:-0xff85B695}" "$COOKING_DIRS" "$COOKING_COUNT" "$COOKING_ICONS" "$COOKING_ICON_COLOR"
-  ;;
-*notify*)
-  update_item "agent_gossips_notify" "!" "${MAUVE_BRIGHT:-0xff89B3B6}" "$NOTIFY_DIRS" "$NOTIFY_COUNT" "$NOTIFY_ICONS" "$NOTIFY_ICON_COLOR"
-  ;;
-*)
-  update_item "agent_gossips_idle" "IDLE" "${YELLOW_BRIGHT:-0xffEBC06D}" "$IDLE_DIRS" "$IDLE_COUNT" "$IDLE_ICONS" "$IDLE_ICON_COLOR"
-  update_item "agent_gossips_cooking" "COOKING" "${GREEN_BRIGHT:-0xff85B695}" "$COOKING_DIRS" "$COOKING_COUNT" "$COOKING_ICONS" "$COOKING_ICON_COLOR"
-  update_item "agent_gossips_notify" "!" "${MAUVE_BRIGHT:-0xff89B3B6}" "$NOTIFY_DIRS" "$NOTIFY_COUNT" "$NOTIFY_ICONS" "$NOTIFY_ICON_COLOR"
-  ;;
+  *idle*)    set_idle ;;
+  *cooking*) set_cooking ;;
+  *perm*)    set_perm ;;
+  *answer*)  set_answer ;;
+  *retry*)   set_retry ;;
+  *)         set_idle; set_cooking; set_perm; set_answer; set_retry ;;
 esac

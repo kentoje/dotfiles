@@ -89,10 +89,21 @@ sketchybar --add item agent_gossips_cooking left \
   script="$PLUGIN_DIR/agent-gossips.sh" \
   --subscribe agent_gossips_cooking agent_gossip_update
 
-sketchybar --add item agent_gossips_notify left \
-  --set agent_gossips_notify \
+# "Needs you" split by reason: permission / answer / retry (each hides when empty)
+sketchybar --add item agent_gossips_perm left \
+  --set agent_gossips_perm \
   script="$PLUGIN_DIR/agent-gossips.sh" \
-  --subscribe agent_gossips_notify agent_gossip_update
+  --subscribe agent_gossips_perm agent_gossip_update
+
+sketchybar --add item agent_gossips_answer left \
+  --set agent_gossips_answer \
+  script="$PLUGIN_DIR/agent-gossips.sh" \
+  --subscribe agent_gossips_answer agent_gossip_update
+
+sketchybar --add item agent_gossips_retry left \
+  --set agent_gossips_retry \
+  script="$PLUGIN_DIR/agent-gossips.sh" \
+  --subscribe agent_gossips_retry agent_gossip_update
 
 sketchybar --add item clock right \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh"
