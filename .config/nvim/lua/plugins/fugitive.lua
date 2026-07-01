@@ -28,7 +28,11 @@ return {
 		end, { desc = "Git open current file on given branch" })
 
 		vim.keymap.set("n", "<leader>xgS", function()
-			vim.cmd(string.format("Gedit %s", vim.fn.input("Commit: ")))
-		end, { desc = "Git show commit" })
+			local commit = vim.fn.input("Commit: ")
+			if commit == "" then
+				commit = "HEAD"
+			end
+			vim.cmd(string.format("Gedit %s", commit))
+		end, { desc = "Git show commit (defaults to HEAD)" })
 	end,
 }
