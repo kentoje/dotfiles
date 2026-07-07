@@ -23,7 +23,11 @@ Don't add a `*.test.tsx`; add/extend **stories**.
    import * as a11yAddonAnnotations from '@storybook/addon-a11y/preview';
    setProjectAnnotations([a11yAddonAnnotations, projectAnnotations]);
    ```
-   An a11y violation fails the run — it is a gate, not a side-quest.
+   ⚠️ But it is **report-only by default**: both `packages/{ds,blocks}/.storybook/preview.tsx`
+   set `a11y: { test: 'todo' }`, so a violation surfaces in the test UI but does **not** fail
+   the run. To make a11y a real gate for a **new, clean** component, set `a11y: { test: 'error' }`
+   in its story `meta.parameters` — then a violation (incl. color contrast) fails `sb:test`.
+   Do this for components that ship clean; don't flip the package-wide default.
 
 ## What "test a component" means here
 

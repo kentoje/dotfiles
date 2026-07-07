@@ -32,6 +32,7 @@ questions already have an established answer next door; divergence needs a writt
 - `api-children-and-icons.md` — Content/icons via `children`; icons from `@aircall/react-icons`
 - `api-polymorphism-render.md` — `render` prop (ds) / `useRender` + `mergeProps` (blocks); never `asChild`
 - `api-typescript-props.md` — `forwardRef` + `displayName`, extend primitive props, `VariantProps`
+- `api-design-checklist.md` — Forks to settle at API-design time (domain, edge values, i18n, typing, hooks)
 
 ### File & Export Layout (MEDIUM)
 
@@ -39,7 +40,7 @@ questions already have an established answer next door; divergence needs a writt
 
 ### Build Workflow (MEDIUM)
 
-- `workflow-spec-first.md` — Spec-first `/build-ds-component` flow; Storybook MCP; a11y gate
+- `workflow-spec-first.md` — API-first flow (ds + blocks): investigate, propose 2-3 APIs + converge, then build
 
 ### Blocks specifics (MEDIUM)
 
@@ -53,7 +54,8 @@ questions already have an established answer next door; divergence needs a writt
 ### Testing (HIGH)
 
 - `testing-stories-are-tests.md` — Stories ARE the tests (`@storybook/addon-vitest`, real
-  browser); `play()` interaction + a11y gate; `sb:test` in CI; Chromatic for visual regression
+  browser); `play()` interaction; a11y report-only by default (opt in with `test: 'error'`);
+  `sb:test` in CI; Chromatic for visual regression
 
 ### Shipping (MEDIUM)
 

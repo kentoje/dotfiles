@@ -11,7 +11,7 @@ description:
 license: MIT
 metadata:
   author: kento
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Hydra UI Library Conventions
@@ -27,7 +27,10 @@ written rationale.
 Authoritative sources (paths relative to the Hydra monorepo root):
 
 - `<hydra>/packages/ds/AGENTS.md` — DS rules (flat files, Base UI, no barrel files)
-- `<hydra>/packages/blocks/AGENTS.md` — blocks rules (compose ds, `useRender` mandatory)
+- `<hydra>/packages/blocks/AGENTS.md` — blocks rules (compose ds, `useRender` mandatory).
+  ⚠️ Stale on layout: it says per-component dirs + `__tests__/`, but the real convention is
+  flat kebab-case files + stories-as-tests — trust `structure-files-and-exports` /
+  `testing-stories-are-tests` below over AGENTS.md.
 - `<hydra>/.agents/skills/build-ds-component/SKILL.md` — the spec-first build workflow
 - `<hydra>/.agents/skills/write-ds-story/SKILL.md` — Storybook conventions
 
@@ -85,6 +88,9 @@ Storybook 10. Icons always from `@aircall/react-icons`, never `lucide-react`.
   `useRender` + `mergeProps` (blocks). Never `asChild`.
 - `api-typescript-props` — `forwardRef` + `displayName` for interactive components;
   props extend the Base UI primitive's props; variants typed via `VariantProps`.
+- `api-design-checklist` — Settle the API before writing code: the recurring forks to
+  resolve up front (input domain/units, null & non-finite handling, locale/formatting,
+  escape-hatch typing, extensibility hook, token mapping) so they don't surface mid-build.
 
 ### 4. File & Export Layout (MEDIUM)
 
@@ -94,9 +100,11 @@ Storybook 10. Icons always from `@aircall/react-icons`, never `lucide-react`.
 
 ### 5. Build Workflow (MEDIUM)
 
-- `workflow-spec-first` — For a non-trivial new ds primitive, run `/build-ds-component`:
-  investigate Figma + real call-sites, write & get approval on `specs/<name>.spec.md`
-  (with a Composition-rules section), then implement and self-verify against Figma.
+- `workflow-spec-first` — Non-trivial new component (ds **or** blocks): investigate first
+  (Figma + real call-sites + sibling components + the primitive you compose), **propose 2-3
+  candidate APIs with call-site sketches + a trade-off table + a recommendation, and converge
+  before writing code**, then implement + self-verify. Full `specs/<name>.spec.md` via
+  `/build-ds-component` for ds primitives; a short in-conversation API proposal for blocks.
 
 ### 6. Blocks specifics (MEDIUM)
 
@@ -114,9 +122,10 @@ Storybook 10. Icons always from `@aircall/react-icons`, never `lucide-react`.
 ### 8. Testing (HIGH)
 
 - `testing-stories-are-tests` — There are **no `*.test.tsx` files** — stories ARE the tests.
-  `@storybook/addon-vitest` runs every story in a real browser; `play()` = interaction tests,
-  the a11y addon is a gate. Run `pnpm --filter @aircall/ds run sb:test -- --run` (CI runs it).
-  Visual regression is Chromatic, not manual screenshots.
+  `@storybook/addon-vitest` runs every story in a real browser; `play()` = interaction tests.
+  a11y runs on every story but is **report-only by default** (`test: 'todo'`) — opt a clean
+  component in with `a11y: { test: 'error' }` on its meta to actually gate. Run
+  `pnpm --filter @aircall/ds run sb:test -- --run` (CI runs it). Visual regression is Chromatic.
 
 ### 9. Shipping (MEDIUM)
 
