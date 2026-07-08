@@ -76,6 +76,10 @@ alias cl="CLAUDE_CODE_NO_FLICKER=1 ~/.local/bin/claude --dangerously-skip-permis
 
 alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_reasoning_summary="detailed" -c model_supports_reasoning_summaries=true"
 
+# Advance merged sprint tickets (dry-run by default; pass --apply to execute).
+# Needs JIRA_API_TOKEN in env + glab authenticated.
+alias jira-cleanup="env JIRA_EMAIL=kento.monthubert@aircall.io $HOME/dotfiles/scripts/jira-sprint-cleanup.sh"
+
 # opencode
 fish_add_path /Volumes/HomeX/kento/.opencode/bin
 
