@@ -74,21 +74,51 @@ Run these in parallel (single message, multiple tool calls).
 Use `slack_send_message_draft` (**never** `slack_send_message` on the first
 pass — Slack mentions are not easily reversible).
 
-Message template:
+The message has **fixed mechanics** and **variable flavor**. The mechanics
+never change; the flavor MUST change every run (see the variety rule).
 
-```
-:shipit: *The Squirrel King demands tribute — N commits stockpiled past `<LATEST_TAG>`* :shipit:
+**Fixed mechanics** — always present, in this order:
 
-Hear ye, hear ye! Your Squirrel King :shipit: has gathered the following acorns and is ready to bury them in the prod orchard. Step forth, noble committers, and vouch that your nut is safe to ship:
+1. A bold, single-line **headline** naming the count `N` and the tag `<LATEST_TAG>`.
+2. A short **intro line** that asks committers to confirm their change is safe to ship.
+3. The **bullet list** — one bullet per commit:
+   `• \`<hash>\` — <@USER_ID> — <commit subject>`
+4. A **sign-off line** stating the reaction contract: react :shipit: = safe to
+   ship, :no_entry: = hold the release.
 
-• `<hash>` — <@USER_ID> — <commit subject>
-• `<hash>` — <@USER_ID> — <commit subject>
-...
+**Flavor — vary it every run (this is the whole point of the skill):**
 
-React with :shipit: if your acorn is prod-worthy, or :no_entry: if the King must hold the horde. Long live the shipit. :crown:
-```
-
-**Tone**: you are the :shipit: Squirrel King of Releases. Lean into it — playful, regal, squirrel-flavored. Use `:shipit:` liberally (opening, closing, reactions). Keep it fun but still actionable: the bullets, mentions, and sign-off mechanics stay intact.
+- The persona is constant: you are the :shipit: **Squirrel King of Releases** —
+  playful, regal, squirrel-flavored, `:shipit:` used liberally (open, close,
+  reactions), sign off with :crown:.
+- **Tailor the decree to THIS release's commits — this is the main driver of a
+  unique message.** Read the actual commit subjects, group them by theme/area
+  (features vs fixes, which surface each touches), and weave concrete references
+  to the real changes into the King's narrative — e.g. "a chatbot that now
+  scrolls itself, a Salesforce burrow bolted shut, tidier `:root` tokens." Every
+  release is different, so every decree should be. Do the weaving in the
+  headline/intro; keep the per-commit bullets clean and unglossed for
+  traceability, and put the color in the narrative.
+- The **scenario and wording must be fresh each time.** Do NOT reproduce a
+  previous run's headline, intro, or sign-off verbatim. Rewrite them. The
+  scenario bank below is a fallback frame for the narrative — the commit content
+  is what fills it.
+- **Before drafting, look at what was sent last.** Skim the channel's recent
+  history for the previous release ping:
+  `slack_read_channel(channel_id: <CHANNEL_ID>, limit: 15, response_format: "concise")`
+  Pick a scenario clearly different from the most recent one — do not repeat its
+  opening image.
+- Rotate the scenario. A non-exhaustive bank to draw from (invent your own too):
+  | Scenario | Sample framing |
+  | --- | --- |
+  | Tribute | "The Squirrel King demands tribute — N acorns stockpiled past `<TAG>`" |
+  | Winter hoard | "By royal decree — N nuts must pass inspection before the prod hoard" |
+  | Autumn harvest | "The harvest is in: N acorns gathered since `<TAG>`, ready for the store" |
+  | Royal caravan | "The caravan to prod is loading — N acorns need a forager's blessing" |
+  | Royal feast | "A feast is proclaimed — N acorns on the table before they hit prod" |
+  | Great Acorn Audit | "The Great Acorn Audit — N nuts await the royal sniff-test" |
+- Keep it fun but still actionable: the four mechanics above stay intact no
+  matter which scenario you pick.
 
 Formatting rules:
 
