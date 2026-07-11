@@ -1,12 +1,77 @@
 # Migration: move `$HOME` back to `/Users/kento`, keep bulk data on `/Volumes/HomeX`
 
-> **Status (last verified 2026-07-11):** IN PROGRESS — Phase 1 only, partially done.
-> `~58 G` of Phase-1 reclaim executed (Docker prune, Rewind removed, pnpm prune).
-> The switch itself has **NOT** started: `$HOME` is still `/Volumes/HomeX/kento`,
-> `flake.nix:290` still `home = "/Volumes/HomeX/kento"`, and `/Users/kento` does not exist.
-> No new work since the last update — every remaining Phase-1 trim/relocate item is still pending.
-> Read the whole file once before running a single command.
-> Touchy / dangerous operations are flagged with **⚠️**. Do those manually, slowly, one at a time.
+> **✅ STATUS: MIGRATION COMPLETE — including Phase 5 (2026-07-12).**
+> `$HOME = /Users/kento` on the internal disk, verified across a full reboot.
+> The home is now a **hybrid**: light/fast dirs live internally on `/Users/kento`, heavy bulk stays external on `/Volumes/HomeX/kento` and is stitched into `~` via symlinks.
+> **Phase 5 reclaim is done:** all duplicated internal-bound copies were deleted from `/Volumes` (~58 G reclaimed, external free → 720 G). `/Volumes/HomeX/kento` now holds ONLY the live bulk: `Documents`, `.lmstudio`, `.ollama`, `.local` (share), `VMs` (+ a harmless 0-byte TCC-protected Figma stub under `Library/`).
+> **This is now permanent** — `/Volumes` no longer holds a rollback of the home.
+> §1–§10 below is the original plan, kept as the historical record of how this was executed.
+
+---
+
+## 0. The new home philosophy — a hybrid `/Users` + `/Volumes` layout
+
+The home directory is **split across two volumes** and stitched together with symlinks, so paths still look normal (`~/Documents`, `~/.ollama`, …).
+The split is by **access pattern**, not convenience: a dir lives internally if it must be fast and available without the drive; it lives externally if it is heavy bulk that tolerates the drive dependency.
+
+**Why split at all — the binding constraint.**
+The internal Data volume is 229 G (~86 G free); the full home was ~400 G.
+Only ~65 G of genuinely-internal content fits, so the ~200 G of bulk below *must* stay external.
+
+**Internal — `/Users/kento` (real dirs, copied here):**
+Everything on the hot path — login, shell startup, editors, LSPs — so the machine boots and works even with the external drive unplugged.
+- Config: `dotfiles`, `.config` (itself a symlink into `dotfiles/.config`), `.claude`, `.codex`, `.cursor`.
+- Toolchains: `.bun`, `.rustup`, `.cargo`, `go`, `.npm`, `.local/bin`, `.local/state`.
+- `Library` (trimmed 175 G → ~54 G), `Pictures`, `Downloads`, small state.
+
+**External — `/Volumes/HomeX/kento` (stays put, symlinked from `~`):**
+
+| `~` path | → external target | Size | Why external |
+|---|---|---|---|
+| `Documents` (symlink) | `/Volumes/HomeX/kento/Documents` | 141 G | all git repos + work; huge, and keeps stable project identity (see below) |
+| `.lmstudio` (symlink) | `…/.lmstudio` | 16 G | LM Studio model store |
+| `.ollama` (symlink) | `…/.ollama` | 6.5 G | Ollama model store |
+| `.local/share` (symlink) | `…/.local/share` | 13 G | toolchain data (fnm/uv/nvim/…); not latency-sensitive |
+| `VMs` (no `~` symlink; UTM points at the absolute path) | `…/VMs` | 32 G | UTM VM disk images |
+
+> ⚠️ Unplugging the drive degrades dev tooling (repos under `~/Documents`, model stores, `.local/share` binaries) but does **not** break login or the base shell — that is the whole point of keeping `.local/bin`, `.config`, and `.claude` internal.
+
+**The load-bearing subtlety — symlink resolution decides project identity.**
+`~/Documents` resolves to `/Volumes/...`, and `process.cwd()` (Node, and therefore Claude Code) returns the **physical** path.
+So work inside `~/Documents/...` is always seen as `/Volumes/HomeX/kento/Documents/...`, no matter how you `cd` there (`z`, `cd ~/Documents/...`, etc.).
+This is *why* every Documents-based project keeps its original `/Volumes` identity — Claude Code memory/history keys, tool caches, and zoxide entries stay stable and needed **no** migration.
+Only the two things that *physically* moved to `/Users` — the `dotfiles` project and the home root — got a new identity, and those were migrated by hand (memory dirs verified identical; zoxide entries remapped).
+
+**Two machines, two nix configs (`dr` picks by hostname).**
+`nix-darwin-mini` = this **Mac mini** (defines sketchybar/agent-gossips, `home=/Users/kento`); `nix-darwin-pro` = the **MacBook Pro**.
+The `dr` function selects the flake by hostname (`*mac-mini*` → mini), replacing the old `$HOME =~ /Volumes` heuristic that broke once this machine's home became `/Users`.
+
+---
+
+## 0b. What was actually executed (completion log, 2026-07-11)
+
+**Phase 1 — trim/relocate (Library 175 G → ~54 G):**
+Docker removed entirely (app + 2.6 G container), Rewind removed (16 G), pnpm store pruned (13→5.6 G), `Library/Caches` (37→9.2 G, kept claude-cli + ms-playwright), Xcode DerivedData + all 26 simulators (7.7 G), Steam game uninstalled (9 G), round-2 caches (npm/npx/uv/.bun/go ≈ 24 G).
+**UTM VMs (32 G)** cloned to `/Volumes/HomeX/kento/VMs/` (APFS clonefile), re-registered in UTM, now boot from there.
+
+**Phase 2 — layout:** decided the hybrid split above; `.local/share` externalized to land internal-bound at ~65 G.
+
+**Phase 3 — the flip:** populated `/Users/kento` via `rsync -aAXH -S` (merged onto a pre-existing stale 2025 home — kept its 2.7 G Photos Library), applied `migration/phase3b-flip-home.patch`, rebuilt, relogged in.
+
+**Phase 4 — cleanup:** removed the obsolete launchd plist-copy hack and repointed all `/Volumes` paths (`migration/phase4-cleanup.patch` + `.claude/settings.json` hooks, `.claude/CLAUDE.md`, plugin `installed_plugins.json`/`known_marketplaces.json`, a workflow default, `obsidian.lua`, `config.fish` pnpm block, `dr.fish` → hostname, `fish_user_paths` destaled, screenshot service reloaded).
+
+**Post-flip preservation:** dotfiles + home Claude memory confirmed present at the new `/Users` keys; zoxide non-Documents entries remapped `/Volumes` → `/Users`.
+
+### Key learnings (bit us during the migration)
+- **Sparse files lie to `rsync`.** Docker's `Docker.raw` was 2.6 G physical but **275 G logical**, making a naive `rsync` report ~340 G to copy. `du` (physical) was right; always copy with `-S` (sparse-aware), and prefer removing regenerable VM disks outright.
+- **`process.cwd()` resolves symlinks** — the reason Documents projects keep their `/Volumes` identity (see §0).
+- **`dr` selected the wrong machine's config** post-flip because it keyed off `$HOME`, not hostname — the `mini`/`pro` names are the two *machines*, not "minimal/pro".
+- **macOS caches the screenshot location** in `SystemUIServer`; `defaults` alone doesn't take effect until `killall SystemUIServer`.
+
+---
+
+> **Reading note:** §1–§10 below is the original PLAN.
+> Touchy / dangerous operations are flagged with **⚠️**.
 
 ---
 
@@ -238,16 +303,21 @@ git apply migration/phase3b-flip-home.patch    # flake.nix: home = "/Users/kento
 sudo mkdir -p /Users/kento
 sudo chown kento:staff /Users/kento
 
-# copy the INTERNAL-bound content. rsync, preserve attrs, do NOT delete, dry-run FIRST.
-# ⚠️ run each with -n (dry run) first, inspect, then run for real without -n.
-rsync -aAXH -n  /Volumes/HomeX/kento/dotfiles      /Users/kento/
-rsync -aAXH -n  /Volumes/HomeX/kento/.config       /Users/kento/
-rsync -aAXH -n  /Volumes/HomeX/kento/Library       /Users/kento/    # large; trimmed in Phase 1
-# ...repeat for each internal-bound dir from §5...
-
-# ⚠️ .local is SPLIT: copy bin+state internal, but EXCLUDE share (it stays external, symlinked in 6d)
-rsync -aAXH -n --exclude 'share' /Volumes/HomeX/kento/.local  /Users/kento/
+# ⚠️ USE GNU rsync, not macOS openrsync (weak xattr/ACL/sparse support).
+#    Installed via: brew install rsync  →  /opt/homebrew/bin/rsync (3.4.4)
+# ⚠️ MUST pass -S (sparse-aware). Without it, sparse files (e.g. Docker.raw = 2.6 G
+#    physical but 275 G LOGICAL) expand to full logical size and blow up the copy.
+# Whole-home copy with EXCLUDES for external-bound + junk (more complete than an
+# allowlist — captures .ssh/.gnupg/.aws/.netrc/all root dotfiles). Merge, NO --delete.
+# ⚠️ dry-run with -n --stats FIRST; confirm "Total transferred" ≈ 64 G, not 340 G.
+set RS /opt/homebrew/bin/rsync
+$RS -aAXH -S -n --stats \
+  --exclude='/Documents' --exclude='/.lmstudio' --exclude='/.ollama' \
+  --exclude='/.local/share' --exclude='/VMs' --exclude='/.Trash' \
+  /Volumes/HomeX/kento/ /Users/kento/          # inspect, then drop -n for the real run
 ```
+> `.local/share` is excluded here (external symlink in 6d); `.local/bin`+`.local/state` copy normally.
+> `/Users/kento` already exists (stale 2025 home) — this **merges** onto it (user chose merge; keeps the 2.7 G Photos Library). No `--delete`, so source and stale extras are both preserved.
 > ⚠️ `noowners` is set on the external volume, so ownership on the source is unreliable. After copying, fix ownership on the destination:
 > ```fish
 > sudo chown -R kento:staff /Users/kento
@@ -358,14 +428,27 @@ set -Ux OLLAMA_MODELS /Volumes/HomeX/kento/.ollama/models   # example
 
 ---
 
-## 9. Phase 5 — Reclaim the old home (only after a clean week)
+## 9. Phase 5 — Reclaim the old home ✅ DONE (2026-07-12)
+
+**Executed:** deleted every duplicated internal-bound copy from `/Volumes/HomeX/kento` (`dotfiles`, `.claude`, `Library`, all toolchains, `Pictures`, `Downloads`, `Videos`, `Music`, credentials, and the small dotdirs). **~58 G reclaimed; external free → 720 G.**
+
+**How it was done safely (no Time Machine backup existed):**
+- **Per-entry guard:** an item was deleted only if the same-named copy existed on `/Users` — anything unique was skipped, not lost.
+- **5 dirs had no `/Users` copy** (created after the populate rsync: `.aider`, `.codeium`, `.dmux`, `.mastracode`, `.cc-safety-net`) → **moved** to `/Users/kento` (copy-verify-then-delete), not deleted.
+- **`.local` special-cased:** kept `share` (the live symlink target), deleted `bin`/`state`.
+
+**Kept on `/Volumes/HomeX/kento` (the live external bulk):** `Documents`, `.lmstudio`, `.ollama`, `.local/share`, `VMs`.
+
+**Loose end:** `Library/Application Support/Figma/FigmaAgent.app` (0 B) is TCC-protected and can't be `rm`'d from a shell — remove via Finder if desired; harmless otherwise.
+
+> ⚠️ **No rollback remains.** `/Volumes` no longer holds a copy of the internal-bound home; the migration is permanent.
+
+<details><summary>Original plan (pre-execution)</summary>
 
 > ⚠️ Do NOT delete the old `/Volumes/HomeX/kento` content immediately. Live on the new home for at least a week.
-
-After you're confident:
-- Keep the *external bulk* dirs that are symlinked (`Documents`, model stores) where they are — they are still in use.
-- Delete only the now-duplicated *internal-bound* copies left behind on the external volume (the ones you rsynced to `/Users`): `dotfiles`, `.config`, `Library`, toolchains, etc.
-- ⚠️ Double-check each path is genuinely duplicated on internal before removing the external copy. `diff -rq` a sample first.
+> - Keep the *external bulk* dirs that are symlinked (`Documents`, model stores) where they are — they are still in use.
+> - Delete only the now-duplicated *internal-bound* copies. `diff -rq` a sample first.
+</details>
 
 ---
 
@@ -392,7 +475,10 @@ After you're confident:
   | .rustup | 3.2 G | | **TOTAL** | **~118 G** |
   Internal free is **86 G** → **~118 G does not fit** (over by ~32 G, before the 20 G headroom). Must shed ~50 G to reach ≤ ~66 G internal-bound.
 - **✅ Round 2 prunes done (2026-07-11, ~40 G reclaimed):** `npm cache clean` (.npm 15→~0 G), `.npm/_npx` (1.9 G), `uv cache clean` (1.7 G), cleared `.cache` (2.9→0 G), `.bun/install/cache` (5.1 G), `go clean -cache -modcache` (1.3→0 G), **Steam game uninstalled** (Neverwinter 9 G), **CoreSimulator all 26 sims deleted** (5.1 G). `Library` now **54 G**.
-- **✅ DISK GATE MET (2026-07-11).** Decision: `.local/share` (14 G toolchain data) → **external symlink** (§5); `.local/bin`+`.local/state` stay internal. **Internal-bound = ~65 G** (measured, excluding `.local/share`). Post-flip: 143 G used + 65 G = 208 G → **~21 G free**, clears the ≥20 G headroom. ✅
+- **✅ DISK GATE MET (2026-07-11).** Decision: `.local/share` (14 G toolchain data) → **external symlink** (§5); `.local/bin`+`.local/state` stay internal. Internal-bound confirmed by `rsync --stats`: **63.8 G transferred**. Post-flip: 143 G used + 64 G = 207 G → **~22 G free**, clears the ≥20 G headroom. ✅
+- **✅ Docker removed (2026-07-11).** User: "don't care, reinstall later." Deleted `/Applications/Docker.app` (2.4 G) + `Library/Containers/com.docker.docker` (2.6 G) + Group Containers + `.docker` + App Support. Leftover `/usr/local/bin/docker*` symlinks + 2 privileged helpers need `sudo rm` (harmless).
+- **⚠️ CRITICAL COPY LESSON — sparse files.** `com.docker.docker/Data/vms/0/data/Docker.raw` was **2.6 G physical but 274.9 G LOGICAL** (sparse). A naive `rsync` counted/would-write the 275 G logical → a false "340 G to copy". Fixes: (a) it's gone now with Docker; (b) always run the copy with **`-S` (sparse-aware)**. `du` (physical) was right all along; rsync `%l`/`--stats` counts logical.
+- **Copy tooling:** macOS `openrsync` has weak xattr/ACL/sparse support → installed **GNU rsync 3.4.4** via brew (`/opt/homebrew/bin/rsync`).
 - ⚠️ **Do NOT delete** `.paseo` (1.8 G, holds `daemon-keypair.json` — real identity) or blindly `.local/share/shuru` (2.6 G microVM rootfs); both ride along external in `.local/share` / stay internal untouched.
 - **Switch NOT started:** `$HOME` still `/Volumes/HomeX/kento`, `flake.nix:290` unchanged, `/Users/kento` absent. Patches staged in `migration/`.
 - **Recovery gate: met** (second admin account exists). **Backup: skipped by choice** (no external TM device) — mitigated by copy-not-move design + verified-before-delete for irreplaceable data.
