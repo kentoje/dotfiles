@@ -25,42 +25,32 @@ local function config_exists(config_names)
 	return false
 end
 
-local function find_tsconfig()
-	local cwd = vim.fn.getcwd()
-
-	-- Look for tsconfig.json in current directory and parent directories
-	local tsconfig_path = vim.fn.findfile("tsconfig.json", cwd .. ";")
-
-	if tsconfig_path ~= "" then
-		return vim.fn.fnamemodify(tsconfig_path, ":p")
-	end
-
-	return nil
-end
-
-local function has_tsconfig_base_url()
-	local tsconfig_path = find_tsconfig()
-
-	if not tsconfig_path then
+local function project_uses_tsgo()
+	-- Use tsgo when the repo has adopted the TS7 native compiler as its
+	-- type-checker. Signal: the nearest package.json runs `tsgo` in a script
+	-- (e.g. "ts:check": "tsgo --noEmit"). In package.json the string "tsgo"
+	-- only ever appears in a script command, never in a dependency name
+	-- (the binary ships as @typescript/native-preview), so a plain-text
+	-- match is reliable.
+	local pkg = vim.fn.findfile("package.json", vim.fn.getcwd() .. ";")
+	if pkg == "" then
 		return false
 	end
-
-	local file = io.open(tsconfig_path, "r")
+	local file = io.open(vim.fn.fnamemodify(pkg, ":p"), "r")
 	if not file then
 		return false
 	end
-
 	local content = file:read("*all")
 	file:close()
-
-	-- Simply check if "baseUrl" appears in the file
-	return content:find("baseUrl", 1, true) ~= nil
-	-- Note: third parameter `true` makes it a plain text search (no patterns)
+	return content:find("tsgo", 1, true) ~= nil
 end
 
-local function should_use_vtsls()
-	-- Use vtsls if project has baseUrl (indicates path aliases/complex config)
-	return has_tsconfig_base_url()
+local function tsgo_cmd()
+	-- Prefer the project's pinned tsgo (matches CI exactly); fall back to
+	-- the Mason/PATH build when the repo has no local install.
+	local local_bin = vim.fn.getcwd() .. "/node_modules/.bin/tsgo"
+	local bin = (vim.fn.executable(local_bin) == 1) and local_bin or "tsgo"
+	return { bin, "--lsp", "--stdio" }
 end
 
 local function setup_tsgo(lsp_capabilities, custom_typescript_config)
@@ -69,7 +59,7 @@ local function setup_tsgo(lsp_capabilities, custom_typescript_config)
 
 	-- Configure tsgo using new vim.lsp.config API
 	vim.lsp.config.tsgo = {
-		cmd = { "tsgo", "--lsp", "--stdio" },
+		cmd = tsgo_cmd(),
 		filetypes = {
 			"javascript",
 			"javascriptreact",
@@ -250,25 +240,16 @@ return {
 			custom_typescript_config.tsdk = "node_modules/typescript/lib"
 		end
 
-		-- Setup TypeScript LSP based on tsconfig baseUrl
-		if should_use_vtsls() then
-			setup_vtsls(lsp_capabilities, custom_typescript_config)
-			vim.lsp.config.tsgo = {
-				filetypes = {}, -- Empty filetypes prevents auto-start
-			}
+		-- Per-project TS language server:
+		--   tsgo  -> repo adopted TS7 native (editor == CI compiler, native speed)
+		--   vtsls -> everything else (richer: organize-imports, refactors, ts plugins)
+		-- Only one attaches; the other is disabled via empty filetypes.
+		if project_uses_tsgo() then
+			setup_tsgo(lsp_capabilities, custom_typescript_config)
+			vim.lsp.config.vtsls = { filetypes = {} }
 		else
-			-- setup_tsgo(lsp_capabilities, custom_typescript_config)
-			-- -- Override lspconfig's built-in vtsls to prevent auto-start
-			-- -- lspconfig has vtsls built-in, which auto-starts if the binary exists
-			-- -- We disable it by setting filetypes to empty when using tsgo
-			-- vim.lsp.config.vtsls = {
-			-- 	filetypes = {}, -- Empty filetypes prevents auto-start
-			-- }
-
 			setup_vtsls(lsp_capabilities, custom_typescript_config)
-			vim.lsp.config.tsgo = {
-				filetypes = {}, -- Empty filetypes prevents auto-start
-			}
+			vim.lsp.config.tsgo = { filetypes = {} }
 		end
 
 		require("mason").setup({})
@@ -327,7 +308,7 @@ return {
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
 		vim.keymap.set("n", "<leader>E", function()
-			if should_use_vtsls() then
+			if not project_uses_tsgo() then
 				vim.cmd("VtsExec add_missing_imports")
 				vim.cmd("VtsExec remove_unused_imports")
 			else
