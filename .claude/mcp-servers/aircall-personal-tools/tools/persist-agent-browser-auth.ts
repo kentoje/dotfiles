@@ -1,4 +1,4 @@
-const AUTH_URL = "https://id.aircall-staging.com/auth/v1/users/session";
+const AUTH_URL = "https://id.aircall-staging.com/auth/v2/users/session";
 const EMAIL = "kento.monthubert+509@aircall.io";
 const SESSION = "aircall-local";
 
@@ -34,6 +34,8 @@ export async function persistAgentBrowserAuth({ url }: { url: string }) {
       throw new Error(`HTTP ${res.status} - ${text}`);
     }
     const data = await res.json();
+    // v2 wraps tokens under the "basic" key
+    const { accessToken, refreshToken } = data.basic;
 
     // Extract domain and security from target URL
     const parsed = new URL(url);
@@ -48,8 +50,8 @@ export async function persistAgentBrowserAuth({ url }: { url: string }) {
       ...(secure ? ["--secure"] : []),
     ];
 
-    await runAgentBrowser("cookies", "set", "ac-auth.id-token", data.accessToken, ...cookieOpts);
-    await runAgentBrowser("cookies", "set", "ac-auth.refresh-token", data.refreshToken, ...cookieOpts);
+    await runAgentBrowser("cookies", "set", "ac-auth.id-token", accessToken, ...cookieOpts);
+    await runAgentBrowser("cookies", "set", "ac-auth.refresh-token", refreshToken, ...cookieOpts);
 
     return {
       content: [

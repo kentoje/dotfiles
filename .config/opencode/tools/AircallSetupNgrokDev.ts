@@ -75,7 +75,7 @@ export default mergeRsbuildConfig(baseConfig, {
 
     try {
       const response = await fetch(
-        "https://id.aircall-staging.com/auth/v1/users/session",
+        "https://id.aircall-staging.com/auth/v2/users/session",
         {
           method: "POST",
           headers: {
@@ -92,12 +92,13 @@ export default mergeRsbuildConfig(baseConfig, {
 
       const res = await response.json();
 
-      if (!res.accessToken) {
+      // v2 wraps tokens under the "basic" key
+      if (!res.basic?.accessToken) {
         return `Error: No accessToken in response. Response: ${JSON.stringify(res)}`;
       }
 
-      accessToken = res.accessToken;
-      refreshToken = res.refreshToken;
+      accessToken = res.basic.accessToken;
+      refreshToken = res.basic.refreshToken;
       results.push("[OK] Retrieved staging tokens");
     } catch (error) {
       return `Error fetching token: ${error instanceof Error ? error.message : String(error)}`;

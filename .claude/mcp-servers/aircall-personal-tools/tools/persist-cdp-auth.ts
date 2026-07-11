@@ -1,4 +1,4 @@
-const AUTH_URL = "https://id.aircall-staging.com/auth/v1/users/session";
+const AUTH_URL = "https://id.aircall-staging.com/auth/v2/users/session";
 const EMAIL = "kento.monthubert+509@aircall.io";
 
 export async function persistCdpAuth({ url }: { url: string }) {
@@ -19,6 +19,8 @@ export async function persistCdpAuth({ url }: { url: string }) {
       throw new Error(`HTTP ${res.status} - ${text}`);
     }
     const data = await res.json();
+    // v2 wraps tokens under the "basic" key
+    const { accessToken, refreshToken } = data.basic;
 
     // Extract domain and security from target URL
     const parsed = new URL(url);
@@ -30,8 +32,8 @@ export async function persistCdpAuth({ url }: { url: string }) {
     // This avoids the SSO redirect problem: cookies are present when the
     // app's auth check executes, so no redirect occurs.
     const initScript = [
-      `document.cookie = "ac-auth.id-token=${data.accessToken}; domain=${domain}; path=/; SameSite=Lax;${securePart}";`,
-      `document.cookie = "ac-auth.refresh-token=${data.refreshToken}; domain=${domain}; path=/; SameSite=Lax;${securePart}";`,
+      `document.cookie = "ac-auth.id-token=${accessToken}; domain=${domain}; path=/; SameSite=Lax;${securePart}";`,
+      `document.cookie = "ac-auth.refresh-token=${refreshToken}; domain=${domain}; path=/; SameSite=Lax;${securePart}";`,
     ].join("\n");
 
     return {

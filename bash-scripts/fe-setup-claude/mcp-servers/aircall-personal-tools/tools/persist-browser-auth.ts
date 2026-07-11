@@ -1,4 +1,4 @@
-const AUTH_URL = "https://id.aircall-staging.com/auth/v1/users/session";
+const AUTH_URL = "https://id.aircall-staging.com/auth/v2/users/session";
 const SESSION = "aircall-local";
 
 async function runAgentBrowser(...args: string[]): Promise<string> {
@@ -33,11 +33,56 @@ export async function persistBrowserAuth({ url }: { url: string }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status} - ${text}`);
+
+    // v2 wraps tokens under the "basic" key on success. When the account
+    // requires MFA, the endpoint instead returns HTTP 200 with an "mfa"
+    // challenge payload (Cognito session + challengeName such as "EMAIL_OTP")
+    // and no tokens. Other failures (invalid credentials, server errors)
+    // arrive without tokens too. We treat *any* response lacking usable
+    // tokens as a failure so the consumer is alerted rather than crashing on
+    // an undefined "basic".
+    const raw = await res.text();
+    let data: any;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = undefined;
     }
-    const data = await res.json();
+    const accessToken: string | undefined = data?.basic?.accessToken;
+    const refreshToken: string | undefined = data?.basic?.refreshToken;
+
+    if (data?.mfa) {
+      const { challengeName, email: mfaEmail } = data.mfa;
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text" as const,
+            text: [
+              `MFA challenge required for ${mfaEmail ?? email}${challengeName ? ` (${challengeName})` : ""}.`,
+              `The account is protected by multi-factor auth, so this tool cannot auto-authenticate.`,
+              `Complete the login manually (enter the one-time code), then retry - the device is usually trusted afterwards.`,
+            ].join(" "),
+          },
+        ],
+      };
+    }
+
+    if (!res.ok || !accessToken || !refreshToken) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text" as const,
+            text: [
+              `Auth did not return tokens (HTTP ${res.status}).`,
+              `The credentials may be invalid or the endpoint returned an unexpected response.`,
+              `Response: ${raw.slice(0, 500)}`,
+            ].join(" "),
+          },
+        ],
+      };
+    }
 
     // Extract domain and security from target URL
     const parsed = new URL(url);
@@ -53,8 +98,8 @@ export async function persistBrowserAuth({ url }: { url: string }) {
     ];
 
     await Promise.all([
-      runAgentBrowser("cookies", "set", "ac-auth.id-token", data.accessToken, ...cookieOpts),
-      runAgentBrowser("cookies", "set", "ac-auth.refresh-token", data.refreshToken, ...cookieOpts),
+      runAgentBrowser("cookies", "set", "ac-auth.id-token", accessToken, ...cookieOpts),
+      runAgentBrowser("cookies", "set", "ac-auth.refresh-token", refreshToken, ...cookieOpts),
     ]);
 
     return {
