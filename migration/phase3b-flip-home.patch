@@ -1,0 +1,11 @@
+--- a/.config/nix-darwin-mini/flake.nix
++++ b/.config/nix-darwin-mini/flake.nix
+@@ -287,7 +287,7 @@
+           nixpkgs.hostPlatform = "aarch64-darwin";
+
+           users.users.kento = {
+-            home = "/Volumes/HomeX/kento";
++            home = "/Users/kento";
+           };
+
+           # Set the primary user for nix-darwin

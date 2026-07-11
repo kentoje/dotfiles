@@ -1,0 +1,212 @@
+--- a/.config/nix-darwin-mini/flake.nix
++++ b/.config/nix-darwin-mini/flake.nix
+@@ -101,7 +101,7 @@
+
+           system.defaults = {
+             ".GlobalPreferences"."com.apple.mouse.scaling" = -1.0;
+-            screencapture.location = "/Volumes/HomeX/kento/Pictures/screenshots";
++            screencapture.location = "/Users/kento/Pictures/screenshots";
+             dock.autohide = true;
+             dock.orientation = "left";
+             finder.FXPreferredViewStyle = "clmv";
+@@ -144,51 +144,6 @@
+               done
+             '';
+
+-          # Trick because of custom mount volume.
+-          # Note: postUserActivation is no longer available, using system.activationScripts instead
+-          system.activationScripts.extraActivation.text = ''
+-            echo "Running post-activation script for LaunchAgents..." >&2
+-            # This ensures this script runs after user setup
+-            if [ ! -d /Users/kento/Library/LaunchAgents ]; then
+-              echo "Creating LaunchAgents directory..." >&2
+-              sudo -u kento mkdir -p /Users/kento/Library/LaunchAgents
+-            fi
+-
+-            if [ ! -f /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist ]; then
+-              sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.sketchybar.plist /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+-            fi
+-
+-            # Check and restart sketchybar service
+-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.sketchybar" >/dev/null 2>&1; then
+-              echo "Stopping existing sketchybar service..." >&2
+-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+-            fi
+-            echo "Starting sketchybar service..." >&2
+-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
+-
+-            # agent-gossips and agent-gossips-daemon plist files
+-            # Note: launchd cannot load plist files from /Volumes/HomeX/ (custom home directory).
+-            # We must copy them to /Users/kento/Library/LaunchAgents/ for launchd to recognize them.
+-            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+-            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+-            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+-            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+-
+-            # Bootstrap agent-gossips services
+-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.agent-gossips" >/dev/null 2>&1; then
+-              echo "Stopping existing agent-gossips service..." >&2
+-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+-            fi
+-            echo "Starting agent-gossips service..." >&2
+-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
+-
+-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.agent-gossips-daemon" >/dev/null 2>&1; then
+-              echo "Stopping existing agent-gossips-daemon service..." >&2
+-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+-            fi
+-            echo "Starting agent-gossips-daemon service..." >&2
+-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
+-          '';
+           #   sf-mono-liga-bin  # Your custom font from the overlay
+           #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
+           # ];
+@@ -237,7 +192,7 @@
+               serviceConfig = {
+                 RunAtLoad = true;
+                 KeepAlive = true;
+-                WorkingDirectory = "/Volumes/HomeX/kento/Documents/github/kentoje/agent-gossips";
++                WorkingDirectory = "/Users/kento/Documents/github/kentoje/agent-gossips";
+                 StandardOutPath = "/tmp/agent-gossips.out.log";
+                 StandardErrorPath = "/tmp/agent-gossips.err.log";
+                 EnvironmentVariables = {
+@@ -245,7 +200,7 @@
+                 };
+               };
+               script = ''
+-                /Volumes/HomeX/kento/.bun/bin/bun run src/index.ts
++                /Users/kento/.bun/bin/bun run src/index.ts
+               '';
+             };
+
+@@ -264,7 +219,7 @@
+                 until curl -sf http://localhost:4000/health >/dev/null 2>&1; do
+                   sleep 1
+                 done
+-                exec /Volumes/HomeX/kento/dotfiles/.config/sketchybar/scripts/agent-gossips-daemon.sh
++                exec /Users/kento/dotfiles/.config/sketchybar/scripts/agent-gossips-daemon.sh
+               '';
+             };
+           };
+
+--- a/.claude/settings.json
++++ b/.claude/settings.json
+@@ -118,7 +118,7 @@
+         "hooks": [
+           {
+             "type": "command",
+-            "command": "node /Volumes/HomeX/kento/.claude/plugins/cache/context-mode/context-mode/1.0.52/hooks/pretooluse.mjs"
++            "command": "node /Users/kento/.claude/plugins/cache/context-mode/context-mode/1.0.52/hooks/pretooluse.mjs"
+           }
+         ]
+       }
+
+--- a/.config/cursor/settings.json
++++ b/.config/cursor/settings.json
+@@ -62,7 +62,7 @@
+   "workbench.editor.enablePreview": false,
+   "workbench.editor.showTabs": "single",
+   "vscode_custom_css.imports": [
+-    "file:///Volumes/HomeX/kento/dotfiles/.config/cursor/js/cursor-animation.js"
++    "file:///Users/kento/dotfiles/.config/cursor/js/cursor-animation.js"
+   ],
+   "workbench.colorTheme": "GitHub Light",
+   "workbench.iconTheme": "symbols",
+
+--- a/.config/ralph/config.json
++++ b/.config/ralph/config.json
+@@ -1,3 +1,3 @@
+ {
+-  "ralph_home": "/Volumes/HomeX/kento/Documents/github/kentoje/ralph"
++  "ralph_home": "/Users/kento/Documents/github/kentoje/ralph"
+ }
+\ No newline at end of file
+--- a/.config/sketchybar/plugins/agent-gossips.sh
++++ b/.config/sketchybar/plugins/agent-gossips.sh
+@@ -5,7 +5,7 @@
+ # Updates 5 display items: idle, cooking, and the three "needs you" reasons
+ # (perm = waiting_for_permission, answer = waiting_for_answer, retry = retry).
+
+-CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
++CONFIG_DIR="${CONFIG_DIR:-$HOME/dotfiles/.config/sketchybar}"
+ [[ -f "$CONFIG_DIR/colors.sh" ]] && source "$CONFIG_DIR/colors.sh"
+
+ STATE_FILE="/tmp/agent-gossips/instances.json"
+
+--- a/.config/sketchybar/plugins/claude_sessions.sh
++++ b/.config/sketchybar/plugins/claude_sessions.sh
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+
+-CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
++CONFIG_DIR="${CONFIG_DIR:-$HOME/dotfiles/.config/sketchybar}"
+ [[ -f "$CONFIG_DIR/colors.sh" ]] && source "$CONFIG_DIR/colors.sh"
+
+ SESSION_DIR="/tmp/claude_sessions"
+
+--- a/.config/fish/config.fish
++++ b/.config/fish/config.fish
+@@ -66,7 +66,7 @@
+ # pnpm end
+
+ # Added by Windsurf
+-fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
++fish_add_path ~/.codeium/windsurf/bin
+
+ bind -M insert ctrl-space accept-autosuggestion
+ bind -M insert ctrl-d delete-char
+@@ -81,7 +81,7 @@
+ alias jira-cleanup="env JIRA_EMAIL=kento.monthubert@aircall.io $HOME/dotfiles/scripts/jira-sprint-cleanup.sh"
+
+ # opencode
+-fish_add_path /Volumes/HomeX/kento/.opencode/bin
++fish_add_path ~/.opencode/bin
+
+ # speech-to-text smart bridge for fzf-like file search.
+ function _voicebridge_write_pwd_file --on-event fish_prompt
+@@ -99,7 +99,7 @@
+ end
+
+ # Added by LM Studio CLI (lms)
+-set -gx PATH $PATH /Volumes/HomeX/kento/.lmstudio/bin
++set -gx PATH $PATH ~/.lmstudio/bin
+ # End of LM Studio CLI section
+
+ # aircall dev-flow — roots the board scanner walks (colon-separated, per dev-flow-status.py)
+
+--- a/.gitconfig
++++ b/.gitconfig
+@@ -9,7 +9,7 @@
+
+ [safe]
+ 	directory = /Users/kento/Documents/gitlab/dashboard-v4
+-	directory = /Volumes/HomeX/kento/dotfiles
++	directory = /Users/kento/dotfiles
+
+ [alias]
+   undo = reset --mixed HEAD~1
+
+--- a/.config/herdr/plugins.json
++++ b/.config/herdr/plugins.json
+@@ -5,8 +5,8 @@
+     "version": "0.1.0",
+     "min_herdr_version": "0.7.0",
+     "description": "Seamless Ctrl+h/j/k/l navigation across herdr panes and Vim/Neovim splits (native, single-exec)",
+-    "manifest_path": "/Volumes/HomeX/kento/Documents/github/kentoje/herdr-vim-nav/herdr-plugin.toml",
+-    "plugin_root": "/Volumes/HomeX/kento/Documents/github/kentoje/herdr-vim-nav",
++    "manifest_path": "/Users/kento/Documents/github/kentoje/herdr-vim-nav/herdr-plugin.toml",
++    "plugin_root": "/Users/kento/Documents/github/kentoje/herdr-vim-nav",
+     "enabled": true,
+     "platforms": [
+       "macos",
+
+--- a/.config/solana/install/config.yml
++++ b/.config/solana/install/config.yml
+@@ -36,5 +36,5 @@
+ current_update_manifest: null
+ update_poll_secs: 3600
+ explicit_release: !Channel stable
+-releases_dir: /Volumes/HomeX/kento/.local/share/solana/install/releases
+-active_release_dir: /Volumes/HomeX/kento/.local/share/solana/install/active_release
++releases_dir: /Users/kento/.local/share/solana/install/releases
++active_release_dir: /Users/kento/.local/share/solana/install/active_release
