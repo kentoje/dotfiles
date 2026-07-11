@@ -35,6 +35,10 @@ const buttonVariants = cva('…base classes…', {
 <Button variant="destructive" size="sm">Delete</Button>
 ```
 
+A `size` variant here means **control dimensions / density** (padding, height, icon box) —
+not a type scale. Never add a `size` that sets font-size/weight/line-height; typography is a
+consumer `className`. See `api-no-typographic-props`.
+
 See `styling-cva-variants` for how to wire CVA + `VariantProps`, and
 `api-children-and-icons` for why the icon is a child, not a prop.
 

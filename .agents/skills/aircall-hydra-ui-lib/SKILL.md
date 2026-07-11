@@ -11,7 +11,7 @@ description:
 license: MIT
 metadata:
   author: kento
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Hydra UI Library Conventions
@@ -88,6 +88,13 @@ Storybook 10. Icons always from `@aircall/react-icons`, never `lucide-react`.
   `useRender` + `mergeProps` (blocks). Never `asChild`.
 - `api-typescript-props` — `forwardRef` + `displayName` for interactive components;
   props extend the Base UI primitive's props; variants typed via `VariantProps`.
+- `api-data-driven-collections` — A component rendering options from data takes opaque
+  `items` + accessor fns (`getItemValue`/`getItemLabel`/`renderItem`, mirror `DataCombobox`),
+  string-key values, behavioral flags as `*Keys: Set<string>` props — never a fixed
+  `{ value, label, icon, disabled }` item shape. Always pair with a compound escape hatch.
+- `api-no-typographic-props` — Typography (font-size/weight/line-height) is a consumer
+  `text-*` className, not a prop; no DS-wide type-scale system exists yet. A CVA `size` is for
+  control dimensions/density only, never a type scale.
 - `api-design-checklist` — Settle the API before writing code: the recurring forks to
   resolve up front (input domain/units, null & non-finite handling, locale/formatting,
   escape-hatch typing, extensibility hook, token mapping) so they don't surface mid-build.
