@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
+CONFIG_DIR="${CONFIG_DIR:-$HOME/dotfiles/.config/sketchybar}"
 [[ -f "$CONFIG_DIR/colors.sh" ]] && source "$CONFIG_DIR/colors.sh"
 
 SESSION_DIR="/tmp/claude_sessions"

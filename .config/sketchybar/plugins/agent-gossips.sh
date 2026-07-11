@@ -5,7 +5,7 @@
 # Updates 5 display items: idle, cooking, and the three "needs you" reasons
 # (perm = waiting_for_permission, answer = waiting_for_answer, retry = retry).
 
-CONFIG_DIR="${CONFIG_DIR:-/Volumes/HomeX/kento/dotfiles/.config/sketchybar}"
+CONFIG_DIR="${CONFIG_DIR:-$HOME/dotfiles/.config/sketchybar}"
 [[ -f "$CONFIG_DIR/colors.sh" ]] && source "$CONFIG_DIR/colors.sh"
 
 STATE_FILE="/tmp/agent-gossips/instances.json"

@@ -54,11 +54,7 @@ source ~/dotfiles/.config/fish/includes/alias.fish
 source ~/dotfiles/.config/fish/includes/private-vars.fish
 
 # pnpm
-if string match -q "/Volumes*" $HOME
-    set -gx PNPM_HOME /Volumes/HomeX/kento/Library/pnpm
-else
-    set -gx PNPM_HOME /Users/kento/Library/pnpm
-end
+set -gx PNPM_HOME $HOME/Library/pnpm
 
 if not string match -q -- $PNPM_HOME $PATH
     set -gx PATH "$PNPM_HOME" $PATH
@@ -66,13 +62,13 @@ end
 # pnpm end
 
 # Added by Windsurf
-fish_add_path /Volumes/HomeX/kento/.codeium/windsurf/bin
+fish_add_path ~/.codeium/windsurf/bin
 
 bind -M insert ctrl-space accept-autosuggestion
 bind -M insert ctrl-d delete-char
 
 # requires https://github.com/louislva/claude-peers-mcp
-alias cl="CLAUDE_CODE_NO_FLICKER=1 ~/.local/bin/claude --dangerously-skip-permissions"
+alias cl="CLAUDE_CODE_NO_FLICKER=1 ~/.local/bin/claude --model opus[1m] --dangerously-skip-permissions"
 
 alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_reasoning_summary="detailed" -c model_supports_reasoning_summaries=true"
 
@@ -81,7 +77,7 @@ alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_r
 alias jira-cleanup="env JIRA_EMAIL=kento.monthubert@aircall.io $HOME/dotfiles/scripts/jira-sprint-cleanup.sh"
 
 # opencode
-fish_add_path /Volumes/HomeX/kento/.opencode/bin
+fish_add_path ~/.opencode/bin
 
 # speech-to-text smart bridge for fzf-like file search.
 function _voicebridge_write_pwd_file --on-event fish_prompt
@@ -99,5 +95,8 @@ function _voicebridge_write_pwd_file --on-event fish_prompt
 end
 
 # Added by LM Studio CLI (lms)
-set -gx PATH $PATH /Volumes/HomeX/kento/.lmstudio/bin
+set -gx PATH $PATH ~/.lmstudio/bin
 # End of LM Studio CLI section
+
+# aircall dev-flow — roots the board scanner walks (colon-separated, per dev-flow-status.py)
+set -gx DEV_FLOW_ROOTS (string join : ~/Documents/gitlab ~/Documents/github)

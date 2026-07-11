@@ -26,8 +26,7 @@ return {
 			workspaces = {
 				{
 					name = "personal",
-					path = has_home_with_volumes and "/Volumes/HomeX/kento/Documents/github/kentoje/obsidian-vault"
-						or "/Users/kento/Documents/github/kentoje/obsidian-vault",
+					path = vim.fn.expand("~/Documents/github/kentoje/obsidian-vault"),
 				},
 			},
 

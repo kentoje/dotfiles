@@ -101,7 +101,7 @@
 
           system.defaults = {
             ".GlobalPreferences"."com.apple.mouse.scaling" = -1.0;
-            screencapture.location = "/Volumes/HomeX/kento/Pictures/screenshots";
+            screencapture.location = "/Users/kento/Pictures/screenshots";
             dock.autohide = true;
             dock.orientation = "left";
             finder.FXPreferredViewStyle = "clmv";
@@ -144,51 +144,6 @@
               done
             '';
 
-          # Trick because of custom mount volume.
-          # Note: postUserActivation is no longer available, using system.activationScripts instead
-          system.activationScripts.extraActivation.text = ''
-            echo "Running post-activation script for LaunchAgents..." >&2
-            # This ensures this script runs after user setup
-            if [ ! -d /Users/kento/Library/LaunchAgents ]; then
-              echo "Creating LaunchAgents directory..." >&2
-              sudo -u kento mkdir -p /Users/kento/Library/LaunchAgents
-            fi
-
-            if [ ! -f /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist ]; then
-              sudo -u kento cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.sketchybar.plist /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
-            fi
-
-            # Check and restart sketchybar service
-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.sketchybar" >/dev/null 2>&1; then
-              echo "Stopping existing sketchybar service..." >&2
-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
-            fi
-            echo "Starting sketchybar service..." >&2
-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.sketchybar.plist
-
-            # agent-gossips and agent-gossips-daemon plist files
-            # Note: launchd cannot load plist files from /Volumes/HomeX/ (custom home directory).
-            # We must copy them to /Users/kento/Library/LaunchAgents/ for launchd to recognize them.
-            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
-            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
-            cp /Volumes/HomeX/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
-            chown kento /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
-
-            # Bootstrap agent-gossips services
-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.agent-gossips" >/dev/null 2>&1; then
-              echo "Stopping existing agent-gossips service..." >&2
-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
-            fi
-            echo "Starting agent-gossips service..." >&2
-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips.plist
-
-            if sudo -u kento launchctl print "gui/$(id -u kento)/org.nixos.agent-gossips-daemon" >/dev/null 2>&1; then
-              echo "Stopping existing agent-gossips-daemon service..." >&2
-              sudo -u kento launchctl bootout "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
-            fi
-            echo "Starting agent-gossips-daemon service..." >&2
-            sudo -u kento launchctl bootstrap "gui/$(id -u kento)" /Users/kento/Library/LaunchAgents/org.nixos.agent-gossips-daemon.plist
-          '';
           #   sf-mono-liga-bin  # Your custom font from the overlay
           #   (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
           # ];
@@ -237,7 +192,7 @@
               serviceConfig = {
                 RunAtLoad = true;
                 KeepAlive = true;
-                WorkingDirectory = "/Volumes/HomeX/kento/Documents/github/kentoje/agent-gossips";
+                WorkingDirectory = "/Users/kento/Documents/github/kentoje/agent-gossips";
                 StandardOutPath = "/tmp/agent-gossips.out.log";
                 StandardErrorPath = "/tmp/agent-gossips.err.log";
                 EnvironmentVariables = {
@@ -245,7 +200,7 @@
                 };
               };
               script = ''
-                /Volumes/HomeX/kento/.bun/bin/bun run src/index.ts
+                /Users/kento/.bun/bin/bun run src/index.ts
               '';
             };
 
@@ -264,7 +219,7 @@
                 until curl -sf http://localhost:4000/health >/dev/null 2>&1; do
                   sleep 1
                 done
-                exec /Volumes/HomeX/kento/dotfiles/.config/sketchybar/scripts/agent-gossips-daemon.sh
+                exec /Users/kento/dotfiles/.config/sketchybar/scripts/agent-gossips-daemon.sh
               '';
             };
           };
@@ -287,7 +242,7 @@
           nixpkgs.hostPlatform = "aarch64-darwin";
 
           users.users.kento = {
-            home = "/Volumes/HomeX/kento";
+            home = "/Users/kento";
           };
 
           # Set the primary user for nix-darwin
