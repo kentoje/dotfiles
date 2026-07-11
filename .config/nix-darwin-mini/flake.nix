@@ -64,6 +64,7 @@
             entr
             qmk
             gcc-arm-embedded
+            gh
             potrace
             fish
             csvq
