@@ -42,6 +42,7 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         croc \
         cloc \
         crush \
+        nono \
         terraform
 
     echo "🍺 Starting homebrew sync..."

@@ -53,3 +53,9 @@ node_modules/
 .config/herdr/*
 !.config/herdr/config.toml
 !.config/herdr/scripts/
+
+# nono: keep our profiles, ignore pull-managed/regenerable state
+.config/nono/*
+!.config/nono/profiles/
+.config/nono/profiles/*
+!.config/nono/profiles/claude-vol.json

@@ -1,0 +1,13 @@
+{
+  "extends": "claude",
+  "meta": {
+    "name": "claude-vol",
+    "version": "0.0.1",
+    "description": "Claude Code + deny blanket /Volumes read (repos granted per-invocation)",
+    "author": "kento"
+  },
+  "filesystem": {
+    "deny": ["/Volumes"],
+    "read": ["$HOME/.local/state/fnm_multishells"]
+  }
+}
