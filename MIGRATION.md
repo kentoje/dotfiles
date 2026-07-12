@@ -31,10 +31,12 @@ Everything on the hot path — login, shell startup, editors, LSPs — so the ma
 | `Documents` (symlink) | `/Volumes/HomeX/kento/Documents` | 141 G | all git repos + work; huge, and keeps stable project identity (see below) |
 | `.lmstudio` (symlink) | `…/.lmstudio` | 16 G | LM Studio model store |
 | `.ollama` (symlink) | `…/.ollama` | 6.5 G | Ollama model store |
-| `.local/share` (symlink) | `…/.local/share` | 13 G | toolchain data (fnm/uv/nvim/…); not latency-sensitive |
 | `VMs` (no `~` symlink; UTM points at the absolute path) | `…/VMs` | 32 G | UTM VM disk images |
 
-> ⚠️ Unplugging the drive degrades dev tooling (repos under `~/Documents`, model stores, `.local/share` binaries) but does **not** break login or the base shell — that is the whole point of keeping `.local/bin`, `.config`, and `.claude` internal.
+> **⚠️ CORRECTION (2026-07-12): `.local/share` is now INTERNAL, not external.**
+> It was originally externalized (toolchain data, "not latency-sensitive"), but that was a mistake: `.local/share` holds **executables** (fnm's `node`, `uv` python, nvim LSPs, the **Claude binary** itself, CLI shims). An executable on a `noowners` removable volume can't get Full Disk Access → constant `EPERM`. So **only bulk *data* stays external** now (`Documents`, `.lmstudio`, `.ollama`, `VMs`); everything you *run* lives internal. See §0c.
+
+> ⚠️ Unplugging the drive makes your repos (`~/Documents`), model stores, and VMs unavailable, but does **not** break login, the shell, editors, node, or Claude — those are all internal now.
 
 **The load-bearing subtlety — symlink resolution decides project identity.**
 `~/Documents` resolves to `/Volumes/...`, and `process.cwd()` (Node, and therefore Claude Code) returns the **physical** path.
@@ -67,6 +69,26 @@ Docker removed entirely (app + 2.6 G container), Rewind removed (16 G), pnpm sto
 - **`process.cwd()` resolves symlinks** — the reason Documents projects keep their `/Volumes` identity (see §0).
 - **`dr` selected the wrong machine's config** post-flip because it keyed off `$HOME`, not hostname — the `mini`/`pro` names are the two *machines*, not "minimal/pro".
 - **macOS caches the screenshot location** in `SystemUIServer`; `defaults` alone doesn't take effect until `killall SystemUIServer`.
+- **Executables must not live on the external (removable) volume.** `.local/share` (node, uv python, LSPs, the Claude binary) was external → couldn't get Full Disk Access → `EPERM` everywhere. Fixed by moving all of `.local/share` internal (`~/relocate-local-share.fish`). Only bulk *data* belongs external.
+- **`/Volumes` access for tools under herdr = grant FDA to `herdr`, not the terminal.** See §0c — this cost us hours.
+
+---
+
+## 0c. Resilient access — the post-migration `/Volumes` `EPERM` saga (2026-07-12)
+
+After the flip, tools kept failing to read `/Volumes` with **`Operation not permitted`** (fish history, atuin, nvim configs under `~/Documents`, Claude working on repos). Root causes, in the order we (wrongly then rightly) diagnosed them:
+
+1. **Shell data on the external volume** — fish history + atuin live in `.local/share`, which was external → every shell start hit `/Volumes`. **Fix:** made `fish` + `atuin` (then all of `.local/share`) internal; restored old fish history + atuin key.
+2. **The Claude binary was on the external volume** (`.local/share/claude` → `/Volumes`) — a binary on a `noowners` removable volume can't hold FDA. **Fix:** `~/relocate-local-share.fish` moved it (and everything else) internal.
+3. **It is NOT nono.** `nono why` *looks* authoritative but reports what a hypothetical profile *would* do; `NONO_CAP_FILE` was **unset** and no `nono run` was in the process tree. The nono plugin is advisory-only. Don't trust `nono why` as proof of active sandboxing.
+4. **The real, final cause — TCC responsibility routes through `herdr`.** Claude runs `launchd → herdr (server) → fish → claude`. macOS attributes Full Disk Access to the **responsible ancestor**, which for a launchd-spawned process is **herdr**, *not* Ghostty. Granting FDA to Ghostty (or even to `claude`) does nothing for Claude.
+
+> **THE FIX (keep this): if a tool launched under herdr gets `EPERM` / "Operation not permitted" on `/Volumes` (external volume):**
+> 1. System Settings → Privacy & Security → **Full Disk Access** → add **`/Users/kento/.local/bin/herdr`** (Cmd-Shift-G to paste the path), enable it.
+> 2. **Reboot** — herdr auto-starts at login and isn't a labeled `launchctl` job, so it can't be surgically restarted; a reboot relaunches it with the grant.
+> 3. Verify: `touch /Volumes/HomeX/kento/.t && rm /Volumes/HomeX/kento/.t && echo OK`.
+>
+> Also grant FDA to **Ghostty** (covers plain terminal tabs + host-launched nvim) — different apps, different responsibility chains. `EPERM` (not `EACCES`) on a present, healthy, `diskutil`-readable external volume = **TCC**, not Unix perms and not a failing drive.
 
 ---
 
