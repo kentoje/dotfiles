@@ -7,6 +7,16 @@
 [includeIf "gitdir:~/dotfiles/"]
   path = ~/.gitconfig-github
 
+; ~/Documents is a symlink to /Volumes/HomeX/kento/Documents (hybrid layout).
+; git's gitdir matcher resolves symlinks, so repos under ~/Documents are seen
+; at their real /Volumes path. Mirror the conditions there so they still match.
+[includeIf "gitdir:/Volumes/HomeX/kento/Documents/gitlab/"]
+  path = ~/.gitconfig-gitlab
+[includeIf "gitdir:/Volumes/HomeX/kento/Documents/js/"]
+  path = ~/.gitconfig-gitlab
+[includeIf "gitdir:/Volumes/HomeX/kento/Documents/github/"]
+  path = ~/.gitconfig-github
+
 [safe]
 	directory = /Users/kento/Documents/gitlab/dashboard-v4
 	directory = /Users/kento/dotfiles
