@@ -1,11 +1,11 @@
 function dr
-    # Select the flake by MACHINE, not $HOME. The old "/Volumes* => mini" heuristic
-    # identified this Mac mini by its external home; after migrating to a /Users home
-    # that misfires and builds the MacBook Pro config here. mini = Mac mini, pro = MBP.
+    # One flake, two host configs sharing common.nix. Select by MACHINE, not
+    # $HOME: mac-mini => .#mac-mini, everything else (the MacBook Pro) => .#macbook-pro.
+    set -l flake ~/dotfiles/.config/nix-darwin
     if string match -qi "*mac-mini*" (scutil --get LocalHostName)
-        sudo darwin-rebuild switch --flake ~/dotfiles/.config/nix-darwin-mini/#kento
+        sudo darwin-rebuild switch --flake $flake#mac-mini
     else
-        sudo darwin-rebuild switch --flake ~/dotfiles/.config/nix-darwin-pro/#kento
+        sudo darwin-rebuild switch --flake $flake#macbook-pro
     end
 end
 

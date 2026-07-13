@@ -44,9 +44,10 @@ So work inside `~/Documents/...` is always seen as `/Volumes/HomeX/kento/Documen
 This is *why* every Documents-based project keeps its original `/Volumes` identity — Claude Code memory/history keys, tool caches, and zoxide entries stay stable and needed **no** migration.
 Only the two things that *physically* moved to `/Users` — the `dotfiles` project and the home root — got a new identity, and those were migrated by hand (memory dirs verified identical; zoxide entries remapped).
 
-**Two machines, two nix configs (`dr` picks by hostname).**
-`nix-darwin-mini` = this **Mac mini** (defines sketchybar/agent-gossips, `home=/Users/kento`); `nix-darwin-pro` = the **MacBook Pro**.
-The `dr` function selects the flake by hostname (`*mac-mini*` → mini), replacing the old `$HOME =~ /Volumes` heuristic that broke once this machine's home became `/Users`.
+**Two machines, one merged nix flake (`dr` picks the host config by hostname).**
+Since `/Volumes` was retired, the former `nix-darwin-mini` and `nix-darwin-pro` flakes were merged into a single `.config/nix-darwin` flake: a shared `common.nix` base plus `hosts/mac-mini.nix` (this **Mac mini** - sketchybar/agent-gossips) and `hosts/macbook-pro.nix` (the **MacBook Pro** - JS/TS toolchain, `nix.enable = false` for Determinate).
+The `dr` function selects the config by hostname (`*mac-mini*` → `.#mac-mini`, else `.#macbook-pro`), replacing the old `$HOME =~ /Volumes` heuristic that broke once this machine's home became `/Users`.
+(The `nix-darwin-mini` paths in the phase-by-phase commands below are historical - they name the flake dir as it existed during the migration.)
 
 ---
 

@@ -11,10 +11,12 @@ if ! [ -x "$(command -v nix)" ]; then
 fi
 
 
-if [[ "$HOME" == */Volumes/* ]]; then
-    echo "Using mini configuration for external drive..." >&2
-    nix run nix-darwin -- switch --flake "$HOME/dotfiles/.config/nix-darwin-mini/#kento"
+# Select the host config by MACHINE (matches the `dr` fish function).
+FLAKE="$HOME/dotfiles/.config/nix-darwin"
+if [[ "$(scutil --get LocalHostName)" == *[Mm]ac-mini* ]]; then
+    echo "Using mac-mini configuration..." >&2
+    nix run nix-darwin -- switch --flake "$FLAKE#mac-mini"
 else
-    echo "Using pro configuration for internal drive..." >&2
-    nix run nix-darwin -- switch --flake "$HOME/dotfiles/.config/nix-darwin-pro/#kento"
+    echo "Using macbook-pro configuration..." >&2
+    nix run nix-darwin -- switch --flake "$FLAKE#macbook-pro"
 fi
