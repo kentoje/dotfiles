@@ -1,7 +1,12 @@
 # Shared base for every host. Machine-specific packages/services live in
 # hosts/<host>.nix, which imports this module. `self` is threaded in via
 # specialArgs (see flake.nix) so we can stamp the configuration revision.
-{ pkgs, config, self, ... }:
+{
+  pkgs,
+  config,
+  self,
+  ...
+}:
 {
   nixpkgs = {
     config.allowUnfree = true;
@@ -27,6 +32,7 @@
     entr
     fish
     nixfmt-rfc-style
+    chafa
     fd
     fnm
     fzf

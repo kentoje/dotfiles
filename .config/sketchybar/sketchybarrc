@@ -8,11 +8,11 @@ sketchybar --bar \
   position=top \
   height=36 \
   y_offset=8 \
-  margin=12 \
+  margin=16 \
   corner_radius=6 \
   blur_radius=10 \
-  padding_left=2 \
-  padding_right=2 \
+  padding_left=4 \
+  padding_right=4 \
   color=$BACKGROUND_BAR \
   shadow=off
 

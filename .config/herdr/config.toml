@@ -240,7 +240,9 @@ pane_gaps = false
 # Accent color for highlights, borders, and navigation UI.
 # Accepts: hex (#89b4fa), named colors (cyan, blue, magenta), or rgb(r,g,b)
 # accent = "#9E4F44" # deep melange red (darkened from melange red #D47766); dark enough that the light on-accent label (panel_bg) reads while panels stay transparent; peach token stays bright #E49B5D
-accent = "#EBC06D"
+# accent = "#EBC06D"
+accent = "#85B695"
+
 
 [ui.toast]
 # off = disable pop-up notifications

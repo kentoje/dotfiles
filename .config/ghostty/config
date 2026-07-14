@@ -5,8 +5,10 @@ theme = "Melange Dark"
 # custom-shader = "shaders/cursor-blaze-tapered.glsl"
 # custom-shader = "shaders/rainbow-glass.glsl"
 # cursor-color = "#E8E0D8"
-custom-shader = "shaders/ruby-torch.glsl"
-cursor-color = "#EB1664"
+custom-shader = "shaders/emerald-torch.glsl"
+# cursor-color = "#EB1664"
+cursor-color = "#D9FFE6"
+
 # cursor-color = "#2979FF"
 # custom-shader = "shaders/sapphire-torch.glsl"
 
@@ -25,9 +27,10 @@ window-decoration = true
 window-padding-x = 16
 window-padding-y = 12
 
-background-opacity = "0.75"
+background-opacity = "0.65"
 # background-opacity = "1"
-background-blur-radius = 60
+# background-blur-radius = 60
+background-blur-radius = 45
 #background = "000000"
 foreground = "a6accd"
 
