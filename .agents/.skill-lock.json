@@ -180,6 +180,15 @@
       "skillFolderHash": "b1d1a07b1cd3963958ef48028c1c283cb5517d47",
       "installedAt": "2026-07-05T19:27:40.010Z",
       "updatedAt": "2026-07-05T19:27:40.010Z"
+    },
+    "apple-design": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/emilkowalski/skill.git",
+      "skillPath": "skills/apple-design/SKILL.md",
+      "skillFolderHash": "e9f5b472dfb28d8cf29f64001b6c01ef94b8168b",
+      "installedAt": "2026-07-14T19:52:59.127Z",
+      "updatedAt": "2026-07-14T19:52:59.127Z"
     }
   },
   "lastSelectedAgents": [
