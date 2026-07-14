@@ -111,7 +111,7 @@ update_item() {
     icon="$_icons" \
     icon.font="sketchybar-app-font:Regular:13.0" \
     icon.color="$_icon_color" \
-    label="[$prefix]: $dirs" \
+    label="[$prefix]: $count" \
     label.color="$color" \
     drawing=on
 }
