@@ -7,5 +7,11 @@ set -gx MAESTRO_HOME /Volumes/HomeX/kento/.maestro
 # Short handle.
 abbr -a mst maestro
 
-# Boot the conductor (the single maestro you talk to).
-abbr -a ma 'maestro conduct'
+# Boot the conductor (the single maestro you talk to) in the current pane.
+abbr -a ma maestro
+
+# Dev-browser controls. maf: focus (lazy-opens) this worktree's dev-browser -
+# run from inside a workspace/worktree path. mas: stop ALL maestro dev servers +
+# browsers (+ portless prune).
+abbr -a maf 'maestro browser focus'
+abbr -a mas 'maestro browser stop'
