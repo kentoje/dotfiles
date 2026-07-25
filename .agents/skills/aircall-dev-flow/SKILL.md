@@ -77,9 +77,15 @@ scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merg
 
 Prefer, in this order:
 
-1. **A repo-local worktree-setup skill/script** if the repo has one (look for a skill named like `<repo>-worktree`, a `scripts/worktree*`/`bin/wt*`, or a `Makefile`/`package.json` setup target). Use it — it handles env/install bootstrapping.
+1. **A repo-local worktree-setup skill/script** if the repo has one (look for a skill named like `<repo>-worktree`, a `scripts/worktree*`/`scripts/new-worktree*`/`bin/wt*`, or a `Makefile`/`package.json` setup target). Use it — it handles env/install bootstrapping. **Check for this first, before reaching for native `git worktree add`.**
 2. **Reuse an existing worktree** if one already matches this ticket/MR (check `git worktree list` and `<repo>/.claude-worktrees/`). Branches follow `<area>/<TICKET>-<slug>` (e.g. `react-doctor/CI-5814-friendlypopup-transform`).
-3. **Native worktree** otherwise — create one named for the ticket.
+3. **Native worktree** otherwise — create one named for the ticket, **then provision it explicitly** (see the ⚠️ box).
+
+> **⚠️ conversation-center-ext (dashboard-extensions/conversation-center-ext) — always provision, never bare.**
+> This repo carries `scripts/new-worktree.sh` and `scripts/setup-worktree.sh`. Provisioning copies gitignored-but-required files that `git worktree add` does **not** bring: `.env.local` (+ a unique `PORT`), `.claude/settings.local.json`, a `node_modules` symlink (or background `pnpm install` when lockfiles differ), and `src/graphql-env.d.ts` (gql-tada output — without it tsc/biome emit a flood of false `never` errors).
+> - **Create via the script:** `scripts/new-worktree.sh <name> [branch] [base]` (lands under `.claude/worktrees/<name>` and auto-provisions).
+> - **If a worktree was created any other way** — bare `git worktree add`, the Agent tool's `isolation: worktree`, or `maestro dispatch` — run the provisioner on it explicitly, idempotently: `bash <repo>/scripts/setup-worktree.sh <worktree-path>`.
+> - **Why you can't rely on the hook:** `setup-worktree.sh` is wired as a PostToolUse hook in the *repo's* `.claude/settings.json`. It only fires for sessions whose project root **is** that repo. From a maestro session (project root `/Volumes/HomeX/kento`) or any out-of-repo session, the hook never loads — so provisioning must be run by hand. Symptom of skipping it: missing `.env.local`, or a wall of GraphQL `never`-type errors.
 
 Then make that worktree the working directory for everything below — and write the manifest **there** (`--file <worktree>/.dev-flow.json`, the default once you `cd` in).
 

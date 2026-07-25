@@ -189,6 +189,24 @@
       "skillFolderHash": "e9f5b472dfb28d8cf29f64001b6c01ef94b8168b",
       "installedAt": "2026-07-14T19:52:59.127Z",
       "updatedAt": "2026-07-14T19:52:59.127Z"
+    },
+    "typescript-best-practices": {
+      "source": "faridz974/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/faridz974/skills.git",
+      "skillPath": "skills/typescript-best-practices/SKILL.md",
+      "skillFolderHash": "9c22f5b17c31914c686e0dacd9df7cb283546806",
+      "installedAt": "2026-07-21T13:24:13.030Z",
+      "updatedAt": "2026-07-21T13:24:13.030Z"
+    },
+    "write-discoverable-code": {
+      "source": "modem-dev/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/modem-dev/skills.git",
+      "skillPath": "write-discoverable-code/SKILL.md",
+      "skillFolderHash": "209109d21718bff6da3ebd65dfee8de582ced0ab",
+      "installedAt": "2026-07-25T19:08:35.297Z",
+      "updatedAt": "2026-07-25T19:08:35.297Z"
     }
   },
   "lastSelectedAgents": [
