@@ -59,6 +59,9 @@
     qmk
     diffnav
     yazi
+    # Python
+    python3
+    uv
   ];
 
   system.defaults = {
