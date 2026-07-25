@@ -17,6 +17,15 @@ return {
 			width = 0.95,
 			prompt_position = "top",
 		},
+		-- Always open the picked file in the window the picker was invoked from,
+		-- instead of fff's "most suitable window" heuristic that skips special
+		-- buffers (oil/terminal/quickfix) and jumps to another split.
+		-- See https://github.com/dmtrKovalenko/fff/issues/577
+		select = {
+			select_window = function(_current_buf, _action)
+				return nil
+			end,
+		},
 		keymaps = {
 			move_up = { "<Up>", "<C-k>" },
 			move_down = { "<Down>", "<C-j>" },
