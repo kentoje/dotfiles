@@ -16,6 +16,13 @@ One orchestrator for the whole loop. It is **glue + sequencing**, not new behavi
 each step hands off to the dedicated skill/tool that already does it. Your job is
 to drive the sequence, make the optional-branch decisions, and **respect the gate**.
 
+## One MR, one branch - follow-up work never forks
+
+Follow-up work on an MR that already exists happens on **that MR's own branch, in that MR's own worktree**.
+Never cut a new branch, and never open a second MR, for a ticket that already has one.
+A review comment, a red pipeline, a broken test, a missed edge case: each is a commit pushed to the existing branch, which updates the open MR automatically.
+Two steps enforce this: the ownership check in phase 2 (before any worktree is created) and `maestro adopt` in phase 6 (which keeps the work reachable afterwards).
+
 ## Autonomy contract — "auto until the first gate"
 
 Run **phases 1–4 autonomously** (ticket → worktree → implement → debug). Do **not**
@@ -75,7 +82,23 @@ scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merg
 
 ### 2. Worktree (create or reuse)
 
-Prefer, in this order:
+**First, ask whether this ticket is already in flight - before creating anything.**
+
+```bash
+maestro ls | grep -i <TICKET>
+```
+
+A matching row means a maestro task already owns this ticket's branch, worktree and MR.
+In that case **do not create a worktree and do not cut a branch**: stop, and tell the user to continue the existing work, naming the task id from the `TASK` column and the MR from the `MR` column.
+Which verb to hand them depends on the `WORKSPACE` column:
+
+- a workspace id → a virtuoso is live on it: `maestro send --task <id> --message "…"`
+- `-` → no live session: `maestro resume --task <id> --message "…"`
+
+Both continue on the existing branch and push to the existing MR, which is the whole point.
+Only when the grep comes back empty do you continue below.
+
+Then prefer, in this order:
 
 1. **A repo-local worktree-setup skill/script** if the repo has one (look for a skill named like `<repo>-worktree`, a `scripts/worktree*`/`scripts/new-worktree*`/`bin/wt*`, or a `Makefile`/`package.json` setup target). Use it — it handles env/install bootstrapping. **Check for this first, before reaching for native `git worktree add`.**
 2. **Reuse an existing worktree** if one already matches this ticket/MR (check `git worktree list` and `<repo>/.claude-worktrees/`). Branches follow `<area>/<TICKET>-<slug>` (e.g. `react-doctor/CI-5814-friendlypopup-transform`).
@@ -133,6 +156,16 @@ before shipping. Do not commit, push, or open an MR until they say go.
 - Commit and push the branch.
 - Open the MR via the **`gitlab-create-merge-request`** skill (first commit message
   becomes the title, targets `main`, `--fill -y`). Reference the ticket key.
+- **Register the work with maestro, so a follow-up can reach this MR instead of forking a new one:**
+
+  ```bash
+  maestro adopt --repo <repo-path> --task <slug> --ticket <TICKET> \
+    --branch <branch> --worktree <worktree-path> --mr <MR_URL>
+  ```
+
+  `adopt` only records what you just created - it never cuts a branch, adds a worktree, or opens an MR.
+  Skipping it is what leaves a ticket unreachable: with no task record, the only verb left later is `maestro dispatch`, which cuts a second branch and opens a duplicate MR for work that already has one.
+  Once adopted, the next round on this MR is `maestro resume --task <slug> --message "…"`, `maestro ls` lists it by ticket, and `maestro dispatch` refuses that id as a duplicate.
 - → manifest: `dev-flow-set.py phase=shipped mr.id=<ID> mr.url=<MR_URL>`
 
 ### 7. Watch the pipeline (optional — only if the user asks to "spy on the pipeline")
@@ -169,5 +202,6 @@ in its worktree. Never reimplement merging here — `--merge` only emits the han
 ## Notes
 
 - This skill **delegates** — never reinvent ticket/MR/browser steps; call the skills above.
-- Bundled code is only glue: `dev-flow-set.py` / `dev-flow-status.py` (manifest) and `watch-pipeline.sh`. Everything else is native worktree, `jira`, `agent-browser-aircall-local`, and `gitlab-create-merge-request`.
+- Bundled code is only glue: `dev-flow-set.py` / `dev-flow-status.py` (manifest) and `watch-pipeline.sh`. Everything else is native worktree, `jira`, `agent-browser-aircall-local`, `gitlab-create-merge-request`, and `maestro` (ownership check + `adopt`).
+- `.dev-flow.json` and the maestro task record answer different questions: the manifest tracks _this_ flow's phase, the maestro record makes the branch/worktree/MR addressable by any later session. Write both.
 - For merging the approved MR afterwards, hand off to the `aircall-merge-train` skill.
