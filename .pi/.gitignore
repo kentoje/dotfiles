@@ -1,0 +1,24 @@
+# Pi keeps hand-edited config and generated runtime state side by side in ~/.pi.
+# Deny everything by default so a Pi upgrade dropping a new state file next to
+# settings.json does not get silently committed. Allow back only real config.
+# Leading slashes matter: a bare `*` would also match inside agent/themes/ and
+# swallow the theme files that the rules below try to allow back.
+/*
+!/.gitignore
+!/agent/
+/agent/*
+!/agent/settings.json
+!/agent/models.json
+!/agent/themes/
+
+# Deliberately NOT tracked (all of the above is denied by `*`, listed here as the record):
+#   agent/auth.json          - provider credentials
+#   agent/trust.json         - per-machine directory trust allowlist
+#   agent/models-store.json  - fetched provider model catalogue
+#   agent/mcp-cache.json     - MCP server capability cache
+#   agent/mcp-npx-cache.json - npx resolution cache
+#   agent/run-history.jsonl  - local run history
+#   agent/sessions/          - conversation transcripts
+#   agent/npm/               - extensions installed from settings.json `packages`
+#   agent/git/               - clones of extensions installed via `pi install git:...`
+#   context-mode/            - context-mode SQLite databases

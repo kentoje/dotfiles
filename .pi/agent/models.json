@@ -1,0 +1,48 @@
+{
+  "providers": {
+    "llmgateway": {
+      "baseUrl": "https://api.llmgateway.io/v1",
+      "api": "openai-completions",
+      "apiKey": "$LLM_GATEWAY_KEY",
+      "authHeader": true,
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "fireworks/kimi-k3",
+          "name": "Kimi K3 (Fireworks, LLM Gateway)",
+          "reasoning": true,
+          "contextWindow": 1048576,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "minimal": null
+          },
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "cost": {
+            "input": 3.0,
+            "output": 15.0,
+            "cacheRead": 0.3,
+            "cacheWrite": 0
+          }
+        },
+        {
+          "id": "aircall/zai.glm-5",
+          "name": "GLM-5 (Aircall Gateway)",
+          "reasoning": false,
+          "contextWindow": 200000,
+          "maxTokens": 128000,
+          "cost": {
+            "input": 1.0,
+            "output": 3.2,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          }
+        }
+      ]
+    }
+  }
+}

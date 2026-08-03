@@ -8,3 +8,7 @@ README.md
 
 .config/nix-darwin
 .factory/settings.json
+
+# Per-machine by design: Claude Code rewrites this itself every time a
+# permission is approved, and the grants are host-specific absolute paths.
+.claude/settings.local.json
