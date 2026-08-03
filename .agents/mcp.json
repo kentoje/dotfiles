@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "fff": {
+      "command": "/Users/kento/.local/bin/fff-mcp"
+    },
+    "video-to-frames": {
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": ["run", "/Users/kento/.claude/mcp-servers/video-to-frames/server.ts"]
+    },
+    "aircall-personal-tools": {
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": ["run", "/Users/kento/.claude/mcp-servers/aircall-personal-tools/server.ts"],
+      "env": {
+        "STAGING_509_PASSWORD": "${STAGING_509_PASSWORD}"
+      }
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "Ref": {
+      "url": "https://api.ref.tools/mcp",
+      "headers": {
+        "x-ref-api-key": "${REF_MCP_API_KEY}"
+      }
+    }
+  }
+}
