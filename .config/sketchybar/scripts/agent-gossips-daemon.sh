@@ -37,7 +37,9 @@ echo '{"instances":[]}' >"$STATE_FILE"
 # Fetch all instances and write to state file
 fetch_instances() {
 	local response
-	response=$(curl -sf "$API_BASE/instances" 2>/dev/null)
+	# --max-time keeps a hung server from stalling the SSE reader, which calls
+	# this on unknown sessions.
+	response=$(curl -sf --max-time 2 "$API_BASE/instances" 2>/dev/null)
 	if [[ $? -eq 0 && -n "$response" ]]; then
 		echo "$response" | jq -c '{instances: .instances}' >"$STATE_FILE" 2>/dev/null
 		return 0
@@ -59,11 +61,14 @@ update_instance_state() {
 	exists=$(echo "$current" | jq -r --arg sid "$session_id" '.instances | map(select(.session_id == $sid)) | length')
 
 	if [[ "$exists" -gt 0 ]]; then
-		# Update existing instance
+		# Update existing instance (its "source" is already on record)
 		echo "$current" | jq -c --arg sid "$session_id" --arg st "$state" \
 			'.instances = [.instances[] | if .session_id == $sid then .state = $st else . end]' >"$STATE_FILE"
-	else
-		# Add new instance
+	elif ! fetch_instances; then
+		# Unknown session: the SSE "state" payload carries no "source", and an
+		# entry without one draws with the default (Claude) icon in the bar, so
+		# prefer a full re-fetch, which does carry it. Synthesizing the entry is
+		# only the offline fallback.
 		echo "$current" | jq -c --arg sid "$session_id" --arg st "$state" --arg dir "$directory" \
 			'.instances += [{"session_id": $sid, "state": $st, "directory": $dir}]' >"$STATE_FILE"
 	fi

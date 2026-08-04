@@ -28,13 +28,16 @@ if [[ -z "$STATE" || "$STATE" == "null" ]]; then
   exit 0
 fi
 
-# Get icons for each source
+# Get icons for each source. The pi CLI (@earendil-works/pi-coding-agent) has no
+# glyph of its own in sketchybar-app-font, so it borrows the Pi-hole logo.
 ICON_CLAUDE=$($CONFIG_DIR/plugins/icon_map_fn.sh "Claude")
 ICON_DROID=$($CONFIG_DIR/plugins/icon_map_fn.sh "Bilibili")
+ICON_PI=$($CONFIG_DIR/plugins/icon_map_fn.sh "Pi-hole Remote")
 
 # Icon colors per source
 ICON_COLOR_CLAUDE="${RED_BRIGHT:-0xffD47766}"
 ICON_COLOR_DROID="${GREEN_BRIGHT:-0xff85B695}"
+ICON_COLOR_PI="${BLUE_BRIGHT:-0xff89B3B6}"
 
 # Build combined icon string + color from unique sources in a state category.
 # $1 is a filter keyword: idle | running | perm | answer | retry
@@ -54,18 +57,24 @@ get_icons_for_state() {
       end
     ) | .source // "claude-code"] | unique | .[]
   ')
-  local icons=""
-  local has_claude=0 has_droid=0
+  local icons="" source_count=0 single_source_color=""
   while IFS= read -r src; do
     [[ -z "$src" ]] && continue
+    local icon color
     case "$src" in
-      droid) icons="${icons}${ICON_DROID}"; has_droid=1 ;;
-      *) icons="${icons}${ICON_CLAUDE}"; has_claude=1 ;;
+      pi)    icon="$ICON_PI";     color="$ICON_COLOR_PI" ;;
+      droid) icon="$ICON_DROID";  color="$ICON_COLOR_DROID" ;;
+      *)     icon="$ICON_CLAUDE"; color="$ICON_COLOR_CLAUDE" ;;
     esac
+    icons="${icons}${icon}"
+    single_source_color="$color"
+    source_count=$((source_count + 1))
   done <<< "$sources"
   _icons="$icons"
-  if [[ $has_droid -eq 1 && $has_claude -eq 0 ]]; then
-    _icon_color="$ICON_COLOR_DROID"
+  # sketchybar tints an item's whole icon string at once, so a category holding
+  # more than one agent can only pick one color: use the Claude color there.
+  if [[ $source_count -eq 1 ]]; then
+    _icon_color="$single_source_color"
   else
     _icon_color="$ICON_COLOR_CLAUDE"
   fi
