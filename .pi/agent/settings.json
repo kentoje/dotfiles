@@ -5,17 +5,47 @@
   "defaultThinkingLevel": "high",
   "theme": "melange_dark",
   "defaultProvider": "llmgateway",
-  "defaultModel": "fireworks/kimi-k3",
+  "defaultModel": "azure/gpt-5.6-luna",
   "packages": [
-    "npm:pi-web-access",
     "npm:pi-subagents",
     "npm:context-mode",
-    "npm:@juicesharp/rpiv-ask-user-question",
     "npm:@juicesharp/rpiv-todo",
     "npm:@ff-labs/pi-fff",
     "npm:pi-powerline-footer",
     "npm:pi-mcp-adapter",
-    "git:github.com/DietrichGebert/ponytail"
-  ]
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:@codexstar/pi-listen",
+    "npm:@juicesharp/rpiv-advisor",
+    "npm:@mrclrchtr/supi-prompt-suggestions",
+    "npm:@mrclrchtr/supi-settings",
+    "npm:@mrclrchtr/supi-ask-user",
+    "npm:@mrclrchtr/supi-web",
+    "npm:@mrclrchtr/supi-code-intelligence"
+  ],
+  "voice": {
+    "version": 2,
+    "enabled": true,
+    "language": "en",
+    "scope": "global",
+    "backend": "local",
+    "localModel": "parakeet-v2",
+    "toggleShortcut": "ctrl+shift+v",
+    "ttsEnabled": false,
+    "ttsBackend": "local",
+    "ttsLocalModel": "kitten-nano-en-v0_2",
+    "ttsLocalVoiceId": 0,
+    "ttsDeepgramVoiceId": "aura-asteria-en",
+    "ttsSpeed": 1,
+    "ttsAutoSpeak": true,
+    "autoSubmitOnSpeak": false,
+    "holdThresholdMs": 700,
+    "ttsDeepgramStreaming": false,
+    "ttsOnboardingShown": false,
+    "onboarding": {
+      "completed": true,
+      "schemaVersion": 2,
+      "completedAt": "2026-08-03T16:42:29.833Z",
+      "source": "migration"
+    }
+  }
 }
-

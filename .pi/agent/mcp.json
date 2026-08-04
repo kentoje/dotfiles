@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "figma-via-claude": {
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": ["run", "/Users/kento/.claude/mcp-servers/figma-via-claude/server.ts"],
+      "toolPrefix": "none",
+      "requestTimeoutMs": 240000,
+      "lifecycle": "lazy"
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "auth": "oauth",
+      "lifecycle": "lazy"
+    },
+    "slack-via-claude": {
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": ["run", "/Users/kento/.claude/mcp-servers/slack-via-claude/server.ts"],
+      "toolPrefix": "none",
+      "requestTimeoutMs": 240000,
+      "lifecycle": "lazy"
+    }
+  }
+}

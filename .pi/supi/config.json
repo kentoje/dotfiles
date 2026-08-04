@@ -1,0 +1,10 @@
+{
+  "lsp": {
+    "servers": {
+      "typescript": {
+        "command": "/Users/kento/.local/share/nvim/mason/bin/tsgo",
+        "args": ["lsp", "-stdio"]
+      }
+    }
+  }
+}

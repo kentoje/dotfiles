@@ -8,8 +8,13 @@
 !/agent/
 /agent/*
 !/agent/settings.json
+!/agent/AGENTS.md
+!/agent/SYSTEM.md
 !/agent/models.json
+!/agent/keybindings.json
+!/agent/mcp.json
 !/agent/themes/
+!/supi
 
 # Deliberately NOT tracked (all of the above is denied by `*`, listed here as the record):
 #   agent/auth.json          - provider credentials
