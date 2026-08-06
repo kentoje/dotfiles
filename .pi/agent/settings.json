@@ -5,7 +5,7 @@
   "defaultThinkingLevel": "high",
   "theme": "melange_dark",
   "defaultProvider": "llmgateway",
-  "defaultModel": "azure/gpt-5.6-luna",
+  "defaultModel": "azure/gpt-5.6-terra",
   "packages": [
     "npm:pi-subagents",
     "npm:context-mode",
