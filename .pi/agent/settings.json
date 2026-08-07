@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.83.0",
+  "lastChangelogVersion": "0.84.1",
   "showHardwareCursor": true,
   "editorPaddingX": 0,
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "max",
   "theme": "melange_dark",
   "defaultProvider": "llmgateway",
   "defaultModel": "azure/gpt-5.6-terra",
@@ -16,7 +16,6 @@
     "git:github.com/DietrichGebert/ponytail",
     "npm:@codexstar/pi-listen",
     "npm:@juicesharp/rpiv-advisor",
-    "npm:@mrclrchtr/supi-prompt-suggestions",
     "npm:@mrclrchtr/supi-settings",
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",
@@ -47,5 +46,35 @@
       "completedAt": "2026-08-03T16:42:29.833Z",
       "source": "migration"
     }
-  }
+  },
+  "powerline": {
+    "preset": "full",
+    "separator": "dot",
+    "layout": {
+      "left": [
+        "model",
+        "thinking",
+        "git",
+        "queue",
+        "custom:subagents",
+        "token_in",
+        "token_out",
+        "cost",
+        "context_pct",
+        "time_spent"
+      ],
+      "right": []
+    },
+    "customItems": [
+      {
+        "id": "subagents",
+        "statusKey": "subagent-slash",
+        "position": "left",
+        "prefix": "subagents",
+        "color": "accent"
+      }
+    ]
+  },
+  "workingVibe": "star trek",
+  "workingVibeModel": "azure/gpt-5.6-luna"
 }
