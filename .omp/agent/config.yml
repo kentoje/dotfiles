@@ -1,0 +1,18 @@
+modelRoles: 
+  default: llmgateway/azure/gpt-5.6-terra:xhigh
+  smol: azure/gpt-5.6-luna
+  slow: azure/gpt-5.6-sol:xhigh
+  plan: azure/gpt-5.6-sol:xhigh
+  commit: azure/gpt-5.6-luna
+symbolPreset: nerd
+theme: 
+  dark: melange_dark
+  light: light
+setupVersion: 1
+dev: 
+  autoqaConsent: denied
+disabledProviders: 
+  - claude
+  - claude-plugins
+  - cursor
+  - codex

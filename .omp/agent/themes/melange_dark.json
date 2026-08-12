@@ -1,0 +1,107 @@
+{
+  "$schema": "../../../.bun/install/global/node_modules/@oh-my-pi/pi-coding-agent/src/modes/theme/theme-schema.json",
+  "name": "melange_dark",
+  "vars": {
+    "bg": "#292522",
+    "float": "#34302C",
+    "sel": "#403A36",
+
+    "ui": "#B9AEA4",
+    "com": "#D5C4B3",
+    "fg": "#EEE4DB",
+
+    "red": "#E9B8AF",
+    "yellow": "#EDC579",
+    "green": "#AACCB5",
+    "cyan": "#ABC9CB",
+    "blue": "#BEC2DC",
+    "magenta": "#DDB9D4",
+
+    "dimYellow": "#ECBA8F",
+    "dimCyan": "#B1C1C0",
+
+    "bgRed": "#7D2A2F",
+    "bgGreen": "#233524"
+  },
+  "colors": {
+    "accent": "yellow",
+    "border": "ui",
+    "borderAccent": "yellow",
+    "borderMuted": "sel",
+    "success": "green",
+    "error": "red",
+    "warning": "yellow",
+    "muted": "com",
+    "dim": "ui",
+    "text": "fg",
+    "thinkingText": "com",
+
+    "selectedBg": "sel",
+    "userMessageBg": "float",
+    "userMessageText": "fg",
+    "customMessageBg": "float",
+    "customMessageText": "fg",
+    "customMessageLabel": "yellow",
+    "toolPendingBg": "float",
+    "toolSuccessBg": "bgGreen",
+    "toolErrorBg": "bgRed",
+    "toolTitle": "fg",
+    "toolOutput": "com",
+
+    "mdHeading": "yellow",
+    "mdLink": "cyan",
+    "mdLinkUrl": "ui",
+    "mdCode": "dimYellow",
+    "mdCodeBlock": "fg",
+    "mdCodeBlockBorder": "sel",
+    "mdQuote": "com",
+    "mdQuoteBorder": "ui",
+    "mdHr": "sel",
+    "mdListBullet": "yellow",
+
+    "toolDiffAdded": "green",
+    "toolDiffRemoved": "red",
+    "toolDiffContext": "ui",
+
+    "syntaxComment": "com",
+    "syntaxKeyword": "magenta",
+    "syntaxFunction": "yellow",
+    "syntaxVariable": "fg",
+    "syntaxString": "green",
+    "syntaxNumber": "dimYellow",
+    "syntaxType": "cyan",
+    "syntaxOperator": "blue",
+    "syntaxPunctuation": "ui",
+
+    "thinkingOff": "ui",
+    "thinkingMinimal": "com",
+    "thinkingLow": "cyan",
+    "thinkingMedium": "blue",
+    "thinkingHigh": "magenta",
+    "thinkingXhigh": "red",
+    "thinkingMax": "dimYellow",
+
+    "bashMode": "green",
+    "pythonMode": "yellow",
+
+    "statusLineBg": "float",
+    "statusLineSep": "ui",
+    "statusLineModel": "magenta",
+    "statusLinePath": "blue",
+    "statusLineGitClean": "green",
+    "statusLineGitDirty": "yellow",
+    "statusLineContext": "cyan",
+    "statusLineSpend": "dimCyan",
+    "statusLineStaged": "green",
+    "statusLineDirty": "yellow",
+    "statusLineUntracked": "red",
+    "statusLineOutput": "fg",
+    "statusLineCost": "dimYellow",
+    "statusLineSubagents": "magenta"
+  },
+  "export": {
+    "pageBg": "bg",
+    "cardBg": "float",
+    "infoBg": "sel"
+  }
+}

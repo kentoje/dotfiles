@@ -1,0 +1,11 @@
+# omp resolves symlinks before writing, so its runtime state lands next to the
+# real files here rather than in ~/.omp. Keep locks, credentials, and session
+# data out of the repo; only hand-authored config belongs in git.
+*.lock
+agent.db*
+history.db*
+models.db*
+sessions/
+terminal-sessions/
+blobs/
+logs/
