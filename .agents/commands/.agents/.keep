@@ -1,0 +1,3 @@
+Marker directory. Do not delete.
+It stops pi-subagents scanning ../ for agents. See ~/.agents/roles/README.md.
+Not a .md file on purpose: Claude Code would list it as a slash command.

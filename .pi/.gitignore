@@ -8,13 +8,27 @@
 !/agent/
 /agent/*
 !/agent/settings.json
+# Personal instructions live in AGENTS.md, deliberately NOT SYSTEM.md: pi *replaces*
+# its whole default system prompt with SYSTEM.md, so a preferences file there silently
+# drops every tool-usage instruction pi ships with. AGENTS.md layers instead.
+# Use APPEND_SYSTEM.md only for rules that must sit above project context files.
 !/agent/AGENTS.md
-!/agent/SYSTEM.md
+!/agent/APPEND_SYSTEM.md
 !/agent/models.json
 !/agent/keybindings.json
 !/agent/mcp.json
 !/agent/themes/
 !/supi
+
+# The experimental RLM profile, selected by PI_CODING_AGENT_DIR=~/.pi/agent-rlm
+# (the `pii` fish abbr). Everything else in it is a symlink back to agent/.
+!/agent-rlm/
+/agent-rlm/*
+!/agent-rlm/settings.json
+!/agent-rlm/README.md
+!/agent-rlm/AGENTS.md
+!/agent-rlm/lib/
+!/agent-rlm/docs/
 
 # Deliberately NOT tracked (all of the above is denied by `*`, listed here as the record):
 #   agent/auth.json          - provider credentials
@@ -26,4 +40,5 @@
 #   agent/sessions/          - conversation transcripts
 #   agent/npm/               - extensions installed from settings.json `packages`
 #   agent/git/               - clones of extensions installed via `pi install git:...`
+#   agent-rlm/sessions/      - RLM-profile conversation transcripts
 #   context-mode/            - context-mode SQLite databases

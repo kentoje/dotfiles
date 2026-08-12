@@ -40,6 +40,12 @@ abbr :wq exit
 
 abbr op opencode
 abbr dro droid
+# Experimental pi profile: RLM mode (one `execute` tool, persistent Bun TS evaluator).
+# PI_CODING_AGENT_DIR swaps ~/.pi/agent for ~/.pi/agent-rlm, which has its own
+# settings.json (trimmed package list) and symlinks everything else back.
+abbr pii "env PI_CODING_AGENT_DIR=\$HOME/.pi/agent-rlm PI_RLM_SUBAGENT_MODEL=llmgateway/azure/gpt-5.6-sol pi --rlm"
+# Launch pi as a named role from ~/.agents/roles. `pir list` shows them.
+abbr pir pi-role
 abbr wm workmux
 abbr cmra claude-mr-approver
 abbr pt portless

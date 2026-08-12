@@ -109,37 +109,56 @@ function capTextSize(text: string): string {
  * Returns the connector tool's own output, never the subprocess model's prose summary.
  *
  * Pairs tool_use ids with tool_result blocks so the ToolSearch call that always
- * precedes the connector call cannot be mistaken for the answer. Large results are
- * spilled to a file by Claude Code, so the saved path is followed and read here
- * rather than leaving the subprocess to read it (Read is denied on purpose).
+ * precedes the connector call cannot be mistaken for the answer. Matches the exact
+ * tool name rather than the connector prefix, so a subprocess that called a different
+ * tool of the same connector fails loudly instead of answering a different question.
+ *
+ * The LAST matching result wins. When one session calls the connector tool more than
+ * once, the later call is the corrective one, and returning the first would hand back
+ * the very response that provoked the retry.
+ *
+ * Large results are spilled to a file by Claude Code, so the saved path is followed and
+ * read here rather than leaving the subprocess to read it (Read is denied on purpose).
  * Image blocks are passed through, so screenshot tools keep working.
  */
-function extractConnectorToolResult(
+export function extractConnectorToolResult(
   messages: ClaudeStreamMessage[],
-  connectorToolPrefix: string
+  connectorToolPrefix: string,
+  connectorTool: string
 ): BridgeContentBlock[] {
-  const connectorToolUseIds = new Set<string>();
+  const connectorToolName = `${connectorToolPrefix}${connectorTool}`;
+  const requestedToolUseIds = new Set<string>();
+  const otherConnectorToolsCalled = new Set<string>();
   for (const message of messages) {
     if (message.type !== "assistant") continue;
     for (const block of message.message?.content ?? []) {
-      if (block.type === "tool_use" && String(block.name).startsWith(connectorToolPrefix)) {
-        connectorToolUseIds.add(String(block.id));
-      }
+      if (block.type !== "tool_use") continue;
+      const toolName = String(block.name);
+      if (toolName === connectorToolName) requestedToolUseIds.add(String(block.id));
+      else if (toolName.startsWith(connectorToolPrefix)) otherConnectorToolsCalled.add(toolName);
     }
   }
 
+  let lastResultContent: unknown;
+  let sawResult = false;
   for (const message of messages) {
     if (message.type !== "user") continue;
     for (const block of message.message?.content ?? []) {
       if (block.type !== "tool_result") continue;
-      if (!connectorToolUseIds.has(String(block.tool_use_id))) continue;
-      return renderToolResultContent(block.content);
+      if (!requestedToolUseIds.has(String(block.tool_use_id))) continue;
+      lastResultContent = block.content;
+      sawResult = true;
     }
   }
+  if (sawResult) return renderToolResultContent(lastResultContent);
 
   const finalMessage = messages.find((m) => m.type === "result");
+  const wrongToolNote =
+    otherConnectorToolsCalled.size > 0
+      ? ` It called ${[...otherConnectorToolsCalled].join(", ")} instead.`
+      : "";
   throw new Error(
-    `Connector bridge never reached ${connectorToolPrefix} (subtype=${finalMessage?.subtype}). ` +
+    `Connector bridge never reached ${connectorToolName} (subtype=${finalMessage?.subtype}).${wrongToolNote} ` +
       `Subprocess said: ${String(finalMessage?.result).slice(0, 300)}`
   );
 }
@@ -246,13 +265,28 @@ export async function askClaudeCodeForConnector(
     });
   });
 
-  return extractConnectorToolResult(parseClaudeJsonOutput(raw), request.connectorToolPrefix);
+  return extractConnectorToolResult(
+    parseClaudeJsonOutput(raw),
+    request.connectorToolPrefix,
+    request.connectorTool
+  );
 }
 
-/** Wraps a bridge call in the MCP content envelope, surfacing failures as tool errors. */
+/** Wraps one bridge call in the MCP content envelope, surfacing failures as tool errors. */
 export async function runConnectorBridgeTool(request: ConnectorBridgeRequest) {
+  return toMcpToolResult(() => askClaudeCodeForConnector(request));
+}
+
+/**
+ * Wraps any sequence of bridge calls in the MCP content envelope.
+ *
+ * Servers that need more than one bridge call per tool - such as Figma declining the
+ * Code Connect mapping prompt and re-requesting the design - use this so failures still
+ * reach the caller as tool errors rather than as rejected promises.
+ */
+export async function toMcpToolResult(produceContentBlocks: () => Promise<BridgeContentBlock[]>) {
   try {
-    return { content: await askClaudeCodeForConnector(request) };
+    return { content: await produceContentBlocks() };
   } catch (error) {
     return {
       content: [

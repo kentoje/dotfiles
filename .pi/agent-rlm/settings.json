@@ -7,24 +7,11 @@
   "defaultProvider": "llmgateway",
   "defaultModel": "azure/gpt-5.6-terra",
   "packages": [
-    "npm:pi-subagents",
-    "npm:context-mode",
-    "npm:@juicesharp/rpiv-todo",
-    "npm:@ff-labs/pi-fff",
+    "npm:@shift-labs/pi-rlm",
     "npm:pi-powerline-footer",
-    "npm:pi-mcp-adapter",
-    "git:github.com/DietrichGebert/ponytail",
     "npm:@codexstar/pi-listen",
-    "npm:@juicesharp/rpiv-advisor",
-    "npm:@mrclrchtr/supi-settings",
-    "npm:@mrclrchtr/supi-ask-user",
-    "npm:@mrclrchtr/supi-web",
-    "npm:@mrclrchtr/supi-code-intelligence",
-    "npm:@shift-labs/pi-rlm"
+    "npm:@mrclrchtr/supi-settings"
   ],
-  "subagents": {
-    "disableBuiltins": true
-  },
   "voice": {
     "version": 2,
     "enabled": true,
@@ -60,7 +47,6 @@
         "thinking",
         "git",
         "queue",
-        "custom:subagents",
         "token_in",
         "token_out",
         "cost",
@@ -68,16 +54,8 @@
         "time_spent"
       ],
       "right": []
-    },
-    "customItems": [
-      {
-        "id": "subagents",
-        "statusKey": "subagent-slash",
-        "position": "left",
-        "prefix": "subagents",
-        "color": "accent"
-      }
-    ]
-  }
+    }
+  },
+  "workingVibe": "star trek",
+  "workingVibeModel": "azure/gpt-5.6-luna"
 }
-

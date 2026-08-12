@@ -1,2 +1,4 @@
 **/.claude/settings.local.json
 .dev-flow.json
+# pi-rlm writes namespace snapshots and subagent output into the cwd
+.pi-rlm/

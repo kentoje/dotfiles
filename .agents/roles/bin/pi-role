@@ -1,0 +1,74 @@
+#!/usr/bin/env bun
+/**
+ * Launches pi as a named role: pi-role architect "plan the call panel refactor"
+ *
+ * A role is a flag bundle over plain pi, deliberately not a separate
+ * PI_CODING_AGENT_DIR profile - the default profile is where the packages live, so
+ * swapping it would silently strip FFF search and the MCP servers from every role.
+ *
+ * Everything after the role name is passed to pi untouched, so -p, @files, --continue
+ * and the rest keep working.
+ */
+
+import { spawnSync } from "node:child_process";
+import { buildPiArgsForRole, listAgentRoleNames, loadAgentRole } from "../lib/load-agent-role.ts";
+
+const [command, ...rest] = process.argv.slice(2);
+
+// A bad role name or a malformed role file is a user error, not a crash: print the
+// message the parser wrote and exit, rather than a Bun stack trace.
+process.on("uncaughtException", (error: Error) => {
+	console.error(error.message);
+	process.exit(1);
+});
+
+function printUsage(): void {
+	console.log("Usage: pi-role <role> [pi args...]   Launch pi as that role");
+	console.log("       pi-role list                  List available roles");
+	console.log("       pi-role show <role>           Print the pi flags a role expands to");
+	console.log(`\nRoles: ${listAgentRoleNames().join(", ") || "none"}`);
+}
+
+if (!command || command === "--help" || command === "-h") {
+	printUsage();
+	process.exit(command ? 0 : 1);
+}
+
+if (command === "list") {
+	for (const name of listAgentRoleNames()) {
+		const role = loadAgentRole(name);
+		// `tools` is an allowlist, so a role writes only if it names a writing tool.
+		const canWrite = role.tools.length === 0
+			? !role.excludeTools.includes("write")
+			: role.tools.some((tool) => tool === "write" || tool === "edit");
+		const writes = canWrite ? "writes" : "read-only";
+		console.log(
+			`${name.padEnd(16)} ${(role.model ?? "default model").padEnd(34)} ${(role.thinking ?? "-").padEnd(6)} ${writes.padEnd(10)} ${role.description}`,
+		);
+	}
+	process.exit(0);
+}
+
+if (command === "show") {
+	const roleName = rest[0];
+	if (!roleName) {
+		console.error("pi-role show needs a role name");
+		process.exit(1);
+	}
+	const role = loadAgentRole(roleName);
+	const args = buildPiArgsForRole(role);
+	// The prompt body is long; show its size rather than reprinting the file.
+	const shown = args.map((arg) => (arg === role.prompt ? `<${role.prompt.length} chars of role prompt>` : arg));
+	console.log(`pi ${shown.join(" ")}`);
+	if (role.hostOnly) console.log("\nhostOnly: needs a browser and a dev server, do not sandbox this role.");
+	process.exit(0);
+}
+
+const role = loadAgentRole(command);
+if (role.hostOnly && process.env.PI_ROLE_SANDBOXED === "1") {
+	console.error(`Role "${role.name}" is hostOnly: it needs a browser and a dev server, and cannot run sandboxed.`);
+	process.exit(1);
+}
+
+const result = spawnSync("pi", [...buildPiArgsForRole(role), ...rest], { stdio: "inherit" });
+process.exit(result.status ?? 1);

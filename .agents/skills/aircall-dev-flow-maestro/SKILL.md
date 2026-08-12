@@ -1,33 +1,39 @@
 ---
-name: aircall-dev-flow
+name: aircall-dev-flow-maestro
 description: >
-  Orchestrates Kento's per-ticket dev loop end-to-end in this session: optional
-  Jira ticket → create/reuse a git worktree → implement → debug in the browser →
-  commit, push, open the MR → optionally watch the pipeline. Runs autonomously
-  through setup and implementation, then STOPS at a readiness gate before
-  shipping. Use when the user wants to start work on a ticket/feature/fix, "spin
-  up a worktree and implement", "take this from ticket to MR", or kick off the
-  dev flow. Delegates each step to existing skills — it does not reimplement
-  them. For work that maestro owns or should own, use `aircall-dev-flow-maestro`.
+  The per-ticket dev loop for work that maestro owns: ticket → worktree →
+  implement → debug → gate → MR, with a maestro ownership check before any
+  worktree is created and `maestro adopt` after the MR exists. Use when the
+  ticket is already a maestro task, when a virtuoso may be live on it, or when
+  the work should stay reachable by `maestro resume` later. For a one-off ticket
+  in this session with no maestro involvement, use `aircall-dev-flow` instead.
 ---
 
-# Aircall Dev Flow
+# Aircall Dev Flow (maestro-owned)
 
-One orchestrator for the whole loop. It is **glue + sequencing**, not new behaviour:
-each step hands off to the dedicated skill/tool that already does it. Your job is
-to drive the sequence, make the optional-branch decisions, and **respect the gate**.
+Same loop as [`aircall-dev-flow`](../aircall-dev-flow/SKILL.md), with maestro as the
+system of record for who owns a branch, a worktree and an MR. It is **glue +
+sequencing**, not new behaviour: each step hands off to the dedicated skill/tool that
+already does it. Your job is to drive the sequence, make the optional-branch decisions,
+and **respect the gate**.
 
-This is the plain flow: the worktree and its `.dev-flow.json` manifest are the only
-record of the work. If the ticket is tracked as a maestro task, or a virtuoso may be
-live on it, use [`aircall-dev-flow-maestro`](../aircall-dev-flow-maestro/SKILL.md)
-instead — it adds an ownership check before phase 2 and `maestro adopt` after phase 6.
+Pick this skill over the plain one when maestro is (or should be) tracking the work.
+The two differences are the ownership check in phase 2 and `maestro adopt` in phase 6;
+everything else is identical.
+
+> **The bundled scripts are not duplicated.** All three live in the sibling skill and are
+> referenced from there, always as `~/.agents/skills/aircall-dev-flow/scripts/`. The path is
+> written home-anchored rather than skill-relative on purpose: phase 2 makes the *worktree*
+> the working directory for everything below, so a `../aircall-dev-flow/…` path would resolve
+> next to the worktree and every manifest write would fail. `~/.claude/skills/…` is the same
+> tree if you prefer it.
 
 ## One MR, one branch - follow-up work never forks
 
 Follow-up work on an MR that already exists happens on **that MR's own branch, in that MR's own worktree**.
 Never cut a new branch, and never open a second MR, for a ticket that already has one.
 A review comment, a red pipeline, a broken test, a missed edge case: each is a commit pushed to the existing branch, which updates the open MR automatically.
-The in-flight check at the top of phase 2 is what enforces this: run it before creating anything.
+Two steps enforce this: the ownership check in phase 2 (before any worktree is created) and `maestro adopt` in phase 6 (which keeps the work reachable afterwards).
 
 ## Autonomy contract — "auto until the first gate"
 
@@ -39,15 +45,15 @@ user _"is it good?"_ before any commit/push/MR. Never cross the gate on your own
 
 Each worktree carries a `.dev-flow.json` manifest so the flow is **resumable** (after
 `/clear`/`/resume`), **visible across parallel sessions**, and feeds the merge-train.
-Update it with the bundled helper after every phase transition — never hand-write the JSON:
+Update it with the shared helper after every phase transition — never hand-write the JSON:
 
 ```bash
-scripts/dev-flow-set.py phase=implementing
-scripts/dev-flow-set.py ticket.key=CI-5814 ticket.epic=csat ticket.storyPoints=3
-scripts/dev-flow-set.py slug=CI-5814-friendlypopup branch=react-doctor/CI-5814-friendlypopup repo=aircall/dashboard-extensions/conversation-center-ext
-scripts/dev-flow-set.py gate.approved=true gate.verdict="ship it"
-scripts/dev-flow-set.py mr.id=1070 mr.url=<MR_URL>
-scripts/dev-flow-set.py pipeline.status=failed
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=implementing
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py ticket.key=CI-5814 ticket.epic=csat ticket.storyPoints=3
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py slug=CI-5814-friendlypopup branch=react-doctor/CI-5814-friendlypopup repo=aircall/dashboard-extensions/conversation-center-ext
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py gate.approved=true gate.verdict="ship it"
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py mr.id=1070 mr.url=<MR_URL>
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py pipeline.status=failed
 ```
 
 `phase` vocabulary (in order): `scoped → worktree → implementing → debugging → gated → approved → shipped → watching → done`.
@@ -55,9 +61,9 @@ scripts/dev-flow-set.py pipeline.status=failed
 **On resume:** if `.dev-flow.json` exists in the worktree, read it first and continue from `phase` instead of restarting. The board view across all worktrees/repos:
 
 ```bash
-scripts/dev-flow-status.py            # set DEV_FLOW_ROOTS to scan all repos (aliased to `dfs`)
-scripts/dev-flow-status.py --ready    # gate-approved + green MR URLs (one per line, pipeable)
-scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merge-train instruction
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-status.py            # set DEV_FLOW_ROOTS to scan all repos (aliased to `dfs`)
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-status.py --ready    # gate-approved + green MR URLs (one per line, pipeable)
+~/.agents/skills/aircall-dev-flow/scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merge-train instruction
 ```
 
 > Keep `.dev-flow.json` out of commits (it's local state) — add it to the repo's `.git/info/exclude` or your global gitignore.
@@ -91,17 +97,18 @@ scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merg
 **First, ask whether this ticket is already in flight - before creating anything.**
 
 ```bash
-scripts/dev-flow-status.py | grep -i <TICKET>   # any worktree already carrying a manifest
-git worktree list | grep -i <TICKET>            # any worktree on this repo
-glab mr list --search <TICKET>                  # any MR already open for it
+maestro ls | grep -i <TICKET>
 ```
 
-A hit in any of the three means the work already has a branch, a worktree and possibly an MR.
-In that case **do not create a worktree and do not cut a branch**: `cd` into the existing
-worktree, read its `.dev-flow.json`, and continue from the `phase` recorded there.
-Pushing to that branch updates the open MR automatically, which is the whole point.
+A matching row means a maestro task already owns this ticket's branch, worktree and MR.
+In that case **do not create a worktree and do not cut a branch**: stop, and tell the user to continue the existing work, naming the task id from the `TASK` column and the MR from the `MR` column.
+Which verb to hand them depends on the `WORKSPACE` column:
 
-Only when all three come back empty do you continue below.
+- a workspace id → a virtuoso is live on it: `maestro send --task <id> --message "…"`
+- `-` → no live session: `maestro resume --task <id> --message "…"`
+
+Both continue on the existing branch and push to the existing MR, which is the whole point.
+Only when the grep comes back empty do you continue below.
 
 Then prefer, in this order:
 
@@ -112,8 +119,8 @@ Then prefer, in this order:
 > **⚠️ conversation-center-ext (dashboard-extensions/conversation-center-ext) — always provision, never bare.**
 > This repo carries `scripts/new-worktree.sh` and `scripts/setup-worktree.sh`. Provisioning copies gitignored-but-required files that `git worktree add` does **not** bring: `.env.local` (+ a unique `PORT`), `.claude/settings.local.json`, a `node_modules` symlink (or background `pnpm install` when lockfiles differ), and `src/graphql-env.d.ts` (gql-tada output — without it tsc/biome emit a flood of false `never` errors).
 > - **Create via the script:** `scripts/new-worktree.sh <name> [branch] [base]` (lands under `.claude/worktrees/<name>` and auto-provisions).
-> - **If a worktree was created any other way** — bare `git worktree add` or the Agent tool's `isolation: worktree` — run the provisioner on it explicitly, idempotently: `bash <repo>/scripts/setup-worktree.sh <worktree-path>`.
-> - **Why you can't rely on the hook:** `setup-worktree.sh` is wired as a PostToolUse hook in the *repo's* `.claude/settings.json`. It only fires for sessions whose project root **is** that repo. From any out-of-repo session the hook never loads — so provisioning must be run by hand. Symptom of skipping it: missing `.env.local`, or a wall of GraphQL `never`-type errors.
+> - **If a worktree was created any other way** — bare `git worktree add`, the Agent tool's `isolation: worktree`, or `maestro dispatch` — run the provisioner on it explicitly, idempotently: `bash <repo>/scripts/setup-worktree.sh <worktree-path>`.
+> - **Why you can't rely on the hook:** `setup-worktree.sh` is wired as a PostToolUse hook in the *repo's* `.claude/settings.json`. It only fires for sessions whose project root **is** that repo. From a maestro session (project root `/Volumes/HomeX/kento`) or any out-of-repo session, the hook never loads — so provisioning must be run by hand. Symptom of skipping it: missing `.env.local`, or a wall of GraphQL `never`-type errors.
 
 Then make that worktree the working directory for everything below — and write the manifest **there** (`--file <worktree>/.dev-flow.json`, the default once you `cd` in).
 
@@ -161,23 +168,30 @@ before shipping. Do not commit, push, or open an MR until they say go.
 - Commit and push the branch.
 - Open the MR via the **`gitlab-create-merge-request`** skill (first commit message
   becomes the title, targets `main`, `--fill -y`). Reference the ticket key.
-- **Record the MR in the manifest immediately.** Here the manifest is the *only* record
-  that links this ticket to its branch, worktree and MR: leave `mr.url` unset and the
-  next session has nothing to find, and the in-flight check in phase 2 will happily let
-  it cut a second branch for work that already has one.
+- **Register the work with maestro, so a follow-up can reach this MR instead of forking a new one:**
+
+  ```bash
+  maestro adopt --repo <repo-path> --task <slug> --ticket <TICKET> \
+    --branch <branch> --worktree <worktree-path> --mr <MR_URL>
+  ```
+
+  `adopt` only records what you just created - it never cuts a branch, adds a worktree, or opens an MR.
+  Skipping it is what leaves a ticket unreachable: with no task record, the only verb left later is `maestro dispatch`, which cuts a second branch and opens a duplicate MR for work that already has one.
+  Once adopted, the next round on this MR is `maestro resume --task <slug> --message "…"`, `maestro ls` lists it by ticket, and `maestro dispatch` refuses that id as a duplicate.
 - → manifest: `dev-flow-set.py phase=shipped mr.id=<ID> mr.url=<MR_URL>`
 
 ### 7. Watch the pipeline (optional — only if the user asks to "spy on the pipeline")
 
-Run the bundled poller against the MR's branch:
+Run the shared poller against the MR's branch:
 
 ```bash
-scripts/watch-pipeline.sh            # current branch
-scripts/watch-pipeline.sh -b <branch> -R <owner/repo>
+~/.agents/skills/aircall-dev-flow/scripts/watch-pipeline.sh            # current branch
+~/.agents/skills/aircall-dev-flow/scripts/watch-pipeline.sh -b <branch> -R <owner/repo>
 ```
 
 It polls `glab ci get` until the pipeline reaches a terminal state and prints
-failing jobs if it fails. See [scripts/watch-pipeline.sh](scripts/watch-pipeline.sh).
+failing jobs if it fails. See [the sibling skill's script](../aircall-dev-flow/scripts/watch-pipeline.sh)
+(a document link, relative to this file - the runnable path is the home-anchored one above).
 
 - → manifest: `dev-flow-set.py phase=watching`, then record the terminal result —
   `dev-flow-set.py pipeline.status=success phase=done` (or `pipeline.status=failed`, looping back to phase 3).
@@ -201,6 +215,10 @@ in its worktree. Never reimplement merging here — `--merge` only emits the han
 ## Notes
 
 - This skill **delegates** — never reinvent ticket/MR/browser steps; call the skills above.
-- Bundled code is only glue: `dev-flow-set.py` / `dev-flow-status.py` (manifest) and `watch-pipeline.sh`. Everything else is native worktree, `jira`, `agent-browser-aircall-local`, and `gitlab-create-merge-request`. These three scripts are shared with `aircall-dev-flow-maestro`, which references them from here rather than carrying its own copies — so a change to the manifest format lands in both flows at once.
-- `.dev-flow.json` is the whole record here, which is why every phase writes it. `aircall-dev-flow-maestro` additionally keeps a maestro task record, so the branch/worktree/MR stays addressable by any later session; if you find yourself wanting that, you picked the wrong skill.
+- Bundled code is only glue, and it is **not bundled here**: `dev-flow-set.py` /
+  `dev-flow-status.py` (manifest) and `watch-pipeline.sh` all live in `aircall-dev-flow`
+  and are shared, so the two skills can never disagree about the manifest format.
+  Everything else is native worktree, `jira`, `agent-browser-aircall-local`,
+  `gitlab-create-merge-request`, and `maestro` (ownership check + `adopt`).
+- `.dev-flow.json` and the maestro task record answer different questions: the manifest tracks _this_ flow's phase, the maestro record makes the branch/worktree/MR addressable by any later session. Write both.
 - For merging the approved MR afterwards, hand off to the `aircall-merge-train` skill.

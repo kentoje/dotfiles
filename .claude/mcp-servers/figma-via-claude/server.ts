@@ -1,7 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { runConnectorBridgeTool } from "../claude-connector-bridge/ask-claude-code-for-connector.js";
+import {
+  runConnectorBridgeTool,
+  toMcpToolResult,
+} from "../claude-connector-bridge/ask-claude-code-for-connector.js";
+import { fetchFigmaDesignContext } from "./fetch-figma-design-context.js";
+import { FIGMA_TOOL_PREFIX, FIGMA_WRITE_TOOLS } from "./figma-connector-tools.js";
 
 /**
  * Gives Pi read access to Figma by borrowing Claude Code's Figma connector session.
@@ -18,21 +23,7 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
-const FIGMA_TOOL_PREFIX = "mcp__claude_ai_Figma__";
-
 const COST_NOTE = "Costs ~$0.04 and 10-20s per call (boots a headless Claude Code session).";
-
-/** Figma connector tools that create or modify Figma content, or write files locally. */
-const FIGMA_WRITE_TOOLS = [
-  "mcp__claude_ai_Figma__use_figma",
-  "mcp__claude_ai_Figma__create_new_file",
-  "mcp__claude_ai_Figma__upload_assets",
-  "mcp__claude_ai_Figma__download_assets",
-  "mcp__claude_ai_Figma__generate_diagram",
-  "mcp__claude_ai_Figma__export_video",
-  "mcp__claude_ai_Figma__add_code_connect_map",
-  "mcp__claude_ai_Figma__send_code_connect_mappings",
-];
 
 const figmaUrl = z
   .string()
@@ -43,7 +34,7 @@ const figmaUrl = z
 
 server.tool(
   "figma_get_design_context",
-  `Get the design context for a Figma node: structure, styles, and generated markup, for implementing it in code. ${COST_NOTE}`,
+  `Get the design context for a Figma node: structure, styles, and generated markup, for implementing it in code. ${COST_NOTE} Rarely costs a second call, when Figma's Code Connect mapping prompt has to be declined.`,
   {
     figma_url: figmaUrl,
     client_frameworks: z
@@ -51,17 +42,24 @@ server.tool(
       .optional()
       .describe("Target frameworks, e.g. 'react,tailwind' - shapes the generated markup"),
     client_languages: z.string().optional().describe("Target languages, e.g. 'typescript,css'"),
+    disable_code_connect: z
+      .boolean()
+      .optional()
+      .describe(
+        "Leave unset. Set true only to skip Code Connect entirely, which drops the mapped " +
+          "codebase component snippets from the output; Figma's Code Connect mapping prompt is " +
+          "already declined automatically."
+      ),
   },
-  ({ figma_url, client_frameworks, client_languages }) =>
-    runConnectorBridgeTool({
-      connectorToolPrefix: FIGMA_TOOL_PREFIX,
-      connectorTool: "get_design_context",
-      writeToolsDenied: FIGMA_WRITE_TOOLS,
-      instruction:
-        `Use the Figma URL ${JSON.stringify(figma_url)}` +
-        `${client_frameworks ? `, clientFrameworks ${JSON.stringify(client_frameworks)}` : ""}` +
-        `${client_languages ? `, clientLanguages ${JSON.stringify(client_languages)}` : ""}.`,
-    })
+  ({ figma_url, client_frameworks, client_languages, disable_code_connect }) =>
+    toMcpToolResult(() =>
+      fetchFigmaDesignContext({
+        figmaUrl: figma_url,
+        clientFrameworks: client_frameworks,
+        clientLanguages: client_languages,
+        disableCodeConnect: disable_code_connect,
+      })
+    )
 );
 
 server.tool(
