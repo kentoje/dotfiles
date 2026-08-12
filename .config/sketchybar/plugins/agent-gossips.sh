@@ -28,16 +28,18 @@ if [[ -z "$STATE" || "$STATE" == "null" ]]; then
   exit 0
 fi
 
-# Get icons for each source. The pi CLI (@earendil-works/pi-coding-agent) has no
-# glyph of its own in sketchybar-app-font, so it borrows the Pi-hole logo.
+# OMP uses the Greek pi glyph rendered by Hack Nerd Font, matching its terminal
+# identity without borrowing a vendor app icon.
 ICON_CLAUDE=$($CONFIG_DIR/plugins/icon_map_fn.sh "Claude")
 ICON_DROID=$($CONFIG_DIR/plugins/icon_map_fn.sh "Bilibili")
 ICON_PI=$($CONFIG_DIR/plugins/icon_map_fn.sh "Pi-hole Remote")
+ICON_OMP="π"
 
 # Icon colors per source
 ICON_COLOR_CLAUDE="${RED_BRIGHT:-0xffD47766}"
 ICON_COLOR_DROID="${GREEN_BRIGHT:-0xff85B695}"
 ICON_COLOR_PI="${BLUE_BRIGHT:-0xff89B3B6}"
+ICON_COLOR_OMP="${YELLOW_BRIGHT:-0xffEBC06D}"
 
 # Build combined icon string + color from unique sources in a state category.
 # $1 is a filter keyword: idle | running | perm | answer | retry
@@ -57,26 +59,34 @@ get_icons_for_state() {
       end
     ) | .source // "claude-code"] | unique | .[]
   ')
-  local icons="" source_count=0 single_source_color=""
+  local icons="" source_count=0 single_source_color="" single_source_font="sketchybar-app-font:Regular:13.0"
   while IFS= read -r src; do
     [[ -z "$src" ]] && continue
-    local icon color
+    local icon color font="sketchybar-app-font:Regular:13.0"
     case "$src" in
+      omp)
+        icon="$ICON_OMP"
+        color="$ICON_COLOR_OMP"
+        font="Hack Nerd Font:Bold:16.0"
+        ;;
       pi)    icon="$ICON_PI";     color="$ICON_COLOR_PI" ;;
       droid) icon="$ICON_DROID";  color="$ICON_COLOR_DROID" ;;
       *)     icon="$ICON_CLAUDE"; color="$ICON_COLOR_CLAUDE" ;;
     esac
     icons="${icons}${icon}"
     single_source_color="$color"
+    single_source_font="$font"
     source_count=$((source_count + 1))
   done <<< "$sources"
   _icons="$icons"
-  # sketchybar tints an item's whole icon string at once, so a category holding
-  # more than one agent can only pick one color: use the Claude color there.
+  # Sketchybar can use one icon font and one tint per item. Preserve the
+  # application icon font when a category combines sources.
   if [[ $source_count -eq 1 ]]; then
     _icon_color="$single_source_color"
+    _icon_font="$single_source_font"
   else
     _icon_color="$ICON_COLOR_CLAUDE"
+    _icon_font="sketchybar-app-font:Regular:13.0"
   fi
 }
 
@@ -118,7 +128,7 @@ update_item() {
 
   sketchybar --set "$item" \
     icon="$_icons" \
-    icon.font="sketchybar-app-font:Regular:13.0" \
+    icon.font="$_icon_font" \
     icon.color="$_icon_color" \
     label="[$prefix]: $count" \
     label.color="$color" \
