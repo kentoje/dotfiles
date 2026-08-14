@@ -18,8 +18,8 @@ already does it. Your job is to drive the sequence, make the optional-branch dec
 and **respect the gate**.
 
 Pick this skill over the plain one when maestro is (or should be) tracking the work.
-The two differences are the ownership check in phase 2 and `maestro adopt` in phase 6;
-everything else is identical.
+The differences are the ownership check in phase 2, `maestro adopt` in phase 6, and asking maestro
+for the dev URL in phase 4; everything else is identical, and the shared rules live in the sibling.
 
 > **`dev-flow-set` is not a command.** It is a script at that exact path, on nobody's PATH,
 > under no shorter name. Write the path in full every time - and if you ever ask another
@@ -94,8 +94,10 @@ Update it with the shared helper after every phase transition — never hand-wri
 - → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=scoped ticket.key=<KEY> ticket.epic=<EPIC> ticket.storyPoints=<N>`
 
 > **Creating the ticket (REST recipe — the CLI can't do sprints):** token is in the `$JIRA_API_TOKEN` env var (not the keychain).
-> The account email comes from `EMAIL=$(jira me)` — **not** from `$USER_EMAIL`, which is unset in most
-> shells here. Basic auth with an empty username returns `401`, which reads exactly like an expired
+> Auth for ALL THREE steps below is `-u "$(jira me):$JIRA_API_TOKEN"` — the email comes from `jira me`,
+> **not** from `$USER_EMAIL`, which is unset in most
+> shells here (`jira me` is a local config read, ~20ms, so calling it per curl costs nothing).
+> Basic auth with an empty username returns `401`, which reads exactly like an expired
 > token: that misdiagnosis stopped a ticket being created and reported "refresh your token" to the
 > user, when the token was fine (maestro docs/postmortem-ci-6569-user-column.md).
 > 1. Active sprint: `curl -u "$(jira me):$JIRA_API_TOKEN" "https://aircall-product.atlassian.net/rest/agile/1.0/board/4795/sprint?state=active"` → sprint id (e.g. `21043`).
@@ -158,13 +160,23 @@ portless run                   # runs the repo's `dev` script through the proxy 
 URL=$(portless get <project>)  # -> https://<branch>.<project>.localhost (worktree prefix auto-applied)
 ```
 
-**When maestro owns the task, ask maestro instead** — `URL=$(maestro dev-url --task <id>)`
-starts the server if nothing is serving and prints the URL alone. It owns the whole
-resolution ladder (the log portless prints, then `portless list` under three candidate
-names), which is worth more than it sounds: portless names the subdomain from the git
-BRANCH, not the task, so there is no formula to guess. A virtuoso told to "start the dev
-server through portless" without that command got `exit=127` three times and ended up
-hand-writing a login-shell PATH wrapper.
+**When maestro owns the task, ask maestro instead:**
+
+```bash
+URL=$(maestro dev-url --task <id>) || URL=""     # `unknown command "dev-url"` => this
+[ -n "$URL" ] || URL=$(portless get <project>)   # maestro predates it; fall back above
+```
+
+It starts the server if nothing is serving, prints the URL alone, and exits non-zero rather
+than answer for a server that did not start. Worth asking for because portless names the
+subdomain from the git BRANCH, not the task, so there is no formula to guess. The fallback
+matters: an unknown subcommand is invisible to `command -v maestro`, and an unguarded
+`$(…)` would leave `$URL` empty and hand the browser nothing - which reads exactly like the
+change not being there.
+
+Its last resort IS a guess (`<task>.<package>.localhost`) and can be wrong when the branch
+drives the subdomain. If the page 404s, check `portless list` before concluding anything
+about your change.
 
 `<project>` is portless's inferred name (the `package.json` name / repo dir); if
 unsure, `portless list` shows the active route. Wait until it's actually serving,
@@ -172,13 +184,7 @@ then hand `$URL` to the **`agent-browser-aircall-local`** skill (it auto-authent
 always `--session aircall-local`) to load it, snapshot, and verify the change
 renders/behaves correctly. Iterate against it until the behaviour is right.
 
-**Verify the surface that ships, not a rehearsal of it.** A playground or storybook page
-that renders the component directly does not exercise the branch a real page takes to get
-there - the CI-6569 fix was "proved" that way twice and rejected twice. Reach the actual
-route, and work out up front what data or filters make the change visible: real data often
-has none of the rows you need, and finding the query string that produces them
-(`?user=<id>`, a filter combination, a seeded fixture) is part of the debugging, not a
-detail to discover after claiming the gate.
+**Verify the surface that ships, not a rehearsal of it** - see `aircall-dev-flow`, which owns this rule.
 
 - → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=debugging`
 
