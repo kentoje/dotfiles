@@ -21,6 +21,13 @@ Pick this skill over the plain one when maestro is (or should be) tracking the w
 The two differences are the ownership check in phase 2 and `maestro adopt` in phase 6;
 everything else is identical.
 
+> **`dev-flow-set` is not a command.** It is a script at that exact path, on nobody's PATH,
+> under no shorter name. Write the path in full every time - and if you ever ask another
+> agent to record a phase, give it that path, because a dispatched virtuoso is sandboxed,
+> cannot see this skill, and cannot resolve "the shared dev-flow-set helper": one spent
+> four minutes globbing two home roots for it and then hand-wrote the JSON this skill
+> forbids hand-writing (see maestro's docs/postmortem-ci-6569-user-column.md, finding 6).
+>
 > **The bundled scripts are not duplicated.** All three live in the sibling skill and are
 > referenced from there, always as `~/.agents/skills/aircall-dev-flow/scripts/`. The path is
 > written home-anchored rather than skill-relative on purpose: phase 2 makes the *worktree*
@@ -70,7 +77,7 @@ Update it with the shared helper after every phase transition — never hand-wri
 
 ## Phases
 
-**After each phase below, record it in the manifest** with `dev-flow-set.py` (the field to set is noted per phase).
+**After each phase below, record it in the manifest** with `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py` (the field to set is noted per phase).
 
 ### 1. Ticket (optional — skip if the user already has one or says no)
 
@@ -84,10 +91,14 @@ Update it with the shared helper after every phase transition — never hand-wri
   - **Dedup first** — check the epic for an existing ticket before creating, so you don't duplicate.
   - **Batch gate** — when creating several, create **one** first, then **wait for the user's "go"** before the rest.
 - Capture the ticket key — it names the branch and seeds the MR title.
-- → manifest: `dev-flow-set.py phase=scoped ticket.key=<KEY> ticket.epic=<EPIC> ticket.storyPoints=<N>`
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=scoped ticket.key=<KEY> ticket.epic=<EPIC> ticket.storyPoints=<N>`
 
 > **Creating the ticket (REST recipe — the CLI can't do sprints):** token is in the `$JIRA_API_TOKEN` env var (not the keychain).
-> 1. Active sprint: `curl -u "$USER_EMAIL:$JIRA_API_TOKEN" "https://aircall-product.atlassian.net/rest/agile/1.0/board/4795/sprint?state=active"` → sprint id (e.g. `21043`).
+> The account email comes from `EMAIL=$(jira me)` — **not** from `$USER_EMAIL`, which is unset in most
+> shells here. Basic auth with an empty username returns `401`, which reads exactly like an expired
+> token: that misdiagnosis stopped a ticket being created and reported "refresh your token" to the
+> user, when the token was fine (maestro docs/postmortem-ci-6569-user-column.md).
+> 1. Active sprint: `curl -u "$(jira me):$JIRA_API_TOKEN" "https://aircall-product.atlassian.net/rest/agile/1.0/board/4795/sprint?state=active"` → sprint id (e.g. `21043`).
 > 2. `POST https://aircall-product.atlassian.net/rest/api/2/issue` with `fields`: `project.key="CI"`, `issuetype.id="10002"` (Task), `assignee.id="61623175d9820f0070f2d020"`, `customfield_10014`=epic key (Epic Link), `customfield_10020`=sprint id (int), `customfield_10028`=story points (the CI create-screen field, **not** `customfield_10016`), `description` in wiki markup (`h2.`, `{{code}}`).
 > 3. Verify: `GET /rest/api/2/issue/<KEY>?fields=summary,assignee,customfield_10014,customfield_10020,customfield_10028,status`.
 > 4. Dedup first: `jira issue list -q "project = CI AND summary ~ '<term>'"`. The `jira` CLI is still fine for **reading** (`jira issue view <KEY>`), just not for sprint-assigned creation.
@@ -124,7 +135,7 @@ Then prefer, in this order:
 
 Then make that worktree the working directory for everything below — and write the manifest **there** (`--file <worktree>/.dev-flow.json`, the default once you `cd` in).
 
-- → manifest: `dev-flow-set.py phase=worktree slug=<SLUG> branch=<BRANCH> repo=<owner/repo>`
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=worktree slug=<SLUG> branch=<BRANCH> repo=<owner/repo>`
 
 ### 3. Implement
 
@@ -132,7 +143,7 @@ Do the actual work in the worktree. Read the ticket + any linked spec; if there'
 an MR already, read **Cursor's bot comments** and the failing checks. This is normal
 agent work — no sub-skill.
 
-- → manifest: `dev-flow-set.py phase=implementing`
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=implementing`
 
 ### 4. Debug (when UI verification is needed)
 
@@ -147,21 +158,37 @@ portless run                   # runs the repo's `dev` script through the proxy 
 URL=$(portless get <project>)  # -> https://<branch>.<project>.localhost (worktree prefix auto-applied)
 ```
 
+**When maestro owns the task, ask maestro instead** — `URL=$(maestro dev-url --task <id>)`
+starts the server if nothing is serving and prints the URL alone. It owns the whole
+resolution ladder (the log portless prints, then `portless list` under three candidate
+names), which is worth more than it sounds: portless names the subdomain from the git
+BRANCH, not the task, so there is no formula to guess. A virtuoso told to "start the dev
+server through portless" without that command got `exit=127` three times and ended up
+hand-writing a login-shell PATH wrapper.
+
 `<project>` is portless's inferred name (the `package.json` name / repo dir); if
 unsure, `portless list` shows the active route. Wait until it's actually serving,
 then hand `$URL` to the **`agent-browser-aircall-local`** skill (it auto-authenticates;
 always `--session aircall-local`) to load it, snapshot, and verify the change
 renders/behaves correctly. Iterate against it until the behaviour is right.
 
-- → manifest: `dev-flow-set.py phase=debugging`
+**Verify the surface that ships, not a rehearsal of it.** A playground or storybook page
+that renders the component directly does not exercise the branch a real page takes to get
+there - the CI-6569 fix was "proved" that way twice and rejected twice. Reach the actual
+route, and work out up front what data or filters make the change visible: real data often
+has none of the rows you need, and finding the query string that produces them
+(`?user=<id>`, a filter combination, a seeded fixture) is part of the debugging, not a
+detail to discover after claiming the gate.
+
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=debugging`
 
 ### 5. ⛔ GATE — "is it good?"
 
 **STOP.** Summarise what changed and what you verified, then ask the user to confirm
 before shipping. Do not commit, push, or open an MR until they say go.
 
-- → manifest, on reaching the gate: `dev-flow-set.py phase=gated`
-- → manifest, once the user says go: `dev-flow-set.py phase=approved gate.approved=true gate.verdict="<their words>"`
+- → manifest, on reaching the gate: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=gated`
+- → manifest, once the user says go: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=approved gate.approved=true gate.verdict="<their words>"`
 
 ### 6. Ship (only after the gate clears)
 
@@ -178,7 +205,7 @@ before shipping. Do not commit, push, or open an MR until they say go.
   `adopt` only records what you just created - it never cuts a branch, adds a worktree, or opens an MR.
   Skipping it is what leaves a ticket unreachable: with no task record, the only verb left later is `maestro dispatch`, which cuts a second branch and opens a duplicate MR for work that already has one.
   Once adopted, the next round on this MR is `maestro resume --task <slug> --message "…"`, `maestro ls` lists it by ticket, and `maestro dispatch` refuses that id as a duplicate.
-- → manifest: `dev-flow-set.py phase=shipped mr.id=<ID> mr.url=<MR_URL>`
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=shipped mr.id=<ID> mr.url=<MR_URL>`
 
 ### 7. Watch the pipeline (optional — only if the user asks to "spy on the pipeline")
 
@@ -193,14 +220,14 @@ It polls `glab ci get` until the pipeline reaches a terminal state and prints
 failing jobs if it fails. See [the sibling skill's script](../aircall-dev-flow/scripts/watch-pipeline.sh)
 (a document link, relative to this file - the runnable path is the home-anchored one above).
 
-- → manifest: `dev-flow-set.py phase=watching`, then record the terminal result —
-  `dev-flow-set.py pipeline.status=success phase=done` (or `pipeline.status=failed`, looping back to phase 3).
+- → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=watching`, then record the terminal result —
+  `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py pipeline.status=success phase=done` (or `pipeline.status=failed`, looping back to phase 3).
 
 ### 8. Merge (handoff — only when the user asks to merge the ready batch)
 
 When the user says "merge the ready ones" (or similar): run `dev-flow-status.py --ready`
 to collect the gate-approved + green MR URLs, then **invoke the `aircall-merge-train`
-skill** on exactly those URLs. As each MR merges, mark it `dev-flow-set.py phase=done`
+skill** on exactly those URLs. As each MR merges, mark it `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=done`
 in its worktree. Never reimplement merging here — `--merge` only emits the handoff;
 `aircall-merge-train` (supervised, human-gated) does the actual work.
 
