@@ -59,3 +59,8 @@ node_modules/
 !.config/nono/profiles/
 .config/nono/profiles/*
 !.config/nono/profiles/claude-vol.json
+.omp/run
+.omp/puppeteer
+.omp/gpu_cache.json
+.pi-subagents/
+.claude/hooks/context-mode-cache-heal.mjs
