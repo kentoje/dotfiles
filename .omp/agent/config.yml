@@ -1,30 +1,122 @@
-modelRoles: 
+modelRoles:
   default: llmgateway/azure/gpt-5.6-luna:xhigh
   smol: azure/gpt-5.6-luna
   slow: azure/gpt-5.6-sol:xhigh
   plan: azure/gpt-5.6-sol:xhigh
   commit: azure/gpt-5.6-luna
-  advisor: llmgateway/azure/gpt-5.6-sol:xhigh
+  advisor: llmgateway/azure/gpt-5.6-terra:xhigh
 symbolPreset: nerd
-theme: 
+theme:
   dark: melange_dark
   light: light
 setupVersion: 1
-dev: 
+dev:
   autoqaConsent: denied
-disabledProviders: 
+disabledProviders:
   - claude
   - claude-plugins
   - cursor
   - codex
-extensions: 
+  - cline
+  - gemini
+  - github
+  - mcp-json
+  - opencode
+  - vscode
+  - windsurf
+extensions:
   - ~/Documents/github/kentoje/agent-gossips/src/extensions/omp-agent-gossips.ts
-statusLine: 
+# ─── Status line ────────────────────────────────────────────────────────────
+# NOTE: omp rewrites this file with `YAML.stringify()` whenever a setting is
+# changed from `/settings`, which DROPS every comment below. This file is in
+# git, so `git show HEAD:.omp/agent/config.yml` brings the annotations back.
+#
+# `leftSegments` / `rightSegments` are ONLY read when `preset: custom`.
+# With any other preset the arrays are ignored and the preset's own lists win.
+# `segmentOptions` merges on top of the preset's options either way.
+statusLine:
+  # default | minimal | compact | full | nerd | ascii | custom
+  preset: custom
+
+  # powerline | powerline-thin | slash | pipe | block | none | ascii
+  # powerline / powerline-thin need a Nerd Font (you have symbolPreset: nerd).
   separator: ascii
+
+  # Drop the theme's statusLineBg so the bar inherits the terminal background.
+  # Also drops powerline end caps (they need a contrasting fill to bridge out).
   transparent: true
+
+  # Thinking level as a single glyph on the model name instead of ` · xhigh`.
   compactThinkingLevel: false
+
+  # Hook status messages on the row below the status line.
   showHookStatus: true
-advisor: 
+
+  # Session-name color also tints the editor border and the status line gap.
+  sessionAccent: true
+
+  # ── Left side (renders left→right in this order) ──
+  # Every available segment is listed; delete the lines you don't want.
+  leftSegments:
+    - pi # omp glyph; becomes the subagent id (+ ghost icon) when a subagent is focused
+    # - hostname        # short hostname, e.g. `mba`
+    # - session         # first 8 chars of the session id, or `new`
+    - model # model name + thinking level (see segmentOptions.model)
+    - mode # Plan / Prewalk / Loop <state> / Goal / Vibe, with a pause glyph when paused
+    - collab # `⇄ collab:<n>` — only visible inside a collab session
+    - path # cwd, with worktree collapsing (see segmentOptions.path)
+    - git # branch + staged/unstaged/untracked counts; hidden outside a repo
+    - context_pct # context used %, colored by threshold, `+ auto glyph` when auto-compact is on
+    # - pr              # `#<number>` for the branch's PR, OSC-8 linked; hidden when there is none
+    - subagents # `<n> agents` while subagents are running; hidden at 0
+
+  # ── Right side (right-aligned; this order reads left→right within the group) ──
+  # Overflow order matters: when the line is wider than the terminal, omp pops
+  # right segments from the END of this list until it fits, then shrinks `path`,
+  # then starts dropping left segments. So this list doubles as a drop priority —
+  # put what you care least about last.
+  rightSegments:
+    - session_name # session name, colored by a hash of the name (see sessionAccent)
+    # - usage # 5h / 7d / monthly plan quota % + reset countdown; blank unless the provider reports usage tiers
+    # - cache_hit # prompt-cache hit rate, cacheRead / (cacheRead + cacheWrite + input)
+    # - cache_read # cumulative cache-read tokens
+    # - cache_write # cumulative cache-write tokens
+    # - token_in # cumulative input tokens
+    # - token_out # cumulative output tokens
+    - token_total # input + output + cacheWrite + orchestration in/out (cacheRead excluded on purpose)
+    - token_rate # `<n> tok/s` for the last turn
+    - cost # `$0.00`, plus `★ <n>` premium requests when the provider bills that way
+    # - context_total # size of the context window itself, e.g. `1.0M`
+    - time_spent # agent's active processing time (agent_start→agent_end union), NOT wall clock
+    # - time # wall clock (see segmentOptions.time)
+
+  # ── Per-segment options (these are the complete set; there are no others) ──
+  segmentOptions:
+    model:
+      showThinkingLevel: true # append ` · xhigh`; see also compactThinkingLevel above
+    path:
+      abbreviate: true # shorten leading dirs, e.g. `~/D/g/kentoje/dotfiles`
+      maxLength: 40 # truncate the rendered path past this width
+      stripWorkPrefix: true # drop the common work-root prefix from the path
+    git:
+      showBranch: true
+      showStaged: true # `+<n>`
+      showUnstaged: true # `*<n>`
+      showUntracked: true # `?<n>`
+    time:
+      format: "24h" # "24h" | "12h"
+      showSeconds: false
+advisor:
   enabled: true
-  subagents: false
 textVerbosity: low
+task:
+  agentAdvisor:
+    task: "off"
+  agentModelOverrides: {}
+terminal:
+  showProgress: true
+tui:
+  tight: false
+display:
+  showTokenUsage: true
+

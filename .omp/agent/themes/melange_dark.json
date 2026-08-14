@@ -99,6 +99,11 @@
     "statusLineCost": "dimYellow",
     "statusLineSubagents": "magenta"
   },
+  "symbols": {
+    "overrides": {
+      "icon.context": ""
+    }
+  },
   "export": {
     "pageBg": "bg",
     "cardBg": "float",

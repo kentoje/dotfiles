@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
+  "mcpServers": {
+    "aircall-personal-tools": {
+      "type": "stdio",
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": [
+        "run",
+        "/Users/kento/.claude/mcp-servers/aircall-personal-tools/server.ts"
+      ],
+      "timeout": 240000
+    },
+    "atlassian": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "auth": {
+        "type": "oauth",
+        "credentialId": "mcp_oauth:profile:default:https://mcp.atlassian.com/v1/mcp",
+        "tokenUrl": "https://cf.mcp.atlassian.com/v1/token",
+        "clientId": "tLbQg0xEDIyzqdaY"
+      },
+      "oauth": {
+        "clientId": "tLbQg0xEDIyzqdaY"
+      }
+    },
+    "figma-via-claude": {
+      "type": "stdio",
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": [
+        "run",
+        "/Users/kento/.claude/mcp-servers/figma-via-claude/server.ts"
+      ],
+      "timeout": 240000
+    },
+    "slack-via-claude": {
+      "type": "stdio",
+      "command": "/Users/kento/.bun/bin/bun",
+      "args": [
+        "run",
+        "/Users/kento/.claude/mcp-servers/slack-via-claude/server.ts"
+      ],
+      "timeout": 240000
+    }
+  }
+}
