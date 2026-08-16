@@ -147,8 +147,8 @@ Do the actual work in the worktree. Read the ticket + any linked spec; if there'
 an MR already, read **Cursor's bot comments** and the failing checks. This is normal
 agent work — no sub-skill.
 
+- **Targeted validation only:** Never run workspace-wide lint/typecheck during development (`pnpm biome check ./src` and full `ts:check` are prohibited). Run `biome check <changed-file>` and `jest <target-test-file>` strictly on modified files. Full-workspace checks belong to CI.
 - → manifest: `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py phase=implementing`
-
 ### 4. Debug (when UI verification is needed)
 
 **Start the dev server with `portless`** — never a bare port. The proxy runs as a
