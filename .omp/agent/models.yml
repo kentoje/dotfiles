@@ -51,3 +51,26 @@ providers:
           output: 1.2
           cacheRead: 0.02
           cacheWrite: 0.25
+
+      - id: google-vertex/gemini-3.7-flash
+        name: Gemini 3.7 Flash
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        maxTokens: 65536
+        compat:
+          supportsReasoningEffort: true
+          # Vertex only accepts minimal|low|medium|high here - sending xhigh/max
+          # makes it 400 with "thinking_budget is out of range".
+          reasoningEffortMap:
+            minimal: minimal
+            low: low
+            medium: medium
+            high: high
+            xhigh: high
+            max: high
+        cost:
+          input: 0.75
+          output: 3.75
+          cacheRead: 0.075
+          cacheWrite: 0.08333

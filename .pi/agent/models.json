@@ -132,6 +132,32 @@
             "cacheRead": 0.02,
             "cacheWrite": 0.25
           }
+        },
+        {
+          "id": "google-vertex/gemini-3.7-flash",
+          "name": "Gemini 3.7 Flash (Vertex, LLM Gateway)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "thinkingLevelMap": {
+            "off": "minimal",
+            "minimal": "minimal",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "high",
+            "max": "high"
+          },
+          "cost": {
+            "input": 0.75,
+            "output": 3.75,
+            "cacheRead": 0.075,
+            "cacheWrite": 0.08333
+          }
         }
       ]
     }
