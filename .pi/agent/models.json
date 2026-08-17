@@ -11,53 +11,8 @@
       },
       "models": [
         {
-          "id": "fireworks/kimi-k3",
-          "name": "Kimi K3 (Fireworks, LLM Gateway)",
-          "reasoning": true,
-          "contextWindow": 1048576,
-          "maxTokens": 128000,
-          "thinkingLevelMap": {
-            "minimal": null
-          },
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "cost": {
-            "input": 3.0,
-            "output": 15.0,
-            "cacheRead": 0.3,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "canopywave/glm-5.2",
-          "name": "GLM-5.2 (CanopyWave, LLM Gateway)",
-          "reasoning": true,
-          "contextWindow": 200000,
-          "maxTokens": 128000,
-          "cost": {
-            "input": 1.4,
-            "output": 4.4,
-            "cacheRead": 0.26,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "together-ai/minimax-m3",
-          "name": "MiniMax M3 (Together AI, LLM Gateway)",
-          "reasoning": true,
-          "contextWindow": 524288,
-          "maxTokens": 128000,
-          "cost": {
-            "input": 0.3,
-            "output": 1.2,
-            "cacheRead": 0.06,
-            "cacheWrite": 0
-          }
-        },
-        {
           "id": "azure/gpt-5.6-sol",
-          "name": "GPT-5.6 Sol (Azure, LLM Gateway)",
+          "name": "GPT-5.6 Sol",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -83,7 +38,7 @@
         },
         {
           "id": "azure/gpt-5.6-terra",
-          "name": "GPT-5.6 Terra (Azure, LLM Gateway)",
+          "name": "GPT-5.6 Terra",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -109,7 +64,7 @@
         },
         {
           "id": "azure/gpt-5.6-luna",
-          "name": "GPT-5.6 Luna (Azure, LLM Gateway)",
+          "name": "GPT-5.6 Luna",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -135,7 +90,7 @@
         },
         {
           "id": "google-vertex/gemini-3.7-flash",
-          "name": "Gemini 3.7 Flash (Vertex, LLM Gateway)",
+          "name": "Gemini 3.7 Flash",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
