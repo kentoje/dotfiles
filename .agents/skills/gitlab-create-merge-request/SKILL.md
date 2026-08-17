@@ -18,15 +18,31 @@ Create a GitLab merge request for the current branch targeting `main`.
    git log main..HEAD --reverse --format="%s" | head -n 1
    ```
 
-2. Create the MR using glab, following the commit message conventions of the repo.
-   Pick **one** of these two modes - never mix them (see "glab flag rules" below):
+2. Build the description in a file containing REAL line breaks. **Never** put `\n` or `\\n` inside a quoted `-d` argument: the shell passes those characters literally, so GitLab renders them as `\n` instead of Markdown line breaks.
+
+   Use the file tool or a quoted heredoc to create the body, then pass its contents:
 
    ```bash
-   # A. You write the title and body (the usual case). No --fill.
-   #    Requires the branch to be pushed already, or add --push.
-   glab mr create -t "<FIRST_COMMIT_MESSAGE>" -d "<SUMMARY_OF_WHAT_HAS_BEEN_DONE>" -b main -y
+   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b main -y
+   ```
 
-   # B. Derive both from the commit history. Pushes the branch itself.
+   The body file must contain actual Markdown, for example:
+
+   ```text
+   ## Summary
+   - Describe the implementation
+
+   ## Verification
+   - State the checks that passed
+   ```
+
+   Pick **one** creation mode; do not mix them:
+
+   ```bash
+   # A. Explicit title and body. Branch must already be pushed.
+   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b main -y
+
+   # B. Derive title and body from commits. Pushes the branch.
    glab mr create --fill --fill-commit-body -b main -y
    ```
 
@@ -79,17 +95,19 @@ uploaded to the project, which returns ready-to-paste markdown.
    In fish the substitution is `-d (cat /tmp/mr_body.md)`; simplest is to put the
    whole invocation in a `.sh` file and run `bash script.sh`.
 
-## Notes
+## Verify the created description
 
-- Ensure the branch has been pushed before running this command
-- The MR title will be the first commit message of the branch
-- **Reviewer/assignee:** add `--reviewer <username>` and `--assignee @me`
-  (e.g. `--reviewer pierre.goutheraud`). Requesting a review pings the reviewer.
-- **Token for the upload curl:** `glab` authenticates via the `$GITLAB_TOKEN`
-  env var - use it directly. Its `config.yml` token is often `!!null`, and
-  `glab auth status --show-token` prints it on a `Token found:` line (not
-  `Token:`), so don't try to scrape it.
-- **fish shell gotcha:** if the shell is fish, `VAR=$(...)` command substitution
-  fails to parse - write the commands to a `.sh` file and run `bash script.sh`.
-  Also prefer `curl -o file.json` over piping curl into `python json.load`
-  (piped reads can truncate).
+After creation, fetch the MR and inspect the description before reporting success:
+
+```bash
+glab mr view <MR_ID> --output json
+```
+
+The returned `description` must contain real newlines and Markdown markers such as `##` and `-` as separate lines. If it contains literal `\n`, repair it immediately using a body file with real line breaks:
+
+```bash
+glab mr update <MR_ID> -d "$(cat /tmp/mr_body.md)" -y
+glab mr view <MR_ID> --output json
+```
+
+Do not report the MR as ready until this verification passes. `glab mr update` supports `-d`; `--description-file` is not available.

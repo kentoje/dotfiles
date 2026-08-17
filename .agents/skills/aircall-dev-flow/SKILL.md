@@ -1,8 +1,8 @@
 ---
 name: aircall-dev-flow
 description: >
-  Orchestrates Kento's per-ticket dev loop end-to-end in this session: optional
-  Jira ticket → create/reuse a git worktree → implement → debug in the browser →
+  Orchestrates Kento's per-ticket dev loop end-to-end in this session: Jira
+  ticket → create/reuse a git worktree → implement → debug in the browser →
   commit, push, open the MR → optionally watch the pipeline. Runs autonomously
   through setup and implementation, then STOPS at a readiness gate before
   shipping. Use when the user wants to start work on a ticket/feature/fix, "spin
@@ -66,9 +66,17 @@ scripts/dev-flow-status.py --merge    # same set, printed as a ready-to-run merg
 
 **After each phase below, record it in the manifest** with `~/.agents/skills/aircall-dev-flow/scripts/dev-flow-set.py` (the field to set is noted per phase).
 
-### 1. Ticket (optional — skip if the user already has one or says no)
+### 1. Ticket (mandatory by default — explicit opt-out only)
 
-- If the user gives a Jira key/URL: read it with the `jira` skill (`jira issue view <KEY>`) to scope the work.
+- If the user provides a Jira key/URL: read it with the `jira` skill (`jira issue view <KEY>`) to scope the work.
+- If the user explicitly says “no ticket”, skip ticket creation.
+- Otherwise, create a Jira ticket **before creating a branch, worktree, manifest, or source change**. Never infer “no ticket” merely because the user did not provide a Jira key.
+- Requests such as `fe-maintenance, size 1, fix` are ticket metadata, not permission to skip ticket creation:
+  1. `fe-maintenance` → resolve the relevant epic/category/label using Jira conventions.
+  2. `size 1` → story points `1`.
+  3. `fix` → fix/bug classification reflected in the summary and issue description.
+- If the epic cannot be resolved uniquely, ask before implementation. Do not begin worktree creation until the ticket is scoped.
+- **Phase-order invariant:** phase 1 MUST complete and the Jira ticket MUST be created and verified before phase 2 starts. The agent MUST NOT create a branch, worktree, manifest, or source change before then.
 - If they want a _new_ ticket, create it and **always set these four fields** (Kento specifies them every time):
   1. **Sprint** — the **current/active** sprint (project `CI`, board `4795`). ⚠️ The `jira` CLI **cannot** assign sprints here: it's configured for board `1260`, whose sprint endpoint 404s, so every `jira sprint list` variant fails. Get the active sprint from the REST agile API and create the issue via REST — see below.
   2. **Assignee** — **Kento Monthubert** (account id `61623175d9820f0070f2d020`; or `jira me`). Always self-assigned.

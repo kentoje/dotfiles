@@ -43,5 +43,10 @@ export namespace Button { export type Props = ButtonProps }
 
 - Restrict a wrapped prop when only a subset is valid (real `blocks/copy-button.tsx`):
   `Omit<…Button props…, 'variant'> & { variant?: 'outline' | 'ghost' }`.
+- **Name collisions need an explicit `Omit`.** When `interface XProps extends` a primitive/DOM
+  props type and you redeclare a member that the base already has with an incompatible type — e.g.
+  a custom `onCopy?: (value: string) => void` vs the DOM `onCopy?: ClipboardEventHandler` — TS errors
+  with **TS2430** (`interface extends` rejects the collision that the legacy `type &` form silently
+  intersected). `Omit` the clashing member from the base: `extends Omit<…Props…, 'onCopy'>`.
 - Don't invent props — the shipped `.d.ts` (literal-union variants) is the source of truth.
   When in doubt about an existing component, query the Storybook MCP, don't guess.
