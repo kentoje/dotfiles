@@ -53,3 +53,6 @@ abbr btop sudo btop
 # abbr dsbx "docker sandbox exec -it"
 # abbr dsbr "docker sandbox rm"
 # abbr dsbrm "docker sandbox ls -q | xargs docker sandbox rm"
+
+# Pi custom harness
+abbr pih 'PI_CODING_AGENT_DIR=$HOME/dotfiles/.pi-custom-harness pi --no-context-files --no-skills --skill $HOME/dotfiles/.pi-custom-harness/skills'

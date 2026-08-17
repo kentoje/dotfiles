@@ -1,0 +1,19 @@
+{
+  "defaultProvider": "llmgateway",
+  "defaultModel": "google-vertex/gemini-3.7-flash",
+  "defaultThinkingLevel": "high",
+  "defaultProjectTrust": "never",
+  "extensions": ["./extensions"],
+  "packages": [
+    "npm:@juicesharp/rpiv-todo",
+    "npm:@ff-labs/pi-fff",
+    "npm:pi-powerline-footer",
+    "npm:pi-mcp-adapter",
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:@codexstar/pi-listen",
+    "npm:@mrclrchtr/supi-settings",
+    "npm:@mrclrchtr/supi-ask-user",
+    "npm:@mrclrchtr/supi-web",
+    "npm:@mrclrchtr/supi-code-intelligence"
+  ]
+}

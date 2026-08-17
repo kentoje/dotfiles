@@ -64,3 +64,11 @@ node_modules/
 .omp/gpu_cache.json
 .pi-subagents/
 .claude/hooks/context-mode-cache-heal.mjs
+
+# Pi custom harness credentials are symlinked locally and must never be committed.
+.pi-custom-harness/auth.json
+.pi-custom-harness/auth*.json
+.pi-custom-harness/mcp-cache.json
+.pi-custom-harness/npm/
+.pi-custom-harness/git/
+.pi-custom-harness/models-store.json

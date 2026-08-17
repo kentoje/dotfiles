@@ -1,0 +1,26 @@
+# mr-guard
+
+## Intent
+Prevent duplicate merge requests and unprepared releases before a `glab mr create` command reaches GitLab.
+
+## Contract
+Input: a Pi bash tool call and its working directory.
+Output: allows unrelated commands and compliant merge request creation, otherwise blocks the call with a corrective reason.
+Errors: `GitLabMergeRequestLookupError | GitChangesetLookupError`; an unavailable Git or GitLab lookup aborts the command because allowing an unverifiable create can duplicate a merge request.
+
+## Behaviour
+1. Ignore a bash command that is not `glab mr create`.
+2. Resolve whether the current branch already has an open merge request.
+3. Block an existing merge request with its IID.
+4. Verify that the branch adds a `.changeset` entry.
+5. Block when no changeset entry exists.
+
+## Edge cases
+- GitLab has no merge request for the branch -> proceed to changeset verification.
+- Git or GitLab lookup fails -> Pi blocks the bash command fail-safe.
+
+## Non-goals
+Creating merge requests, generating changesets, and updating an existing merge request remain outside this handler.
+
+## Evidence
+The instruction “do not create a new branch or MR” was repeated in three consecutive prompts on MR !5676.
