@@ -79,5 +79,5 @@ can be threaded with `thread_ts` if needed.
 ## Related skills
 
 - `notify` — lighter-weight ntfy.sh push when a Slack DM is overkill.
-- `release-ping-dashboard` — pings *other* people (commit authors) for sign-off,
-  using the same Slack MCP.
+- `release-ping-dashboard-squirrel-king` — pings *other* people (commit authors)
+  for sign-off, using the same Slack MCP.
