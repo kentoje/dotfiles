@@ -42,6 +42,7 @@
 .config/caddy
 
 node_modules/
+__pycache__/
 
 .config/agents/commands
 .config/agents/skills
@@ -49,7 +50,6 @@ node_modules/
 .config/opencode/skills
 .config/fabric
 .config/docker-sandbox
-.agents/skills/aircall-dev-flow/scripts/__pycache__
 .config/herdr/*
 !.config/herdr/config.toml
 !.config/herdr/scripts/
