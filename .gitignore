@@ -72,3 +72,6 @@ __pycache__/
 .pi-custom-harness/npm/
 .pi-custom-harness/git/
 .pi-custom-harness/models-store.json
+
+# Pi custom harness session transcripts are local run state, never shared config.
+.pi-custom-harness/sessions/

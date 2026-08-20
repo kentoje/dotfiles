@@ -57,3 +57,14 @@ $ nvim .config/tmux/tmux.config
 ```
 
 Run plugin install with: `<C-TMUX_PREFIX>I`
+
+### pi custom harness
+
+The `pih` abbr runs pi against `.pi-custom-harness`, whose extensions import `effect`.
+The lockfile is committed but `node_modules` is gitignored, so a fresh clone must install the deps or pi refuses to boot with `Cannot find module 'effect'`.
+
+`setup/macos/setup.sh` does this for you; to run it on its own:
+
+```bash
+$ ./setup/macos/setup_pi_harness_deps.sh
+```
