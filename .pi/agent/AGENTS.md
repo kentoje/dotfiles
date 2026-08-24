@@ -28,8 +28,9 @@ Project instructions win where they disagree.
   the filter, the aggregation, and print only the result.
 - Reading 20 files one by one to answer one question is a sign the approach is wrong.
   Stop and script it instead.
-- Use FFF (`ffgrep`, `fffind`) for search when the extension is loaded. Prefer bare
-  identifiers over regex; FFF matches single lines, so multi-token patterns return
+- Use `ffgrep` and `fffind` inside a Git repository.
+  Outside one, FFF has no index, so use built-in `grep` and `find`.
+  Prefer bare identifiers over regex; FFF matches single lines, so multi-token patterns return
   nothing.
 
 ## Delegating to roles
