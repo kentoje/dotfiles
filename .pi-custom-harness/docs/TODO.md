@@ -121,6 +121,14 @@ Detect repository facts from the repository where possible. Do not hardcode a re
 - [ ] Let `ticket bind` accept a worktree path or stable worktree handle and fail when it would bind the ticket to a different checkout than the one just created.
 - [ ] Add a `preview up` escape hatch for an explicit consumer worktree or port, returning the actual running URL and owning cleanup when a repo's default development port is occupied.
 
+### P1: MR diagnosis, review, and ticket workflows
+
+- [ ] Add `mr diagnose <IID>` to fetch the current merge-result pipeline, failed jobs, and traces, then return the first actionable compiler/test failure while filtering cache and artifact-upload noise.
+- [ ] Add targeted `story test <component> --story <name>` support that resolves the Storybook story ID, runs its play test, and returns the failing assertion, browser errors, and preview URL.
+- [ ] Add robust `mr watch` lifecycle and feedback classification: record source/merge-result SHAs, deduplicate notes and discussions, classify stale feedback by cited commit, and report a final settled/quiet state on shutdown.
+- [ ] Add Aircall-aware `ticket create` support for project, active sprint, assignee, epic, and story points, with deduplication and REST verification of the created issue.
+- [ ] Add a structured thermo-nuclear quality-review skill workflow that returns prioritized blockers, concerns, strengths, exact locations, failure mechanisms, and concrete remediation without pretending to approve the code automatically.
+
 ## P1: implement the modules in build order
 
 ### `worktree`
