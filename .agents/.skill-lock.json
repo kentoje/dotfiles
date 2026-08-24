@@ -207,6 +207,24 @@
       "skillFolderHash": "209109d21718bff6da3ebd65dfee8de582ced0ab",
       "installedAt": "2026-07-25T19:08:35.297Z",
       "updatedAt": "2026-07-25T19:08:35.297Z"
+    },
+    "effect-ts": {
+      "source": "Effect-TS/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/Effect-TS/skills.git",
+      "skillPath": "skills/effect-ts/SKILL.md",
+      "skillFolderHash": "6baafd7b8add660a5d544ceb4317f257f1d730ee",
+      "installedAt": "2026-08-20T13:18:12.762Z",
+      "updatedAt": "2026-08-20T13:18:12.762Z"
+    },
+    "show-me": {
+      "source": "humanlayer/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/humanlayer/skills.git",
+      "skillPath": "plugins/show-me/skills/show-me/SKILL.md",
+      "skillFolderHash": "0bdb821a21e793a4f6f82a7078c052154447e5cc",
+      "installedAt": "2026-08-20T13:34:14.035Z",
+      "updatedAt": "2026-08-20T13:34:14.035Z"
     }
   },
   "lastSelectedAgents": [
