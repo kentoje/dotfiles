@@ -1,15 +1,16 @@
 modelRoles: 
-  default: llmgateway/google-vertex/gemini-3.7-flash:high
   smol: llmgateway/azure/gpt-5.6-luna:xhigh
-  slow: azure/gpt-5.6-sol:xhigh
+  slow: llmgateway/azure/gpt-5.6-sol:xhigh
   plan: azure/gpt-5.6-sol:xhigh
   commit: azure/gpt-5.6-luna
   advisor: llmgateway/azure/gpt-5.6-terra:xhigh
+  task: llmgateway/azure/gpt-5.6-luna:xhigh
+  default: llmgateway/azure/gpt-5.6-terra:xhigh
 symbolPreset: nerd
 theme: 
   dark: melange_dark
   light: light
-setupVersion: 1
+setupVersion: 2
 dev: 
   autoqaConsent: denied
 disabledProviders: 
@@ -35,18 +36,19 @@ statusLine:
   sessionAccent: true
   leftSegments: 
     - pi
+    - session
     - model
     - mode
+    - cost
     - collab
     - path
     - git
     - context_pct
+    - token_total
     - subagents
   rightSegments: 
     - session_name
-    - token_total
     - token_rate
-    - cost
     - time_spent
   segmentOptions: 
     model: 
@@ -77,3 +79,8 @@ tui:
   tight: false
 display: 
   showTokenUsage: true
+defaultThinkingLevel: auto
+prewalk: 
+  enabled: false
+composer: 
+  shape: box
