@@ -62,6 +62,8 @@ __pycache__/
 .omp/run
 .omp/puppeteer
 .omp/gpu_cache.json
+.omp/collab/
+.omp/cache/
 .pi-subagents/
 .claude/hooks/context-mode-cache-heal.mjs
 
