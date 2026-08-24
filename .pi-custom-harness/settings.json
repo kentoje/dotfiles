@@ -1,9 +1,11 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "azure/gpt-5.6-luna",
+  "defaultModel": "azure/gpt-5.6-terra",
   "defaultThinkingLevel": "xhigh",
   "defaultProjectTrust": "never",
-  "extensions": ["./extensions"],
+  "extensions": [
+    "./extensions"
+  ],
   "packages": [
     "npm:@juicesharp/rpiv-todo",
     "npm:@ff-labs/pi-fff",
@@ -14,7 +16,8 @@
     "npm:@mrclrchtr/supi-settings",
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",
-    "npm:@mrclrchtr/supi-code-intelligence"
+    "npm:@mrclrchtr/supi-code-intelligence",
+    "npm:@juicesharp/rpiv-btw"
   ],
   "lastChangelogVersion": "0.84.2",
   "theme": "melange_dark"
