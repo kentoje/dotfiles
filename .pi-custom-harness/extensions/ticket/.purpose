@@ -1,0 +1,27 @@
+# ticket
+
+## Intent
+Keep the local branch-to-ticket association available to ship-gate and other harness policies without querying Jira.
+
+## Contract
+Input: TypeBox `TicketParams` with action `bind` or `current`; `bind` requires a Jira-style key.
+Output: the validated ticket key, branch, and absolute worktree association.
+Errors: `TicketKeyValidationError` for malformed keys, `TicketBindingMissingError` when no association exists, `TicketBindingMalformedError` for untrusted state, `TicketWorktreeDeletedError` for a deleted worktree, and typed branch/write failures for unavailable local state.
+
+## Behaviour
+`bind` validates the key, resolves the current branch, and writes the association to `<worktree>/.dev-flow.json`.
+`current` reads only the current worktree's association and returns its validated ticket binding.
+The Pi boundary resolves an absolute real path before invoking the Effect core.
+
+## Edge cases
+- A missing `bind.key` is treated as an invalid key and fails closed.
+- Missing `.dev-flow.json` reports a missing binding rather than querying Jira.
+- Invalid JSON, missing fields, invalid keys, or a different worktree path report malformed state.
+- A deleted worktree reports a typed deletion error before reading or writing state.
+- Each lookup is scoped to the requested absolute worktree and cannot use another worktree's file.
+
+## Non-goals
+This module does not create tickets, query Jira, resolve ticket details, create merge requests, or maintain a central binding database.
+
+## Evidence
+The dev-flow workflow records a local `.dev-flow.json` manifest per worktree and uses a ticket key to seed branch and merge-request context; the ticket tool is intentionally limited to `bind` and `current`.

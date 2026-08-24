@@ -1,26 +1,28 @@
 # mr-guard
 
 ## Intent
-Prevent duplicate merge requests and unprepared releases before a `glab mr create` command reaches GitLab.
+Prevent duplicate merge-request creation and enforce the repository map's canonical delivery policy before `glab mr create` executes.
 
 ## Contract
-Input: a Pi bash tool call and its working directory.
-Output: allows unrelated commands and compliant merge request creation, otherwise blocks the call with a corrective reason.
-Errors: `GitLabMergeRequestLookupError | GitChangesetLookupError`; an unavailable Git or GitLab lookup aborts the command because allowing an unverifiable create can duplicate a merge request.
+Input: a Bash command and its working directory.
+Output: `allow` or a fail-closed block decision with an actionable reason.
+Errors: Git, GitLab, and repository-facts lookup failures abort MR creation rather than permitting an unverifiable delivery.
 
 ## Behaviour
-1. Ignore a bash command that is not `glab mr create`.
-2. Resolve whether the current branch already has an open merge request.
-3. Block an existing merge request with its IID.
-4. Verify that the branch adds a `.changeset` entry.
-5. Block when no changeset entry exists.
+1. Ignore commands that do not create a merge request.
+2. Block creation when the branch already has an open merge request.
+3. Resolve `RepositoryFacts.deliveryPolicy` through `RepoMapService`.
+4. Ask `GitService` for release readiness under that policy.
+5. Block only when the shared readiness result requires a release artifact; name each publishable package missing a changeset.
 
 ## Edge cases
-- GitLab has no merge request for the branch -> proceed to changeset verification.
-- Git or GitLab lookup fails -> Pi blocks the bash command fail-safe.
+- Changeset repositories require committed changesets only for changed publishable packages.
+- Conventional-commit repositories require every branch commit to be conventional.
+- A `none` delivery policy permits creation release-wise.
+- Existing-MR detection happens before release-policy lookup.
 
 ## Non-goals
-Creating merge requests, generating changesets, and updating an existing merge request remain outside this handler.
+This guard does not create, push, or merge merge requests, and it does not decide repository policy.
 
 ## Evidence
-The instruction “do not create a new branch or MR” was repeated in three consecutive prompts on MR !5676.
+The harness must stop its own task flow from opening a Hydra MR without the committed changesets required by affected publishable packages.

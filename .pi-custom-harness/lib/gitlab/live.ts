@@ -8,79 +8,147 @@ import {
   GitLabService,
 } from "./core";
 
-const GitLabMergeRequestPayload = Schema.Struct({ iid: Schema.Number });
+const CurrentBranchName = Schema.NonEmptyString;
+const decodeCurrentBranchName = Schema.decodeUnknownEffect(CurrentBranchName);
+
+const GitLabMergeRequestPayload = Schema.Array(
+  Schema.Struct({ iid: Schema.Number }),
+);
 const decodeGitLabMergeRequestPayload = Schema.decodeUnknownEffect(
   GitLabMergeRequestPayload,
 );
 
-/** Queries GitLab for an existing open merge request attached to the current branch. */
+/** A completed CLI invocation used by the GitLab lookup transport seam. */
+export interface GitLabCommandResult {
+  readonly exitCode: number;
+  readonly output: string;
+}
+
+export interface GitLabCommandRequest {
+  readonly program: "git" | "glab";
+  readonly cwd: string;
+  readonly arguments_: ReadonlyArray<string>;
+}
+
+/** Runs one GitLab-safe CLI query without exposing subprocess details to policy code. */
+export type GitLabCommandTransport = (
+  request: GitLabCommandRequest,
+) => Effect.Effect<GitLabCommandResult, unknown>;
+
+const lookupFailure = (message: string): GitLabMergeRequestLookupError =>
+  new GitLabMergeRequestLookupError({
+    message: `GitLab MR lookup failed: ${message}`,
+  });
+
+const describeTransportFailure = (cause: unknown): string =>
+  cause instanceof Error ? cause.message : String(cause);
+
+const makeGitLabService = (
+  transport: GitLabCommandTransport,
+): GitLabService["Service"] => {
+  const runGitLabCommand = Effect.fn("GitLabCommandTransport.run")(function* (
+    request: GitLabCommandRequest,
+  ) {
+    return yield* transport(request).pipe(
+      Effect.mapError((cause) =>
+        lookupFailure(describeTransportFailure(cause)),
+      ),
+    );
+  });
+
+  const findOpenMergeRequestForCurrentBranch = Effect.fn(
+    "GitLabService.findOpenMergeRequestForCurrentBranch",
+  )(function* ({ cwd }: { readonly cwd: string }) {
+    const branchResult = yield* runGitLabCommand({
+      program: "git",
+      cwd,
+      arguments_: ["branch", "--show-current"],
+    });
+
+    if (branchResult.exitCode !== 0) {
+      return yield* lookupFailure(
+        `git branch --show-current exited with ${branchResult.exitCode}`,
+      );
+    }
+
+    const sourceBranch = yield* decodeCurrentBranchName(
+      branchResult.output.trim(),
+    ).pipe(
+      Effect.mapError((cause) =>
+        lookupFailure(`current branch output is invalid: ${cause.message}`),
+      ),
+    );
+
+    const mergeRequestResult = yield* runGitLabCommand({
+      program: "glab",
+      cwd,
+      arguments_: [
+        "mr",
+        "list",
+        "--source-branch",
+        sourceBranch,
+        "--output",
+        "json",
+      ],
+    });
+
+    if (mergeRequestResult.exitCode !== 0) {
+      return yield* lookupFailure(
+        `glab mr list exited with ${mergeRequestResult.exitCode}`,
+      );
+    }
+
+    const parsedPayload = yield* Effect.try({
+      try: () => JSON.parse(mergeRequestResult.output),
+      catch: (cause) =>
+        lookupFailure(`merge request list JSON is malformed: ${String(cause)}`),
+    });
+    const mergeRequests = yield* decodeGitLabMergeRequestPayload(
+      parsedPayload,
+    ).pipe(
+      Effect.mapError((cause) =>
+        lookupFailure(
+          `merge request list payload is unsupported: ${cause.message}`,
+        ),
+      ),
+    );
+
+    const firstMergeRequest = mergeRequests[0];
+    return firstMergeRequest === undefined
+      ? Option.none<CurrentBranchMergeRequest>()
+      : Option.some(firstMergeRequest);
+  });
+
+  return GitLabService.of({ findOpenMergeRequestForCurrentBranch });
+};
+
+/** Builds a GitLab service from an injected CLI transport for deterministic tests. */
+export const GitLabLiveLayerWithTransport = (
+  transport: GitLabCommandTransport,
+): Layer.Layer<GitLabService> =>
+  Layer.succeed(GitLabService, makeGitLabService(transport));
+
+/** Queries GitLab for open merge requests attached to the current branch. */
 export const GitLabLiveLayer = Layer.effect(
   GitLabService,
   Effect.gen(function* () {
     const childProcessSpawner = yield* ChildProcessSpawner.ChildProcessSpawner;
 
-    const findOpenMergeRequestForCurrentBranch = Effect.fn(
-      "GitLabService.findOpenMergeRequestForCurrentBranch",
-    )(function* ({ cwd }: { readonly cwd: string }) {
-      const command = ChildProcess.make(
-        "glab",
-        ["mr", "view", "--output", "json", "--fields", "iid,state"],
-        { cwd },
-      );
-      const result = yield* Effect.scoped(
+    const transport: GitLabCommandTransport = ({ program, cwd, arguments_ }) =>
+      Effect.scoped(
         Effect.gen(function* () {
+          const command = ChildProcess.make(program, arguments_, { cwd });
           const handle = yield* childProcessSpawner.spawn(command);
-          const output = yield* handle.all.pipe(
+          const output = yield* handle.stdout.pipe(
             Stream.decodeText(),
             Stream.runCollect,
             Effect.map((chunks) => chunks.join("")),
           );
           const exitCode = yield* handle.exitCode;
-
           return { exitCode, output };
         }),
-      ).pipe(
-        Effect.mapError(
-          (cause) =>
-            new GitLabMergeRequestLookupError({
-              message: `GitLab MR lookup failed: ${cause.message}`,
-            }),
-        ),
       );
 
-      if (
-        result.exitCode === 1 &&
-        result.output.includes("no merge requests found")
-      ) {
-        return Option.none<CurrentBranchMergeRequest>();
-      }
-      if (result.exitCode !== 0) {
-        return yield* new GitLabMergeRequestLookupError({
-          message: `GitLab MR lookup failed: glab mr view exited with ${result.exitCode}`,
-        });
-      }
-
-      const parsedPayload = yield* Effect.try({
-        try: () => JSON.parse(result.output),
-        catch: (cause) =>
-          new GitLabMergeRequestLookupError({
-            message: `GitLab MR lookup failed: ${String(cause)}`,
-          }),
-      });
-      const mergeRequest = yield* decodeGitLabMergeRequestPayload(
-        parsedPayload,
-      ).pipe(
-        Effect.mapError(
-          (cause) =>
-            new GitLabMergeRequestLookupError({
-              message: `GitLab MR lookup failed: ${cause.message}`,
-            }),
-        ),
-      );
-
-      return Option.some(mergeRequest);
-    });
-
-    return GitLabService.of({ findOpenMergeRequestForCurrentBranch });
+    return makeGitLabService(transport);
   }),
 ).pipe(Layer.provide(BunServicesLayer));

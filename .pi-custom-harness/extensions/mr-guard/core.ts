@@ -1,13 +1,17 @@
 import { Effect, Option } from "effect";
 
-import { type GitChangesetLookupError, GitService } from "../../lib/git/core";
+import {
+  type GitChangesetLookupError,
+  GitService,
+  releaseReadinessFailureReason,
+} from "../../lib/git/core";
 import {
   type GitLabMergeRequestLookupError,
   GitLabService,
 } from "../../lib/gitlab/core";
 import {
-  type RepositoryReleaseGateLookupError,
   RepoMapService,
+  type RepositoryFactsLookupError,
 } from "../../lib/repo-map/core";
 
 /** Input captured from a Pi bash tool call before it runs. */
@@ -25,7 +29,7 @@ export type MergeRequestCreationGuardDecision =
 export type MergeRequestCreationGuardError =
   | GitChangesetLookupError
   | GitLabMergeRequestLookupError
-  | RepositoryReleaseGateLookupError;
+  | RepositoryFactsLookupError;
 
 /** Detects the `glab mr create` command form that can create a duplicate merge request. */
 export const isMergeRequestCreationCommand = (command: string): boolean =>
@@ -51,40 +55,15 @@ export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
       } as const;
     }
 
-    const releaseGate = yield* repoMapService.releaseGateFor({ cwd });
-    switch (releaseGate) {
-      case "changeset": {
-        const hasChangeset =
-          yield* gitService.hasChangesetOnCurrentBranch({ cwd });
-        if (!hasChangeset) {
-          return {
-            kind: "block",
-            reason:
-              "No .changeset entry on this branch. Write one before opening the MR.",
-          } as const;
-        }
-
-        return { kind: "allow" } as const;
-      }
-      case "conventional-commits": {
-        const commitsAreConventional =
-          yield* gitService.commitsAreConventional({ cwd });
-        if (!commitsAreConventional) {
-          return {
-            kind: "block",
-            reason:
-              "semantic-release repo: every commit needs a conventional prefix, it sets the version.",
-          } as const;
-        }
-
-        return { kind: "allow" } as const;
-      }
-      case "none":
-        return { kind: "allow" } as const;
-      default: {
-        const _exhaustive: never = releaseGate;
-        return _exhaustive;
-      }
+    const repositoryFacts = yield* repoMapService.repositoryFactsFor({ cwd });
+    const readiness = yield* gitService.releaseReadinessFor({
+      cwd,
+      policy: repositoryFacts.deliveryPolicy,
+    });
+    const reason = releaseReadinessFailureReason(readiness, "opening the MR");
+    if (reason !== undefined) {
+      return { kind: "block", reason } as const;
     }
+    return { kind: "allow" } as const;
   },
 );

@@ -1,0 +1,19 @@
+# story
+
+## Intent
+Provide Hydra-only Storybook story discovery and isolated preview-iframe rendering.
+
+## Contract
+Accept TypeBox `list` and `show` actions, discover story ids through an injected index seam, resolve the worktree Storybook portless URL, and return screenshot, URL, and console errors for rendered stories.
+
+## Behaviour
+`list` returns matching story ids. `show` resolves an optional story selector, constructs `/iframe.html?id=...&viewMode=story` with optional theme globals, passes viewport options to the browser seam, and captures the preview rather than manager chrome.
+
+## Edge cases
+No matching stories and unknown selectors are structured index failures. URL resolution and browser failures are structured failures. Render resources are cleaned up by the live adapter.
+
+## Non-goals
+This tool does not start Storybook, expose generic browser controls, authenticate Aircall pages, or render Storybook manager routes.
+
+## Evidence
+Core tests inject index, portless, and render services to cover lookup, empty results, URL options, iframe targeting, and render failures.

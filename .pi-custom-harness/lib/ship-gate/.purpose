@@ -1,0 +1,31 @@
+# ship-gate
+
+## Intent
+Provide the Pi-free policy and Effect service seams for evaluating whether a change is ready to ship.
+
+## Contract
+Input: a working directory, attempt number, and runtime state supplied to `runShipGate`, or explicit `ShipGateFacts` supplied to `evaluateShipGate`.
+Output: a `ShipGateOutcome` containing completion or blockers, attempt records, and retry exhaustion.
+Errors: `ShipGateFactsError` when the facts service cannot resolve the inputs.
+
+## Behaviour
+1. Evaluate independent blockers for incomplete release artifacts, missing merge requests, unresolved threads, missing ticket binding, policy-required fresh verification, unsettled pipelines, and incomplete visual review for Figma-backed work.
+2. Require repository-wide verification after the latest edit for a repository-wide policy, or a focused test after the latest edit for a focused-only policy.
+3. Return `complete` only when no blockers are observed; otherwise return `blocked` with every observed blocker.
+4. Mark a blocked attempt retry-exhausted when its attempt number is at least three.
+5. Preserve every attempt record when `recordShipGateAttempt` appends a current outcome.
+6. Resolve facts through the injected `ShipGateFactsService`; Pi event state and provider lookups remain outside the policy core.
+
+## Edge cases
+- A missing merge request blocks only when commits are ahead of the base branch.
+- Unresolved threads block only when a merge request exists.
+- Verification is stale when its policy-matched evidence generation differs from the current edit generation.
+- Focused-only repositories never accept `verify all` as evidence.
+- Visual review is required only for Figma-backed work.
+- Facts lookup failure returns the typed `ShipGateFactsError` instead of an outcome.
+
+## Non-goals
+This library does not register Pi tools, own session state or follow-up delivery, query GitLab or ticket providers directly, run verification, or perform a ship operation.
+
+## Evidence
+The colocated ship-gate extension tests exercise clean completion, each blocker condition, combined blockers, retry exhaustion, attempt recording, fake facts lookup, and the blocked follow-up contract.

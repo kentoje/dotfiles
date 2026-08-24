@@ -1,0 +1,30 @@
+# fleet
+
+## Intent
+Provide one fleet tool for repository-wide status, dependency comparison, safe synchronization, installs, and orphaned portless cleanup.
+
+## Contract
+Input: a TypeBox action `status`, `versions` with a nonempty package name, `sync` with optional `hard`, `install`, or `prune`.
+Output: repository status, package versions, a sync plan and any applied hard-sync repositories, aggregated install results, or orphaned portless removal results.
+Errors: repository selection or service failures block the action when no trustworthy result can be produced; install and prune retain per-repository or per-server failures while continuing other entries.
+
+## Behaviour
+1. Select repositories exclusively from `RepoMapService.repositoryFactsFor(...).repositories`.
+2. Status reports branch, dirty state, ahead/behind counts, and open merge request state for each selected repository.
+3. Versions reads the named package through `FleetPackageService` for each selected repository and preserves a missing version as `undefined`.
+4. Sync first obtains plans. Without `hard` it performs no mutation; with `hard` it asks the injected confirmation service and applies hard sync only after confirmation.
+5. Install attempts every repository and returns installed names plus failures instead of stopping at the first failure.
+6. Prune removes only servers returned by the injected orphan-discovery service and aggregates removal failures.
+
+## Edge cases
+- Missing repository selection service fails closed.
+- An empty mapped fleet produces empty action collections.
+- Hard-sync confirmation refusal returns the pending plans without applying any repository changes.
+- A failed install or orphan removal does not prevent remaining entries from being attempted.
+
+## Non-goals
+This module does not maintain a repository matrix, infer package metadata outside repository services, or silently force-reset repositories.
+
+## Evidence
+The colocated fleet core tests cover repository-map selection, status and version aggregation, safe and confirmed sync, continued installs after a failure, and orphan-only prune removal.
+

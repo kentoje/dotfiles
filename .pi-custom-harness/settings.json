@@ -1,7 +1,7 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "google-vertex/gemini-3.7-flash",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "azure/gpt-5.6-luna",
+  "defaultThinkingLevel": "xhigh",
   "defaultProjectTrust": "never",
   "extensions": ["./extensions"],
   "packages": [
@@ -15,5 +15,7 @@
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",
     "npm:@mrclrchtr/supi-code-intelligence"
-  ]
+  ],
+  "lastChangelogVersion": "0.84.2",
+  "theme": "melange_dark"
 }

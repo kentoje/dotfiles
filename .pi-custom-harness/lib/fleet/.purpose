@@ -1,0 +1,22 @@
+# fleet
+
+## Intent
+Own the Pi-free Effect service contracts and subprocess adapters consumed by the fleet extension.
+
+## Contract
+`FleetGitService` provides branch, dirty, ahead/behind, sync-plan, and explicit hard-sync operations. `FleetGitLabService` reads open merge requests. `FleetPackageService` reads named package versions and runs frozen installs. `FleetPortlessService` discovers and removes only servers classified as orphaned. `FleetConfirmationService` is supplied at the Pi boundary for destructive confirmation. Service failures are represented by `FleetServiceError`; repository-selection failures use `FleetRepositoryError` in the extension policy.
+
+## Behaviour
+All services are injected into the extension core and remain independently fakeable. The live layer runs Git, GitLab, pnpm, and portless subprocesses, decodes their structured results, and maps failures to typed `FleetServiceError` values. Portless orphan discovery skips running servers and existing worktree paths.
+
+## Edge cases
+- Missing or malformed subprocess output and nonzero exits become `FleetServiceError` values.
+- A package absent from all supported dependency scopes is returned with an undefined version.
+- Running portless servers and servers whose declared worktree path exists are not classified as orphans.
+
+## Non-goals
+This library does not select repositories, register Pi tools, infer repository matrices, or decide whether a hard sync is allowed.
+
+## Evidence
+The fleet extension core tests inject fake Git, GitLab, package, portless, and confirmation services to exercise the service contracts across status, versions, sync, install, and prune actions.
+

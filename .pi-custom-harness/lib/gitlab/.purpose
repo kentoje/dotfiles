@@ -1,0 +1,23 @@
+# gitlab
+
+## Intent
+Provide the current branch's open merge request without coupling policy code to the GitLab CLI.
+
+## Contract
+Input: a working directory.
+Output: an optional current-branch merge request containing its IID.
+Errors: `GitLabMergeRequestLookupError`; callers must block when GitLab state cannot be verified.
+
+## Behaviour
+Resolve the current branch with `git branch --show-current`, then invoke `glab mr list --source-branch <branch> --state opened --output json --fields iid`.
+Decode the structured JSON array and return its first IID, or `Option.none` for an empty list.
+
+## Edge cases
+- No open merge request exists -> return `Option.none` for an empty structured list.
+- Malformed JSON, an unsupported payload, an unexpected exit code, or a CLI transport failure -> fail with `GitLabMergeRequestLookupError`.
+
+## Non-goals
+This module does not create, update, reply to, or watch merge requests.
+
+## Evidence
+The MR guard must prevent duplicate merge requests before `glab mr create` executes.

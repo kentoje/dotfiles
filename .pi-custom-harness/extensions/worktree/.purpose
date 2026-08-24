@@ -1,0 +1,30 @@
+# worktree
+
+## Intent
+Create and maintain safe task worktrees using repository-owned facts and setup contracts.
+
+## Contract
+Input: one TypeBox action: `{ action: "new", task }`, `{ action: "verify" }`, `{ action: "list" }`, or `{ action: "rm", task }`.
+Output: a created worktree with setup and readiness summary, a readiness result, configured-root listing, or safe removal result.
+Errors: `WorktreeRepositoryFactsError | WorktreeGitError | WorktreeCommandError | WorktreeFilesystemError | WorktreePathError | WorktreeMutationError`.
+
+## Behaviour
+1. Resolve repository facts through `RepoMapService`; never infer package metadata or configuration in this module.
+2. Use the configured worktree root and reject empty, separator-containing, or traversal task names.
+3. For `new`, create a Git worktree, run the configured setup script when present or a minimal native-Git fallback otherwise, register its typed portless route, and verify only that the path and requested branch are available.
+4. Verify the requested current worktree through Git/filesystem readiness checks without reading developer-home state or invoking repository check scripts.
+5. List only Git worktrees below the configured root.
+6. Remove only a recognized Git worktree below the configured root.
+7. Queue absolute-path mutations at the Pi boundary.
+
+## Edge cases
+- Missing repository facts fail closed instead of falling back to package metadata.
+- Setup-script, fallback command, portless, Git, filesystem, or mutation-queue failure returns a typed error; repository checks are never launched.
+- A path outside the configured root or absent from Git's recognized worktree list is never removed.
+
+## Non-goals
+This tool does not implement repository setup details, infer auth mode, call GitLab, or expose developer-home state to its core.
+
+## Evidence
+The colocated worktree core tests cover setup-script delegation, the native-Git fallback, check-free readiness, root-filtered listing, recognized removal, and unsafe task rejection.
+

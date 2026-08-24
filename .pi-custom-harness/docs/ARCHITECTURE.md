@@ -1,11 +1,10 @@
 # Harness architecture
 
 How the harness in `~/dotfiles/.pi-custom-harness` is built and isolated.
-`HARNESS.md` in this directory decides *what* to build.
-This document decides *how*.
+`HARNESS.md` in this directory records what the harness does and why.
+This document records how the implemented modules compose.
 
-Design only.
-No implementation exists yet.
+The Effect/Pi boundary is implemented. The current tree contains the planned library and extension directories, deterministic tests, and the repository checks for strict TypeScript, Biome, and module contracts.
 
 ---
 
@@ -18,9 +17,8 @@ Bun runs `.ts` directly, so there is no build step and no watch loop.
 
 ### Why Effect earns its place here
 
-Effect is not used anywhere in your stack today (not in hydra, dashboard-v4, or the extensions), so this is a new bet.
-It is a good one, for reasons that map onto requirements you already stated rather than onto general enthusiasm.
-
+Effect is now the runtime of this harness, including its Pi-free library cores and extension boundaries. It is new relative to hydra and dashboard-v4, but it is no longer only a proposal.
+It earns its place for reasons that map onto requirements you already stated rather than onto general enthusiasm.
 | What you asked for | What Effect gives |
 | --- | --- |
 | A `.purpose` file recording the contract, including errors | `Effect<A, E, R>` puts the error channel in the type. The Errors section of `.purpose` becomes type-checked rather than merely documented. |
@@ -62,22 +60,22 @@ It forces exactly the shell-and-core split you asked for.
 
 ## 2. Module anatomy
 
-Every module, whether a tool, an event handler, or a shared library, has the same five files.
+The implemented layout distinguishes Pi-facing extensions from Pi-free service libraries. Every module has a `.purpose`, `core.ts`, and colocated tests; extensions additionally expose `schema.ts` and `index.ts`, while libraries may expose `live.ts` for subprocess or filesystem integration.
 
 ```
 extensions/mr/
 ├── .purpose        the contract in prose. Intent, contract, edge cases, non-goals, evidence.
 ├── schema.ts       typebox parameters. The single machine-readable contract.
 ├── index.ts        the Pi shell. Thin. Registers, validates, runs, maps errors to ToolResult.
-├── core.ts         the Effect program. All logic. Knows nothing about Pi.
-└── core.test.ts    tests core.ts against fake service layers. No Pi, no network.
+├── core.ts         the Effect program. All policy logic. Knows nothing about Pi.
+└── core.test.ts    deterministic tests of core.ts against fake service layers.
 ```
 
-The rule that keeps this honest: **`core.ts` must never import from `@earendil-works/pi-coding-agent`.**
-If it does, the module is no longer testable in isolation and the split has failed.
-This is one lint rule and it is worth enforcing.
+Library modules use the same Pi-free core/test contract and add `live.ts` when they have a real command, filesystem, or process boundary. `live.test.ts` covers that boundary with injected transports or temporary fixtures.
 
-`index.ts` stays roughly this shape for every module:
+The rule that keeps this honest: **library `core.ts` and `live.ts` must never import from `@earendil-works/pi-coding-agent`.**
+If they do, the module is no longer testable in isolation and the split has failed.
+`index.ts` stays roughly this shape for every tool extension:
 
 ```typescript
 export default function (pi: ExtensionAPI) {
@@ -91,8 +89,7 @@ export default function (pi: ExtensionAPI) {
 }
 ```
 
-All Pi-specific concerns (signal wiring, error to `ToolResult` mapping, `withFileMutationQueue`) live in `lib/pi-bridge` and are applied once per module, not reimplemented.
-
+Pi-specific signal/error bridging is shared through `lib/pi-bridge`; mutation queue ownership remains at the extension boundary where the Pi API is available.
 ---
 
 ## 3. The `.purpose` specification
@@ -149,11 +146,17 @@ That is the trade for keeping it visually adjacent to `index.ts` rather than sho
 │
 ├── lib/                        shared. Not discovered by Pi as extensions.
 │   ├── pi-bridge/              Effect <-> Pi edge: runTool, signal wiring, error mapping
-│   ├── gitlab/                 glab wrapper + REST client        (GitLabService)
-│   ├── git/                    branch, worktree, status          (GitService)
-│   ├── portless/               URL resolution, server lifecycle  (PortlessService)
-│   ├── repo-map/               repo -> runner, authMode, paths   (RepoMap)
-│   └── result/                 structured result and error types
+│   ├── gitlab/                 glab wrapper + transport boundary       (GitLabService)
+│   ├── git/                    branch, worktree, status                 (GitService)
+│   ├── mr/                     merge-request service and live boundary
+│   ├── repo-map/               repo -> runner, authMode, paths          (RepoMap)
+│   ├── worktree/               worktree policy and live services
+│   ├── verify/                 repository check policy and live runner
+│   ├── preview/                URL resolution and server lifecycle      (PortlessService)
+│   ├── story/                  Storybook route and index services
+│   ├── ticket/                 per-worktree ticket binding
+│   ├── fleet/                  multi-repository status and maintenance
+│   └── ship-gate/              settled-turn acceptance policy
 │
 ├── extensions/                 one directory per module, each with a .purpose
 │   ├── mr-guard/               handler  (HARNESS.md 4.1)
@@ -179,17 +182,18 @@ Pi discovers extensions from `<configDir>/extensions/*.ts` and `*/index.ts`.
 
 ### `lib/repo-map` is the single source of truth
 
-Three separate modules need the same per-repo facts, and duplicating them is how they drift:
+Every delivery consumer resolves `RepositoryFacts.deliveryPolicy` from this module; no consumer infers policy from raw repository files.
 
 | Fact | Consumed by |
 | --- | --- |
+| delivery policy: `changesets`, `conventional-commits`, or `none` | `mr-guard`, `ship-gate`, `GitService` |
+| verification policy: focused-only or repository-wide | `verify`, `ship-gate` |
 | test runner (vitest in hydra, jest in the extensions) | `verify` |
 | `authMode`: `none` / `dev-plugin` / `browser-login` | `preview`, `story` |
 | worktree root, portless app name | `worktree`, `preview`, `fleet` |
 | repo list for sweeps | `fleet` |
 
-One module owns this table.
-Everything else asks it.
+Git owns branch-diff, publishable-package, committed-changeset, and release-readiness inspection under the selected policy. This keeps source policy separate from mutable branch evidence. `RepositoryFactsConfiguration.deliveryPolicyOverrides` is the explicit extension point for an exceptional repository: it can select release and verification policy by repository root, directory name, or package name without adding conditionals to consumers.
 
 ---
 
@@ -268,20 +272,22 @@ Add both the symlink and any stray `auth*.json` to `.gitignore` before the first
 
 | Not included | Why |
 | --- | --- |
-| Auto-discovery of `~/.agents/skills` | Hermetic by decision. Ten skills are re-authored into `skills/` instead, listed in section 9. |
+| Auto-discovery of `~/.agents/skills` | Hermetic by decision. Ten skills are present in `skills/`; the CLI abbreviation supplies them explicitly. |
 | Subagent roles | Decided in review: none for now. See the open decision in section 7. |
 | `AGENTS.md` and `SYSTEM.md` | Neither loads or neither should. `APPEND_SYSTEM.md` is the vehicle, per section 5. |
 | The four retired skills | `aircall-dev-flow`, `aircall-dev-flow-maestro`, `gitlab-create-merge-request`, `agent-browser-storybook-dev`. Superseded by modules, per HARNESS.md section 8. |
-| A build step | Bun runs `.ts` directly. Adding a bundler would buy startup time at the cost of an edit-reload loop. Revisit only if section 1 cost 2 becomes real. |
+| A build step | Bun runs `.ts` directly. Adding a bundler would buy startup time at the cost of an edit-reload loop. Revisit only if the unresolved startup measurement changes that tradeoff. |
 | Effect Schema for tool parameters | Impossible. Pi requires typebox `TSchema`. |
 
 ---
 
-## 7. Verify before building
+## 7. Verify unresolved design and live evidence
 
-Four things I could not confirm from the docs alone, each cheap to settle and each able to change the design.
+One item remains unresolved because it needs live measurement:
 
-1. **Cold start with Effect loaded.** Measure `pi` startup before and after the first Effect-based extension. This validates or kills the no-build-step decision.
+1. **Cold start with Effect loaded.** Measure `pi` startup before and after the Effect-based extensions. This validates or challenges the no-build-step decision.
+
+The implementation and deterministic contract checks do not close that live startup question.
 
 Three items previously listed here are now closed.
 
@@ -312,10 +318,10 @@ Delegation is a thing you do by opening another session, not a tool in this harn
 
 ---
 
-## 8. Skills to port
+## 8. Skills catalogue
 
 Hermetic mode means nothing loads from `~/.agents/skills`.
-Ten skills are re-authored into `.pi-custom-harness/skills/`, decided in review.
+The ten harness-owned skills listed below are present in `.pi-custom-harness/skills/` and are supplied through the harness CLI abbreviation.
 
 | Skill | Why it earns a slot |
 | --- | --- |
@@ -332,42 +338,39 @@ Ten skills are re-authored into `.pi-custom-harness/skills/`, decided in review.
 
 **Not ported:** `agent-browser-storybook-dev`, retired by the `story` tool, per HARNESS.md section 8.
 
-Porting is a copy plus a review, not a move.
-Each skill's description is its trigger, and the measured invocation rate (10 across 5 skills of roughly 50) says most descriptions do not match how requests are actually phrased.
-Rewrite each description against a real prompt from the corpus before accepting it into the harness.
+The skill directories are present; any future description tuning should be driven by real prompts and invocation evidence rather than treated as unfinished installation.
 
 ---
 
-## 9. Build order
+## 9. Implementation status and build order
 
-Unchanged from HARNESS.md section 10, with the scaffolding phase added.
+The dependency order below is retained as historical rationale. Phases 0 through 7 are represented in the current tree; phase 8 remains a future prompt artifact.
 
 | Phase | Ships |
 | --- | --- |
-| 0 | Directory, `package.json`, `settings.json`, the fish abbreviation, symlinks, `.gitignore`. Settle the open items in section 7. No prompt file yet. |
-| 1 | `lib/pi-bridge` and `lib/gitlab`, then `mr-guard`. The first module proves the whole pattern end to end. |
-| 2 | `lib/repo-map`, `lib/git`, then `worktree`. |
-| 3 | `mr` and `verify`. |
-| 4 | `ticket`, then `ship-gate` and `notify-on-settle`. |
-| 5 | `lib/portless`, then `preview` and `story`. |
-| 6 | `fleet`. |
-| 7 | Port the ten skills from section 8, rewriting each description. |
-| 8 | **`APPEND_SYSTEM.md`.** Written last, against the modules that exist. See section 10. |
+| 0 | Directory, `package.json`, `settings.json`, the fish abbreviation, symlinks, `.gitignore`. Historical scaffolding phase; the current tree is already beyond it. |
+| 1 | `lib/pi-bridge` and `lib/gitlab`, then `mr-guard`. **Implemented.** |
+| 2 | `lib/repo-map`, `lib/git`, then `worktree`. **Implemented.** |
+| 3 | `mr` and `verify`. **Implemented.** |
+| 4 | `ticket`, then `ship-gate` and `notify-on-settle`. **Implemented.** |
+| 5 | `preview` and `story`, with shared portless process services in `lib/preview`. **Implemented.** |
+| 6 | `fleet`. **Implemented.** |
+| 7 | Port the ten skills from section 8. **Implemented.** |
+| 8 | **`APPEND_SYSTEM.md`.** Written last, against the modules that exist. See section 10. **Unresolved future work.** |
 
-Phase 1 is the one to be careful with.
-It establishes the shell-and-core split, the `.purpose` format, the service-layer shape, and the test approach that the other nine modules copy.
-Get it wrong and the mistake is replicated nine times.
+The module directories and boundary contracts now exist; future work should preserve those contracts rather than repeat the scaffolding sequence.
 
 ---
 
-## 10. The prompt is written last
+## 10. The prompt artifact
 
-`APPEND_SYSTEM.md` is a downstream artifact, not a starting point.
-Writing it before the modules exist produces a generic style document, which is the one thing the harness does not need.
+`APPEND_SYSTEM.md` now exists as the hand-written remainder of the assembled harness prompt.
 
-**It cannot be written earlier because its content is defined by subtraction.**
-Sources 1, 3 and 4 from section 5 already carry the tool list, the per-tool guidelines, and the skills catalogue.
-`APPEND_SYSTEM.md` holds only the remainder, and the remainder is unknowable until you can read what each module already contributes.
+The current prompt-evidence session confirmed that the file loads, all local extensions initialize, there are zero active tool-schema errors, and the ten harness skills are discovered with nine exposed for model invocation.
+
+`ctx.getSystemPrompt()` remains available only inside extension runtime hooks, so the evidence session could not dump the full assembled string directly from an agent prompt.
+
+The artifact therefore follows the documented subtraction rules and remains intentionally concise while the runtime hook needed for a byte-for-byte prompt dump remains future work.
 
 ### What it must contain
 

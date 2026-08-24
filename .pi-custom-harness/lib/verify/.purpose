@@ -1,0 +1,26 @@
+# verify
+
+## Intent
+Provide the typed command boundary used by the verify policy without exposing subprocess details to its Effect core.
+
+## Contract
+Input: `VerifyCommandRequest` containing a working directory and repository check kind.
+Output: `VerifyCommandResult` containing exit code and complete command output.
+Errors: `VerifyCommandExecutionError` when the command transport cannot start or complete.
+
+## Behaviour
+1. Accept only repository check kinds supplied by `RepoMapService`.
+2. Run the corresponding package script through the injected command transport.
+3. Preserve the complete combined command output.
+4. Translate transport failures into a typed service error.
+
+## Edge cases
+- A nonzero exit code is a result, not a transport error, so the policy can parse and aggregate its diagnostics.
+- Output is never truncated by this service.
+- Deterministic tests can supply a transport without spawning a subprocess.
+
+## Non-goals
+This service does not select checks, parse diagnostics, infer package scripts, or import Pi APIs.
+
+## Evidence
+The verify contract requires actionable diagnostics instead of the truncated `tail -50` output used by historical hand-rolled checks.

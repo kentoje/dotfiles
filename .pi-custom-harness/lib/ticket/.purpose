@@ -1,0 +1,26 @@
+# ticket
+
+## Intent
+Own the local filesystem and Git state seam used by the ticket extension's branch-to-ticket association.
+
+## Contract
+Input: an absolute worktree path and either a ticket key to bind or a lookup request.
+Output: a validated ticket key, branch, and worktree association.
+Errors: typed validation, missing state, malformed state, deleted worktree, branch lookup, and binding write errors.
+
+## Behaviour
+Validate ticket keys locally, resolve the branch through Git, and serialize bindings under the worktree's `.dev-flow.json`.
+Read only the requested worktree's state, decode it, and reject malformed or differently-associated records.
+Expose filesystem and Git operations as an injected seam for deterministic tests.
+
+## Edge cases
+- A deleted worktree fails before state access.
+- Missing state is distinct from malformed JSON or fields.
+- A binding whose recorded worktree differs from the requested worktree is rejected.
+- No Jira or remote service is contacted.
+
+## Non-goals
+This service does not create Jira tickets, query Jira, manage branches, or maintain central binding state.
+
+## Evidence
+The workflow records a `.dev-flow.json` manifest per worktree and the ticket tool is limited to binding and current lookup.

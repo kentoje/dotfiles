@@ -1,0 +1,25 @@
+# pi-bridge
+
+## Intent
+Keep Effect execution and failure mapping at the Pi boundary so policy cores remain Pi-free.
+
+## Contract
+Input: an Effect program and optional Pi abort signal.
+Output: the program value, a fail-closed handler decision, or a Pi tool result.
+Errors: typed Git, GitLab, and repository-policy lookup failures become readable blocking reasons; defects, unexpected failures, and interruption also fail closed.
+
+## Behaviour
+Run the Effect program with the supplied abort signal.
+Return successful values unchanged.
+Map typed failures, defects, unexpected failures, and interruption to safe Pi-facing results.
+
+## Edge cases
+- The abort signal interrupts verification -> return an actionable retry reason.
+- A typed lookup fails -> identify the unavailable subsystem in the blocking reason.
+- A defect or unknown thrown value occurs -> block without rejecting the Pi handler promise.
+
+## Non-goals
+This module does not implement policy decisions or register Pi extensions.
+
+## Evidence
+Pi handlers are Promise-based while harness modules use Effect error channels and interruption.

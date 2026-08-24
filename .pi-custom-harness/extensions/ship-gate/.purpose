@@ -1,0 +1,34 @@
+# ship-gate
+
+## Intent
+Keep a settled agent turn from ending while repository shipping obligations remain incomplete.
+
+## Contract
+Input: the current Pi session and worktree state at `agent_settled`.
+Output: a stable `ShipGateOutcome` custom event payload, or silence on clean completion.
+Errors: fact lookup failures block closed and are recorded as a ship-gate blocker.
+
+## Behaviour
+1. Resolve `RepositoryFacts.deliveryPolicy` and its branch release proof through `RepoMapService` and `GitService`.
+2. Block a branch only when its canonical delivery policy's release proof is incomplete, even when its merge request already exists.
+3. Check branch commits ahead of its base without a merge request.
+4. Check unresolved merge request discussions, ticket binding, fresh policy-matched verification evidence, and unsettled pipeline watches.
+5. Hold Figma-backed work until human visual review is complete under the frozen policy.
+6. Record every blocker category and attempt for false-positive measurement.
+7. Send exactly one follow-up per blocked settled event with `deliverAs: "followUp"` and `triggerTurn: true` while attempts remain below three.
+8. Stop after three blocked attempts without looping and remain silent on clean completion.
+
+## Edge cases
+- Changeset delivery policies require committed changesets only for affected publishable packages; docs, tooling, tests, and private-package changes do not need one.
+- Conventional-commit delivery policies require every branch commit to use a conventional prefix.
+- A `none` delivery policy is always release-ready.
+- Successful verification from before the latest edit remains stale; focused-only repositories require a successful focused `verify test --file …`, while repository-wide repositories require `verify all`.
+- Multiple simultaneous blockers are reported together.
+- A retry-cap blocker is reported without another follow-up.
+- Pipeline and visual-review holds are independent of code checks.
+
+## Non-goals
+This extension is not a tool, does not create merge requests, and does not own repository facts, verification commands, or pipeline polling.
+
+## Evidence
+The harness design requires a capped `agent_settled` stop-gate with measurable blocker categories and a visual-review hold for Figma-backed work.

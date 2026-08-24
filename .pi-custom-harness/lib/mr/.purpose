@@ -1,0 +1,26 @@
+# mr
+
+## Intent
+Provide Pi-free, fakeable Effect services for reading and mutating an existing GitLab merge request, reading branch commits, and polling pipeline state.
+
+## Contract
+`MergeRequestService` exposes status, thread, reply, update, and pipeline operations. `MergeRequestCommitService` reads current-branch commits used for update derivation. `MergeRequestClock` and `MergeRequestTimer` keep time and sleeps replaceable in deterministic tests. Live layers expose only injected command-transport seams to the core. GitLab failures use `MergeRequestGitLabError`; commit-read failures use `MergeRequestCommitError`.
+
+## Behaviour
+1. GitLab status maps IID, title, draft, discussion state, pipeline state, unresolved count, and bound ticket.
+2. Thread reads preserve author, bot, code position, body, and resolution metadata.
+3. Reply and update operations remain explicit service calls.
+4. Commit reads return subjects and bodies without reading package metadata.
+5. Pipeline reads expose known states, map unsupported states to `unknown`, and are polled by the extension core through the timer seam until terminal.
+
+## Edge cases
+- Malformed or nonzero subprocess responses become typed lookup errors.
+- Unknown pipeline values become `unknown`; absent code positions remain undefined.
+- Missing bound tickets remain undefined.
+
+## Non-goals
+This module does not import Pi, register tools, own session timers, deliver follow-ups, create merge requests, or infer repository facts.
+
+## Evidence
+The colocated live boundary test injects command transport and verifies a read-only status payload is decoded into the typed merge request result and expected safe command request.
+

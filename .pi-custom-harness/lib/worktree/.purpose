@@ -1,0 +1,27 @@
+# worktree
+
+## Intent
+Own the Pi-free Effect policy and typed service seams for creating, verifying, listing, and safely removing task worktrees.
+
+## Contract
+Input: `WorktreeToolInput` with action `new`, `verify`, `list`, or `rm`, an optional task name, and a working directory. Output: a created and verified worktree, verification summary, root-filtered worktree listing, or removed worktree path. Errors: `WorktreeRepositoryFactsError`, `WorktreeGitError`, `WorktreeCommandError`, `WorktreeVerificationError`, `WorktreeFilesystemError`, `WorktreePathError`, `WorktreeMutationError`, or the mapped repository release-gate lookup error.
+
+## Behaviour
+1. Resolve repository facts through `RepoMapService` and derive the configured worktree root and repository-specific path.
+2. Reject empty, dot, dot-dot, or separator-containing task names and keep calculated paths within the configured root.
+3. For `new`, ensure the target does not exist, create it through `WorktreeGitService`, run the mapped setup script or minimal native-Git fallback, register its route through `WorktreePortlessService`, and verify all mapped checks.
+4. For `verify`, require the current path to exist and run the repository verification seam.
+5. For `list`, return only Git records under the configured root; for `rm`, remove only a recognized record under that root.
+6. Route mutating operations through `WorktreeMutationService`, leaving queue ownership to the Pi boundary.
+
+## Edge cases
+- Unavailable repository facts fail closed.
+- Git, setup command, portless, filesystem, verification, or mutation failures remain typed.
+- Existing targets cannot be created, and unrecognized or outside-root targets cannot be removed.
+- A repository with no mapped setup script uses the minimal Git fallback before portless registration and verification.
+
+## Non-goals
+This library does not register Pi tools, implement repository setup scripts, infer auth or package metadata, call GitLab, or expose developer-home state to policy code.
+
+## Evidence
+The colocated worktree extension core tests inject every service seam and cover setup delegation, fallback setup, verification failure, root-filtered listing, recognized removal, and unsafe task rejection.

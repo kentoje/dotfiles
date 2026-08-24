@@ -1,7 +1,7 @@
-# Pi harness blueprint
+# Pi harness
 
 A tailored harness for Aircall GitLab frontend work, built on Pi (`@earendil-works/pi-coding-agent`, v0.84.2).
-Blueprint only: nothing here is installed yet.
+The harness is implemented under `.pi-custom-harness`: its Effect/Pi boundary, planned module directories, colocated deterministic tests, strict typecheck, Biome check, and module-contract validation are present.
 
 Every recommendation is anchored either to a measured number from the session analysis of 55 GitLab sessions, 20 July to 17 August 2026, or to a fact read out of the installed Pi source and package docs.
 
@@ -61,9 +61,9 @@ Read from `dist/core/tools/`, it is exactly seven tools, and all seven are load-
 | `@juicesharp/rpiv-todo` | `todo` | 1 |
 | `@mrclrchtr/supi-ask-user` | `ask_user` | 1 |
 | `pi-powerline-footer`, `@codexstar/pi-listen`, `@mrclrchtr/supi-settings` | none, UI and voice only | 0 |
-| `git:DietrichGebert/ponytail` | not yet enumerated, see section 9 | ? |
+| `git:DietrichGebert/ponytail` | not yet enumerated, see section 11 | ? |
 
-**24 tools today. 31 after the seven additions in section 5.**
+**31 tools are now present: 24 existing tools plus the seven harness tools in section 5.**
 
 `pi-subagents` was removed in review, taking `subagent` and `subagent_wait` with it.
 See section 3.
@@ -151,31 +151,14 @@ pi.on("tool_call", async (event, ctx) => {
     };
   }
 
-  const gate = await releaseGateFor(ctx.cwd);   // from lib/repo-map
-  if (gate.kind === "changeset" && !(await hasChangeset(ctx.cwd))) {
-    return { block: true, reason: "No .changeset entry on this branch. Write one before opening the MR." };
-  }
-  if (gate.kind === "conventional-commits" && !(await commitsAreConventional(ctx.cwd))) {
-    return { block: true, reason: "semantic-release repo: every commit needs a conventional prefix, it sets the version." };
-  }
+  const facts = await repositoryFactsFor(ctx.cwd); // lib/repo-map
+  const readiness = await releaseReadinessFor(ctx.cwd, facts.deliveryPolicy); // lib/git
+  if (!readiness.ready) return { block: true, reason: releaseReadinessFailureReason(readiness) };
 });
 ```
 
-Two guards in one handler.
-The release check is here rather than in a generator, for the reason in section 7.
+The policy is per repository: Hydra uses a changeset policy that requires committed changesets only for changed publishable packages; dashboard-v4, conversation-center-ext, analytics-extension, and assets-page use conventional commits. `lib/repo-map` owns the rule and `lib/git` owns branch evidence, so `mr-guard`, `ship-gate`, and `verify` cannot drift.
 
-**The release gate is per repo, and hydra is the outlier.**
-Only hydra uses changesets.
-`dashboard-v4`, `conversation-center-ext`, `analytics-extension` and `assets-page` all use semantic-release, where the version bump rides on the commit message.
-A changeset check on those four would block every MR for a missing file the repo does not use.
-
-`lib/repo-map` owns the mapping.
-Note that commitlint is configured on only two of the five repos, so on the other three this guard is the only thing enforcing the convention that decides the published version.
-
-Build this first.
-It is roughly forty lines and it is the highest leverage per line in the document.
-
-### 4.2 Ship-gate - approved, all four checks, capped retries
 
 **Evidence.** The maestro stop-gate fired 22 times in the analysed window: "Do not finish yet - the task is not complete (attempt 1/3). You have not opened the MR."
 An agent that wrote correct code but never shipped it would otherwise report success.
@@ -185,7 +168,7 @@ An `agent_settled` handler refuses to let the turn end when any of these hold:
 - the branch has commits ahead of main but no MR
 - the MR has unresolved discussion threads
 - the branch has no bound ticket
-- `verify all` has not passed since the last edit
+- the delivery policy's required verification evidence has not passed since the last edit: `verify all` for repository-wide policy or focused `verify test --file …` for focused-only policy
 
 On failure it calls `pi.sendMessage(..., { deliverAs: "followUp", triggerTurn: true })` to push the agent back to work.
 
@@ -258,10 +241,8 @@ So `worktree new` calls the repo's script when `lib/repo-map` says one exists, a
 - the `verify` pass afterwards
 - a fallback provisioning path for repos with no script yet
 
-**The worktree root is still undefined.**
-Worktrees lived at `~/.maestro/worktrees/<repo>/<task>` and maestro is dropped.
-This blocks implementation, and it also fixes the portless route shape, since routes are `https://<worktree>.<project>.localhost`.
-Decide before building this module.
+**The default worktree root is `~/.pi/worktrees`.**
+`lib/repo-map` owns this default and accepts an explicit override, so routes follow `https://<worktree>.<project>.localhost` under the configured portless route.
 
 `verify` is not garnish.
 You asked for it explicitly: "create a fake wt, and try the script onto it", and separately "It should be working on any machine not only mine".
@@ -319,7 +300,7 @@ Mode names are per repo, so `lib/repo-map` owns them.
 
 **This tool serves four of the five repos.**
 Only hydra has Storybook, so `preview` is the common path and `story` is the special case.
-The build order in section 10 reflects the opposite and should be corrected when scheduling.
+The implementation order in section 10 puts `preview` before `story`, matching that scope.
 
 **`authMode` is a fact the tool reports, not a step it performs.**
 This was the key correction in review.
@@ -363,7 +344,7 @@ What the tool owns is the branch-to-ticket-to-MR association, which nothing else
 - `current` resolves it from the branch name
 
 This exists because the ship-gate (4.2) needs to check "is a ticket bound", and because every working branch in the corpus carries a key.
-Storage location is open, see section 9.
+The implementation stores the binding in the worktree's `.dev-flow.json`; whether a central index or cache is also needed remains open in section 11.
 
 ### 5.7 `fleet` - status, versions, sync, install, prune
 
@@ -425,18 +406,13 @@ Recorded so the reasoning survives, and so a future re-measure can overturn them
 
 ```jsonc
 {
-  // defaultTools deliberately NOT set: built-in find and grep stay,
-  // as the non-git-repo fallback for pi-fff. See section 3.
-  "skills": [
-    "~/.agents/skills",
-    "!~/.agents/skills/aircall-dev-flow",
-    "!~/.agents/skills/aircall-dev-flow-maestro",
-    "!~/.agents/skills/gitlab-create-merge-request",
-    "!~/.agents/skills/agent-browser-storybook-dev"
-  ],
+  // Built-in find and grep stay as the non-git-repo fallback for pi-fff.
   "extensions": ["./extensions"]
+  // Harness skills are supplied with --skill by the pih abbreviation.
 }
 ```
+
+The implemented settings use the local extension directory. `--no-skills` removes auto-discovery, so the harness skill directory is supplied explicitly with `--skill`.
 
 **Four skills retired**, each because an approved tool or handler now owns the same guarantee:
 
@@ -500,21 +476,21 @@ Add `extensions/` to the same pattern.
 
 ---
 
-## 10. Build order
+## 10. Implementation status and build order
 
 | Phase | Ships | Why here |
 | --- | --- | --- |
 | 0 | Retire 4 skills, rewrite the FFF line in `AGENTS.md` | Config only, reversible, no code. |
-| 1 | MR guard + changeset gate (4.1) | Highest leverage per line. Depends on nothing. |
-| 2 | `worktree` (5.2) | Top recurring friction. Everything downstream assumes a working worktree. |
-| 3 | `mr` (5.1) and `verify` (5.3) | Highest call volume, and both are prerequisites for the ship-gate. |
-| 4 | `ticket` (5.6), then ship-gate + notify (4.2, 4.3) | The gate needs `mr`, `verify` and `ticket` to check against. |
-| 5 | `preview` (5.4) | Serves four of five repos. Ship before `story`. |
-| 5b | `story` (5.5) | hydra only. Valuable, but one repository. |
-| 6 | `fleet` (5.7) | Real value, nothing depends on it. |
+| 1 | MR guard + changeset gate (4.1) | Highest leverage per line. Depends on nothing. **Implemented.** |
+| 2 | `worktree` (5.2) | Top recurring friction. Everything downstream assumes a working worktree. **Implemented.** |
+| 3 | `mr` (5.1) and `verify` (5.3) | Highest call volume, and both are prerequisites for the ship-gate. **Implemented.** |
+| 4 | `ticket` (5.6), then ship-gate + notify (4.2, 4.3) | The gate needs `mr`, `verify` and `ticket` to check against. **Implemented.** |
+| 5 | `preview` (5.4) | Serves four of five repos. Ship before `story`. **Implemented.** |
+| 5b | `story` (5.5) | hydra only. Valuable, but one repository. **Implemented.** |
+| 6 | `fleet` (5.7) | Real value, nothing depends on it. **Implemented.** |
 
-Phases 0 and 1 are cheap and change your day.
-Do them before anything else.
+The module sequence above is implemented in the current tree; its rationale remains useful for dependency direction.
+The remaining future artifact is `APPEND_SYSTEM.md`, which is intentionally deferred until a real session can confirm the assembled prompt (see section 10).
 
 ---
 
@@ -522,7 +498,7 @@ Do them before anything else.
 
 1. **What does `ponytail` register?** You are keeping it deliberately, but its tool surface is still missing from the section 2 census. One `pi config` run closes this.
 2. **Which repos are `browser-login`?** Section 5.4 has `assets-page`, `conversation-center-ext` and `dashboard-v4` as `dev-plugin`, and Storybook as `none`. The remaining repos are unclassified, and `preview` cannot report `authMode` without the full map.
-3. **Where does `ticket` binding live?** A gitignored `.dev-flow.json` per worktree matches what you do today, and you drew the boundary yourself: "`.dev-flow.json` is something from my workflow, other people do not use it". A single `~/.pi/agent/bindings.json` survives worktree deletion and makes `fleet status` cheaper. I lean central, with the per-worktree file as a cache.
+3. **Where does `ticket` binding live beyond one worktree?** The implementation writes a `.dev-flow.json` manifest per worktree, matching what you do today. A single `~/.pi/agent/bindings.json` could survive worktree deletion and make `fleet status` cheaper. I lean central, with the per-worktree file as a cache; that design remains unresolved.
 4. **Which ship-gate checks fire spuriously?** The ticket-binding and verify-freshness checks are the two most likely to annoy. Ship all four, log which one fires, and drop whichever cries wolf.
 
 ---

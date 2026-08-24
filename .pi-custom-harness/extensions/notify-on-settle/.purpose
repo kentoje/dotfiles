@@ -1,0 +1,29 @@
+# notify-on-settle
+
+## Intent
+Notify the operator when an agent settles with a ship-gate terminal failure or a red pipeline, without training the operator to ignore routine completion messages.
+
+## Contract
+Input: TypeBox `NotifyOnSettleParams`, containing a session ID, one settle outcome, and optional failure identity and message.
+Output: a Pi-free decision describing a notification, a duplicate suppression, or intentional silence.
+Errors: the injected `NotifyOnSettleService` owns notification transport. This policy has no transport error of its own; the Pi boundary supplies the safe transport implementation.
+
+## Behaviour
+1. Ignore clean completion and pending pipeline outcomes.
+2. For a ship-gate terminal failure or red pipeline, resolve a stable failure identity and message.
+3. Suppress a notification already sent for the same session, outcome, and failure identity.
+4. Send the remaining failure through the injected notification service.
+5. The Pi shell records the latest ship-gate/pipeline outcome per session and consumes it once at `agent_settled`.
+
+## Edge cases
+- Clean completion -> remain silent and do not call the notification service.
+- Pending pipeline -> remain silent until a later terminal outcome is recorded.
+- Repeated delivery of the same failure in one session -> send once.
+- Session shutdown before settlement -> discard the pending outcome for that session.
+- Missing failure ID -> use one stable fallback identity rather than emitting an unkeyed notification.
+
+## Non-goals
+This module does not decide ship-gate policy, poll pipelines, inspect session entries, call Slack directly, or send success notifications. Ship-gate and MR own those decisions and state; the injected notification service owns transport.
+
+## Evidence
+The harness decision requires failure-only `agent_settled` notifications: ship-gate failure and red pipeline are actionable, while clean completion and pending pipeline must remain silent.

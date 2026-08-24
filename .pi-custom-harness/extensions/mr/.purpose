@@ -1,0 +1,30 @@
+# mr
+
+## Intent
+Inspect and update the current branch's existing GitLab merge request, reply to review discussions, and notify the active Pi session when its pipeline settles.
+
+## Contract
+Input: a TypeBox discriminated action request for `status`, `threads`, `reply`, `update`, or `watch`, plus the current working directory supplied by Pi.
+Output: merge request status, review threads, mutation confirmation, regenerated update data, or a watch registration message. `watch` sends one Pi follow-up when the pipeline reaches a settled state.
+Errors: typed merge request, commit, clock, and watch errors remain in the Effect core; the Pi boundary maps them to a tool result.
+
+## Behaviour
+1. `status` returns IID, title, draft state, discussion state, pipeline state, unresolved count, and bound ticket.
+2. `threads` returns thread ID, author, bot metadata, file, line, body, and resolved state.
+3. `reply` posts a body to a thread and optionally resolves it.
+4. `update` derives a title and description from current-branch commits through a fakeable commit service, then updates the existing merge request.
+5. `watch` polls through fakeable clock and GitLab services until the pipeline settles, and the Pi shell delivers one follow-up only to the session that registered it.
+6. Session shutdown aborts and clears every owned watch; a replacement session cannot receive a stale watch notification.
+
+## Edge cases
+- There is deliberately no `open` action; merge request creation remains guarded bash behaviour.
+- A discussion without a code position reports undefined file and line values.
+- A pipeline that is already settled notifies without sleeping.
+- Aborting a watch, session shutdown, and a stale session token all suppress notification.
+- A missing repository-bound ticket is returned as undefined rather than inferred from package metadata.
+
+## Non-goals
+This module does not create merge requests, read package metadata, infer repository facts, own Pi timers, or deliver Pi messages from its Effect core.
+
+## Evidence
+The harness workflow requires status, thread triage, reply-and-resolve, commit-derived updates, and a pipeline-settle follow-up; the previous implementation had only the duplicate-MR guard.

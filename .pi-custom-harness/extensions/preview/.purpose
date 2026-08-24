@@ -1,0 +1,29 @@
+# preview
+
+## Intent
+Resolve and start the current worktree development preview without hiding browser authentication or portless state.
+
+## Contract
+Input: TypeBox actions `url` and `up`, with optional repository-exposed mode `sandbox`, `integrate`, or `mock`.
+Output: `{ url, running, authMode, mode }`.
+Errors: repository facts, route readiness, mode selection, portless, and startup failures remain typed and fail closed.
+
+## Behaviour
+1. Resolve repository facts only through `RepoMapService`.
+2. Resolve the current worktree's portless route and validate its URL against the repository route shape.
+3. Return an already-running route without starting another process.
+4. For `up`, select an exposed mode and start exactly its repository development script through the portless and process seams.
+5. Report browser-login as a preparation requirement; never perform browser navigation or login.
+
+## Edge cases
+- Unknown modes and modes absent from repository facts are rejected.
+- A route that is registered but not ready is reported as a typed route failure.
+- Startup that does not make the route ready is a typed startup failure.
+- Auth mode is reported even when it is `undefined`; it is never guessed.
+- Running development processes are stopped when the Pi session shuts down.
+
+## Non-goals
+This module does not drive a browser, perform authentication, infer scripts from package metadata, wrap portless globally, or own repository facts.
+
+## Evidence
+The harness walkthrough requires `preview url`, mode-aware `preview up`, current-worktree portless URL validation, startup failure handling, and auth-mode reporting.

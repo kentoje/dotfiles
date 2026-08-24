@@ -1,0 +1,19 @@
+# story
+
+## Intent
+Own the Pi-free Hydra Storybook policy and browser/index service seams.
+
+## Contract
+Expose typed Storybook index, portless URL, and render services plus the deterministic list/show action core.
+
+## Behaviour
+The core matches component stories, selects an optional story, builds preview-iframe URLs, forwards viewport options, and returns captures with console errors.
+
+## Edge cases
+Empty component results and unknown story selectors fail with typed index errors. Portless and browser failures remain typed and do not leak Pi APIs.
+
+## Non-goals
+This library does not register Pi tools, import Pi, start Storybook, or provide a generic browser wrapper.
+
+## Evidence
+The colocated core tests use fake services to cover lookup, empty results, URL options, preview targeting, and render errors.

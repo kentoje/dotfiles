@@ -1,0 +1,22 @@
+# preview
+
+## Intent
+Provide typed portless route lookup and development-process lifecycle seams for the preview extension.
+
+## Contract
+Input: current worktree facts and typed portless or process requests.
+Output: route readiness, process handles, and structured preview service errors.
+
+## Behaviour
+Expose narrow services that the Pi-free preview policy can replace with deterministic fakes or live implementations.
+
+## Edge cases
+- Portless lookup failures are typed.
+- Process startup and cleanup failures are typed.
+- Session-owned child processes are terminated through explicit cleanup.
+
+## Non-goals
+This library does not select repository modes, infer package scripts, navigate browsers, authenticate users, or own repository facts.
+
+## Evidence
+The preview policy requires isolated route and process seams for mode selection, route readiness, already-running servers, and startup failures.

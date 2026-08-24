@@ -1,0 +1,27 @@
+# git
+
+## Intent
+Provide Git facts needed by harness policies without importing Pi.
+
+## Contract
+Input: a working directory and the selected `RepositoryDeliveryPolicy`.
+Output: changed files, committed branch changesets with declared packages, conventional-commit status, and one `GitReleaseReadiness` result.
+Errors: `GitChangesetLookupError`; callers must block when Git cannot verify release evidence.
+
+## Behaviour
+1. Resolve the remote default branch from the repository.
+2. Compare the current branch with that default branch.
+3. For changeset policy, identify changed publishable packages and compare them with packages declared by committed changesets read from `HEAD`.
+4. For conventional-commit policy, require every branch commit to use a conventional prefix.
+5. Return ready for a `none` policy.
+
+## Edge cases
+- Untracked or staged changeset files do not satisfy release readiness.
+- Docs, tooling, tests, and private-package changes do not require a changeset.
+- No remote default branch or failed Git command returns `GitChangesetLookupError`.
+
+## Non-goals
+This module does not create branches, worktrees, commits, or merge requests.
+
+## Evidence
+The MR guard uses these facts to enforce changesets and semantic-release commit conventions before MR creation.

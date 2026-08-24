@@ -1,0 +1,30 @@
+# repo-map
+
+## Intent
+Own the one typed source of repository-specific delivery, verification, worktree, route, and fleet rules.
+
+## Contract
+Input: a working directory and optional explicit harness configuration.
+Output: `RepositoryFacts`, including its canonical `RepositoryDeliveryPolicy`.
+Errors: malformed or unavailable repository facts fail with `RepositoryFactsLookupError`; consumers must not bypass an unknown policy.
+
+## Behaviour
+1. Resolve the repository root with Git and inspect root package metadata.
+2. Select exactly one delivery policy: `changesets`, `conventional-commits`, or `none`.
+3. Apply an explicit per-repository delivery override before detectable defaults when a repository needs an exception.
+4. Attach either focused-only or repository-wide verification to that policy.
+5. Select focused-only verification for pnpm/Turbo workspaces and retain its workspace root.
+6. Return the policy with detectable checks, test runner, worktree setup, portless route, auth, and fleet facts.
+
+## Edge cases
+- A changeset directory selects the publishable-package changeset policy unless an explicit override applies.
+- Semantic-release metadata selects conventional-commit policy only when changesets do not apply.
+- Explicit overrides may select release and verification policy by repository root, directory name, or package name.
+- Missing package metadata returns conservative empty operational facts and a `none` delivery policy.
+- Invalid package metadata fails closed.
+
+## Non-goals
+This module does not inspect branch changes, parse changeset contents, run tests, or create merge requests; Git owns release-artifact inspection.
+
+## Evidence
+Every harness delivery consumer resolves `RepositoryFacts.deliveryPolicy` instead of inferring release or verification policy from raw repository files.
