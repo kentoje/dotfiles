@@ -112,6 +112,15 @@ Detect repository facts from the repository where possible. Do not hardcode a re
 
 ---
 
+## P1: cross-repository debug release workflow
+
+- [ ] Check the installed `glab` version before selecting GitLab CLI syntax, keep the harness transport on the same supported API, and add a live open-MR smoke test for lookup, pipeline, discussion, and reply operations.
+- [ ] Add a beta-publish tool or skill that builds the selected publishable package, publishes a canary, resolves the registry version, installs it into a consumer worktree, verifies the installed artifact, and runs the consumer build.
+- [ ] Publish beta packages with a task-scoped prerelease identifier and commit SHA to avoid registry collisions serving an older tarball for the same normalized version.
+- [ ] Extend `worktree new` with an explicit target repository path so a task can create and provision a dependent consumer worktree through that repository's setup script.
+- [ ] Let `ticket bind` accept a worktree path or stable worktree handle and fail when it would bind the ticket to a different checkout than the one just created.
+- [ ] Add a `preview up` escape hatch for an explicit consumer worktree or port, returning the actual running URL and owning cleanup when a repo's default development port is occupied.
+
 ## P1: implement the modules in build order
 
 ### `worktree`
