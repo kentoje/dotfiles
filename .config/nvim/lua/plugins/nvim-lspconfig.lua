@@ -26,32 +26,45 @@ local function config_exists(config_names)
 end
 
 local function project_uses_tsgo()
-	-- Use tsgo when the repo has adopted the TS7 native compiler as its
-	-- type-checker. Signal: the nearest package.json runs `tsgo` in a script
-	-- (e.g. "ts:check": "tsgo --noEmit"). In package.json the string "tsgo"
-	-- only ever appears in a script command, never in a dependency name
-	-- (the binary ships as @typescript/native-preview), so a plain-text
-	-- match is reliable.
-	local pkg = vim.fn.findfile("package.json", vim.fn.getcwd() .. ";")
-	if pkg == "" then
+	local package_path = vim.fs.find("package.json", {
+		upward = true,
+		path = vim.api.nvim_buf_get_name(0),
+	})[1]
+	if package_path == nil then
 		return false
 	end
-	local file = io.open(vim.fn.fnamemodify(pkg, ":p"), "r")
-	if not file then
+
+	local file = io.open(package_path, "r")
+	if file == nil then
 		return false
 	end
 	local content = file:read("*all")
 	file:close()
-	return content:find("tsgo", 1, true) ~= nil
+	local package = vim.json.decode(content)
+	if type(package) ~= "table" or type(package.scripts) ~= "table" then
+		return false
+	end
+	for _, script in pairs(package.scripts) do
+		if type(script) == "string" and script:find("tsgo", 1, true) ~= nil then
+			return true
+		end
+	end
+	return false
+end
+
+local function project_root()
+  local markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" }
+  local root = vim.fs.root(0, markers)
+  return root or vim.fn.getcwd()
 end
 
 local function tsgo_cmd()
-	-- Prefer the project's pinned tsgo (matches CI exactly); fall back to
-	-- the Mason/PATH build when the repo has no local install.
-	local local_bin = vim.fn.getcwd() .. "/node_modules/.bin/tsgo"
-	local bin = (vim.fn.executable(local_bin) == 1) and local_bin or "tsgo"
-	return { bin, "--lsp", "--stdio" }
+  local root = project_root()
+  local local_bin = root .. "/node_modules/.bin/tsgo"
+  local bin = (vim.fn.executable(local_bin) == 1) and local_bin or "tsgo"
+  return { bin, "--lsp", "--stdio" }
 end
+
 
 local function setup_tsgo(lsp_capabilities, custom_typescript_config)
 	-- tsgo: Fast TypeScript compiler with LSP support
@@ -126,6 +139,7 @@ return {
 		{ "williamboman/mason-lspconfig.nvim", version = "v2.*" },
 		{ "L3MON4D3/LuaSnip", version = "v2.*" },
 		{ "yioneko/nvim-vtsls" },
+		{ "nvim-treesitter/nvim-treesitter-textobjects" },
 	},
 	config = function()
 		local move_next_error = function()
@@ -169,14 +183,28 @@ return {
 
 		-- local lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lsp_capabilities = require("blink.cmp").get_lsp_capabilities()
+		local ts_repeat_move = require("nvim-treesitter-textobjects.repeatable_move")
 
-		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
-		local next_error_repeat, prev_error_repeat =
-			ts_repeat_move.make_repeatable_move_pair(move_next_error, move_prev_error)
-		local next_diag_repeat, prev_diag_repeat =
-			ts_repeat_move.make_repeatable_move_pair(move_next_diag, move_prev_diag)
-		local next_warning_repeat, prev_warning_repeat =
-			ts_repeat_move.make_repeatable_move_pair(move_next_warning, move_prev_warning)
+		local repeat_diagnostic_move = function(forward_move, backward_move)
+			local move = function(options)
+				if options.forward then
+					forward_move()
+				else
+					backward_move()
+				end
+			end
+			local repeatable_move = ts_repeat_move.make_repeatable_move(move)
+
+			return function()
+				repeatable_move({ forward = true })
+			end, function()
+				repeatable_move({ forward = false })
+			end
+		end
+
+		local next_error_repeat, prev_error_repeat = repeat_diagnostic_move(move_next_error, move_prev_error)
+		local next_diag_repeat, prev_diag_repeat = repeat_diagnostic_move(move_next_diag, move_prev_diag)
+		local next_warning_repeat, prev_warning_repeat = repeat_diagnostic_move(move_next_warning, move_prev_warning)
 
 		vim.api.nvim_create_autocmd("LspAttach", {
 			desc = "LSP actions",
@@ -234,10 +262,11 @@ return {
 			updateImportsOnFileMove = "always",
 		}
 
-		if file_exists(".yarn/sdks/typescript/lib") then
-			custom_typescript_config.tsdk = ".yarn/sdks/typescript/lib"
-		elseif file_exists("node_modules/typescript/lib") then
-			custom_typescript_config.tsdk = "node_modules/typescript/lib"
+		local root = project_root()
+		if file_exists(root .. "/.yarn/sdks/typescript/lib") then
+			custom_typescript_config.tsdk = root .. "/.yarn/sdks/typescript/lib"
+		elseif file_exists(root .. "/node_modules/typescript/lib") then
+			custom_typescript_config.tsdk = root .. "/node_modules/typescript/lib"
 		end
 
 		-- Per-project TS language server:

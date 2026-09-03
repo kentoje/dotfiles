@@ -1,78 +1,75 @@
 return {
 	"nvim-treesitter/nvim-treesitter-textobjects",
+	branch = "main",
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter",
 	},
 	config = function()
-		local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+		local ts_repeat_move = require("nvim-treesitter-textobjects.repeatable_move")
+		local ts_select = require("nvim-treesitter-textobjects.select")
+		local ts_move = require("nvim-treesitter-textobjects.move")
+
+		require("nvim-treesitter-textobjects").setup({
+			move = {
+				set_jumps = true,
+			},
+			select = {
+				lookahead = true,
+				selection_modes = {
+					["@parameter.outer"] = "v",
+					["@function.outer"] = "V",
+					["@class.outer"] = "<c-v>",
+				},
+				include_surrounding_whitespace = false,
+			},
+		})
 
 		vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
 		vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+		vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
+		vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
+		vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
+		vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
 
-		-- Optionally, make builtin f, F, t, T also repeatable with ; and ,
-		vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f)
-		vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F)
-		vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t)
-		vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T)
+		vim.keymap.set({ "x", "o" }, "af", function()
+			ts_select.select_textobject("@function.outer", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "if", function()
+			ts_select.select_textobject("@function.inner", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "ai", function()
+			ts_select.select_textobject("@conditional.outer", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "ii", function()
+			ts_select.select_textobject("@conditional.inner", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "al", function()
+			ts_select.select_textobject("@loop.outer", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "il", function()
+			ts_select.select_textobject("@loop.inner", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "it", function()
+			ts_select.select_textobject("@comment.inner", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "at", function()
+			ts_select.select_textobject("@comment.outer", "textobjects")
+		end)
+		vim.keymap.set({ "x", "o" }, "as", function()
+			ts_select.select_textobject("@scope", "locals")
+		end)
 
-		require("nvim-treesitter.configs").setup({
-			textobjects = {
-				move = {
-					enable = true,
-					goto_next_start = {
-						["]f"] = "@function.outer",
-						["]i"] = "@conditional.outer",
-					},
-					goto_previous_start = {
-						["[f"] = "@function.outer",
-						["[i"] = "@conditional.outer",
-					},
-				},
-				select = {
-					enable = true,
-
-					-- Automatically jump forward to textobj, similar to targets.vim
-					lookahead = true,
-
-					keymaps = {
-						-- You can use the capture groups defined in textobjects.scm
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-						["ai"] = "@conditional.outer",
-						["ii"] = "@conditional.inner",
-						["al"] = "@loop.outer",
-						["il"] = "@loop.inner",
-						["it"] = "@comment.inner",
-						["at"] = "@comment.outer",
-						["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-
-						-- ["i:"] = { query = "@property.lhs", desc = "Select left part of an object property" },
-						-- ["a:"] = { query = "@property.rhs", desc = "Select right part of an object property" },
-					},
-					-- You can choose the select mode (default is charwise 'v')
-					--
-					-- Can also be a function which gets passed a table with the keys
-					-- * query_string: eg '@function.inner'
-					-- * method: eg 'v' or 'o'
-					-- and should return the mode ('v', 'V', or '<c-v>') or a table
-					-- mapping query_strings to modes.
-					selection_modes = {
-						["@parameter.outer"] = "v", -- charwise
-						["@function.outer"] = "V", -- linewise
-						["@class.outer"] = "<c-v>", -- blockwise
-					},
-					-- If you set this to `true` (default is `false`) then any textobject is
-					-- extended to include preceding or succeeding whitespace. Succeeding
-					-- whitespace has priority in order to act similarly to eg the built-in
-					-- `ap`.
-					--
-					-- Can also be a function which gets passed a table with the keys
-					-- * query_string: eg '@function.inner'
-					-- * selection_mode: eg 'v'
-					-- and should return true of false
-					include_surrounding_whitespace = false,
-				},
-			},
-		})
+		vim.keymap.set({ "n", "x", "o" }, "]f", function()
+			ts_move.goto_next_start("@function.outer", "textobjects")
+		end)
+		vim.keymap.set({ "n", "x", "o" }, "]i", function()
+			ts_move.goto_next_start("@conditional.outer", "textobjects")
+		end)
+		vim.keymap.set({ "n", "x", "o" }, "[f", function()
+			ts_move.goto_previous_start("@function.outer", "textobjects")
+		end)
+		vim.keymap.set({ "n", "x", "o" }, "[i", function()
+			ts_move.goto_previous_start("@conditional.outer", "textobjects")
+		end)
 	end,
 }

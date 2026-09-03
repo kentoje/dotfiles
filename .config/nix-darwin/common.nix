@@ -51,9 +51,10 @@
     stow
     tmux
     tree
+    tree-sitter
     tldr
     yq
-    nodePackages.yalc
+    yalc
     zoxide
     gitmux
     qmk
@@ -90,11 +91,7 @@
 
   system.activationScripts.applications.text =
     let
-      env = pkgs.buildEnv {
-        name = "system-applications";
-        paths = config.environment.systemPackages;
-        pathsToLink = "/Applications";
-      };
+      env = config.system.build.applications;
     in
     pkgs.lib.mkForce ''
       # Set up applications.
