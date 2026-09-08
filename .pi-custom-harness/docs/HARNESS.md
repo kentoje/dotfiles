@@ -60,10 +60,9 @@ Read from `dist/core/tools/`, it is exactly seven tools, and all seven are load-
 | `pi-mcp-adapter` | `mcp` `mcpScript` | 2 |
 | `@juicesharp/rpiv-todo` | `todo` | 1 |
 | `@mrclrchtr/supi-ask-user` | `ask_user` | 1 |
-| `pi-powerline-footer`, `@codexstar/pi-listen`, `@mrclrchtr/supi-settings` | none, UI and voice only | 0 |
-| `git:DietrichGebert/ponytail` | not yet enumerated, see section 11 | ? |
+| `pi-powerline-footer`, `@mrclrchtr/supi-settings` | UI only | 0 |
 
-**31 tools are now present: 24 existing tools plus the seven harness tools in section 5.**
+**30 tools are now present: 23 existing tools plus the seven harness tools in section 5.**
 
 `pi-subagents` was removed in review, taking `subagent` and `subagent_wait` with it.
 See section 3.
@@ -76,13 +75,9 @@ Leave it alone.
 
 ---
 
-## 3. What to strip: one package
+## 3. What has been stripped
 
-This is the section that inverted in review, and the result is worth stating plainly.
-
-**Every removal I proposed was rejected, and in the main case I was wrong on the facts.**
-The one package that does come out was not on my list.
-
+**Two packages have now been removed:** `pi-subagents` during the original review and Ponytail on 3 September 2026. All remaining packages either provide a distinct tool surface, an operational guard, or an operator-facing capability.
 ### `pi-subagents` is removed
 
 Not proposed as a strip.
@@ -104,7 +99,7 @@ Reversible: reinstall the package and drop role files into `<harness>/agents/**/
 | --- | --- | --- |
 | Drop built-in `find` and `grep` | **Keep both** | FFF is git-aware and pre-indexed. Outside a git repo it has nothing to search, and the built-ins are the only fallback. My proposal would have removed the working path for non-repo directories. |
 | Trim `supi-code-intelligence` to 5 | **Keep all 8** | The refactor pair earns its slot on cross-package API renames. |
-| Audit or drop `ponytail` | **Keep** | Deliberately installed and understood. Still worth enumerating for the census, see section 9. |
+| Audit or drop `ponytail` | **Removed** | It was deliberately installed and had loaded into previous sessions, but is disabled pending re-evaluation. |
 | Drop the Atlassian MCP in favour of the `jira` CLI | **Keep both** | MCP for Confluence and rich search, CLI for ticket work. |
 
 **The consequence you now own: the find/grep ambiguity is real and stays.**
@@ -496,10 +491,9 @@ The remaining future artifact is `APPEND_SYSTEM.md`, which is intentionally defe
 
 ## 11. Open questions
 
-1. **What does `ponytail` register?** You are keeping it deliberately, but its tool surface is still missing from the section 2 census. One `pi config` run closes this.
-2. **Which repos are `browser-login`?** Section 5.4 has `assets-page`, `conversation-center-ext` and `dashboard-v4` as `dev-plugin`, and Storybook as `none`. The remaining repos are unclassified, and `preview` cannot report `authMode` without the full map.
-3. **Where does `ticket` binding live beyond one worktree?** The implementation writes a `.dev-flow.json` manifest per worktree, matching what you do today. A single `~/.pi/agent/bindings.json` could survive worktree deletion and make `fleet status` cheaper. I lean central, with the per-worktree file as a cache; that design remains unresolved.
-4. **Which ship-gate checks fire spuriously?** The ticket-binding and verify-freshness checks are the two most likely to annoy. Ship all four, log which one fires, and drop whichever cries wolf.
+1. **Which repos are `browser-login`?** Section 5.4 has `assets-page`, `conversation-center-ext` and `dashboard-v4` as `dev-plugin`, and Storybook as `none`. The remaining repos are unclassified, and `preview` cannot report `authMode` without the full map.
+2. **Where does `ticket` binding live beyond one worktree?** The implementation writes a `.dev-flow.json` manifest per worktree, matching what you do today. A single `~/.pi/agent/bindings.json` could survive worktree deletion and make `fleet status` cheaper. I lean central, with the per-worktree file as a cache; that design remains unresolved.
+3. **Which ship-gate checks fire spuriously?** The ticket-binding and verify-freshness checks are the two most likely to annoy. Ship all four, log which one fires, and drop whichever cries wolf.
 
 ---
 

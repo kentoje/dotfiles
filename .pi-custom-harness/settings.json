@@ -11,8 +11,6 @@
     "npm:@ff-labs/pi-fff",
     "npm:pi-powerline-footer",
     "npm:pi-mcp-adapter",
-    "git:github.com/DietrichGebert/ponytail",
-    "npm:@codexstar/pi-listen",
     "npm:@mrclrchtr/supi-settings",
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",

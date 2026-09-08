@@ -272,7 +272,7 @@ For every ported skill:
 - [ ] Measure Pi cold start before Effect-backed extension loading.
 - [ ] Measure Pi cold start after Effect-backed extension loading.
 - [ ] Decide whether lazy-loading is necessary based on the measured regression.
-- [ ] Enumerate ponytail's registered tools and finish the tool census.
+- [x] Remove ponytail from PIH. Removed from `settings.json` on 3 September 2026 after confirming it had loaded into historical sessions.
 - [ ] Run a real session with the completed modules and dump the assembled system prompt using `ctx.getSystemPrompt()`; agent-prompt evidence confirmed this API is runtime-hook-only.
 - [x] Write `APPEND_SYSTEM.md` last, after subtracting the default header, module prompt snippets/guidelines, and skills catalogue; the artifact exists and loads in the prompt-evidence session.
 - [x] Include only the remaining composition rules, tool-versus-Bash guidance, enforced invariants, search-tool condition, voice/code standards, and bug/UI standards.
