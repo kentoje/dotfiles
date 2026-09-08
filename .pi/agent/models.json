@@ -11,6 +11,32 @@
       },
       "models": [
         {
+          "id": "openai/gpt-6-astra",
+          "name": "GPT-6 Astra",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1050000,
+          "maxTokens": 128000,
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          },
+          "cost": {
+            "input": 10.0,
+            "output": 50.0,
+            "cacheRead": 1.0,
+            "cacheWrite": 12.5
+          }
+        },
+        {
           "id": "azure/gpt-5.6-sol",
           "name": "GPT-5.6 Sol",
           "reasoning": true,
@@ -89,8 +115,8 @@
           }
         },
         {
-          "id": "google-vertex/gemini-3.7-flash",
-          "name": "Gemini 3.7 Flash",
+          "id": "google-vertex/gemini-3.8-flash",
+          "name": "Gemini 3.8 Flash",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
