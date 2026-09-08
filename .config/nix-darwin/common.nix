@@ -41,6 +41,7 @@
     gnugrep
     jq
     lazygit
+    glab
     lsd
     gum
     mods
