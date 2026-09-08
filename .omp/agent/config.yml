@@ -1,19 +1,19 @@
-modelRoles: 
+modelRoles:
   smol: llmgateway/azure/gpt-5.6-luna:xhigh
   slow: llmgateway/azure/gpt-5.6-sol:xhigh
   plan: azure/gpt-5.6-sol:xhigh
   commit: azure/gpt-5.6-luna
   advisor: llmgateway/azure/gpt-5.6-terra:xhigh
   task: llmgateway/azure/gpt-5.6-luna:xhigh
-  default: llmgateway/azure/gpt-5.6-terra:xhigh
+  default: llmgateway/aws-bedrock/grok-4-6:xhigh
 symbolPreset: nerd
-theme: 
+theme:
   dark: melange_dark
   light: light
 setupVersion: 2
-dev: 
+dev:
   autoqaConsent: denied
-disabledProviders: 
+disabledProviders:
   - claude
   - claude-plugins
   - cursor
@@ -25,16 +25,16 @@ disabledProviders:
   - opencode
   - vscode
   - windsurf
-extensions: 
+extensions:
   - ~/Documents/github/kentoje/agent-gossips/src/extensions/omp-agent-gossips.ts
-statusLine: 
+statusLine:
   preset: custom
   separator: ascii
   transparent: true
   compactThinkingLevel: false
   showHookStatus: true
   sessionAccent: true
-  leftSegments: 
+  leftSegments:
     - pi
     - session
     - model
@@ -46,41 +46,43 @@ statusLine:
     - context_pct
     - token_total
     - subagents
-  rightSegments: 
+  rightSegments:
     - session_name
     - token_rate
     - time_spent
-  segmentOptions: 
-    model: 
+  segmentOptions:
+    model:
       showThinkingLevel: true
-    path: 
+    path:
       abbreviate: true
       maxLength: 40
       stripWorkPrefix: true
-    git: 
+    git:
       showBranch: true
       showStaged: true
       showUnstaged: true
       showUntracked: true
-    time: 
+    time:
       format: 24h
       showSeconds: false
-advisor: 
+advisor:
   enabled: false
 textVerbosity: low
-task: 
-  agentAdvisor: 
+task:
+  agentAdvisor:
     task: "off"
-  agentModelOverrides: 
+  agentModelOverrides:
     {}
-terminal: 
+terminal:
   showProgress: true
-tui: 
+tui:
   tight: false
-display: 
+display:
   showTokenUsage: true
 defaultThinkingLevel: auto
-prewalk: 
+prewalk:
   enabled: false
-composer: 
+composer:
   shape: box
+secrets:
+  enabled: true
