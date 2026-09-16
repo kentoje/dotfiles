@@ -25,23 +25,33 @@ local function config_exists(config_names)
 	return false
 end
 
-local function project_uses_tsgo()
-	local package_path = vim.fs.find("package.json", {
-		upward = true,
-		path = vim.api.nvim_buf_get_name(0),
-	})[1]
-	if package_path == nil then
-		return false
-	end
+local ts_filetypes = {
+	"javascript",
+	"javascriptreact",
+	"javascript.jsx",
+	"typescript",
+	"typescriptreact",
+	"typescript.tsx",
+}
 
-	local file = io.open(package_path, "r")
+local ts_root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" }
+
+local function read_json(path)
+	local file = io.open(path, "r")
 	if file == nil then
-		return false
+		return nil
 	end
 	local content = file:read("*all")
 	file:close()
-	local package = vim.json.decode(content)
-	if type(package) ~= "table" or type(package.scripts) ~= "table" then
+	local ok, decoded = pcall(vim.json.decode, content)
+	if not ok or type(decoded) ~= "table" then
+		return nil
+	end
+	return decoded
+end
+
+local function package_uses_tsgo(package)
+	if type(package.scripts) ~= "table" then
 		return false
 	end
 	for _, script in pairs(package.scripts) do
@@ -52,67 +62,91 @@ local function project_uses_tsgo()
 	return false
 end
 
-local function project_root()
-  local markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" }
-  local root = vim.fs.root(0, markers)
-  return root or vim.fn.getcwd()
+local function project_uses_tsgo(start_path)
+	local package_path = vim.fs.find("package.json", {
+		upward = true,
+		path = start_path,
+	})[1]
+	if package_path == nil then
+		return false
+	end
+	local package = read_json(package_path)
+	return package ~= nil and package_uses_tsgo(package)
 end
 
-local function tsgo_cmd()
-  local root = project_root()
-  local local_bin = root .. "/node_modules/.bin/tsgo"
-  local bin = (vim.fn.executable(local_bin) == 1) and local_bin or "tsgo"
-  return { bin, "--lsp", "--stdio" }
+local function buffer_start_path(bufnr)
+	local name = vim.api.nvim_buf_get_name(bufnr)
+	if name ~= "" then
+		return name
+	end
+	return vim.uv.cwd()
 end
 
+local function buffer_project_root(bufnr)
+	return vim.fs.root(buffer_start_path(bufnr), ts_root_markers) or vim.uv.cwd()
+end
 
-local function setup_tsgo(lsp_capabilities, custom_typescript_config)
-	-- tsgo: Fast TypeScript compiler with LSP support
-	-- Handles: diagnostics, hover, definition, references, formatting, completion, and all other LSP features
+local function buffer_uses_tsgo(bufnr)
+	return project_uses_tsgo(buffer_project_root(bufnr))
+end
 
-	-- Configure tsgo using new vim.lsp.config API
+local function tsgo_cmd_for(root)
+	local local_bin = root .. "/node_modules/.bin/tsgo"
+	local bin = (vim.fn.executable(local_bin) == 1) and local_bin or "tsgo"
+	return { bin, "--lsp", "--stdio" }
+end
+
+local function typescript_settings(root)
+	local settings = {
+		updateImportsOnFileMove = "always",
+	}
+	if file_exists(root .. "/.yarn/sdks/typescript/lib") then
+		settings.tsdk = root .. "/.yarn/sdks/typescript/lib"
+	elseif file_exists(root .. "/node_modules/typescript/lib") then
+		settings.tsdk = root .. "/node_modules/typescript/lib"
+	end
+	return settings
+end
+
+local function setup_typescript_servers(lsp_capabilities)
+	-- tsgo: TS7-native repos. vtsls: everything else.
+	-- Exclusive root_dir so a mixed session cannot attach both to one buffer.
 	vim.lsp.config.tsgo = {
-		cmd = tsgo_cmd(),
-		filetypes = {
-			"javascript",
-			"javascriptreact",
-			"javascript.jsx",
-			"typescript",
-			"typescriptreact",
-			"typescript.tsx",
-		},
-		root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+		cmd = function(dispatchers, config)
+			local root = (config and config.root_dir) or buffer_project_root(0)
+			return vim.lsp.rpc.start(tsgo_cmd_for(root), dispatchers)
+		end,
+		filetypes = ts_filetypes,
+		root_markers = ts_root_markers,
+		root_dir = function(bufnr, on_dir)
+			if buffer_uses_tsgo(bufnr) then
+				on_dir(buffer_project_root(bufnr))
+			end
+		end,
 		capabilities = lsp_capabilities,
 		settings = {
-			typescript = custom_typescript_config,
 			javascript = {
 				updateImportsOnFileMove = "always",
 			},
 		},
+		before_init = function(_, config)
+			config.settings = config.settings or {}
+			config.settings.typescript = typescript_settings(config.root_dir)
+		end,
 	}
 
-	vim.lsp.enable("tsgo")
-end
 
-local function setup_vtsls(lsp_capabilities, custom_typescript_config)
-	-- vtsls: Full-featured TypeScript LSP server
-	-- Handles: diagnostics, hover, definition, references, formatting, completion, code actions, and all other LSP features
-
-	-- Configure vtsls using new vim.lsp.config API
 	vim.lsp.config.vtsls = {
 		cmd = { "vtsls", "--stdio" },
-		filetypes = {
-			"javascript",
-			"javascriptreact",
-			"javascript.jsx",
-			"typescript",
-			"typescriptreact",
-			"typescript.tsx",
-		},
-		root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+		filetypes = ts_filetypes,
+		root_markers = ts_root_markers,
+		root_dir = function(bufnr, on_dir)
+			if not buffer_uses_tsgo(bufnr) then
+				on_dir(buffer_project_root(bufnr))
+			end
+		end,
 		capabilities = lsp_capabilities,
 		settings = {
-			typescript = custom_typescript_config,
 			javascript = {
 				updateImportsOnFileMove = "always",
 			},
@@ -121,8 +155,13 @@ local function setup_vtsls(lsp_capabilities, custom_typescript_config)
 				autoUseWorkspaceTsdk = true,
 			},
 		},
+		before_init = function(_, config)
+			config.settings = config.settings or {}
+			config.settings.typescript = typescript_settings(config.root_dir)
+		end,
 	}
 
+	vim.lsp.enable("tsgo")
 	vim.lsp.enable("vtsls")
 end
 
@@ -238,78 +277,34 @@ return {
 			end,
 		})
 
-		local default_setup = function(server)
-			-- Skip ts_ls to use custom vtsls setup
-			if server == "ts_ls" then
-				return
-			end
+		vim.lsp.config("*", {
+			capabilities = lsp_capabilities,
+		})
 
-			-- Skip yamlls to use manual setup
-			if server == "yamlls" then
-				return
-			end
+		setup_typescript_servers(lsp_capabilities)
 
-			-- Configure server using new vim.lsp.config API
-			vim.lsp.config[server] = {
-				capabilities = lsp_capabilities,
-			}
-
-			-- Enable the server
-			vim.lsp.enable(server)
-		end
-
-		local custom_typescript_config = {
-			updateImportsOnFileMove = "always",
+		vim.lsp.config.eslint = {
+			capabilities = lsp_capabilities,
+			flags = {
+				debounce_text_changes = 300,
+			},
 		}
 
-		local root = project_root()
-		if file_exists(root .. "/.yarn/sdks/typescript/lib") then
-			custom_typescript_config.tsdk = root .. "/.yarn/sdks/typescript/lib"
-		elseif file_exists(root .. "/node_modules/typescript/lib") then
-			custom_typescript_config.tsdk = root .. "/node_modules/typescript/lib"
-		end
-
-		-- Per-project TS language server:
-		--   tsgo  -> repo adopted TS7 native (editor == CI compiler, native speed)
-		--   vtsls -> everything else (richer: organize-imports, refactors, ts plugins)
-		-- Only one attaches; the other is disabled via empty filetypes.
-		if project_uses_tsgo() then
-			setup_tsgo(lsp_capabilities, custom_typescript_config)
-			vim.lsp.config.vtsls = { filetypes = {} }
-		else
-			setup_vtsls(lsp_capabilities, custom_typescript_config)
-			vim.lsp.config.tsgo = { filetypes = {} }
-		end
+		vim.lsp.config.graphql = {
+			capabilities = lsp_capabilities,
+			filetypes = { "graphql", "typescriptreact", "javascriptreact", "typescript" },
+			root_markers = { ".git" },
+		}
 
 		require("mason").setup({})
 		require("mason-lspconfig").setup({
 			ensure_installed = { "yamlls" },
-			handlers = {
-				default_setup,
-
-				eslint = function()
-					vim.lsp.config.eslint = {
-						capabilities = lsp_capabilities,
-						flags = {
-							debounce_text_changes = 300,
-						},
-						-- settings = {
-						-- 	packageManager = "yarn",
-						-- },
-					}
-					vim.lsp.enable("eslint")
-				end,
-
-				graphql = function()
-					vim.lsp.config.graphql = {
-						capabilities = lsp_capabilities,
-						filetypes = { "graphql", "typescriptreact", "javascriptreact", "typescript" },
-						root_markers = { ".git" },
-					}
-					vim.lsp.enable("graphql")
-				end,
+			automatic_enable = {
+				exclude = { "ts_ls", "vtsls", "tsgo", "yamlls" },
 			},
 		})
+
+
 
 		-- Manual yamlls setup using vim.lsp.config API
 		vim.lsp.config.yamlls = {
@@ -337,14 +332,14 @@ return {
 		vim.keymap.set("n", "<leader>r", ":LspR<CR>", { silent = true, desc = "Restart LSP" })
 
 		vim.keymap.set("n", "<leader>E", function()
-			if not project_uses_tsgo() then
-				vim.cmd("VtsExec add_missing_imports")
-				vim.cmd("VtsExec remove_unused_imports")
-			else
-				-- tsgo doesn't support organize imports yet
+			if buffer_uses_tsgo(0) then
 				print("Organize imports not supported in tsgo")
+				return
 			end
+			vim.cmd("VtsExec add_missing_imports")
+			vim.cmd("VtsExec remove_unused_imports")
 		end, { desc = "Organize imports (vtsls only)" })
+
 
 		if config_exists(biome_config_names) then
 			vim.keymap.set("n", "<leader>e", function()
