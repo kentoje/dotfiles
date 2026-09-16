@@ -5,7 +5,7 @@ modelRoles:
   commit: azure/gpt-5.6-luna
   advisor: llmgateway/azure/gpt-5.6-terra:xhigh
   task: llmgateway/azure/gpt-5.6-luna:xhigh
-  default: llmgateway/aws-bedrock/grok-4-6:xhigh
+  default: llmgateway/aws-bedrock/grok-4-6:high
 symbolPreset: nerd
 theme:
   dark: melange_dark
