@@ -7,7 +7,7 @@ import { NotifyOnSettleParams } from "./schema";
 export const SETTLEMENT_OUTCOME_CHANNEL =
   "pi-custom-harness/settlement-outcome";
 
-/** Typed payload published by ship-gate and merge-request pipeline producers. */
+/** Typed payload published by ship-gate producers. */
 export type SettlementOutcome = NotifyOnSettleInput;
 
 /** Decodes unknown event-bus data using the settlement TypeBox schema. */
@@ -28,17 +28,6 @@ export const makeShipGateSettlementOutcome = (input: {
   message: input.message,
 });
 
-/** Builds the stable red-pipeline payload published after an MR watch settles. */
-export const makePipelineRedSettlementOutcome = (input: {
-  readonly sessionId: string;
-  readonly pipelineIid: number;
-}): SettlementOutcome => ({
-  sessionId: input.sessionId,
-  outcome: "pipeline-red",
-  failureId: `pipeline-${input.pipelineIid}`,
-  message: `Pipeline for merge request !${input.pipelineIid} failed.`,
-});
-
 /** The notification transport injected by the Pi boundary or a test. */
 export class NotifyOnSettleService extends Context.Service<
   NotifyOnSettleService,
@@ -52,7 +41,7 @@ export class NotifyOnSettleService extends Context.Service<
 /** The failure payload sent to the injected notification transport. */
 export interface NotifyOnSettleNotification {
   readonly sessionId: string;
-  readonly outcome: "ship-gate-failed" | "pipeline-red";
+  readonly outcome: "ship-gate-failed";
   readonly failureId: string;
   readonly message: string;
 }
@@ -69,7 +58,7 @@ export const createNotifyOnSettleState = (): NotifyOnSettleState => ({
 
 /** The observable policy decision returned by the Pi-free core. */
 export type NotifyOnSettleDecision =
-  | { readonly kind: "silent"; readonly outcome: "clean" | "pipeline-pending" }
+  | { readonly kind: "silent"; readonly outcome: "clean" }
   | { readonly kind: "duplicate"; readonly key: string }
   | {
       readonly kind: "notified";
@@ -79,10 +68,7 @@ export type NotifyOnSettleDecision =
 
 const fallbackFailureId = "unknown-failure";
 
-const defaultMessageFor = (
-  outcome: NotifyOnSettleNotification["outcome"],
-): string =>
-  outcome === "ship-gate-failed" ? "Ship gate failed." : "Pipeline is red.";
+const defaultMessageFor = (): string => "Ship gate failed.";
 
 const keyFor = (input: NotifyOnSettleInput, failureId: string): string =>
   [input.sessionId, input.outcome, failureId].join("\u0000");
@@ -95,7 +81,7 @@ export const notifyOnSettle = Effect.fn("notifyOnSettle")(function* ({
   readonly input: NotifyOnSettleInput;
   readonly state: NotifyOnSettleState;
 }) {
-  if (input.outcome === "clean" || input.outcome === "pipeline-pending") {
+  if (input.outcome === "clean") {
     return { kind: "silent", outcome: input.outcome } as const;
   }
 
@@ -104,7 +90,7 @@ export const notifyOnSettle = Effect.fn("notifyOnSettle")(function* ({
     sessionId: input.sessionId,
     outcome: input.outcome,
     failureId,
-    message: input.message ?? defaultMessageFor(input.outcome),
+    message: input.message ?? defaultMessageFor(),
   };
   const key = keyFor(input, failureId);
   const shouldSend = yield* Effect.sync(() => {

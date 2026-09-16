@@ -66,7 +66,14 @@ test("bind validates, resolves branch, and writes a worktree association", async
   state.branches.set("/worktrees/one", "feature/CI-6600-button");
 
   const result = await run(
-    { input: { action: "bind", key: "CI-6600" }, cwd: "/worktrees/one" },
+    {
+      input: {
+        action: "bind",
+        key: "CI-6600",
+        worktree: "/worktrees/one",
+      },
+      cwd: "/repositories/example",
+    },
     state.operations,
   );
 
@@ -82,6 +89,85 @@ test("bind validates, resolves branch, and writes a worktree association", async
     branch: "feature/CI-6600-button",
     worktree: "/worktrees/one",
   });
+});
+
+test("bind targets an explicit worktree instead of the session checkout", async () => {
+  const state = makeState();
+  state.directories.add("/worktrees/task");
+  state.branches.set("/worktrees/task", "DAT-624");
+  const input = {
+    action: "bind" as const,
+    key: "DAT-624",
+    worktree: "/worktrees/task",
+  };
+
+  const result = await run(
+    { input, cwd: "/repositories/assets-page" },
+    state.operations,
+  );
+
+  expect(result.binding).toMatchObject({
+    ticketKey: "DAT-624",
+    branch: "DAT-624",
+    worktree: "/worktrees/task",
+  });
+  expect(state.files.has("/repositories/assets-page/.dev-flow.json")).toBe(
+    false,
+  );
+});
+
+test("bind refuses to replace another ticket's worktree association", async () => {
+  const state = makeState();
+  state.directories.add("/worktrees/task");
+  state.branches.set("/worktrees/task", "DAT-624");
+  state.files.set(
+    "/worktrees/task/.dev-flow.json",
+    JSON.stringify({
+      ticket: { key: "DAT-623" },
+      branch: "DAT-623",
+      worktree: "/worktrees/task",
+    }),
+  );
+
+  const exit = await runExit(
+    {
+      input: {
+        action: "bind",
+        key: "DAT-624",
+        worktree: "/worktrees/task",
+      },
+      cwd: "/repositories/assets-page",
+    },
+    state.operations,
+  );
+
+  expect(exit._tag).toBe("Failure");
+  expect(String(exit)).toContain("TicketBindingConflictError");
+  expect(state.files.get("/worktrees/task/.dev-flow.json")).toContain(
+    "DAT-623",
+  );
+});
+
+test("bind rejects a checkout whose branch belongs to another task", async () => {
+  const state = makeState();
+  state.directories.add("/worktrees/task");
+  state.branches.set("/worktrees/task", "main");
+
+  const exit = await runExit(
+    {
+      input: {
+        action: "bind",
+        key: "DAT-624",
+        worktree: "/worktrees/task",
+      },
+      cwd: "/repositories/assets-page",
+    },
+    state.operations,
+  );
+
+  expect(exit._tag).toBe("Failure");
+  expect(String(exit)).toContain("TicketWorktreeMismatchError");
+  expect(state.files.has("/worktrees/task/.dev-flow.json")).toBe(false);
 });
 
 test("current looks up the binding for the requested worktree", async () => {
@@ -107,6 +193,36 @@ test("current looks up the binding for the requested worktree", async () => {
       ticketKey: "DS-61",
       branch: "feature/DS-61-card",
       worktree: "/worktrees/one",
+    },
+  });
+});
+
+test("current reads an explicitly selected task worktree", async () => {
+  const state = makeState();
+  state.directories.add("/worktrees/task");
+  state.files.set(
+    "/worktrees/task/.dev-flow.json",
+    JSON.stringify({
+      ticket: { key: "DAT-624" },
+      branch: "DAT-624",
+      worktree: "/worktrees/task",
+    }),
+  );
+
+  await expect(
+    run(
+      {
+        input: { action: "current", worktree: "/worktrees/task" },
+        cwd: "/repositories/assets-page",
+      },
+      state.operations,
+    ),
+  ).resolves.toEqual({
+    action: "current",
+    binding: {
+      ticketKey: "DAT-624",
+      branch: "DAT-624",
+      worktree: "/worktrees/task",
     },
   });
 });
@@ -139,7 +255,14 @@ test("current reports malformed binding state", async () => {
 test("bind and current report a deleted worktree", async () => {
   const state = makeState();
   const exit = await runExit(
-    { input: { action: "bind", key: "CI-6600" }, cwd: "/worktrees/deleted" },
+    {
+      input: {
+        action: "bind",
+        key: "CI-6600",
+        worktree: "/worktrees/deleted",
+      },
+      cwd: "/repositories/example",
+    },
     state.operations,
   );
   expect(exit._tag).toBe("Failure");
@@ -152,7 +275,14 @@ test("bind rejects an invalid Jira-style ticket key", async () => {
   state.branches.set("/worktrees/one", "feature/no-ticket");
 
   const exit = await runExit(
-    { input: { action: "bind", key: "not-a-ticket" }, cwd: "/worktrees/one" },
+    {
+      input: {
+        action: "bind",
+        key: "not-a-ticket",
+        worktree: "/worktrees/one",
+      },
+      cwd: "/repositories/example",
+    },
     state.operations,
   );
   expect(exit._tag).toBe("Failure");

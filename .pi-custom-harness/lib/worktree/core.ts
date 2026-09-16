@@ -136,7 +136,7 @@ export type WorktreeToolError =
 /** Input passed to the Pi-free worktree policy. */
 export type WorktreeToolInput =
   | { readonly action: "new"; readonly task: string; readonly cwd: string }
-  | { readonly action: "verify"; readonly cwd: string }
+  | { readonly action: "verify"; readonly task: string; readonly cwd: string }
   | { readonly action: "list"; readonly cwd: string }
   | { readonly action: "rm"; readonly task: string; readonly cwd: string };
 
@@ -151,7 +151,9 @@ export type WorktreeToolResult =
     }
   | {
       readonly action: "verify";
+      readonly task: string;
       readonly path: string;
+      readonly branch: string;
       readonly verification: WorktreeVerificationSummary;
     }
   | {
@@ -280,27 +282,31 @@ const verifyWorktreeReadiness = ({
         message: `Worktree branch does not match requested branch: ${expectedBranch}`,
       });
     }
-    return worktreeReadiness();
+    return { branch: entry.branch, verification: worktreeReadiness() };
   });
 
 const verifyWorktree = Effect.fn("worktree.verifyWorktree")(function* ({
   cwd,
+  task,
 }: {
   readonly cwd: string;
+  readonly task: string;
 }) {
   const facts = yield* repositoryFacts({ cwd });
   const root = yield* configuredRoot(facts.worktreeRoot);
   const git = yield* WorktreeGitService;
   const fileSystem = yield* WorktreeFileSystemService;
   const repositoryRoot = yield* git.resolveRepositoryRoot({ cwd });
-  const verification = yield* verifyWorktreeReadiness({
-    cwd,
+  const path = taskPath(root, repositoryRoot, task);
+  const { branch, verification } = yield* verifyWorktreeReadiness({
+    cwd: path,
     root,
     repositoryRoot,
+    expectedBranch: task,
     fileSystem,
     git,
   });
-  return { action: "verify", path: cwd, verification } as const;
+  return { action: "verify", task, path, branch, verification } as const;
 });
 
 /** Executes new, verify, list, and rm with repository facts and safe-root policy. */
@@ -309,8 +315,10 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
 ) {
   const { cwd } = input;
   switch (input.action) {
-    case "verify":
-      return yield* verifyWorktree({ cwd });
+    case "verify": {
+      const safeTask = yield* ensureTask(input.task);
+      return yield* verifyWorktree({ cwd, task: safeTask });
+    }
     case "list": {
       const facts = yield* repositoryFacts({ cwd });
       const root = yield* configuredRoot(facts.worktreeRoot);
@@ -381,7 +389,7 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
             url,
             worktreePath: path,
           });
-          const verification = yield* verifyWorktreeReadiness({
+          const { verification } = yield* verifyWorktreeReadiness({
             cwd: path,
             root,
             repositoryRoot,

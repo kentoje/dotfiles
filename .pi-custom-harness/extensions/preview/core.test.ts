@@ -14,6 +14,7 @@ import { RepoMapService, type RepositoryFacts } from "../../lib/repo-map/core";
 import { runPreview, selectPreviewMode } from "./core";
 
 const facts = (overrides: Partial<RepositoryFacts> = {}): RepositoryFacts => ({
+  repositoryRoot: "/repo/app",
   deliveryPolicy: { kind: "none", verification: { kind: "repository-wide" } },
   testRunner: "none",
   checks: [],

@@ -18,7 +18,23 @@ import {
   type OpenMergeRequest,
 } from "./core";
 
-type ProcessResult = Readonly<{ exitCode: number; output: string }>;
+/** Completed Fleet subprocess invocation used by deterministic transport tests. */
+export interface FleetCommandResult {
+  readonly exitCode: number;
+  readonly output: string;
+}
+
+/** Fleet subprocess request kept behind an injectable transport seam. */
+export interface FleetCommandRequest {
+  readonly program: string;
+  readonly arguments_: ReadonlyArray<string>;
+  readonly cwd: string;
+}
+
+/** Runs one Fleet subprocess request. */
+export type FleetCommandTransport = (
+  request: FleetCommandRequest,
+) => Effect.Effect<FleetCommandResult, FleetServiceError>;
 
 const expandHome = (path: string): string =>
   path === "~"
@@ -36,10 +52,10 @@ const runProcess = (
   program: string,
   arguments_: ReadonlyArray<string>,
   cwd: string,
-): Effect.Effect<ProcessResult, FleetServiceError> =>
+): Effect.Effect<FleetCommandResult, FleetServiceError> =>
   Effect.tryPromise({
     try: () =>
-      new Promise<ProcessResult>((resolve, reject) => {
+      new Promise<FleetCommandResult>((resolve, reject) => {
         const child = spawn(program, [...arguments_], { cwd: expandHome(cwd) });
         let output = "";
         child.stdout.on("data", (chunk: Buffer) => {
@@ -56,6 +72,9 @@ const runProcess = (
     catch: serviceError,
   });
 
+const runFleetCommand: FleetCommandTransport = ({ program, arguments_, cwd }) =>
+  runProcess(program, arguments_, cwd);
+
 const parseJson = (text: string): Effect.Effect<unknown, FleetServiceError> =>
   Effect.try({
     try: (): unknown => JSON.parse(text),
@@ -63,7 +82,7 @@ const parseJson = (text: string): Effect.Effect<unknown, FleetServiceError> =>
   });
 
 const successfulOutput = (
-  result: ProcessResult,
+  result: FleetCommandResult,
   command: string,
 ): Effect.Effect<string, FleetServiceError> =>
   result.exitCode === 0
@@ -80,27 +99,72 @@ const pendingFromOutput = (output: string): ReadonlyArray<string> =>
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
-const gitStatusFor = (
+const resolveFleetDefaultBranch = (
   repository: RepositoryFleetEntry,
+  transport: FleetCommandTransport,
+): Effect.Effect<string, FleetServiceError> =>
+  Effect.gen(function* () {
+    const remoteHead = yield* transport({
+      program: "git",
+      arguments_: ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"],
+      cwd: repository.path,
+    });
+    const remoteHeadRef = remoteHead.output
+      .trim()
+      .replace(/^refs\/remotes\//u, "");
+    if (remoteHead.exitCode === 0 && remoteHeadRef.startsWith("origin/")) {
+      return remoteHeadRef;
+    }
+    for (const fallbackRef of ["origin/main", "origin/master"] as const) {
+      const fallback = yield* transport({
+        program: "git",
+        arguments_: ["rev-parse", "--verify", "--quiet", fallbackRef],
+        cwd: repository.path,
+      });
+      if (fallback.exitCode === 0) return fallbackRef;
+    }
+    return yield* new FleetServiceError({
+      message: `Fleet Git default branch lookup failed in ${repository.path}: origin/HEAD, origin/main, and origin/master are unavailable.`,
+    });
+  });
+
+/** Reads branch, dirty state, and ahead/behind counts inside one selected Fleet repository. */
+export const readFleetGitStatus = (
+  repository: RepositoryFleetEntry,
+  transport: FleetCommandTransport = runFleetCommand,
 ): Effect.Effect<FleetGitStatus, FleetServiceError> =>
   Effect.gen(function* () {
-    const branchResult = yield* runProcess(
-      "git",
-      ["branch", "--show-current"],
-      repository.path,
+    const branchResult = yield* transport({
+      program: "git",
+      arguments_: ["branch", "--show-current"],
+      cwd: repository.path,
+    });
+    const branch = yield* successfulOutput(branchResult, "Fleet git branch");
+    const porcelainResult = yield* transport({
+      program: "git",
+      arguments_: ["status", "--porcelain"],
+      cwd: repository.path,
+    });
+    yield* successfulOutput(porcelainResult, "Fleet git status");
+    const defaultBranch = yield* resolveFleetDefaultBranch(
+      repository,
+      transport,
     );
-    const branch = yield* successfulOutput(branchResult, "git branch");
-    const porcelainResult = yield* runProcess(
-      "git",
-      ["status", "--porcelain"],
-      repository.path,
+    const countsResult = yield* transport({
+      program: "git",
+      arguments_: [
+        "rev-list",
+        "--left-right",
+        "--count",
+        `${defaultBranch}...HEAD`,
+        "--",
+      ],
+      cwd: repository.path,
+    });
+    const counts = yield* successfulOutput(
+      countsResult,
+      `Fleet git ahead/behind in ${repository.path}`,
     );
-    const countsResult = yield* runProcess(
-      "git",
-      ["rev-list", "--left-right", "--count", "main...HEAD"],
-      repository.path,
-    );
-    const counts = yield* successfulOutput(countsResult, "git rev-list");
     const [behindText, aheadText] = counts.split(/\s+/u);
     return {
       branch: branch || "HEAD",
@@ -114,7 +178,7 @@ const gitSyncPlanFor = (
   repository: RepositoryFleetEntry,
 ): Effect.Effect<FleetSyncPlan, FleetServiceError> =>
   Effect.gen(function* () {
-    const status = yield* gitStatusFor(repository);
+    const status = yield* readFleetGitStatus(repository);
     const pendingResult = yield* runProcess(
       "git",
       ["status", "--short", "--branch"],
@@ -158,26 +222,31 @@ const MergeRequestPayload = Schema.Array(
 
 const decodeMergeRequests = Schema.decodeUnknownEffect(MergeRequestPayload);
 
-const mergeRequestFor = (input: {
-  readonly repository: RepositoryFleetEntry;
-  readonly branch: string;
-}): Effect.Effect<OpenMergeRequest | undefined, FleetServiceError> =>
+/** Reads the current branch's open merge request using syntax supported by glab 1.111. */
+export const openFleetMergeRequest = (
+  input: {
+    readonly repository: RepositoryFleetEntry;
+    readonly branch: string;
+  },
+  transport: FleetCommandTransport = runFleetCommand,
+): Effect.Effect<OpenMergeRequest | undefined, FleetServiceError> =>
   Effect.gen(function* () {
-    const result = yield* runProcess(
-      "glab",
-      [
+    const result = yield* transport({
+      program: "glab",
+      arguments_: [
         "mr",
         "list",
-        "--state",
-        "opened",
         "--source-branch",
         input.branch,
         "--output",
         "json",
       ],
-      input.repository.path,
+      cwd: input.repository.path,
+    });
+    const output = yield* successfulOutput(
+      result,
+      "Fleet open merge request lookup via glab mr list",
     );
-    const output = yield* successfulOutput(result, "glab mr list");
     const decoded = yield* decodeMergeRequests(yield* parseJson(output)).pipe(
       Effect.mapError(serviceError),
     );
@@ -307,13 +376,13 @@ const removeServer = (
 /** Live subprocess implementations; policy remains in the Pi-free extension core. */
 export const FleetLiveLayer = Layer.mergeAll(
   Layer.succeed(FleetGitService, {
-    statusFor: ({ repository }) => gitStatusFor(repository),
+    statusFor: ({ repository }) => readFleetGitStatus(repository),
     syncPlanFor: ({ repository }) => gitSyncPlanFor(repository),
     syncHardFor: ({ repository }) => gitHardSyncFor(repository),
   }),
   Layer.succeed(FleetGitLabService, {
     openMergeRequestFor: ({ repository, branch }) =>
-      mergeRequestFor({ repository, branch }),
+      openFleetMergeRequest({ repository, branch }),
   }),
   Layer.succeed(FleetPackageService, {
     versionFor: packageVersionFor,

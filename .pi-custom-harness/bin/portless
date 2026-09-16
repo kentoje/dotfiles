@@ -1,0 +1,5 @@
+#!/bin/bash
+if [ "$1" = "add" ]; then
+  exit 0
+fi
+exec /Users/kento/.bun/bin/portless "$@"

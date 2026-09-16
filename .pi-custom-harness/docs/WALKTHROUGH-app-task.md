@@ -60,12 +60,12 @@ Three corrections follow, recorded in HARNESS.md:
 | 18 | Push | bash | `git push -u origin CI-6600` |
 | 19 | Open the MR | bash | `glab mr create ...` |
 | 20 | **Guard fires** | handler | `mr-guard`: no existing MR, commit message conventional |
-| 21 | Watch the pipeline | tool | `mr watch` |
-| 22 | Wake on settle | handler | `sendMessage(followUp, triggerTurn)` |
+| 21 | Optional pipeline monitor | **human command** | `/harness-watch-pipeline <worktree>` only when requested |
+| 22 | Inspect current MR state | tool | `mr status` |
 | 23 | Read review threads | tool | `mr threads --unresolved` |
 | 24 | Triage bot findings | human | `is_bot` splits Bugbot from human review |
 | 25 | Fix and resolve | tool | `mr reply --thread <id> --resolve` |
-| 26 | **Ship-gate fires** | handler | MR, threads, ticket, verify |
+| 26 | **Ship-gate fires** | handler | MR, threads, ticket, local verify |
 | 27 | Notify only if blocked | handler | `notify-on-settle` |
 
 ---

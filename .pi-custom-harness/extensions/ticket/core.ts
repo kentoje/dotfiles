@@ -27,15 +27,18 @@ export const runTicket = Effect.fn("runTicket")(function* ({
   const service = yield* TicketService;
   switch (input.action) {
     case "bind": {
-      const binding = yield* service.bind({ cwd, ticketKey: input.key ?? "" });
+      const binding = yield* service.bind({
+        cwd: input.worktree,
+        ticketKey: input.key,
+      });
       return { action: input.action, binding } satisfies TicketResult;
     }
     case "current": {
-      const binding = yield* service.current({ cwd });
+      const binding = yield* service.current({ cwd: input.worktree ?? cwd });
       return { action: input.action, binding } satisfies TicketResult;
     }
     default: {
-      const _exhaustive: never = input.action;
+      const _exhaustive: never = input;
       return _exhaustive;
     }
   }

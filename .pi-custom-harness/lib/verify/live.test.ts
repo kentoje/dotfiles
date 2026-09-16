@@ -9,10 +9,11 @@ import {
   type VerifyCommandTransport,
 } from "./live";
 
-const request: VerifyCommandRequest = {
+const request = {
   cwd: "/workspace",
   check: "ts:check",
-};
+  testRunner: "none",
+} as const;
 
 const runCheck = (transport: VerifyCommandTransport) =>
   Effect.runPromise(
@@ -28,6 +29,35 @@ test("returns complete command output and exit code from the transport", async (
   };
 
   await expect(runCheck(() => Effect.succeed(result))).resolves.toEqual(result);
+});
+
+test("runs Vitest repository checks once instead of entering watch mode", async () => {
+  const requests: VerifyCommandRequest[] = [];
+  const result = await Effect.runPromise(
+    VerifyCommandService.use((service) =>
+      service.runCheck({
+        cwd: "/worktree",
+        check: "test",
+        testRunner: "vitest",
+      }),
+    ).pipe(
+      Effect.provide(
+        VerifyCommandLiveLayerWithTransport((request) => {
+          requests.push(request);
+          return Effect.succeed({ exitCode: 0, output: "passed" });
+        }),
+      ),
+    ),
+  );
+
+  expect(requests).toEqual([
+    {
+      cwd: "/worktree",
+      program: "pnpm",
+      args: ["run", "test", "--run"],
+    },
+  ]);
+  expect(result).toEqual({ exitCode: 0, output: "passed" });
 });
 
 test("maps transport failures to VerifyCommandExecutionError", async () => {

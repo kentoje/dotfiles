@@ -19,6 +19,16 @@ export class TicketBindingMissingError extends Schema.TaggedError<TicketBindingM
   { worktree: Schema.String },
 ) {}
 
+/** A worktree already contains a binding for a different checkout identity. */
+export class TicketBindingConflictError extends Schema.TaggedError<TicketBindingConflictError>()(
+  "TicketBindingConflictError",
+  {
+    worktree: Schema.String,
+    expectedTicketKey: Schema.String,
+    message: Schema.String,
+  },
+) {}
+
 /** The worktree association file exists but cannot be trusted. */
 export class TicketBindingMalformedError extends Schema.TaggedError<TicketBindingMalformedError>()(
   "TicketBindingMalformedError",
@@ -29,6 +39,17 @@ export class TicketBindingMalformedError extends Schema.TaggedError<TicketBindin
 export class TicketWorktreeDeletedError extends Schema.TaggedError<TicketWorktreeDeletedError>()(
   "TicketWorktreeDeletedError",
   { worktree: Schema.String },
+) {}
+
+/** The selected checkout branch does not identify the ticket being bound. */
+export class TicketWorktreeMismatchError extends Schema.TaggedError<TicketWorktreeMismatchError>()(
+  "TicketWorktreeMismatchError",
+  {
+    worktree: Schema.String,
+    ticketKey: Schema.String,
+    branch: Schema.String,
+    message: Schema.String,
+  },
 ) {}
 
 /** The branch could not be resolved for the worktree association. */
@@ -46,8 +67,10 @@ export class TicketBindingWriteError extends Schema.TaggedError<TicketBindingWri
 export type TicketStateError =
   | TicketKeyValidationError
   | TicketBindingMissingError
+  | TicketBindingConflictError
   | TicketBindingMalformedError
   | TicketWorktreeDeletedError
+  | TicketWorktreeMismatchError
   | TicketBranchLookupError
   | TicketBindingWriteError;
 

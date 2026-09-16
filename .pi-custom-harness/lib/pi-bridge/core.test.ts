@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { Effect } from "effect";
 
+import { FleetServiceError } from "../fleet/core";
 import { GitChangesetLookupError } from "../git/core";
 import { GitLabMergeRequestLookupError } from "../gitlab/core";
 import { RepositoryFactsLookupError } from "../repo-map/core";
@@ -25,6 +26,24 @@ test("runHandler maps typed lookup failures to fail-closed reasons", async () =>
     block: true,
     reason:
       "MR creation blocked: GitLab merge request verification failed. glab mr view exited with 1",
+  });
+});
+
+test("runHandler preserves actionable Fleet service failures", async () => {
+  const result = await runHandler(
+    Effect.fail(
+      new FleetServiceError({
+        message:
+          "Fleet open merge request lookup via glab mr list failed: Unknown flag: --output.",
+      }),
+    ),
+    { failurePrefix: "Fleet" },
+  );
+
+  expect(result).toEqual({
+    block: true,
+    reason:
+      "Fleet: Fleet open merge request lookup via glab mr list failed: Unknown flag: --output.",
   });
 });
 

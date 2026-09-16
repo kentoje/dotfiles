@@ -16,9 +16,9 @@ export const WorktreeParams = Type.Object({
   ),
 });
 
-/** Static input retains action-specific narrowing; core validation enforces task for mutations. */
+/** Static input retains action-specific narrowing; core validation enforces task where required. */
 export type WorktreeInput =
   | { readonly action: "new"; readonly task: string }
-  | { readonly action: "verify" }
+  | { readonly action: "verify"; readonly task: string }
   | { readonly action: "list" }
   | { readonly action: "rm"; readonly task: string };

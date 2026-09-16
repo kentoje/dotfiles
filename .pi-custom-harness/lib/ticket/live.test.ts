@@ -16,7 +16,7 @@ test("ticket live layer binds a validated key and persists its branch associatio
       Effect.sync(() => {
         files.set(path, content);
       }),
-    currentBranch: () => Effect.succeed("feature/TICKET-42"),
+    currentBranch: () => Effect.succeed("feature/PROJ-42"),
   };
 
   const binding = await Effect.runPromise(
@@ -28,7 +28,7 @@ test("ticket live layer binds a validated key and persists its branch associatio
 
   expect(binding).toEqual({
     ticketKey: "PROJ-42",
-    branch: "feature/TICKET-42",
+    branch: "feature/PROJ-42",
     worktree,
   });
   expect(files.get(`${worktree}/.dev-flow.json`)).toContain('"key": "PROJ-42"');

@@ -22,6 +22,7 @@ const facts = (
   worktreeRoot = "/tmp/worktrees",
 ) =>
   ({
+    repositoryRoot: "/repo/example",
     deliveryPolicy: {
       kind: "none",
       verification: {
@@ -162,18 +163,20 @@ test("uses the minimal fallback when no setup script is mapped", async () => {
   ).toBe(false);
 });
 
-test("verify checks filesystem and recognized branch readiness only", async () => {
+test("verify targets the registered worktree for the requested task", async () => {
   const result = await run(
-    { action: "verify", cwd: "/tmp/worktrees/example/CI-6600" },
+    { action: "verify", task: "CI-6600", cwd: "/repo/example" },
     {
       facts: facts(undefined),
-      exists: () => true,
+      exists: (path) => path === "/tmp/worktrees/example/CI-6600",
       records: [{ path: "/tmp/worktrees/example/CI-6600", branch: "CI-6600" }],
     },
   );
   expect(result).toEqual({
     action: "verify",
+    task: "CI-6600",
     path: "/tmp/worktrees/example/CI-6600",
+    branch: "CI-6600",
     verification: { passed: true, checks: [] },
   });
 });
@@ -275,18 +278,24 @@ test("rejects malformed relative roots before Git operations", async () => {
   expect(calls).toHaveLength(0);
 });
 
-test("verifies a throwaway temporary-repository path without home state", async () => {
+test("verifies a throwaway temporary task worktree without home state", async () => {
   const temporaryRoot = await mkdtemp(join(tmpdir(), "worktree-test-"));
+  const worktreePath = join(temporaryRoot, "example", "temporary");
   try {
     const result = await run(
-      { action: "verify", cwd: temporaryRoot },
+      { action: "verify", task: "temporary", cwd: "/repo/example" },
       {
         facts: facts(undefined, temporaryRoot),
-        exists: (path) => path === temporaryRoot,
-        records: [{ path: temporaryRoot, branch: "temporary" }],
+        exists: (path) => path === worktreePath,
+        records: [{ path: worktreePath, branch: "temporary" }],
       },
     );
-    expect(result).toMatchObject({ action: "verify", path: temporaryRoot });
+    expect(result).toMatchObject({
+      action: "verify",
+      task: "temporary",
+      path: worktreePath,
+      branch: "temporary",
+    });
   } finally {
     await rm(temporaryRoot, { recursive: true, force: true });
   }

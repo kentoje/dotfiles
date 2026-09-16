@@ -86,7 +86,7 @@ const makeMergeRequestService = (
   const readMergeRequest = (cwd: string) =>
     run({
       cwd,
-      arguments_: ["api", "merge_requests", "--current", "--output", "json"],
+      arguments_: ["mr", "view", "--output", "json"],
     }).pipe(
       Effect.flatMap((output) =>
         Effect.try({
@@ -102,11 +102,16 @@ const makeMergeRequestService = (
         if (iid === undefined || title === undefined) {
           return Effect.fail(lookupFailure("response is missing iid or title"));
         }
-        const discussionsOk = object?.discussions_ok !== false;
+        const discussionsOk =
+          object?.discussions_ok !== false &&
+          object?.blocking_discussions_resolved !== false;
         const unresolvedCount =
           numberOrUndefined(object?.unresolved_count) ?? 0;
-        const boundTicket = stringOrUndefined(object?.bound_ticket);
-        const draft = object?.draft === true;
+        const boundTicket =
+          stringOrUndefined(object?.bound_ticket) ??
+          title.match(/\[([A-Z]+-\d+)\]/)?.[1];
+        const draft =
+          object?.draft === true || object?.work_in_progress === true;
         const pipeline = objectValue(object?.pipeline);
         return Effect.succeed({
           iid,

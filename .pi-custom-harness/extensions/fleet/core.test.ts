@@ -31,6 +31,7 @@ const repositories: ReadonlyArray<RepositoryFleetEntry> = [
 ];
 
 const facts: RepositoryFacts = {
+  repositoryRoot: "/fleet/alpha",
   deliveryPolicy: { kind: "none", verification: { kind: "repository-wide" } },
   testRunner: "none",
   checks: [],

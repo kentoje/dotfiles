@@ -1,6 +1,6 @@
 import { Context, type Effect, Schema } from "effect";
 
-import type { RepositoryCheck } from "../repo-map/core";
+import type { RepositoryCheck, RepositoryTestRunner } from "../repo-map/core";
 
 /** A completed repository check command, including its complete untruncated output. */
 export interface VerifyCommandResult {
@@ -12,6 +12,7 @@ export interface VerifyCommandResult {
 export interface VerifyCheckRequest {
   readonly cwd: string;
   readonly check: RepositoryCheck;
+  readonly testRunner: RepositoryTestRunner;
 }
 
 /** A typed request for an exact program, argument list, and working directory. */

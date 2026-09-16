@@ -12,7 +12,6 @@ export type ShipGateBlockerCategory =
   | "unresolved-threads"
   | "missing-ticket-binding"
   | "verify"
-  | "pipeline"
   | "visual-review"
   | "release-artifact";
 
@@ -52,7 +51,6 @@ export interface ShipGateFacts {
   readonly verificationPolicy: RepositoryVerificationPolicy;
   readonly verificationEvidence: ShipGateVerificationEvidence;
   readonly editGeneration: number;
-  readonly pipelineSettled: boolean;
   readonly figmaBacked: boolean;
   readonly visualReviewComplete: boolean;
   readonly releaseReadiness: GitReleaseReadiness;
@@ -65,6 +63,61 @@ export interface ShipGateRuntimeState {
   figmaBacked: boolean;
   visualReviewComplete: boolean;
 }
+
+const isShippingBranch = (facts: ShipGateFacts): boolean =>
+  facts.commitsAheadOfBase || facts.mergeRequestExists;
+
+const verifyBlocker = (reason: string): ShipGateBlocker => ({
+  category: "verify",
+  reason,
+});
+
+/** Selects the verification blocker required by the repository policy. */
+export const verificationBlockerFor = (
+  facts: ShipGateFacts,
+): ShipGateBlocker | undefined => {
+  switch (facts.verificationPolicy.kind) {
+    case "focused-only":
+      return facts.verificationEvidence.focusedTestEditGeneration ===
+        facts.editGeneration
+        ? undefined
+        : verifyBlocker(
+            "focused test verification has not passed after the latest edit.",
+          );
+    case "repository-wide":
+      return facts.verificationEvidence.repositoryWideEditGeneration ===
+        facts.editGeneration
+        ? undefined
+        : verifyBlocker(
+            "repository-wide verification has not passed after the latest edit.",
+          );
+    case "focused-then-all": {
+      if (
+        isShippingBranch(facts) &&
+        facts.verificationEvidence.repositoryWideEditGeneration === undefined
+      ) {
+        return verifyBlocker(
+          "repository-wide verification has not passed before shipping.",
+        );
+      }
+      const focusedAtCurrentEdit =
+        facts.verificationEvidence.focusedTestEditGeneration ===
+        facts.editGeneration;
+      const repositoryWideAtCurrentEdit =
+        facts.verificationEvidence.repositoryWideEditGeneration ===
+        facts.editGeneration;
+      return focusedAtCurrentEdit || repositoryWideAtCurrentEdit
+        ? undefined
+        : verifyBlocker(
+            "focused test verification has not passed after the latest edit.",
+          );
+    }
+    default: {
+      const _exhaustive: never = facts.verificationPolicy;
+      return _exhaustive;
+    }
+  }
+};
 
 /** Defers shipping enforcement until the current session has made a source edit. */
 export const shouldEvaluateShipGate = (state: ShipGateRuntimeState): boolean =>
@@ -133,22 +186,10 @@ export const evaluateShipGate = (input: {
       category: "missing-ticket-binding",
       reason: "The current worktree has no bound ticket.",
     });
-  const verifiedEditGeneration =
-    facts.verificationPolicy.kind === "focused-only"
-      ? facts.verificationEvidence.focusedTestEditGeneration
-      : facts.verificationEvidence.repositoryWideEditGeneration;
-  if (verifiedEditGeneration !== facts.editGeneration) {
-    const reason =
-      facts.verificationPolicy.kind === "focused-only"
-        ? "focused test verification has not passed after the latest edit."
-        : "repository-wide verification has not passed after the latest edit.";
-    blockers.push({ category: "verify", reason });
+  const verificationBlocker = verificationBlockerFor(facts);
+  if (verificationBlocker !== undefined) {
+    blockers.push(verificationBlocker);
   }
-  if (!facts.pipelineSettled)
-    blockers.push({
-      category: "pipeline",
-      reason: "The merge request pipeline watch has not settled.",
-    });
   if (facts.figmaBacked && !facts.visualReviewComplete) {
     blockers.push({
       category: "visual-review",

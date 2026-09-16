@@ -23,8 +23,8 @@ It earns its place for reasons that map onto requirements you already stated rat
 | --- | --- |
 | A `.purpose` file recording the contract, including errors | `Effect<A, E, R>` puts the error channel in the type. The Errors section of `.purpose` becomes type-checked rather than merely documented. |
 | "Very modular code so that we can isolate the behaviour of each" | `Layer` and `Context` are real dependency injection. Each module declares the services it needs; tests swap a fake `GitLabService` for the real one without touching the module. |
-| `mr watch` must not orphan its timer | `Effect.acquireRelease` with a `Scope` tied to `session_shutdown` makes cleanup structural instead of remembered. This was a flagged footgun in HARNESS.md 5.1. |
-| Pipeline polling | `Schedule` gives retry and backoff, cancellable, without hand-rolled `setInterval`. |
+| `/harness-watch-pipeline` must not orphan its timer | A command-owned `AbortController` ties cleanup to `session_shutdown`. |
+| User-activated pipeline polling | The command reports through the TUI and never triggers a model turn. |
 | Every tool shells out to glab, git, portless, pnpm | `@effect/platform` `Command` models subprocesses with typed exit codes, streams, and interruption. This is the hot path for the entire harness. |
 
 ### The costs, stated plainly
@@ -162,6 +162,7 @@ That is the trade for keeping it visually adjacent to `index.ts` rather than sho
 │   ├── mr-guard/               handler  (HARNESS.md 4.1)
 │   ├── ship-gate/              handler  (4.2)
 │   ├── notify-on-settle/       handler  (4.3)
+│   ├── harness-retro/          command + tool
 │   ├── mr/                     tool     (5.1)
 │   ├── worktree/               tool     (5.2)
 │   ├── verify/                 tool     (5.3)
@@ -174,7 +175,9 @@ That is the trade for keeping it visually adjacent to `index.ts` rather than sho
 ├── themes/
 └── docs/
     ├── HARNESS.md              what to build and why
-    └── ARCHITECTURE.md         this file
+    ├── ARCHITECTURE.md         this file
+    ├── TODO.md                 implementation roadmap
+    └── BACKLOG.md              session-derived harness work
 ```
 
 Pi discovers extensions from `<configDir>/extensions/*.ts` and `*/index.ts`.
@@ -187,10 +190,10 @@ Every delivery consumer resolves `RepositoryFacts.deliveryPolicy` from this modu
 | Fact | Consumed by |
 | --- | --- |
 | delivery policy: `changesets`, `conventional-commits`, or `none` | `mr-guard`, `ship-gate`, `GitService` |
-| verification policy: focused-only or repository-wide | `verify`, `ship-gate` |
+| verification policy: focused-only, focused-then-all, or repository-wide | `verify`, `ship-gate` |
 | test runner (vitest in hydra, jest in the extensions) | `verify` |
 | `authMode`: `none` / `dev-plugin` / `browser-login` | `preview`, `story` |
-| worktree root, portless app name | `worktree`, `preview`, `fleet` |
+| worktree root (`PI_WORKTREE_ROOT`, else `~/.pi/worktrees`), portless app name | `worktree`, `preview`, `fleet` |
 | repo list for sweeps | `fleet` |
 
 Git owns branch-diff, publishable-package, committed-changeset, and release-readiness inspection under the selected policy. This keeps source policy separate from mutable branch evidence. `RepositoryFactsConfiguration.deliveryPolicyOverrides` is the explicit extension point for an exceptional repository: it can select release and verification policy by repository root, directory name, or package name without adding conditionals to consumers.
@@ -374,7 +377,7 @@ The artifact therefore follows the documented subtraction rules and remains inte
 
 ### What it must contain
 
-1. **How the modules compose into the loop.** Ticket to worktree to implementation to verify to MR to pipeline. Which tool owns which step, and the handoffs between them. This is the substance, and it is exactly what a generic prompt lacks.
+1. **How the modules compose into the loop.** Ticket to worktree to implementation to verify to MR, with optional user-activated pipeline monitoring through `/harness-watch-pipeline`. Which tool owns which step, and the handoffs between them. This is the substance, and it is exactly what a generic prompt lacks.
 2. **When to reach for a tool rather than bash.** `mr` for MR state, bash for MR creation because `mr-guard` covers it. Non-obvious, and wrong by default.
 3. **The invariants that are enforced.** The agent behaves better when it knows a block is an invariant rather than a bug, so it fixes the cause instead of routing around it.
 4. **The search-tool condition.** `ffgrep`/`fffind` inside a git repository, built-in `grep`/`find` outside one. HARNESS.md section 3 decided this has to be prose, since keeping both pairs means it cannot be a tool.

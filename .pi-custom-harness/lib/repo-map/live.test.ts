@@ -6,18 +6,30 @@ import { Effect } from "effect";
 
 import {
   DefaultRepositoryFactsConfiguration,
+  FallbackWorktreeRoot,
   RepoMapService,
   type RepositoryFactsConfiguration,
+  WorktreeRootEnvironmentVariable,
 } from "./core";
 import { RepoMapLiveLayer } from "./live";
 
 const temporaryRepositories: Array<string> = [];
+const originalWorktreeRoot = process.env[WorktreeRootEnvironmentVariable];
+
+const restoreWorktreeRootEnvironment = () => {
+  if (originalWorktreeRoot === undefined) {
+    delete process.env[WorktreeRootEnvironmentVariable];
+    return;
+  }
+  process.env[WorktreeRootEnvironmentVariable] = originalWorktreeRoot;
+};
 
 afterEach(() => {
   for (const temporaryRepository of temporaryRepositories) {
     rmSync(temporaryRepository, { force: true, recursive: true });
   }
   temporaryRepositories.length = 0;
+  restoreWorktreeRootEnvironment();
 });
 const runGit = (repositoryPath: string, arguments_: ReadonlyArray<string>) => {
   const process = Bun.spawnSync(["git", ...arguments_], {
@@ -75,6 +87,8 @@ test("detects runner, ordered checks, dev modes, setup, and derived portless fac
     "#!/bin/sh\n",
   );
 
+  delete process.env[WorktreeRootEnvironmentVariable];
+
   await expect(
     repositoryFactsFor({ cwd: repositoryPath }),
   ).resolves.toMatchObject({
@@ -85,14 +99,14 @@ test("detects runner, ordered checks, dev modes, setup, and derived portless fac
     setupScript: "scripts/setup-worktree.sh",
     authMode: undefined,
     portlessAppName: repositoryName,
-    worktreeRoot: "~/.pi/worktrees",
+    worktreeRoot: FallbackWorktreeRoot,
     portlessRoute: {
       protocol: "https",
       hostSuffix: ".localhost",
       appName: repositoryName,
       url: `https://${repositoryName}.localhost`,
     },
-    repositories: [],
+    repositories: DefaultRepositoryFactsConfiguration.repositories,
   });
 });
 
@@ -121,6 +135,25 @@ test("keeps ordinary package repositories repository-wide", async () => {
     repositoryFactsFor({ cwd: repositoryPath }),
   ).resolves.toMatchObject({
     deliveryPolicy: { kind: "none", verification: { kind: "repository-wide" } },
+  });
+});
+
+test("applies the default focused-then-all override for conversation-center-ext", async () => {
+  const repositoryPath = createRepository(
+    JSON.stringify({
+      name: "conversations-center-ext",
+      scripts: { test: "jest", release: "semantic-release" },
+      devDependencies: { "semantic-release": "24.0.0" },
+    }),
+  );
+
+  await expect(
+    repositoryFactsFor({ cwd: repositoryPath }),
+  ).resolves.toMatchObject({
+    deliveryPolicy: {
+      kind: "conventional-commits",
+      verification: { kind: "focused-then-all" },
+    },
   });
 });
 
@@ -197,5 +230,17 @@ test("fails closed for invalid package metadata", async () => {
     repositoryFactsFor({ cwd: repositoryPath }),
   ).rejects.toMatchObject({
     _tag: "RepositoryFactsLookupError",
+  });
+});
+
+test("uses PI_WORKTREE_ROOT when configuration omits worktreeRoot", async () => {
+  const repositoryPath = createRepository();
+  process.env[WorktreeRootEnvironmentVariable] =
+    "/Volumes/HomeX/kento/.pi/worktrees";
+
+  await expect(
+    repositoryFactsFor({ cwd: repositoryPath }),
+  ).resolves.toMatchObject({
+    worktreeRoot: "/Volumes/HomeX/kento/.pi/worktrees",
   });
 });

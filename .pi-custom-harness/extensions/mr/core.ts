@@ -7,7 +7,6 @@ import {
   type MergeRequestCommitError,
   MergeRequestCommitService,
   MergeRequestGitLabError,
-  type MergeRequestPipelineSettled,
   type MergeRequestReplyResult,
   MergeRequestService,
   type MergeRequestStatus,
@@ -32,13 +31,7 @@ export type MergeRequestActionResult =
       readonly threads: ReadonlyArray<MergeRequestThread>;
     }
   | { readonly action: "reply"; readonly reply: MergeRequestReplyResult }
-  | { readonly action: "update"; readonly update: MergeRequestUpdateResult }
-  | { readonly action: "watch"; readonly settled: MergeRequestPipelineSettled };
-
-/** A successful polling result that identifies the terminal pipeline state. */
-export interface MergeRequestWatchOptions {
-  readonly intervalMs: number;
-}
+  | { readonly action: "update"; readonly update: MergeRequestUpdateResult };
 
 /** Derives title and description from commits without reading package metadata. */
 export const deriveMergeRequestUpdateData = (
@@ -65,10 +58,7 @@ export const runMergeRequestAction = Effect.fn("runMergeRequestAction")(
   }: MergeRequestActionInput): Effect.fn.Return<
     MergeRequestActionResult,
     MergeRequestCommitError | MergeRequestGitLabError,
-    | MergeRequestCommitService
-    | MergeRequestService
-    | MergeRequestClock
-    | MergeRequestTimer
+    MergeRequestCommitService | MergeRequestService
   > {
     const mergeRequestService = yield* MergeRequestService;
 
@@ -113,11 +103,6 @@ export const runMergeRequestAction = Effect.fn("runMergeRequestAction")(
           }),
         } as const;
       }
-      case "watch":
-        return yield* watchMergeRequestPipeline({
-          cwd,
-          intervalMs: request.intervalMs ?? 30_000,
-        });
       default: {
         const exhaustive: never = request.action;
         return exhaustive;
@@ -126,7 +111,7 @@ export const runMergeRequestAction = Effect.fn("runMergeRequestAction")(
   },
 );
 
-/** Polls an existing merge request until its pipeline is terminal; interruption cancels the poll. */
+/** Polls an existing merge request until terminal; only /harness-watch-pipeline calls this. */
 export const watchMergeRequestPipeline = Effect.fn("watchMergeRequestPipeline")(
   function* ({
     cwd,

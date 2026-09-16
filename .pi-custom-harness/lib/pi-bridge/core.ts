@@ -1,6 +1,6 @@
 import type { AgentToolResult } from "@earendil-works/pi-coding-agent";
 import { Cause, Effect, Exit, Option, Result } from "effect";
-
+import { FleetServiceError } from "../fleet/core";
 import { GitChangesetLookupError } from "../git/core";
 import { GitLabMergeRequestLookupError } from "../gitlab/core";
 import { RepositoryFactsLookupError } from "../repo-map/core";
@@ -24,6 +24,7 @@ export interface PiToolRunOptions<TDetails> extends PiBridgeRunOptions {
 }
 
 type KnownPiBoundaryError =
+  | FleetServiceError
   | GitChangesetLookupError
   | GitLabMergeRequestLookupError
   | RepositoryFactsLookupError;
@@ -31,12 +32,16 @@ type KnownPiBoundaryError =
 const isKnownPiBoundaryError = (
   error: unknown,
 ): error is KnownPiBoundaryError =>
+  error instanceof FleetServiceError ||
   error instanceof GitChangesetLookupError ||
   error instanceof GitLabMergeRequestLookupError ||
   error instanceof RepositoryFactsLookupError;
 
 const failureReason = (error: unknown, failurePrefix: string): string => {
   if (isKnownPiBoundaryError(error)) {
+    if (error instanceof FleetServiceError) {
+      return `${failurePrefix}: ${error.message}`;
+    }
     if (error instanceof GitChangesetLookupError) {
       return `${failurePrefix}: Git changeset verification failed. ${error.message}`;
     }

@@ -19,7 +19,6 @@ const passingFacts = {
     focusedTestEditGeneration: undefined,
   },
   editGeneration: 4,
-  pipelineSettled: true,
   figmaBacked: false,
   visualReviewComplete: false,
   releaseReadiness: { kind: "none", ready: true, missingPackages: [] },
@@ -169,12 +168,90 @@ test("rejects repository-wide evidence for a focused-only repository", () => {
   });
 });
 
-test("checks unsettled pipeline", () => {
+test("focused-then-all accepts a fresh focused test before shipping", () => {
   const result = evaluate({
     attempt: 1,
-    facts: { ...passingFacts, pipelineSettled: false },
+    facts: {
+      ...passingFacts,
+      commitsAheadOfBase: false,
+      mergeRequestExists: false,
+      verificationPolicy: {
+        kind: "focused-then-all",
+        workspaceRoot: "/conversation-center-ext",
+      },
+      verificationEvidence: {
+        repositoryWideEditGeneration: undefined,
+        focusedTestEditGeneration: 4,
+      },
+    },
   });
-  expect(result.blockers.map(({ category }) => category)).toContain("pipeline");
+  expect(result.blockers.map(({ category }) => category)).not.toContain(
+    "verify",
+  );
+});
+
+test("focused-then-all requires repository-wide verification before shipping", () => {
+  const result = evaluate({
+    attempt: 1,
+    facts: {
+      ...passingFacts,
+      verificationPolicy: {
+        kind: "focused-then-all",
+        workspaceRoot: "/conversation-center-ext",
+      },
+      verificationEvidence: {
+        repositoryWideEditGeneration: undefined,
+        focusedTestEditGeneration: 4,
+      },
+    },
+  });
+  expect(result.blockers).toContainEqual({
+    category: "verify",
+    reason: "repository-wide verification has not passed before shipping.",
+  });
+});
+
+test("focused-then-all keeps a prior repository-wide stamp after a later focused test", () => {
+  const result = evaluate({
+    attempt: 1,
+    facts: {
+      ...passingFacts,
+      editGeneration: 5,
+      verificationPolicy: {
+        kind: "focused-then-all",
+        workspaceRoot: "/conversation-center-ext",
+      },
+      verificationEvidence: {
+        repositoryWideEditGeneration: 4,
+        focusedTestEditGeneration: 5,
+      },
+    },
+  });
+  expect(result.blockers.map(({ category }) => category)).not.toContain(
+    "verify",
+  );
+});
+
+test("focused-then-all still requires a focused test after an edit once all has passed", () => {
+  const result = evaluate({
+    attempt: 1,
+    facts: {
+      ...passingFacts,
+      editGeneration: 5,
+      verificationPolicy: {
+        kind: "focused-then-all",
+        workspaceRoot: "/conversation-center-ext",
+      },
+      verificationEvidence: {
+        repositoryWideEditGeneration: 4,
+        focusedTestEditGeneration: undefined,
+      },
+    },
+  });
+  expect(result.blockers).toContainEqual({
+    category: "verify",
+    reason: "focused test verification has not passed after the latest edit.",
+  });
 });
 
 test("holds Figma-backed work for visual review", () => {
@@ -198,7 +275,6 @@ test("reports combined blockers and records them", () => {
         repositoryWideEditGeneration: undefined,
         focusedTestEditGeneration: undefined,
       },
-      pipelineSettled: false,
       figmaBacked: true,
       releaseReadiness: {
         kind: "changesets",
@@ -208,7 +284,7 @@ test("reports combined blockers and records them", () => {
     },
   });
   expect(result.kind).toBe("blocked");
-  expect(result.blockers).toHaveLength(6);
+  expect(result.blockers).toHaveLength(5);
   expect(result.blockers.map(({ category }) => category)).toContain(
     "release-artifact",
   );

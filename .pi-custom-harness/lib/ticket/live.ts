@@ -4,6 +4,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 import {
   type TicketBinding,
+  TicketBindingConflictError,
   TicketBindingMalformedError,
   TicketBindingMissingError,
   TicketBindingWriteError,
@@ -11,6 +12,7 @@ import {
   TicketKeyValidationError,
   TicketService,
   TicketWorktreeDeletedError,
+  TicketWorktreeMismatchError,
 } from "./core";
 
 const BindingState = Schema.Struct({
@@ -118,6 +120,26 @@ const makeTicketService = (
         Effect.mapError(() => new TicketWorktreeDeletedError({ worktree })),
       );
     if (!exists) return yield* new TicketWorktreeDeletedError({ worktree });
+    const statePath = `${worktree}/.dev-flow.json`;
+    const stateExists = yield* ops.pathExists(statePath).pipe(
+      Effect.mapError(
+        () =>
+          new TicketBindingMalformedError({
+            worktree,
+            message: "could not inspect existing .dev-flow.json",
+          }),
+      ),
+    );
+    if (stateExists) {
+      const existingBinding = yield* readBinding(ops, worktree);
+      if (existingBinding.ticketKey !== ticketKey) {
+        return yield* new TicketBindingConflictError({
+          worktree,
+          expectedTicketKey: ticketKey,
+          message: `Worktree is already bound to ${existingBinding.ticketKey}; refusing to bind ${ticketKey} to a different checkout.`,
+        });
+      }
+    }
     const branch = yield* ops
       .currentBranch(worktree)
       .pipe(
@@ -130,6 +152,16 @@ const makeTicketService = (
       return yield* new TicketBranchLookupError({
         worktree,
         message: "empty branch name",
+      });
+    }
+    if (
+      !new RegExp(`(?:^|[^A-Z0-9_])${ticketKey}(?:$|[^A-Z0-9_])`).test(branch)
+    ) {
+      return yield* new TicketWorktreeMismatchError({
+        worktree,
+        ticketKey,
+        branch,
+        message: `Ticket ${ticketKey} does not match branch ${branch} in ${worktree}. Bind the ticket to the worktree returned by worktree new or verify.`,
       });
     }
     const binding: TicketBinding = { ticketKey, branch, worktree };

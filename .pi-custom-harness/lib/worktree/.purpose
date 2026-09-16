@@ -19,6 +19,7 @@ Input: `WorktreeToolInput` with action `new`, `verify`, `list`, or `rm`, an opti
 - Git, setup command, portless, filesystem, verification, or mutation failures remain typed.
 - Existing targets cannot be created, and unrecognized or outside-root targets cannot be removed.
 - A repository with no mapped setup script uses the minimal Git fallback before portless registration and verification.
+- Live `WorktreePortlessService.register` is a no-op: portless has no `add` subcommand, and `portless add <name>` treats `add` as an app name.
 
 ## Non-goals
 This library does not register Pi tools, implement repository setup scripts, infer auth or package metadata, call GitLab, or expose developer-home state to policy code.

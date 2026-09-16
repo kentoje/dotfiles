@@ -1,3 +1,6 @@
+import { homedir } from "node:os";
+import { isAbsolute, resolve } from "node:path";
+
 import { Effect, Option } from "effect";
 
 import {
@@ -31,9 +34,55 @@ export type MergeRequestCreationGuardError =
   | GitLabMergeRequestLookupError
   | RepositoryFactsLookupError;
 
-/** Detects the `glab mr create` command form that can create a duplicate merge request. */
-export const isMergeRequestCreationCommand = (command: string): boolean =>
-  /\bglab\s+mr\s+create\b/.test(command);
+/** Detects protected `mr-guard` and legacy `glab mr create` command forms. */
+export const isMergeRequestCreationCommand = (command: string): boolean => {
+  const invocation =
+    /(?:^\s*|(?:&&|\|\||[;&|])\s*)(mr-guard(?:\s+([^;&|]*))?|glab\s+mr\s+create\b)/u.exec(
+      command,
+    );
+  if (invocation === null) return false;
+  const mrGuardArguments = invocation[2];
+  return (
+    mrGuardArguments === undefined ||
+    !/(?:^|\s)(?:-h|--help)(?:\s|$)/u.test(mrGuardArguments)
+  );
+};
+
+const expandHomeDirectory = (path: string): string =>
+  path === "~"
+    ? homedir()
+    : path.startsWith("~/")
+      ? `${homedir()}${path.slice(1)}`
+      : path;
+
+const resolveCommandDirectory = (cwd: string, target: string): string => {
+  const expanded = expandHomeDirectory(target);
+  return isAbsolute(expanded) ? expanded : resolve(cwd, expanded);
+};
+
+const leadingCdPattern =
+  /^\s*cd\s+(?:(?:"([^"]+)")|(?:'([^']+)')|(\S+))\s*(?:&&|;)\s*/u;
+
+/** Resolves the directory a leading chained `cd` would enter before the rest of the command. */
+export const effectiveWorkingDirectoryForCommand = (
+  command: string,
+  cwd: string,
+): string => {
+  let remaining = command;
+  let directory = cwd;
+  while (true) {
+    const match = leadingCdPattern.exec(remaining);
+    if (match === null) {
+      return directory;
+    }
+    const target = match[1] ?? match[2] ?? match[3];
+    if (target === undefined || target.length === 0 || target === "-") {
+      return directory;
+    }
+    directory = resolveCommandDirectory(directory, target);
+    remaining = remaining.slice(match[0].length);
+  }
+};
 
 /** Blocks a duplicate merge request before the Pi bash tool can execute it. */
 export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
@@ -42,11 +91,14 @@ export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
       return { kind: "allow" } as const;
     }
 
+    const targetDirectory = effectiveWorkingDirectoryForCommand(command, cwd);
     const gitLabService = yield* GitLabService;
     const gitService = yield* GitService;
     const repoMapService = yield* RepoMapService;
     const existingMergeRequest =
-      yield* gitLabService.findOpenMergeRequestForCurrentBranch({ cwd });
+      yield* gitLabService.findOpenMergeRequestForCurrentBranch({
+        cwd: targetDirectory,
+      });
 
     if (Option.isSome(existingMergeRequest)) {
       return {
@@ -55,9 +107,11 @@ export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
       } as const;
     }
 
-    const repositoryFacts = yield* repoMapService.repositoryFactsFor({ cwd });
+    const repositoryFacts = yield* repoMapService.repositoryFactsFor({
+      cwd: targetDirectory,
+    });
     const readiness = yield* gitService.releaseReadinessFor({
-      cwd,
+      cwd: targetDirectory,
       policy: repositoryFacts.deliveryPolicy,
     });
     const reason = releaseReadinessFailureReason(readiness, "opening the MR");

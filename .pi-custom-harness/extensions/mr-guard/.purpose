@@ -1,28 +1,31 @@
 # mr-guard
 
 ## Intent
-Prevent duplicate merge-request creation and enforce the repository map's canonical delivery policy before `glab mr create` executes.
+Prevent duplicate merge-request creation and enforce the repository map's canonical delivery policy before protected `mr-guard` or legacy `glab mr create` invocations execute.
 
 ## Contract
-Input: a Bash command and its working directory.
+Input: a Bash command and its working directory; `bin/mr-guard` provides the discoverable command entrypoint.
 Output: `allow` or a fail-closed block decision with an actionable reason.
 Errors: Git, GitLab, and repository-facts lookup failures abort MR creation rather than permitting an unverifiable delivery.
 
 ## Behaviour
-1. Ignore commands that do not create a merge request.
-2. Block creation when the branch already has an open merge request.
-3. Resolve `RepositoryFacts.deliveryPolicy` through `RepoMapService`.
-4. Ask `GitService` for release readiness under that policy.
-5. Block only when the shared readiness result requires a release artifact; name each publishable package missing a changeset.
+1. Ignore commands that do not invoke `mr-guard` or `glab mr create`.
+2. Resolve the effective working directory from leading chained `cd` statements before GitLab or Git lookup.
+3. Block creation when the branch already has an open merge request.
+4. Resolve `RepositoryFacts.deliveryPolicy` through `RepoMapService`.
+5. Ask `GitService` for release readiness under that policy.
+6. Block only when the shared readiness result requires a release artifact; name each publishable package missing a changeset.
 
 ## Edge cases
 - Changeset repositories require committed changesets only for changed publishable packages.
 - Conventional-commit repositories require every branch commit to be conventional.
 - A `none` delivery policy permits creation release-wise.
 - Existing-MR detection happens before release-policy lookup.
+- `cd /other && glab mr create` is checked against `/other`, not the Pi session `cwd`.
+- `mr-guard --help` remains available outside a session, while creation fails with an actionable diagnostic unless the Pi custom-harness environment and command path are active.
 
 ## Non-goals
 This guard does not create, push, or merge merge requests, and it does not decide repository policy.
 
 ## Evidence
-The harness must stop its own task flow from opening a Hydra MR without the committed changesets required by affected publishable packages.
+The harness must stop its own task flow from opening a Hydra MR without required changesets, and its executable contract test keeps the protected command discoverable.

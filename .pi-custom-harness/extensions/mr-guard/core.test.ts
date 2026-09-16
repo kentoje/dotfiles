@@ -8,9 +8,14 @@ import {
   type RepositoryDeliveryPolicy,
   type RepositoryFacts,
 } from "../../lib/repo-map/core";
-import { guardMergeRequestCreation } from "./core";
+import {
+  effectiveWorkingDirectoryForCommand,
+  guardMergeRequestCreation,
+  isMergeRequestCreationCommand,
+} from "./core";
 
 const facts = (deliveryPolicy: RepositoryDeliveryPolicy): RepositoryFacts => ({
+  repositoryRoot: "/worktree",
   deliveryPolicy,
   testRunner: "none",
   checks: [],
@@ -134,4 +139,99 @@ test("blocks an existing merge request before resolving delivery policy", async 
     reason:
       "Branch already has MR !42. Update it instead of opening a second one.",
   });
+});
+
+test("recognizes the protected merge-request command", async () => {
+  const decision = await Effect.runPromise(
+    guardMergeRequestCreation({
+      command: "mr-guard --fill --yes",
+      cwd: "/worktree",
+    }).pipe(
+      Effect.provideService(GitLabService, {
+        findOpenMergeRequestForCurrentBranch: () =>
+          Effect.succeed(Option.some({ iid: 42 })),
+      }),
+      Effect.provideService(GitService, {
+        commitsAreConventional: () => Effect.succeed(true),
+        changedFilesSinceDefaultBranch: () => Effect.succeed([]),
+        committedChangesetsSinceDefaultBranch: () => Effect.succeed([]),
+        releaseReadinessFor: () => Effect.die("unexpected release readiness"),
+      }),
+      Effect.provideService(RepoMapService, {
+        repositoryFactsFor: () => Effect.die("unexpected facts"),
+      }),
+    ),
+  );
+
+  expect(decision).toEqual({
+    kind: "block",
+    reason:
+      "Branch already has MR !42. Update it instead of opening a second one.",
+  });
+});
+
+test("does not guard the command help diagnostic", () => {
+  expect(isMergeRequestCreationCommand("mr-guard --help")).toBe(false);
+  expect(isMergeRequestCreationCommand("mr-guard -h")).toBe(false);
+});
+
+test("extracts the directory a leading chained cd would enter", () => {
+  expect(
+    effectiveWorkingDirectoryForCommand(
+      "cd /Users/kento/.pi/worktrees/hydra/DS-237 && glab mr create --fill --yes",
+      "/Users/kento/conversation-center-ext",
+    ),
+  ).toBe("/Users/kento/.pi/worktrees/hydra/DS-237");
+  expect(
+    effectiveWorkingDirectoryForCommand(
+      "cd '../hydra/DS-237' && glab mr create --fill",
+      "/worktrees/conversation-center-ext",
+    ),
+  ).toBe("/worktrees/hydra/DS-237");
+});
+
+test("looks up merge request state in the chained cd target", async () => {
+  const seen: string[] = [];
+  const decision = await Effect.runPromise(
+    guardMergeRequestCreation({
+      command:
+        "cd /Users/kento/.pi/worktrees/hydra/DS-237 && glab mr create --fill --yes",
+      cwd: "/Users/kento/conversation-center-ext",
+    }).pipe(
+      Effect.provideService(GitLabService, {
+        findOpenMergeRequestForCurrentBranch: ({ cwd }) => {
+          seen.push(cwd);
+          return Effect.succeed(Option.none());
+        },
+      }),
+      Effect.provideService(GitService, {
+        commitsAreConventional: () => Effect.succeed(true),
+        changedFilesSinceDefaultBranch: () => Effect.succeed([]),
+        committedChangesetsSinceDefaultBranch: () => Effect.succeed([]),
+        releaseReadinessFor: ({ cwd }) => {
+          seen.push(cwd);
+          return Effect.succeed({
+            kind: "none",
+            ready: true,
+            missingPackages: [],
+          });
+        },
+      }),
+      Effect.provideService(RepoMapService, {
+        repositoryFactsFor: ({ cwd }) => {
+          seen.push(cwd);
+          return Effect.succeed(
+            facts({ kind: "none", verification: { kind: "repository-wide" } }),
+          );
+        },
+      }),
+    ),
+  );
+
+  expect(seen).toEqual([
+    "/Users/kento/.pi/worktrees/hydra/DS-237",
+    "/Users/kento/.pi/worktrees/hydra/DS-237",
+    "/Users/kento/.pi/worktrees/hydra/DS-237",
+  ]);
+  expect(decision).toEqual({ kind: "allow" });
 });

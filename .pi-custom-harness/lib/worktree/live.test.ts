@@ -8,6 +8,30 @@ import {
   WorktreeMutationService,
   WorktreePortlessService,
 } from "./core";
+import { registerWorktreePortlessRoute, WorktreeLiveLayer } from "./live";
+
+test("live portless register is a no-op and never runs portless add", async () => {
+  const registered = await Effect.runPromise(
+    Effect.gen(function* () {
+      const portless = yield* WorktreePortlessService;
+      yield* portless.register({
+        name: "CI-6782.conversation-center-ext",
+        url: "https://CI-6782.conversation-center-ext.localhost",
+        worktreePath: "/tmp/worktree-contract",
+      });
+      return portless.register;
+    }).pipe(Effect.provide(WorktreeLiveLayer)),
+  );
+
+  expect(registered).toBe(registerWorktreePortlessRoute);
+  await Effect.runPromise(
+    registerWorktreePortlessRoute({
+      name: "CI-6782.conversation-center-ext",
+      url: "https://CI-6782.conversation-center-ext.localhost",
+      worktreePath: "/tmp/worktree-contract",
+    }),
+  );
+});
 
 test("worktree live seams expose deterministic command and filesystem behavior", async () => {
   const result = await Effect.runPromise(

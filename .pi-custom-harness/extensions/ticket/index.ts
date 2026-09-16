@@ -23,9 +23,10 @@ export default function registerTicket(pi: ExtensionAPI): void {
     name: "ticket",
     label: "Ticket",
     description:
-      "Bind or resolve the Jira-style ticket associated with this worktree.",
-    promptSnippet: "Bind or resolve the current worktree ticket",
+      "Bind a Jira-style ticket to an explicit worktree, or resolve a selected/current worktree binding.",
+    promptSnippet: "Bind or resolve a worktree ticket",
     promptGuidelines: [
+      "Pass the absolute path returned by worktree new or verify when binding or querying a task worktree.",
       "Use ticket for local branch-to-ticket binding; do not query Jira through it.",
     ],
     parameters: TicketParams,
@@ -36,14 +37,17 @@ export default function registerTicket(pi: ExtensionAPI): void {
       _onUpdate,
       context,
     ) {
+      const requestedPath = params.worktree ?? context.cwd;
       const effect = Effect.tryPromise({
-        try: () => realpath(context.cwd),
-        catch: () => context.cwd,
+        try: () => realpath(requestedPath),
+        catch: () => requestedPath,
       }).pipe(
         Effect.flatMap((cwd) =>
-          runTicket({ input: params, cwd }).pipe(
-            Effect.provide(TicketLiveLayer),
-          ),
+          runTicket({
+            input:
+              params.action === "bind" ? { ...params, worktree: cwd } : params,
+            cwd,
+          }).pipe(Effect.provide(TicketLiveLayer)),
         ),
         Effect.map(
           (result): AgentToolResult<TicketToolDetails> => ({

@@ -39,12 +39,12 @@ Legend for the layer column:
 | 18 | Commit and push | bash | `git add -A && git commit && git push -u origin DS-61` |
 | 19 | Open the MR | bash | `glab mr create ...` |
 | 20 | **Guard fires** | handler | `mr-guard`: no existing MR, changeset present, allow |
-| 21 | Watch the pipeline | tool | `mr watch` |
-| 22 | Wake on settle | handler | `sendMessage(deliverAs: "followUp", triggerTurn: true)` |
+| 21 | Optional pipeline monitor | **human command** | `/harness-watch-pipeline <worktree>` only when requested |
+| 22 | Inspect current MR state | tool | `mr status` |
 | 23 | Read review threads | tool | `mr threads --unresolved` |
 | 24 | Triage bot findings | skill + judgement | `is_bot` splits Bugbot from human review |
 | 25 | Fix and resolve | tool | `mr reply --thread <id> --resolve` |
-| 26 | **Ship-gate fires** | handler | `agent_settled`: MR exists, threads clear, ticket bound, verify green |
+| 26 | **Ship-gate fires** | handler | MR exists, threads clear, ticket bound, local verify green |
 | 27 | Notify only if blocked | handler | `notify-on-settle`, silent on success |
 
 Steps 20, 22, 26 and 27 are the ones nobody chose to run.
@@ -118,13 +118,13 @@ A Figma-backed task is precisely the workflow that supplies one: there is a refe
 The honest position is that the earlier rejection was measured against a corpus that predates having `story show` and `figma_get_screenshot` in the same session.
 Not a reversal yet, but the trigger to reconsider is now named.
 
-### Gap 5: `mr watch` can lose its notification
+### Gap 5: optional pipeline watching ends with the session
 
-Step 21 registers a timer the extension owns, because Pi has no background job manager.
-If the session ends between 21 and 22, the wake never arrives and nothing reports the loss.
+`/harness-watch-pipeline` registers a command-owned timer because Pi has no persistent background job manager.
+If the session ends before settlement, the command cancels and no notification arrives.
 
-Mitigation is to have the ship-gate at step 26 treat "watching a pipeline that has not settled" as a reason to hold, rather than letting the turn end silently.
-Worth specifying when `mr watch` is built.
+This is acceptable because pipeline monitoring is an explicit convenience, not a shipping gate.
+Run the command again in an active session when monitoring is still wanted.
 
 ---
 
@@ -167,7 +167,7 @@ Each of these is a prompt you measurably typed, now answered by a module:
 | "open mr", "open the MR" | step 19 plus `mr-guard` |
 | "did you create a ticket?", "you should have created a ticket" | ship-gate check 3 |
 | "what is wrong with my WT setup here?", "we are missing mandatory files" | `worktree verify` |
-| "https://.../-/jobs/... is failing", "pipeline is failing 2 jobs" | `mr watch` |
+| "https://.../-/jobs/... is failing", "pipeline is failing 2 jobs" | user invokes `/harness-watch-pipeline` or asks for `mr status` |
 | "do not create a new branch or MR" (three consecutive prompts) | `mr-guard` blocking |
 
 ### The hole: the ship-gate cannot tell whether it looks right

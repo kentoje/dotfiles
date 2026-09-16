@@ -12,7 +12,7 @@ import {
   VerifyCommandService,
   VerifyFocusedTestPackageError,
 } from "../../lib/verify/core";
-import { parseDiagnostics, verify } from "./core";
+import { commandOutputTail, parseDiagnostics, verify } from "./core";
 
 const facts = (
   checks: ReadonlyArray<RepositoryCheck>,
@@ -20,6 +20,7 @@ const facts = (
     kind: "repository-wide",
   },
 ): RepositoryFacts => ({
+  repositoryRoot: "/worktree",
   deliveryPolicy: { kind: "none", verification: verificationPolicy },
   testRunner: "none",
   checks,
@@ -42,6 +43,7 @@ const runVerify = (
   runCheck: (input: {
     readonly cwd: string;
     readonly check: RepositoryCheck;
+    readonly testRunner: RepositoryFacts["testRunner"];
   }) => Effect.Effect<
     { readonly exitCode: number; readonly output: string },
     never
@@ -100,6 +102,98 @@ test("focused-only all returns a policy failure without running commands", async
         "Repository-wide verification is forbidden by repository policy; use focused verification.",
     },
   ]);
+});
+
+test("focused-then-all all runs the repository check list", async () => {
+  const checks: RepositoryCheck[] = [];
+  const report = await runVerify(
+    "all",
+    facts(["ts:check", "test"], {
+      kind: "focused-then-all",
+      workspaceRoot: "/workspace",
+    }),
+    (input) => {
+      checks.push(input.check);
+      return Effect.succeed({ exitCode: 0, output: "" });
+    },
+  );
+
+  expect(checks).toEqual(["ts:check", "test"]);
+  expect(report.ok).toBe(true);
+});
+
+test("all resolves an absolute file to its worktree and completes there", async () => {
+  const requestedWorktree = "/worktrees/assets-page/DAT-624";
+  const calls: Array<{
+    readonly cwd: string;
+    readonly check: RepositoryCheck;
+    readonly testRunner: RepositoryFacts["testRunner"];
+  }> = [];
+  const factLookups: string[] = [];
+  const report = await Effect.runPromise(
+    verify({
+      action: "all",
+      file: `${requestedWorktree}/.gitlab/ci/e2e.gitlab-ci.yml`,
+      cwd: "/repositories/assets-page",
+    }).pipe(
+      Effect.provideService(RepoMapService, {
+        repositoryFactsFor: ({ cwd }) => {
+          factLookups.push(cwd);
+          return Effect.succeed({
+            ...facts(["test"]),
+            repositoryRoot: cwd.startsWith(requestedWorktree)
+              ? requestedWorktree
+              : "/repositories/assets-page",
+          });
+        },
+      }),
+      Effect.provideService(VerifyCommandService, {
+        runCheck: (input) => {
+          calls.push(input);
+          return Effect.succeed({ exitCode: 0, output: "complete" });
+        },
+      }),
+    ),
+  );
+
+  expect(factLookups).toEqual([`${requestedWorktree}/.gitlab/ci`]);
+  expect(calls).toEqual([
+    { cwd: requestedWorktree, check: "test", testRunner: "none" },
+  ]);
+  expect(report).toMatchObject({
+    ok: true,
+    status: "completed",
+    worktree: requestedWorktree,
+  });
+});
+
+test("focused-then-all focused Jest runs the file command", async () => {
+  const commands: ReadonlyArray<unknown>[] = [];
+  const report = await runFocusedVerify(
+    facts(["test"], {
+      kind: "focused-then-all",
+      workspaceRoot: "/workspace",
+    }),
+    "src/ScoreCardQuestionCard.test.tsx",
+    {
+      runCheck: () => Effect.die("runCheck must not run"),
+      focusedTestPackageFor: () =>
+        Effect.succeed({
+          packageRoot: "/workspace",
+          relativeFile: "src/ScoreCardQuestionCard.test.tsx",
+          runner: "jest",
+        }),
+      runCommand: (input) => {
+        commands.push([input.cwd, input.program, ...input.args]);
+        return Effect.succeed({ exitCode: 0, output: "" });
+      },
+    },
+  );
+
+  expect(commands).toEqual([
+    ["/workspace", "pnpm", "test", "--", "src/ScoreCardQuestionCard.test.tsx"],
+  ]);
+  expect(report.ok).toBe(true);
 });
 
 test("focused Vitest runs package-root command with --run file", async () => {
@@ -363,6 +457,41 @@ test("diagnostic parsing respects actionable boundaries and complete output", ()
       message: "final line",
     },
   ]);
+});
+
+test("fallback failure includes the command output tail", async () => {
+  const report = await runVerify("test", facts(["test"]), () =>
+    Effect.succeed({
+      exitCode: 1,
+      output: [
+        "● test/worker.test.ts",
+        "A worker process has failed to exit gracefully",
+        "Force exiting Jest",
+      ].join("\n"),
+    }),
+  );
+
+  expect(report.ok).toBe(false);
+  expect(report.failures).toEqual([
+    {
+      file: "",
+      line: 0,
+      rule: "test",
+      message:
+        "Check failed with exit code 1.\n● test/worker.test.ts\nA worker process has failed to exit gracefully\nForce exiting Jest",
+    },
+  ]);
+});
+
+test("command output tail keeps the last lines of unparsed check output", () => {
+  const lines = Array.from(
+    { length: 25 },
+    (_, index) => `log line ${index + 1}`,
+  );
+  expect(commandOutputTail(`${lines.join("\n")}\n`)).toBe(
+    lines.slice(-20).join("\n"),
+  );
+  expect(commandOutputTail("")).toBe("");
 });
 
 test("repository-fact absence is a structured failure", async () => {

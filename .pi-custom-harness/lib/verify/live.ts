@@ -84,10 +84,14 @@ const makeVerifyCommandService = (
   const runCheck = Effect.fn("VerifyCommandService.runCheck")(function* (
     request: VerifyCheckRequest,
   ) {
+    const args = ["run", request.check];
+    if (request.check === "test" && request.testRunner === "vitest") {
+      args.push("--run");
+    }
     return yield* run({
       cwd: request.cwd,
       program: "pnpm",
-      args: ["run", request.check],
+      args,
     });
   });
 

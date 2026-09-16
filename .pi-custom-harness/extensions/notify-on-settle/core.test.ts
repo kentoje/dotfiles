@@ -41,23 +41,6 @@ test("notifies on a terminal ship-gate failure", async () => {
   expect(result.decision.kind).toBe("notified");
 });
 
-test("notifies on a red pipeline", async () => {
-  const result = await runNotify({
-    sessionId: "session-1",
-    outcome: "pipeline-red",
-    failureId: "pipeline-17",
-  });
-
-  expect(result.sent).toEqual([
-    {
-      sessionId: "session-1",
-      outcome: "pipeline-red",
-      failureId: "pipeline-17",
-      message: "Pipeline is red.",
-    },
-  ]);
-});
-
 test("stays silent on clean completion", async () => {
   const result = await runNotify({
     sessionId: "session-1",
@@ -68,26 +51,12 @@ test("stays silent on clean completion", async () => {
   expect(result.sent).toHaveLength(0);
 });
 
-test("stays silent while a pipeline is pending", async () => {
-  const result = await runNotify({
-    sessionId: "session-1",
-    outcome: "pipeline-pending",
-    failureId: "pipeline-17",
-  });
-
-  expect(result.decision).toEqual({
-    kind: "silent",
-    outcome: "pipeline-pending",
-  });
-  expect(result.sent).toHaveLength(0);
-});
-
 test("suppresses duplicate failures for the same session and identity", async () => {
   const state = createNotifyOnSettleState();
   const first = await runNotify(
     {
       sessionId: "session-1",
-      outcome: "pipeline-red",
+      outcome: "ship-gate-failed",
       failureId: "pipeline-17",
     },
     state,
@@ -95,7 +64,7 @@ test("suppresses duplicate failures for the same session and identity", async ()
   const second = await runNotify(
     {
       sessionId: "session-1",
-      outcome: "pipeline-red",
+      outcome: "ship-gate-failed",
       failureId: "pipeline-17",
     },
     state,

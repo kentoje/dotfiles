@@ -50,11 +50,12 @@ export default function registerWorktreeTool(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "worktree",
     label: "Worktree",
-    description: "Create, verify, list, or safely remove task worktrees.",
+    description:
+      "Create, verify by task name, list, or safely remove task worktrees.",
     promptSnippet: "Create and verify repository task worktrees.",
     promptGuidelines: [
       "Use worktree new before editing a task checkout.",
-      "Use worktree verify when a checkout may be missing repository setup.",
+      "Use worktree verify with a task name when a checkout may be missing repository setup.",
       "Use worktree rm only for a recognized task worktree under the configured root.",
     ],
     parameters: WorktreeParams,

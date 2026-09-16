@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: mr-guard [glab mr create options]
+
+Creates a GitLab merge request through the Pi harness protection boundary.
+Run this command from an active Pi custom-harness session.
+EOF
+}
+
+case "${1:-}" in
+  -h|--help)
+    usage
+    exit 0
+    ;;
+esac
+
+if [ -z "${PI_CODING_AGENT_DIR:-}" ]; then
+  echo "mr-guard unavailable: start the task with pih so the protected merge-request boundary is active." >&2
+  exit 78
+fi
+
+case ":${PATH:-}:" in
+  *":${PI_CODING_AGENT_DIR}/bin:"*) ;;
+  *)
+    echo "mr-guard unavailable: ${PI_CODING_AGENT_DIR}/bin is not on PATH. Reload the Pi custom harness before creating the merge request." >&2
+    exit 78
+    ;;
+esac
+
+if [ "$#" -ge 2 ] && [ "$1" = "mr" ] && [ "$2" = "create" ]; then
+  shift 2
+fi
+
+exec glab mr create "$@"

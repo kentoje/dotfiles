@@ -23,6 +23,17 @@ const expandHome = (path: string): string =>
       ? `${homedir()}${path.slice(1)}`
       : path;
 
+/**
+ * Portless has no `add` subcommand; `portless add <name>` treats `add` as an
+ * app name and then execs the remaining tokens. Worktree routes register
+ * automatically when preview runs `portless run`.
+ */
+export const registerWorktreePortlessRoute = (_input: {
+  readonly name: string;
+  readonly url: string;
+  readonly worktreePath: string;
+}): Effect.Effect<void> => Effect.void;
+
 const commandFailure = (cause: unknown): WorktreeCommandError =>
   new WorktreeCommandError({
     message: `Worktree command failed: ${cause instanceof Error ? cause.message : String(cause)}`,
@@ -174,22 +185,7 @@ export const WorktreeLiveLayer = Layer.mergeAll(
       ),
   }),
   Layer.succeed(WorktreePortlessService, {
-    register: ({ name, url, worktreePath }) =>
-      runProcess(
-        "portless",
-        ["add", name, url, worktreePath],
-        expandHome(worktreePath),
-      ).pipe(
-        Effect.flatMap((result) =>
-          result.exitCode === 0
-            ? Effect.void
-            : Effect.fail(
-                new WorktreeCommandError({
-                  message: `Portless registration failed: ${result.output}`,
-                }),
-              ),
-        ),
-      ),
+    register: registerWorktreePortlessRoute,
   }),
   Layer.succeed(WorktreeMutationService, {
     run: ({ operation }) => operation,

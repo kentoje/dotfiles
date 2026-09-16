@@ -14,6 +14,9 @@ import {
   RepositoryFactsLookupError,
   type RepositoryTestRunner,
   type RepositoryVerificationPolicy,
+  resolveWorktreeRoot,
+  verificationPolicyFor,
+  WorktreeRootEnvironmentVariable,
 } from "./core";
 
 const PackageMetadata = Schema.Struct({
@@ -112,12 +115,10 @@ const deliveryPolicyFor = (input: {
   readonly repositoryRoot: string;
   readonly inferredVerification: RepositoryVerificationPolicy;
 }): RepositoryDeliveryPolicy => {
-  const verificationKind =
-    input.override?.verification ?? input.inferredVerification.kind;
-  const verification: RepositoryVerificationPolicy =
-    verificationKind === "focused-only"
-      ? { kind: "focused-only", workspaceRoot: input.repositoryRoot }
-      : { kind: "repository-wide" };
+  const verification = verificationPolicyFor(
+    input.override?.verification ?? input.inferredVerification.kind,
+    input.repositoryRoot,
+  );
   const release =
     input.override?.release ??
     (input.changesetDirectoryExists
@@ -279,6 +280,7 @@ export const RepoMapLiveLayer = Layer.effect(
         }
 
         const facts: RepositoryFacts = {
+          repositoryRoot,
           deliveryPolicy,
           testRunner:
             packageMetadata === undefined
@@ -291,7 +293,10 @@ export const RepoMapLiveLayer = Layer.effect(
           setupScript,
           authMode,
           portlessAppName,
-          worktreeRoot: configuration.worktreeRoot,
+          worktreeRoot: resolveWorktreeRoot({
+            configuredRoot: configuration.worktreeRoot,
+            environmentValue: process.env[WorktreeRootEnvironmentVariable],
+          }),
           portlessRoute: {
             ...configuration.portlessRoute,
             appName: portlessAppName,

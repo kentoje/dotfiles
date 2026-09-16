@@ -156,29 +156,30 @@ The policy is per repository: Hydra uses a changeset policy that requires commit
 
 
 **Evidence.** The maestro stop-gate fired 22 times in the analysed window: "Do not finish yet - the task is not complete (attempt 1/3). You have not opened the MR."
-An agent that wrote correct code but never shipped it would otherwise report success.
+An agent that wrote correct code but never opened an MR would otherwise report success.
 
 An `agent_settled` handler refuses to let the turn end when any of these hold:
 
-- the branch has commits ahead of main but no MR
+- the branch has commits ahead of its base branch but no MR
 - the MR has unresolved discussion threads
 - the branch has no bound ticket
-- the delivery policy's required verification evidence has not passed since the last edit: `verify all` for repository-wide policy or focused `verify test --file …` for focused-only policy
+- the delivery policy's required local verification evidence has not passed: `verify all` after the latest edit for repository-wide policy, focused `verify test --file …` after the latest edit for focused-only policy, or a focused test after the latest edit plus one `verify all` before shipping for focused-then-all policy
 
-On failure it calls `pi.sendMessage(..., { deliverAs: "followUp", triggerTurn: true })` to push the agent back to work.
+Remote pipeline state is not a ship-gate input.
+The operator may start `/harness-watch-pipeline` after MR creation, but the agent does not wait for it by default.
+
+On failure the gate calls `pi.sendMessage(..., { deliverAs: "followUp", triggerTurn: true })` to push the agent back to locally actionable work.
 
 **Cap at 3 attempts, matching maestro.**
 An ungated loop here is an infinite one, and the failure mode is expensive because it burns tokens silently.
 
-Depends on `mr` (5.1), `verify` (5.3) and `ticket` (5.6), so it lands after them.
-
-### 4.3 Notify-on-settle - approved, failures only
+### 4.3 Notify-on-settle - approved, ship-gate failures only
 
 **Evidence.** `maestro notify` ran 48 times.
 
-Rewires your existing `notify` and `ping-me-slack` skills as an `agent_settled` handler.
-**Fires only on ship-gate failure or a red pipeline, silent on clean completion.**
-A notification you rely on is a guarantee, so it belongs in the event layer, but end-of-turn noise on success is how you learn to ignore it.
+Rewires your existing `notify` integration as an `agent_settled` handler.
+**Fires only on terminal ship-gate failure and stays silent on clean completion.**
+Pipeline monitoring is user-activated through `/harness-watch-pipeline`, which reports through the TUI without triggering another agent turn.
 
 ### 4.4 Heavy-command lock - declined
 
@@ -197,27 +198,23 @@ The handler is about thirty lines and slots into the same `tool_call` extension 
 
 Seven approved.
 
-### 5.1 `mr` - status, threads, reply, update, watch
+### 5.1 `mr` - status, threads, reply, update
 
 **Evidence.** 261 `glab` invocations: `api` 93, `mr view` 61, `mr create` 23, `mr list` 16, `mr update` 13.
-Plus 35 pipeline notification events, which is what `watch` replaces.
+Pipeline monitoring existed in 35 observed notification flows, but forcing it into every delivery loop made ordinary MR creation wait on remote CI.
 
 - `status` returns iid, title, draft, `discussions_ok`, pipeline state, unresolved count, bound ticket
 - `threads` returns `[{ id, author, is_bot, file, line, body, resolved }]`
 - `reply` posts to a thread and optionally resolves it
 - `update` regenerates title and description from commits
-- `watch` injects a message when the pipeline settles
 
 `is_bot` is what makes the Bugbot triage habit cheap.
 Your measured pattern is "is this true?" before "fix them", and separating bot findings from human review currently costs a hand-rolled API call.
 
-**There is deliberately no `open` action.**
+**There is deliberately no `open` or `watch` action.**
 Creation stays in bash, guarded by 4.1, because that is where the model actually reaches.
-
-**The `watch` footgun.**
-Pi has no background job manager, so the extension owns its own timer.
-It must clear it on `session_shutdown`, or an orphaned poller survives `/new` and wakes the wrong session about the wrong MR.
-Pi's extension docs have a "Long-lived resources and shutdown" section for exactly this.
+Continuous monitoring starts only when the operator invokes `/harness-watch-pipeline [worktree] [poll-seconds]`.
+The command owns its timer, cancels it on `session_shutdown`, and reports settlement through the TUI without waking the model.
 
 ### 5.2 `worktree` - new, verify, list, rm
 
@@ -236,8 +233,8 @@ So `worktree new` calls the repo's script when `lib/repo-map` says one exists, a
 - the `verify` pass afterwards
 - a fallback provisioning path for repos with no script yet
 
-**The default worktree root is `~/.pi/worktrees`.**
-`lib/repo-map` owns this default and accepts an explicit override, so routes follow `https://<worktree>.<project>.localhost` under the configured portless route.
+**The worktree root is `PI_WORKTREE_ROOT`, falling back to `~/.pi/worktrees`.**
+`lib/repo-map` resolves that path (`resolveWorktreeRoot`) and accepts an explicit configuration override. On this machine the shell exports `PI_WORKTREE_ROOT=/Volumes/HomeX/kento/.pi/worktrees` so trees land on the external SSD. Routes still follow `https://<worktree>.<project>.localhost` under the configured portless route.
 
 `verify` is not garnish.
 You asked for it explicitly: "create a fake wt, and try the script onto it", and separately "It should be working on any machine not only mine".
@@ -270,7 +267,7 @@ A `verify` that knew only types, lint and test would let a `fallow` failure reac
 Runners vary too: vitest in hydra and assets-page, jest in the three extensions and dashboard-v4.
 `lib/repo-map` owns the whole list.
 
-Returns `{ ok, failures: [{ file, line, rule, message }], duration }`.
+Returns `{ ok, status, worktree, failures: [{ file, line, rule, message }], duration }`.
 Structured failures instead of a truncated tail.
 
 Note this tool no longer carries the concurrency lock, since 4.4 was declined.

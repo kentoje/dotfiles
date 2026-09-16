@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { Effect } from "effect";
+import { Value } from "typebox/value";
 
 import {
   MergeRequestClock,
@@ -7,7 +8,12 @@ import {
   MergeRequestService,
   MergeRequestTimer,
 } from "../../lib/mr/core";
-import { deriveMergeRequestUpdateData, runMergeRequestAction } from "./core";
+import {
+  deriveMergeRequestUpdateData,
+  runMergeRequestAction,
+  watchMergeRequestPipeline,
+} from "./core";
+import { MergeRequestParams } from "./schema";
 
 const unusedCommitService = MergeRequestCommitService.of({
   currentBranchCommits: () => Effect.die("commit lookup should not run"),
@@ -15,6 +21,49 @@ const unusedCommitService = MergeRequestCommitService.of({
 
 const unusedClock = MergeRequestClock.of({
   currentTimeMillis: Effect.succeed(0),
+});
+
+test("MR tool schema excludes pipeline watching", () => {
+  expect(Value.Check(MergeRequestParams, { action: "status" })).toBe(true);
+  expect(Value.Check(MergeRequestParams, { action: "watch" })).toBe(false);
+});
+
+test("pipeline watch remains available behind the harness command core", async () => {
+  let polls = 0;
+  let sleeps = 0;
+  const result = await Effect.runPromise(
+    watchMergeRequestPipeline({ cwd: "/workspace", intervalMs: 5 }).pipe(
+      Effect.provideService(MergeRequestClock, {
+        currentTimeMillis: Effect.succeed(100),
+      }),
+      Effect.provideService(MergeRequestTimer, {
+        sleep: (milliseconds) =>
+          Effect.sync(() => {
+            sleeps += milliseconds;
+          }),
+      }),
+      Effect.provideService(MergeRequestService, {
+        statusFor: () => Effect.die("status should not run"),
+        threadsFor: () => Effect.die("threads should not run"),
+        replyTo: () => Effect.die("reply should not run"),
+        updateWith: () => Effect.die("update should not run"),
+        pipelineFor: () =>
+          Effect.sync(() => {
+            polls += 1;
+            return {
+              iid: 17,
+              state: polls === 1 ? ("running" as const) : ("failed" as const),
+            };
+          }),
+      }),
+    ),
+  );
+
+  expect(result).toEqual({
+    action: "watch",
+    settled: { iid: 17, state: "failed" },
+  });
+  expect(sleeps).toBe(5);
 });
 
 const unusedTimer = MergeRequestTimer.of({
@@ -168,47 +217,6 @@ test("update derives title and description from commits", async () => {
       description: "Fix title\n\nFirst body\n\nAdd tests",
     },
   });
-});
-
-test("watch polls until a settled pipeline and uses the timer seam", async () => {
-  let polls = 0;
-  let sleeps = 0;
-  const result = await Effect.runPromise(
-    runMergeRequestAction({
-      cwd: "/workspace",
-      request: { action: "watch", intervalMs: 5 },
-    }).pipe(
-      Effect.provideService(MergeRequestClock, {
-        currentTimeMillis: Effect.succeed(100),
-      }),
-      Effect.provideService(MergeRequestTimer, {
-        sleep: (ms) =>
-          Effect.sync(() => {
-            sleeps += ms;
-          }),
-      }),
-      Effect.provideService(MergeRequestService, {
-        statusFor: () => Effect.die("status should not run"),
-        threadsFor: () => Effect.die("threads should not run"),
-        replyTo: () => Effect.die("reply should not run"),
-        updateWith: () => Effect.die("update should not run"),
-        pipelineFor: () =>
-          Effect.sync(() => {
-            polls += 1;
-            return {
-              iid: 17,
-              state: polls === 1 ? ("running" as const) : ("failed" as const),
-            };
-          }),
-      }),
-      Effect.provideService(MergeRequestCommitService, unusedCommitService),
-    ),
-  );
-  expect(result).toEqual({
-    action: "watch",
-    settled: { iid: 17, state: "failed" },
-  });
-  expect(sleeps).toBe(5);
 });
 
 test("update derivation has a safe empty-commit fallback", () => {

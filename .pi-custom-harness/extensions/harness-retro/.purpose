@@ -1,0 +1,31 @@
+# harness-retro
+
+## Intent
+Let the operator start a harness retrospective on demand, then record only new harness fixes and features as markdown checklist items with expect-only behavior specs.
+
+## Contract
+Input: the `/harness-retro` command with an optional focus string, or TypeBox `HarnessBacklogParams` with action `list` or `record`.
+Output: a follow-up reflection prompt, the current backlog listing, a newly appended checklist item, or an existing-item match.
+Errors: `HarnessBacklogValidationError` for an incomplete record or a spec that includes test implementation, `HarnessBacklogPathError` when a docs path escapes the harness docs directory, and `HarnessBacklogFilesystemError` when the backlog or roadmap cannot be read or written.
+
+## Behaviour
+1. `/harness-retro` waits for the agent to go idle and injects one follow-up turn that must inspect this session, `docs/BACKLOG.md`, and `docs/TODO.md`.
+2. `list` returns parsed checklist items plus roadmap headings so the agent can see what already exists.
+3. `record` normalizes the proposed title against `docs/BACKLOG.md` and `docs/TODO.md`.
+4. A match returns the existing item or roadmap reference and does not write.
+5. A new item is an unchecked markdown checkbox appended under `docs/BACKLOG.md` `## Open`.
+6. The required spec is a `describe`/`test` block whose bodies contain only `expect` calls that name the desired behavior.
+
+## Edge cases
+- An empty or missing backlog file is treated as an empty open list and is created on the first successful record.
+- Titles that already exist, even with different punctuation or casing, are duplicates.
+- A proposal that already appears as a `docs/TODO.md` heading or checkbox is already planned and is not copied.
+- Record requires a non-empty title, evidence, proposal, and expect-only spec.
+- Specs that include setup, fixtures, helpers, imports, awaits, assignments, or any call other than `describe`, `test`, `it`, and `expect` are rejected as test implementation.
+- Writes are refused when the target path is not `docs/BACKLOG.md` inside the harness.
+
+## Non-goals
+This module does not run on `agent_settled` or `session_shutdown`, does not edit `docs/TODO.md`, does not implement the proposed harness change, does not write test implementation, does not assign ticket-like identifiers, and does not record product-repository work.
+
+## Evidence
+The operator asked for a user-invoked command, not a skill or shutdown hook, that reflects on harness pain and fills a markdown checklist only when the point is not already listed. Each recorded item must define desired behavior as expect-only tests, never as test implementation.

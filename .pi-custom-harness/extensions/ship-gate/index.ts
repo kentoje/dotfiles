@@ -7,10 +7,7 @@ import { GitService } from "../../lib/git/core";
 import { GitLiveLayer } from "../../lib/git/live";
 import { GitLabService } from "../../lib/gitlab/core";
 import { GitLabLiveLayer } from "../../lib/gitlab/live";
-import {
-  isMergeRequestPipelineSettled,
-  MergeRequestService,
-} from "../../lib/mr/core";
+import { MergeRequestService } from "../../lib/mr/core";
 import { MergeRequestLiveLayer } from "../../lib/mr/live";
 import { runHandler } from "../../lib/pi-bridge/core";
 import { RepoMapService } from "../../lib/repo-map/core";
@@ -142,7 +139,6 @@ const settledFactsLayer = (
                 verificationPolicy: facts.deliveryPolicy.verification,
                 verificationEvidence: state.verificationEvidence,
                 editGeneration: state.editGeneration,
-                pipelineSettled: true,
                 figmaBacked: state.figmaBacked,
                 visualReviewComplete: state.visualReviewComplete,
                 releaseReadiness,
@@ -160,9 +156,6 @@ const settledFactsLayer = (
               verificationPolicy: facts.deliveryPolicy.verification,
               verificationEvidence: state.verificationEvidence,
               editGeneration: state.editGeneration,
-              pipelineSettled: isMergeRequestPipelineSettled(
-                status.pipelineState,
-              ),
               figmaBacked: state.figmaBacked,
               visualReviewComplete: state.visualReviewComplete,
               releaseReadiness,
@@ -249,7 +242,7 @@ export default function registerShipGate(pi: ExtensionAPI): void {
     if (event.toolName === "edit" && !event.isError) {
       state.editGeneration += 1;
       state.verificationEvidence = {
-        repositoryWideEditGeneration: undefined,
+        ...state.verificationEvidence,
         focusedTestEditGeneration: undefined,
       };
     }

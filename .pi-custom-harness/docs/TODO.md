@@ -1,6 +1,6 @@
 # Remaining work
 
-Status as of 20 August 2026 after the release-gate vertical slice.
+Status as of 11 September 2026 after the live MR-guard and ship-gate smoke.
 
 `HARNESS.md` defines scope and evidence. `ARCHITECTURE.md` defines module boundaries, isolation, build order, and prompt assembly. The two walkthroughs are design traces that corrected the original plan.
 
@@ -24,7 +24,7 @@ The implemented slice is runnable, but the end-to-end harness described by the w
 | Tests | 115 passing tests across the runnable harness test command; 237 assertions |
 | Verification | `pnpm check`, `pnpm test`, and module-contract validation pass |
 
-The guard must not be treated as production-safe for MR creation until the real-MR smoke test is complete.
+The live MR-guard and ship-gate release-artifact paths were exercised against real GitLab and repository state on 11 September 2026. The rest of the walkthrough harness is still incomplete.
 
 ---
 
@@ -43,9 +43,11 @@ The guard must not be treated as production-safe for MR creation until the real-
 
 ### Exercise the live MR guard
 
-- [ ] Run a real `pih` smoke test on a branch that already has an MR after the bridge repair.
-- [ ] Verify duplicate-MR blocking against a real GitLab MR without creating a new MR.
-- [ ] Verify the live semantic-release and changeset gates against representative repositories without creating MRs.
+- [x] Run a real `pih` smoke test on a branch that already has an MR after the bridge repair.
+- [x] Verify duplicate-MR blocking against a real GitLab MR without creating a new MR.
+- [x] Verify the live semantic-release and changeset gates against representative repositories without creating MRs.
+>
+> **Live smoke, 11 September 2026.** `pih -p --tools bash` in `conversation-center-ext` on `CI-6782` called `glab mr create --fill --yes`; `mr-guard` blocked it with `Branch already has MR !1302. Update it instead of opening a second one.` The create never reached `glab` (`/tmp/p0-glab-create.log` absent) and `glab mr list --source-branch CI-6782` still returned only `!1302`. Live `guardMergeRequestCreation` through `GitLabLiveLayer`/`GitLiveLayer`/`RepoMapLiveLayer` also: allowed `glab mr view` on that branch; allowed create on Hydra `fix/DS-237/numeric-input-leading-zero` with a committed `@aircall/ds` changeset; blocked a local Hydra throwaway after that changeset was deleted (`Missing required changeset(s) for package(s): @aircall/ds`); blocked a local conversation-center throwaway whose HEAD subject was `WIP: not a conventional commit` (`semantic-release repo: every commit needs a conventional prefix`). `evaluateShipGate` on the same live Hydra readiness facts completed with the changeset present and blocked `release-artifact` without it, which is the CI-6618 independent delivery hold.
 >
 > **CI-6618 incident, 21 August 2026.** Hydra MR !6038 was opened outside the recorded custom-harness session, so `mr-guard` did not intercept its `glab mr create` command. The MR merged without a `.changeset` file. `ship-gate` now independently blocks delivery when a changeset repository lacks a branch changeset, so bypassing the pre-create guard cannot produce a clean delivery state.
 
@@ -74,7 +76,7 @@ The guard must not be treated as production-safe for MR creation until the real-
 
 ## P1: decisions blocking dependent modules
 
-- [ ] Choose the replacement for `~/.maestro/worktrees/<repo>/<task>` and document the worktree root.
+- [x] Choose the replacement for `~/.maestro/worktrees/<repo>/<task>` and document the worktree root.
 - [ ] Establish the portless route shape derived from the selected worktree root and app name.
 - [ ] Decide whether to retain the Claude-backed Figma MCP server or move to Figma desktop MCP at `127.0.0.1:3845`.
 - [ ] Decide whether `ship-gate` requires actual render verification, a forced `ask_user` visual review, or human supervision only.
@@ -86,7 +88,7 @@ The guard must not be treated as production-safe for MR creation until the real-
 
 - [ ] Decide whether to add a narrow `ds tokens` capability that maps Figma variable names to `@aircall/ds` token names; the Figma walkthrough identifies this as an unresolved gap not covered by generic code search.
 - [ ] If render verification is selected, define and implement the reference-render comparison workflow; the Figma walkthrough currently leaves this as manual visual comparison with no diff tool.
-- [ ] Define the failure/recovery contract when `mr watch` loses its notification because the Pi session ends before pipeline settlement.
+- [x] Make pipeline monitoring user-activated through `/harness-watch-pipeline`, cancel it on session shutdown, and never trigger a model turn on settlement.
 - [ ] Decide whether a Figma-backed task needs a forced human visual-review stop; the current trace has no forced stop, but visual match remains a human judgment.
 
 ### Prompt and search configuration outside the harness directory
@@ -114,18 +116,18 @@ Detect repository facts from the repository where possible. Do not hardcode a re
 
 ## P1: cross-repository debug release workflow
 
-- [ ] Check the installed `glab` version before selecting GitLab CLI syntax, keep the harness transport on the same supported API, and add a live open-MR smoke test for lookup, pipeline, discussion, and reply operations.
+- [ ] Check the installed `glab` version before selecting GitLab CLI syntax and add a live open-MR smoke test for pipeline, discussion, and reply operations. Fleet open-MR lookup now uses the installed CLI's supported default-open syntax.
 - [ ] Add a beta-publish tool or skill that builds the selected publishable package, publishes a canary, resolves the registry version, installs it into a consumer worktree, verifies the installed artifact, and runs the consumer build.
 - [ ] Publish beta packages with a task-scoped prerelease identifier and commit SHA to avoid registry collisions serving an older tarball for the same normalized version.
 - [ ] Extend `worktree new` with an explicit target repository path so a task can create and provision a dependent consumer worktree through that repository's setup script.
-- [ ] Let `ticket bind` accept a worktree path or stable worktree handle and fail when it would bind the ticket to a different checkout than the one just created.
+- [x] Let `ticket bind` accept a worktree path or stable worktree handle and fail when it would bind the ticket to a different checkout than the one just created.
 - [ ] Add a `preview up` escape hatch for an explicit consumer worktree or port, returning the actual running URL and owning cleanup when a repo's default development port is occupied.
 
 ### P1: MR diagnosis, review, and ticket workflows
 
 - [ ] Add `mr diagnose <IID>` to fetch the current merge-result pipeline, failed jobs, and traces, then return the first actionable compiler/test failure while filtering cache and artifact-upload noise.
 - [ ] Add targeted `story test <component> --story <name>` support that resolves the Storybook story ID, runs its play test, and returns the failing assertion, browser errors, and preview URL.
-- [ ] Add robust `mr watch` lifecycle and feedback classification: record source/merge-result SHAs, deduplicate notes and discussions, classify stale feedback by cited commit, and report a final settled/quiet state on shutdown.
+- [ ] Add optional pipeline feedback classification to `/harness-watch-pipeline`: record source/merge-result SHAs, classify stale feedback by cited commit, and report a final settled/quiet state.
 - [ ] Add Aircall-aware `ticket create` support for project, active sprint, assignee, epic, and story points, with deduplication and REST verification of the created issue.
 - [ ] Add a structured thermo-nuclear quality-review skill workflow that returns prioritized blockers, concerns, strengths, exact locations, failure mechanisms, and concrete remediation without pretending to approve the code automatically.
 
@@ -154,7 +156,7 @@ Detect repository facts from the repository where possible. Do not hardcode a re
 - [x] Implement `test`.
 - [x] Implement `all`.
 - [x] Back commands with the per-repository check lists from `repo-map`.
-- [x] Return structured results: `{ ok, failures: [{ file, line, rule, message }], duration }`.
+- [x] Return structured results: `{ ok, status, worktree, failures: [{ file, line, rule, message }], duration }`.
 - [x] Preserve command output and actionable failure details without relying on truncated shell tails.
 - [x] Add tests for individual checks, all-check ordering, missing scripts, and failure aggregation.
 
@@ -167,9 +169,9 @@ MR creation remains Bash plus `mr-guard`; do not add an `open` action.
 - [x] Implement `threads` with ID, author, `is_bot`, file, line, body, and resolved state.
 - [x] Implement `reply` with optional resolution.
 - [x] Implement `update` by regenerating title and description from commits.
-- [x] Implement `watch` and inject a message when the pipeline settles.
-- [x] Clear watch timers on `session_shutdown`.
-- [x] Ensure watch cancellation and shutdown cannot wake the wrong session.
+- [x] Move continuous monitoring behind the user-invoked `/harness-watch-pipeline` command.
+- [x] Cancel command-owned watch timers on `session_shutdown`.
+- [x] Keep settlement notifications in the TUI without waking the model.
 - [x] Add deterministic fake-service tests.
 - [ ] Run a safe live GitLab boundary test on the current branch with an open MR.
 
@@ -188,8 +190,8 @@ MR creation remains Bash plus `mr-guard`; do not add an `open` action.
 - [x] Check for commits ahead of the base branch with no MR.
 - [x] Check for unresolved MR discussion threads.
 - [x] Check for a bound ticket.
-- [x] Check that policy-required verification evidence passed after the last edit: `verify all` for repository-wide repositories or focused `verify test --file …` for focused-only repositories.
-- [x] Treat an unsettled pipeline watch as a hold condition where appropriate.
+- [x] Check that policy-required verification evidence passed: `verify all` for repository-wide repositories, focused `verify test --file …` for focused-only repositories, or a focused test plus one `verify all` before shipping for focused-then-all repositories.
+- [x] Keep pipeline settlement outside ship-gate; monitoring is optional and user-activated.
 - [x] Send a follow-up with `deliverAs: "followUp"` and `triggerTurn: true` when blocked.
 - [x] Cap retries at three attempts.
 - [x] Record which check blocked each attempt for false-positive measurement.
@@ -199,10 +201,21 @@ MR creation remains Bash plus `mr-guard`; do not add an `open` action.
 ### `notify-on-settle`
 
 - [x] Add the handler and `.purpose` contract.
-- [x] Notify only on ship-gate failure or a red pipeline.
+- [x] Notify only on terminal ship-gate failure.
 - [x] Stay silent on clean completion.
 - [x] Reuse the intended notify/Slack integration without adding success noise.
-- [x] Add tests for failure notifications, red pipelines, clean completion, and duplicate suppression.
+- [x] Add tests for failure notifications, clean completion, and duplicate suppression.
+
+### `harness-retro`
+
+- [x] Add the `/harness-retro` command and `.purpose` contract.
+- [x] Inject one follow-up reflection turn; do not auto-fire on settle or shutdown.
+- [x] Add `harness_backlog` `list` and `record`.
+- [x] Deduplicate against `docs/BACKLOG.md` and `docs/TODO.md` before writing.
+- [x] Keep `docs/BACKLOG.md` as the session-derived source of truth.
+- [x] Record items as markdown checkboxes, not ticket-like `HB-NNNN` identifiers.
+- [x] Require an expect-only `describe`/`test` spec and reject test implementation.
+- [x] Add tests for list, record, backlog duplicates, and roadmap duplicates.
 
 ### `preview`
 

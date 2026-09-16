@@ -4,29 +4,31 @@
 Run repository-owned verification checks without losing actionable diagnostics to truncated shell output, while honoring repository verification policy.
 
 ## Contract
-Input: `VerifyParams`, whose action is `types`, `lint`, `test`, or `all`, with an optional focused `file` for `test`.
-Output: `{ ok, failures: [{ file, line, rule, message }], duration }`.
-Errors: repository facts, package discovery, and command transport failures are represented as structured failures; no check is inferred outside `RepoMapService.repositoryFactsFor`.
+Input: `VerifyParams`, whose action is `types`, `lint`, `test`, or `all`, with an optional `file` that selects the owning worktree and narrows focused `test` runs.
+Output: `{ ok, status, worktree, failures: [{ file, line, rule, message }], duration }`.
+Errors: repository facts, package discovery, and command transport failures are represented as structured completed results; explicit caller cancellation is represented as interrupted.
 
 ## Behaviour
-1. Resolve repository facts through `RepoMapService.repositoryFactsFor`.
+1. Resolve an absolute `file` through `RepoMapService.repositoryFactsFor` and run checks from the returned repository root rather than the Pi session checkout.
 2. Map `types`, `lint`, and non-focused `test` to corresponding repository check kinds, reporting an absent selected check as a missing-script failure.
-3. Reject `all` with `repository-wide-forbidden` when `facts.deliveryPolicy.verification.kind` is `focused-only`, before running a command.
-4. For focused `test`, discover the nearest package.json within the policy workspace root, validate its test script and runner, and run from package root with runner-specific focused arguments.
+3. Reject `all` with `repository-wide-forbidden` when repository-wide verification is forbidden, before running a command.
+4. For focused `test`, require a focused-only or focused-then-all policy, discover the nearest package.json within the policy workspace root, validate its test script and runner, and run from package root with runner-specific focused arguments.
 5. Run repository-wide `all` in the exact order returned by repository facts when policy permits it.
-6. Preserve complete command output and parse actionable diagnostics from it.
-7. Aggregate every selected check failure into one report.
+6. Run Vitest check scripts with `--run` so repository verification terminates instead of entering watch mode.
+7. Preserve complete command output and parse actionable diagnostics from it.
+8. Aggregate every selected check failure into one completed report.
 
 ## Edge cases
 - A repository map without `repositoryFactsFor` returns a structured repository-facts failure.
+- An absolute file inside another worktree selects that worktree; a missing or relative file preserves session-checkout behavior.
 - A selected individual check absent from the repository check list returns a structured missing-script failure without running a command.
 - A focused file outside the policy workspace or without a supported nearest package test script returns a structured focused-test-package failure without running a test command.
-- A failed command with no parseable diagnostic returns one command-level failure.
+- A failed command with no parseable diagnostic returns one command-level failure that includes the tail of the command output.
 - A failed command with multiple diagnostics returns all diagnostics, and later checks still run.
 
 ## Non-goals
 This tool does not mutate files, truncate output, or create commits and merge requests.
 
 ## Evidence
-Hydra-style focused-only verification must never launch its root test command through `verify all`; focused package tests use the package-local test script and preserve complete diagnostics.
+Hydra-style focused-only verification must never launch its root test command through `verify all`; focused-then-all repositories may run both a focused file test and the complete check list.
 

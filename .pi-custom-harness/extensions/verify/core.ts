@@ -1,9 +1,14 @@
+import { dirname, isAbsolute } from "node:path";
+
 import { Effect } from "effect";
 
 import {
   RepoMapService,
   type RepositoryCheck,
   type RepositoryFacts,
+  verificationPolicyAllowsFocusedTest,
+  verificationPolicyAllowsRepositoryWide,
+  verificationPolicyWorkspaceRoot,
 } from "../../lib/repo-map/core";
 import {
   type VerifyCommandExecutionError,
@@ -23,6 +28,8 @@ export interface VerifyFailure {
 /** The stable public result of a verification run. */
 export interface VerifyReport {
   readonly ok: boolean;
+  readonly status: "completed" | "interrupted";
+  readonly worktree: string;
   readonly failures: ReadonlyArray<VerifyFailure>;
   readonly duration: number;
 }
@@ -145,6 +152,26 @@ export const parseDiagnostics = (
   return diagnostics;
 };
 
+const VERIFY_FALLBACK_OUTPUT_TAIL_LINES = 20;
+const VERIFY_FALLBACK_OUTPUT_TAIL_CHARS = 2000;
+
+/** Last lines of check output kept when no file-location diagnostic was parsed. */
+export const commandOutputTail = (output: string): string => {
+  const stripped = stripAnsi(output).trim();
+  if (stripped.length === 0) {
+    return "";
+  }
+  const tail = stripped
+    .split(/\r?\n/u)
+    .slice(-VERIFY_FALLBACK_OUTPUT_TAIL_LINES)
+    .join("\n")
+    .trim();
+  if (tail.length <= VERIFY_FALLBACK_OUTPUT_TAIL_CHARS) {
+    return tail;
+  }
+  return tail.slice(-VERIFY_FALLBACK_OUTPUT_TAIL_CHARS);
+};
+
 const checkFailures = (
   check: RepositoryCheck,
   result: { readonly exitCode: number; readonly output: string },
@@ -168,27 +195,36 @@ const checkFailures = (
   }
 
   const diagnostics = parseDiagnostics(result.output);
-  return diagnostics.length > 0
-    ? diagnostics
-    : [failure(check, `Check failed with exit code ${result.exitCode}.`)];
+  if (diagnostics.length > 0) {
+    return diagnostics;
+  }
+  const tail = commandOutputTail(result.output);
+  const suffix = tail.length > 0 ? `\n${tail}` : "";
+  return [
+    failure(check, `Check failed with exit code ${result.exitCode}.${suffix}`),
+  ];
 };
 
 const runChecks = Effect.fn("verify.runChecks")(function* ({
   cwd,
   checks,
+  testRunner,
 }: {
   readonly cwd: string;
   readonly checks: ReadonlyArray<RepositoryCheck>;
+  readonly testRunner: RepositoryFacts["testRunner"];
 }) {
   const commandService = yield* VerifyCommandService;
   const failures: VerifyFailure[] = [];
   for (const check of checks) {
-    const result = yield* commandService.runCheck({ cwd, check }).pipe(
-      Effect.match({
-        onFailure: (error) => ({ _tag: "failure" as const, error }),
-        onSuccess: (value) => ({ _tag: "success" as const, value }),
-      }),
-    );
+    const result = yield* commandService
+      .runCheck({ cwd, check, testRunner })
+      .pipe(
+        Effect.match({
+          onFailure: (error) => ({ _tag: "failure" as const, error }),
+          onSuccess: (value) => ({ _tag: "success" as const, value }),
+        }),
+      );
     if (result._tag === "failure") {
       failures.push(failure("command", result.error.message));
       continue;
@@ -288,11 +324,15 @@ export const verify = Effect.fn("verify")(function* ({
   file,
 }: VerifyInput & { readonly cwd: string }) {
   const startedAt = performance.now();
+  const lookupPath =
+    file !== undefined && isAbsolute(file) ? dirname(file) : cwd;
   const repoMapService = yield* RepoMapService;
   const repositoryFactsFor = repoMapService.repositoryFactsFor;
   if (repositoryFactsFor === undefined) {
     return {
       ok: false,
+      status: "completed",
+      worktree: cwd,
       failures: [
         failure(
           "repository-facts",
@@ -303,7 +343,7 @@ export const verify = Effect.fn("verify")(function* ({
     } satisfies VerifyReport;
   }
 
-  const factsResult = yield* repositoryFactsFor({ cwd }).pipe(
+  const factsResult = yield* repositoryFactsFor({ cwd: lookupPath }).pipe(
     Effect.match({
       onFailure: (error) => ({ _tag: "failure" as const, error }),
       onSuccess: (value) => ({ _tag: "success" as const, value }),
@@ -312,37 +352,53 @@ export const verify = Effect.fn("verify")(function* ({
   if (factsResult._tag === "failure") {
     return {
       ok: false,
+      status: "completed",
+      worktree: cwd,
       failures: [failure("repository-facts", factsResult.error.message)],
       duration: performance.now() - startedAt,
     } satisfies VerifyReport;
   }
+  const worktree = factsResult.value.repositoryRoot;
   const verificationPolicy = factsResult.value.deliveryPolicy.verification;
   const selected = checksForAction(action, factsResult.value);
   let failures: ReadonlyArray<VerifyFailure>;
-  if (action === "all" && verificationPolicy.kind === "focused-only") {
+  if (
+    action === "all" &&
+    !verificationPolicyAllowsRepositoryWide(verificationPolicy)
+  ) {
     failures = [repositoryWideForbidden()];
   } else if (action === "test" && file !== undefined) {
-    if (verificationPolicy.kind !== "focused-only") {
+    const workspaceRoot = verificationPolicyWorkspaceRoot(verificationPolicy);
+    if (
+      !verificationPolicyAllowsFocusedTest(verificationPolicy) ||
+      workspaceRoot === undefined
+    ) {
       failures = [
         failure(
           "focused-test-policy",
-          "Focused test verification requires a focused-only repository policy.",
+          "Focused test verification requires a focused-only or focused-then-all repository policy.",
         ),
       ];
     } else {
       failures = yield* focusedTestFailures({
         file,
-        workspaceRoot: verificationPolicy.workspaceRoot,
+        workspaceRoot,
       });
     }
   } else if (selected.missing !== undefined) {
     failures = [selected.missing];
   } else {
-    failures = yield* runChecks({ cwd, checks: selected.checks });
+    failures = yield* runChecks({
+      cwd: worktree,
+      checks: selected.checks,
+      testRunner: factsResult.value.testRunner,
+    });
   }
 
   return {
     ok: failures.length === 0,
+    status: "completed",
+    worktree,
     failures,
     duration: performance.now() - startedAt,
   } satisfies VerifyReport;

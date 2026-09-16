@@ -6,8 +6,6 @@ export const NotifyOnSettleParams = Type.Object({
   outcome: Type.Union([
     Type.Literal("clean"),
     Type.Literal("ship-gate-failed"),
-    Type.Literal("pipeline-red"),
-    Type.Literal("pipeline-pending"),
   ]),
   failureId: Type.Optional(Type.String()),
   message: Type.Optional(Type.String()),

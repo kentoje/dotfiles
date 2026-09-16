@@ -5,16 +5,16 @@ Own the one typed source of repository-specific delivery, verification, worktree
 
 ## Contract
 Input: a working directory and optional explicit harness configuration.
-Output: `RepositoryFacts`, including its canonical `RepositoryDeliveryPolicy`.
+Output: `RepositoryFacts`, including the resolved repository root and its canonical `RepositoryDeliveryPolicy`.
 Errors: malformed or unavailable repository facts fail with `RepositoryFactsLookupError`; consumers must not bypass an unknown policy.
 
 ## Behaviour
-1. Resolve the repository root with Git and inspect root package metadata.
+1. Resolve and return the repository root with Git, then inspect root package metadata.
 2. Select exactly one delivery policy: `changesets`, `conventional-commits`, or `none`.
 3. Apply an explicit per-repository delivery override before detectable defaults when a repository needs an exception.
-4. Attach either focused-only or repository-wide verification to that policy.
-5. Select focused-only verification for pnpm/Turbo workspaces and retain its workspace root.
-6. Return the policy with detectable checks, test runner, worktree setup, portless route, auth, and fleet facts.
+4. Attach focused-only, focused-then-all, or repository-wide verification to that policy.
+5. Select focused-only verification for pnpm/Turbo workspaces and retain its workspace root; apply the conversation-center-ext focused-then-all override from default configuration.
+6. Return the policy with detectable checks, test runner, worktree setup, portless route, auth, and the five declared product repositories used by fleet.
 
 ## Edge cases
 - A changeset directory selects the publishable-package changeset policy unless an explicit override applies.
@@ -22,9 +22,10 @@ Errors: malformed or unavailable repository facts fail with `RepositoryFactsLook
 - Explicit overrides may select release and verification policy by repository root, directory name, or package name.
 - Missing package metadata returns conservative empty operational facts and a `none` delivery policy.
 - Invalid package metadata fails closed.
+- Default fleet paths are derived from the current user's `~/Documents/gitlab` root so the same dotfiles work when the home directory is relocated.
 
 ## Non-goals
 This module does not inspect branch changes, parse changeset contents, run tests, or create merge requests; Git owns release-artifact inspection.
 
 ## Evidence
-Every harness delivery consumer resolves `RepositoryFacts.deliveryPolicy` instead of inferring release or verification policy from raw repository files.
+Every harness delivery consumer resolves `RepositoryFacts.deliveryPolicy` instead of inferring policy from raw repository files, and fleet receives its product repository list from the same source.

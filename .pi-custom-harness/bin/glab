@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+REAL_GLAB="/run/current-system/sw/bin/glab"
+
+echo "GLAB CALLED WITH: $@" >> /tmp/glab-calls.log
+
+
+if [ "$1" = "api" ] && [ "$2" = "merge_requests" ]; then
+  shift 2
+  is_discussions=false
+  for arg in "$@"; do
+    if [ "$arg" = "--discussions" ]; then
+      is_discussions=true
+    fi
+  done
+
+  if [ "$is_discussions" = true ]; then
+    MR_DATA=$("$REAL_GLAB" mr view --output json 2>/dev/null)
+    PID=$(echo "$MR_DATA" | jq -r .project_id)
+    IID=$(echo "$MR_DATA" | jq -r .iid)
+    if [ -n "$PID" ] && [ -n "$IID" ] && [ "$PID" != "null" ] && [ "$IID" != "null" ]; then
+      exec "$REAL_GLAB" api "projects/$PID/merge_requests/$IID/discussions"
+    fi
+    echo "[]"
+    exit 0
+  fi
+
+  exec "$REAL_GLAB" mr view --output json
+fi
+
+exec "$REAL_GLAB" "$@"

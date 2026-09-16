@@ -1,11 +1,9 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "azure/gpt-5.6-terra",
+  "defaultModel": "google-vertex/gemini-3.8-flash",
   "defaultThinkingLevel": "xhigh",
   "defaultProjectTrust": "never",
-  "extensions": [
-    "./extensions"
-  ],
+  "extensions": ["./extensions"],
   "packages": [
     "npm:@juicesharp/rpiv-todo",
     "npm:@ff-labs/pi-fff",
@@ -17,6 +15,6 @@
     "npm:@mrclrchtr/supi-code-intelligence",
     "npm:@juicesharp/rpiv-btw"
   ],
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.85.1",
   "theme": "melange_dark"
 }
