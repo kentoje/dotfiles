@@ -163,10 +163,10 @@ An `agent_settled` handler refuses to let the turn end when any of these hold:
 - the branch has commits ahead of its base branch but no MR
 - the MR has unresolved discussion threads
 - the branch has no bound ticket
-- the delivery policy's required local verification evidence has not passed: `verify all` after the latest edit for repository-wide policy, focused `verify test --file …` after the latest edit for focused-only policy, or a focused test after the latest edit plus one `verify all` before shipping for focused-then-all policy
+- one focused local verification has not passed after the latest edit in each changed task worktree
 
-Remote pipeline state is not a ship-gate input.
-The operator may start `/harness-watch-pipeline` after MR creation, but the agent does not wait for it by default.
+Repository-wide verification and remote pipeline state are not ship-gate inputs.
+The operator may invoke `/harness-verify-all` or `/harness-watch-pipeline`, but the agent does not run or wait for either by default.
 
 On failure the gate calls `pi.sendMessage(..., { deliverAs: "followUp", triggerTurn: true })` to push the agent back to locally actionable work.
 

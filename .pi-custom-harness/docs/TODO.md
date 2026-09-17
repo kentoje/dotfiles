@@ -141,24 +141,25 @@ Detect repository facts from the repository where possible. Do not hardcode a re
 - [x] Implement `list`.
 - [x] Implement `rm`.
 - [x] Delegate provisioning to the repository setup script when one exists.
-- [x] Add the fallback provisioning path for repositories without a setup script.
+- [x] Install dependencies synchronously when a package repository has no setup script.
+- [x] Use the minimal Git fallback only for repositories without a package manifest.
 - [x] Add portless registration after provisioning.
-- [x] Run the repository-specific verification pass after creation.
+- [x] Run the repository-specific readiness pass after creation.
 - [x] Verify a throwaway worktree without reading developer-home state.
 - [x] Use `withFileMutationQueue` around absolute-path file mutations.
-- [x] Add tests for setup-script delegation, fallback setup, verification failure, list, and removal.
+- [x] Add tests for setup-script delegation, dependency installation, Git fallback, verification, list, and removal.
 
 ### `verify`
 
 - [x] Add the `verify` extension and `.purpose` contract.
-- [x] Implement `types`.
-- [x] Implement `lint`.
-- [x] Implement `test`.
-- [x] Implement `all`.
+- [x] Implement focused `types`, `lint`, and `test` actions.
+- [x] Move repository-wide verification behind `/harness-verify-all`.
 - [x] Back commands with the per-repository check lists from `repo-map`.
 - [x] Return structured results: `{ ok, status, worktree, failures: [{ file, line, rule, message }], duration }`.
+- [x] Cache unchanged verification plans by Git snapshot.
+- [x] Serialize heavy verification across repositories.
 - [x] Preserve command output and actionable failure details without relying on truncated shell tails.
-- [x] Add tests for individual checks, all-check ordering, missing scripts, and failure aggregation.
+- [x] Add tests for focused checks, explicit full verification, caching, serialization, missing scripts, and failure aggregation.
 
 ### `mr`
 
@@ -190,8 +191,8 @@ MR creation remains Bash plus `mr-guard`; do not add an `open` action.
 - [x] Check for commits ahead of the base branch with no MR.
 - [x] Check for unresolved MR discussion threads.
 - [x] Check for a bound ticket.
-- [x] Check that policy-required verification evidence passed: `verify all` for repository-wide repositories, focused `verify test --file …` for focused-only repositories, or a focused test plus one `verify all` before shipping for focused-then-all repositories.
-- [x] Keep pipeline settlement outside ship-gate; monitoring is optional and user-activated.
+- [x] Accept one fresh focused verification result per changed task worktree.
+- [x] Keep repository-wide verification and remote pipeline settlement outside ship-gate; both are optional and user-activated.
 - [x] Send a follow-up with `deliverAs: "followUp"` and `triggerTurn: true` when blocked.
 - [x] Cap retries at three attempts.
 - [x] Record which check blocked each attempt for false-positive measurement.

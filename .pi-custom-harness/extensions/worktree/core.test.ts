@@ -138,29 +138,34 @@ test("delegates setup script and portless without repository checks", async () =
   ).toBe(false);
 });
 
-test("uses the minimal fallback when no setup script is mapped", async () => {
+test("installs dependencies when no repository setup script is mapped", async () => {
   const calls: string[][] = [];
   const result = await run(
     { action: "new", task: "fallback", cwd: "/repo/example" },
-    { facts: facts(undefined), command: (args) => calls.push([...args]) },
+    {
+      facts: facts(undefined),
+      exists: (path) => path.endsWith("/package.json"),
+      command: (args) => calls.push([...args]),
+    },
   );
   expect(result).toMatchObject({ verification: { passed: true, checks: [] } });
+  expect(calls).toContainEqual(["install", "--frozen-lockfile"]);
+  expect(calls).toContainEqual(["run", "--if-present", "setup"]);
+  expect(calls.some((call) => call.includes("status"))).toBe(false);
+});
+
+test("uses the minimal Git fallback when no package manifest exists", async () => {
+  const calls: string[][] = [];
+  await run(
+    { action: "new", task: "git-only", cwd: "/repo/example" },
+    { facts: facts(undefined), command: (args) => calls.push([...args]) },
+  );
   expect(calls).toContainEqual([
     "-C",
-    "/tmp/worktrees/example/fallback",
+    "/tmp/worktrees/example/git-only",
     "status",
     "--short",
   ]);
-  expect(
-    calls.some(
-      (call) =>
-        call.includes("test") ||
-        call.includes("lint") ||
-        call.includes("types") ||
-        call.includes("graphql") ||
-        call.includes("fallow"),
-    ),
-  ).toBe(false);
 });
 
 test("verify targets the registered worktree for the requested task", async () => {

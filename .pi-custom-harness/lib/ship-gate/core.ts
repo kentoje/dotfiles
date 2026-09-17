@@ -36,14 +36,16 @@ export interface ShipGateOutcome {
   readonly retryExhausted: boolean;
 }
 
-/** Fresh verification generations captured from successful verify tool results. */
+/** Fresh focused verification generations retained per task worktree. */
 export interface ShipGateVerificationEvidence {
-  readonly repositoryWideEditGeneration: number | undefined;
-  readonly focusedTestEditGeneration: number | undefined;
+  readonly focusedByWorktree?: Readonly<Record<string, string>>;
+  readonly repositoryWideEditGeneration?: number;
+  readonly focusedTestEditGeneration?: number;
 }
 
-/** Facts needed by the gate, supplied by fakeable services and Pi session state. */
+/** Facts needed by the gate, supplied by fakeable modules and Pi session state. */
 export interface ShipGateFacts {
+  readonly changedWorktrees?: Readonly<Record<string, string>>;
   readonly commitsAheadOfBase: boolean;
   readonly mergeRequestExists: boolean;
   readonly unresolvedThreadCount: number;
@@ -59,67 +61,45 @@ export interface ShipGateFacts {
 /** Runtime state that belongs to the Pi index, not the policy core. */
 export interface ShipGateRuntimeState {
   editGeneration: number;
+  changedWorktrees?: Record<string, string>;
+  activeWorktree?: string;
   verificationEvidence: ShipGateVerificationEvidence;
   figmaBacked: boolean;
   visualReviewComplete: boolean;
 }
-
-const isShippingBranch = (facts: ShipGateFacts): boolean =>
-  facts.commitsAheadOfBase || facts.mergeRequestExists;
 
 const verifyBlocker = (reason: string): ShipGateBlocker => ({
   category: "verify",
   reason,
 });
 
-/** Selects the verification blocker required by the repository policy. */
+/** Requires one successful focused check for each changed worktree snapshot. */
 export const verificationBlockerFor = (
   facts: ShipGateFacts,
 ): ShipGateBlocker | undefined => {
-  switch (facts.verificationPolicy.kind) {
-    case "focused-only":
-      return facts.verificationEvidence.focusedTestEditGeneration ===
-        facts.editGeneration
-        ? undefined
-        : verifyBlocker(
-            "focused test verification has not passed after the latest edit.",
-          );
-    case "repository-wide":
-      return facts.verificationEvidence.repositoryWideEditGeneration ===
-        facts.editGeneration
-        ? undefined
-        : verifyBlocker(
-            "repository-wide verification has not passed after the latest edit.",
-          );
-    case "focused-then-all": {
-      if (
-        isShippingBranch(facts) &&
-        facts.verificationEvidence.repositoryWideEditGeneration === undefined
-      ) {
-        return verifyBlocker(
-          "repository-wide verification has not passed before shipping.",
+  if (facts.changedWorktrees === undefined) {
+    const legacyGeneration =
+      facts.verificationEvidence.focusedTestEditGeneration ??
+      facts.verificationEvidence.repositoryWideEditGeneration;
+    return legacyGeneration === facts.editGeneration
+      ? undefined
+      : verifyBlocker(
+          "focused verification has not passed after the latest edit.",
         );
-      }
-      const focusedAtCurrentEdit =
-        facts.verificationEvidence.focusedTestEditGeneration ===
-        facts.editGeneration;
-      const repositoryWideAtCurrentEdit =
-        facts.verificationEvidence.repositoryWideEditGeneration ===
-        facts.editGeneration;
-      return focusedAtCurrentEdit || repositoryWideAtCurrentEdit
-        ? undefined
-        : verifyBlocker(
-            "focused test verification has not passed after the latest edit.",
-          );
-    }
-    default: {
-      const _exhaustive: never = facts.verificationPolicy;
-      return _exhaustive;
-    }
   }
+  const focusedByWorktree = facts.verificationEvidence.focusedByWorktree ?? {};
+  const missing = Object.entries(facts.changedWorktrees)
+    .filter(
+      ([worktree, fingerprint]) => focusedByWorktree[worktree] !== fingerprint,
+    )
+    .map(([worktree]) => worktree);
+  return missing.length === 0
+    ? undefined
+    : verifyBlocker(
+        `focused verification has not passed for the latest snapshot in: ${missing.join(", ")}.`,
+      );
 };
 
-/** Defers shipping enforcement until the current session has made a source edit. */
 export const shouldEvaluateShipGate = (state: ShipGateRuntimeState): boolean =>
   state.editGeneration > 0;
 

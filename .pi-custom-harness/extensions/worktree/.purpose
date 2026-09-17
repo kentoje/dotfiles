@@ -11,7 +11,7 @@ Errors: `WorktreeRepositoryFactsError | WorktreeGitError | WorktreeCommandError 
 ## Behaviour
 1. Resolve repository facts through `RepoMapService`; never infer package metadata or configuration in this module.
 2. Use the configured worktree root and reject empty, separator-containing, or traversal task names.
-3. For `new`, create a Git worktree, run the configured setup script when present or a minimal native-Git fallback otherwise, register its typed portless route, and verify only that the path and requested branch are available.
+3. For `new`, create a Git worktree, run the configured setup script when present, otherwise install dependencies for a package repository or use the minimal Git fallback, register its typed portless route, and verify readiness.
 4. For `verify`, resolve the requested task beneath the repository's configured worktree root and verify that registered path and branch through Git/filesystem readiness checks.
 5. List only Git worktrees below the configured root.
 6. Remove only a recognized Git worktree below the configured root.
@@ -19,9 +19,9 @@ Errors: `WorktreeRepositoryFactsError | WorktreeGitError | WorktreeCommandError 
 
 ## Edge cases
 - Missing repository facts fail closed instead of falling back to package metadata.
-- Setup-script, fallback command, portless, Git, filesystem, or mutation-queue failure returns a typed error; repository checks are never launched.
+- Setup-script, dependency-install, fallback-command, portless, Git, filesystem, or mutation-queue failure returns a typed error; repository checks are never launched.
+- A repository without a setup script but with `package.json` receives a synchronous frozen install before `new` returns.
 - Live portless registration is a no-op because portless has no `add` subcommand.
-- A path outside the configured root or absent from Git's recognized worktree list is never removed.
 
 ## Non-goals
 This tool does not implement repository setup details, infer auth mode, call GitLab, or expose developer-home state to its core.

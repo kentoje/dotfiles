@@ -6,47 +6,40 @@ import {
   shouldEvaluateShipGate,
 } from "../../lib/ship-gate/core";
 import { evaluate, evaluateWithFacts, recordShipGateAttempt } from "./core";
-import { makeShipGateFollowUp } from "./index";
+import {
+  isVisualApprovalToolResult,
+  makeShipGateFollowUp,
+  verifyResult,
+} from "./index";
 
+const worktree = "/worktrees/task";
 const passingFacts = {
+  worktree,
+  changedWorktrees: { [worktree]: "snapshot-4" },
   commitsAheadOfBase: true,
   mergeRequestExists: true,
   unresolvedThreadCount: 0,
   ticketBound: true,
   verificationPolicy: { kind: "repository-wide" },
-  verificationEvidence: {
-    repositoryWideEditGeneration: 4,
-    focusedTestEditGeneration: undefined,
-  },
+  verificationEvidence: { focusedByWorktree: { [worktree]: "snapshot-4" } },
   editGeneration: 4,
   figmaBacked: false,
   visualReviewComplete: false,
   releaseReadiness: { kind: "none", ready: true, missingPackages: [] },
 } as const;
 
+const runtimeState = (editGeneration: number) => ({
+  editGeneration,
+  changedWorktrees: { [worktree]: `snapshot-${editGeneration}` },
+  activeWorktree: worktree,
+  verificationEvidence: { focusedByWorktree: {} },
+  figmaBacked: false,
+  visualReviewComplete: false,
+});
+
 test("defers shipping enforcement before the session edits source", () => {
-  expect(
-    shouldEvaluateShipGate({
-      editGeneration: 0,
-      verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: undefined,
-      },
-      figmaBacked: false,
-      visualReviewComplete: false,
-    }),
-  ).toBe(false);
-  expect(
-    shouldEvaluateShipGate({
-      editGeneration: 1,
-      verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: undefined,
-      },
-      figmaBacked: false,
-      visualReviewComplete: false,
-    }),
-  ).toBe(true);
+  expect(shouldEvaluateShipGate(runtimeState(0))).toBe(false);
+  expect(shouldEvaluateShipGate(runtimeState(1))).toBe(true);
 });
 
 test("clean completion has no blockers", () => {
@@ -68,7 +61,8 @@ test("checks missing MR only when commits are ahead", () => {
     "missing-mr",
   );
 });
-test("blocks missing changesets for the affected package even when an MR exists", () => {
+
+test("blocks missing changesets for the affected package", () => {
   const result = evaluate({
     attempt: 1,
     facts: {
@@ -99,167 +93,104 @@ test("blocks a conventional-commit release failure", () => {
       },
     },
   });
-  expect(result.blockers).toContainEqual({
-    category: "release-artifact",
-    reason:
-      "semantic-release repo: every commit needs a conventional prefix, it sets the version.",
-  });
-});
-
-test("checks unresolved threads", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: { ...passingFacts, unresolvedThreadCount: 2 },
-  });
   expect(result.blockers.map(({ category }) => category)).toContain(
-    "unresolved-threads",
+    "release-artifact",
   );
 });
 
-test("checks ticket binding", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: { ...passingFacts, ticketBound: false },
-  });
-  expect(result.blockers.map(({ category }) => category)).toContain(
-    "missing-ticket-binding",
-  );
+test("checks unresolved threads and ticket binding", () => {
+  expect(
+    evaluate({
+      attempt: 1,
+      facts: { ...passingFacts, unresolvedThreadCount: 2 },
+    }).blockers.map(({ category }) => category),
+  ).toContain("unresolved-threads");
+  expect(
+    evaluate({
+      attempt: 1,
+      facts: { ...passingFacts, ticketBound: false },
+    }).blockers.map(({ category }) => category),
+  ).toContain("missing-ticket-binding");
 });
 
-test("repository-wide verification from an older edit is stale", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      editGeneration: 5,
-    },
-  });
-  expect(result.blockers.map(({ category }) => category)).toContain("verify");
-});
-
-test("accepts a fresh focused test for a focused-only repository", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      verificationPolicy: { kind: "focused-only", workspaceRoot: "/hydra" },
-      verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: 4,
-      },
-    },
-  });
+test("accepts focused evidence for a repository-wide policy", () => {
+  const result = evaluate({ attempt: 1, facts: passingFacts });
   expect(result.blockers.map(({ category }) => category)).not.toContain(
     "verify",
   );
 });
 
-test("rejects repository-wide evidence for a focused-only repository", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      verificationPolicy: { kind: "focused-only", workspaceRoot: "/hydra" },
-    },
+test("extracts focused verification worktree from tool results", () => {
+  const result = verifyResult({
+    type: "tool_result",
+    toolCallId: "verify-1",
+    toolName: "verify",
+    input: { action: "test", file: "/worktrees/task/a.test.ts" },
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify({ ok: true, worktree: "/worktrees/task" }),
+      },
+    ],
+    isError: false,
+    details: undefined,
   });
-  expect(result.blockers).toContainEqual({
-    category: "verify",
-    reason: "focused test verification has not passed after the latest edit.",
-  });
+  expect(result).toEqual({ ok: true, worktree: "/worktrees/task" });
 });
 
-test("focused-then-all accepts a fresh focused test before shipping", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      commitsAheadOfBase: false,
-      mergeRequestExists: false,
-      verificationPolicy: {
-        kind: "focused-then-all",
-        workspaceRoot: "/conversation-center-ext",
-      },
-      verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: 4,
-      },
-    },
-  });
-  expect(result.blockers.map(({ category }) => category)).not.toContain(
-    "verify",
-  );
+test("recognizes explicit visual approval tool results", () => {
+  expect(
+    isVisualApprovalToolResult({
+      type: "tool_result",
+      toolCallId: "ask-1",
+      toolName: "ask_user",
+      input: {},
+      content: [
+        { type: "text", text: "Visual approval: Approve the rendered layout" },
+      ],
+      isError: false,
+      details: undefined,
+    }),
+  ).toBe(true);
 });
-
-test("focused-then-all requires repository-wide verification before shipping", () => {
+test("requires focused verification for every changed worktree", () => {
+  const secondWorktree = "/worktrees/consumer";
   const result = evaluate({
     attempt: 1,
     facts: {
       ...passingFacts,
-      verificationPolicy: {
-        kind: "focused-then-all",
-        workspaceRoot: "/conversation-center-ext",
+      changedWorktrees: {
+        [worktree]: "snapshot-4",
+        [secondWorktree]: "snapshot-5",
       },
       verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: 4,
+        focusedByWorktree: { [worktree]: "snapshot-4" },
       },
     },
   });
   expect(result.blockers).toContainEqual({
     category: "verify",
-    reason: "repository-wide verification has not passed before shipping.",
+    reason: `focused verification has not passed for the latest snapshot in: ${secondWorktree}.`,
   });
 });
 
-test("focused-then-all keeps a prior repository-wide stamp after a later focused test", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      editGeneration: 5,
-      verificationPolicy: {
-        kind: "focused-then-all",
-        workspaceRoot: "/conversation-center-ext",
-      },
-      verificationEvidence: {
-        repositoryWideEditGeneration: 4,
-        focusedTestEditGeneration: 5,
-      },
-    },
-  });
-  expect(result.blockers.map(({ category }) => category)).not.toContain(
-    "verify",
-  );
-});
-
-test("focused-then-all still requires a focused test after an edit once all has passed", () => {
-  const result = evaluate({
-    attempt: 1,
-    facts: {
-      ...passingFacts,
-      editGeneration: 5,
-      verificationPolicy: {
-        kind: "focused-then-all",
-        workspaceRoot: "/conversation-center-ext",
-      },
-      verificationEvidence: {
-        repositoryWideEditGeneration: 4,
-        focusedTestEditGeneration: undefined,
-      },
-    },
-  });
-  expect(result.blockers).toContainEqual({
-    category: "verify",
-    reason: "focused test verification has not passed after the latest edit.",
-  });
-});
-
-test("holds Figma-backed work for visual review", () => {
-  const result = evaluate({
+test("holds Figma-backed work until explicit visual approval", () => {
+  const blocked = evaluate({
     attempt: 1,
     facts: { ...passingFacts, figmaBacked: true },
   });
-  expect(result.blockers.map(({ category }) => category)).toContain(
+  expect(blocked.blockers.map(({ category }) => category)).toContain(
+    "visual-review",
+  );
+  const approved = evaluate({
+    attempt: 1,
+    facts: {
+      ...passingFacts,
+      figmaBacked: true,
+      visualReviewComplete: true,
+    },
+  });
+  expect(approved.blockers.map(({ category }) => category)).not.toContain(
     "visual-review",
   );
 });
@@ -271,10 +202,7 @@ test("reports combined blockers and records them", () => {
       ...passingFacts,
       mergeRequestExists: false,
       ticketBound: false,
-      verificationEvidence: {
-        repositoryWideEditGeneration: undefined,
-        focusedTestEditGeneration: undefined,
-      },
+      verificationEvidence: { focusedByWorktree: {} },
       figmaBacked: true,
       releaseReadiness: {
         kind: "changesets",
@@ -285,22 +213,10 @@ test("reports combined blockers and records them", () => {
   });
   expect(result.kind).toBe("blocked");
   expect(result.blockers).toHaveLength(5);
-  expect(result.blockers.map(({ category }) => category)).toContain(
-    "release-artifact",
-  );
   expect(result.records[0]?.blockers).toEqual(result.blockers);
 });
 
-test("caps retries at three without another attempt", () => {
-  const result = evaluate({
-    attempt: 3,
-    facts: { ...passingFacts, ticketBound: false },
-  });
-  expect(result.retryExhausted).toBe(true);
-  expect(result.attempts).toBe(3);
-});
-
-test("repeated failure records each attempt", () => {
+test("caps retries and records repeated failures", () => {
   const first = evaluate({
     attempt: 1,
     facts: { ...passingFacts, ticketBound: false },
@@ -309,30 +225,28 @@ test("repeated failure records each attempt", () => {
     attempt: 2,
     facts: { ...passingFacts, ticketBound: false },
   });
-  const third = recordShipGateAttempt(
-    recordShipGateAttempt(undefined, first),
-    second,
-  );
-  expect(third.records.map(({ attempt }) => attempt)).toEqual([1, 2]);
+  const third = evaluate({
+    attempt: 3,
+    facts: { ...passingFacts, ticketBound: false },
+  });
+  expect(third.retryExhausted).toBe(true);
+  expect(
+    recordShipGateAttempt(
+      recordShipGateAttempt(undefined, first),
+      second,
+    ).records.map(({ attempt }) => attempt),
+  ).toEqual([1, 2]);
 });
 
-test("facts are resolved through a fakeable Effect service", async () => {
+test("facts are resolved through a fakeable Effect module", async () => {
   const result = await Effect.runPromise(
     evaluateWithFacts({
-      cwd: "/worktree",
+      cwd: worktree,
       attempt: 1,
-      state: {
-        editGeneration: 4,
-        verificationEvidence: {
-          repositoryWideEditGeneration: 4,
-          focusedTestEditGeneration: undefined,
-        },
-        figmaBacked: false,
-        visualReviewComplete: false,
-      },
+      state: runtimeState(4),
     }).pipe(
       Effect.provideService(ShipGateFactsService, {
-        factsFor: ({ state }) => Effect.succeed({ ...passingFacts, ...state }),
+        factsFor: () => Effect.succeed(passingFacts),
       }),
     ),
   );

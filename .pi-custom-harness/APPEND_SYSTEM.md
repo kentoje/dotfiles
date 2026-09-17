@@ -5,8 +5,8 @@ For a bug, reproduce the reported failure end to end before editing, record the 
 For UI work, compare the result with the intended reference, preserve responsive behavior, and treat pixel-level visual correctness as a requirement.
 Use structured module actions when the harness owns a decision or stateful workflow, and use bash for ordinary repository commands and for guarded merge-request creation.
 Create merge requests with `mr-guard [glab mr create options]`; it exposes the protected Bash boundary and the harness never performs live merge-request creation itself.
-After implementation, run the relevant focused checks after each edit, and complete repository-wide verification before committing and pushing when the repository policy allows it.
-Fix every resulting lint or test failure, including failures that were not introduced by the current change.
+After implementation, run one relevant focused check for each changed worktree before committing and pushing.
+Do not run repository-wide verification unless the user explicitly invokes `/harness-verify-all`; CI owns broad repository health by default.
 Use existing-merge-request inspection, discussion handling, and updates after the branch is pushed, and never open a second merge request for a branch that already has one.
 Do not poll or wait for pipeline settlement unless the user explicitly requests monitoring with `/harness-watch-pipeline`.
 Treat missing ticket binding, stale local verification, unresolved discussions, duplicate-merge-request detection, release-policy failures, and required visual review as enforced gates rather than suggestions to route around.

@@ -369,17 +369,41 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
                 message: `Repository worktree setup failed with exit code ${result.exitCode}.`,
               });
             }
-          }
-          if (facts.setupScript === undefined) {
-            const fallback = yield* command.run({
-              program: "git",
-              arguments_: ["-C", path, "status", "--short"],
-              cwd: repositoryRoot,
+          } else {
+            const packageManifestExists = yield* fileSystem.exists({
+              path: `${path}/package.json`,
             });
+            const fallback = yield* command.run(
+              packageManifestExists
+                ? {
+                    program: "pnpm",
+                    arguments_: ["install", "--frozen-lockfile"],
+                    cwd: path,
+                  }
+                : {
+                    program: "git",
+                    arguments_: ["-C", path, "status", "--short"],
+                    cwd: repositoryRoot,
+                  },
+            );
             if (fallback.exitCode !== 0) {
               return yield* new WorktreeCommandError({
-                message: `Minimal native Git worktree setup failed with exit code ${fallback.exitCode}.`,
+                message: packageManifestExists
+                  ? `Repository dependency installation failed with exit code ${fallback.exitCode}. ${fallback.output}`
+                  : `Minimal native Git worktree setup failed with exit code ${fallback.exitCode}.`,
               });
+            }
+            if (packageManifestExists) {
+              const packageSetup = yield* command.run({
+                program: "pnpm",
+                arguments_: ["run", "--if-present", "setup"],
+                cwd: path,
+              });
+              if (packageSetup.exitCode !== 0) {
+                return yield* new WorktreeCommandError({
+                  message: `Repository package setup failed with exit code ${packageSetup.exitCode}. ${packageSetup.output}`,
+                });
+              }
             }
           }
           const routeName = `${safeTask}.${facts.portlessRoute.appName}`;

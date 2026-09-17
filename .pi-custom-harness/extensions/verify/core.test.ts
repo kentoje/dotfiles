@@ -78,30 +78,22 @@ const runFocusedVerify = (
     ),
   );
 
-test("focused-only all returns a policy failure without running commands", async () => {
-  let calls = 0;
+test("explicit full verification runs the repository check list", async () => {
+  const calls: RepositoryCheck[] = [];
   const report = await runVerify(
     "all",
     facts(["test", "ts:check"], {
       kind: "focused-only",
       workspaceRoot: "/workspace",
     }),
-    () => {
-      calls += 1;
+    ({ check }) => {
+      calls.push(check);
       return Effect.succeed({ exitCode: 0, output: "" });
     },
   );
 
-  expect(calls).toBe(0);
-  expect(report.failures).toEqual([
-    {
-      file: "",
-      line: 0,
-      rule: "repository-wide-forbidden",
-      message:
-        "Repository-wide verification is forbidden by repository policy; use focused verification.",
-    },
-  ]);
+  expect(calls).toEqual(["test", "ts:check"]);
+  expect(report.ok).toBe(true);
 });
 
 test("focused-then-all all runs the repository check list", async () => {

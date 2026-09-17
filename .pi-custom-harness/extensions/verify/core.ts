@@ -7,7 +7,6 @@ import {
   type RepositoryCheck,
   type RepositoryFacts,
   verificationPolicyAllowsFocusedTest,
-  verificationPolicyAllowsRepositoryWide,
   verificationPolicyWorkspaceRoot,
 } from "../../lib/repo-map/core";
 import {
@@ -16,6 +15,11 @@ import {
   type VerifyFocusedTestPackageError,
 } from "../../lib/verify/core";
 import type { VerifyInput } from "./schema";
+
+/** Internal verification input; `all` is reachable only from /harness-verify-all. */
+export type VerifyCoreInput =
+  | VerifyInput
+  | { readonly action: "all"; readonly file?: string };
 
 /** One actionable diagnostic returned by a repository check. */
 export interface VerifyFailure {
@@ -40,7 +44,7 @@ export type VerifyError =
   | VerifyFocusedTestPackageError;
 
 const selectedCheckFor = (
-  action: VerifyInput["action"],
+  action: VerifyCoreInput["action"],
 ): RepositoryCheck | undefined => {
   switch (action) {
     case "types":
@@ -289,14 +293,8 @@ const focusedTestFailures = Effect.fn("verify.focusedTestFailures")(function* ({
   return checkFailures("test", result.value);
 });
 
-const repositoryWideForbidden = (): VerifyFailure =>
-  failure(
-    "repository-wide-forbidden",
-    "Repository-wide verification is forbidden by repository policy; use focused verification.",
-  );
-
 const checksForAction = (
-  action: VerifyInput["action"],
+  action: VerifyCoreInput["action"],
   facts: RepositoryFacts,
 ): {
   readonly checks: ReadonlyArray<RepositoryCheck>;
@@ -322,7 +320,7 @@ export const verify = Effect.fn("verify")(function* ({
   action,
   cwd,
   file,
-}: VerifyInput & { readonly cwd: string }) {
+}: VerifyCoreInput & { readonly cwd: string }) {
   const startedAt = performance.now();
   const lookupPath =
     file !== undefined && isAbsolute(file) ? dirname(file) : cwd;
@@ -362,12 +360,7 @@ export const verify = Effect.fn("verify")(function* ({
   const verificationPolicy = factsResult.value.deliveryPolicy.verification;
   const selected = checksForAction(action, factsResult.value);
   let failures: ReadonlyArray<VerifyFailure>;
-  if (
-    action === "all" &&
-    !verificationPolicyAllowsRepositoryWide(verificationPolicy)
-  ) {
-    failures = [repositoryWideForbidden()];
-  } else if (action === "test" && file !== undefined) {
+  if (action === "test" && file !== undefined) {
     const workspaceRoot = verificationPolicyWorkspaceRoot(verificationPolicy);
     if (
       !verificationPolicyAllowsFocusedTest(verificationPolicy) ||
@@ -380,10 +373,7 @@ export const verify = Effect.fn("verify")(function* ({
         ),
       ];
     } else {
-      failures = yield* focusedTestFailures({
-        file,
-        workspaceRoot,
-      });
+      failures = yield* focusedTestFailures({ file, workspaceRoot });
     }
   } else if (selected.missing !== undefined) {
     failures = [selected.missing];

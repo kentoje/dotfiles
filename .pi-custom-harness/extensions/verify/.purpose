@@ -1,34 +1,32 @@
 # verify
 
 ## Intent
-Run repository-owned verification checks without losing actionable diagnostics to truncated shell output, while honoring repository verification policy.
+Run focused repository-owned verification without repeated heavy commands, while keeping repository-wide verification an explicit operator choice.
 
 ## Contract
-Input: `VerifyParams`, whose action is `types`, `lint`, `test`, or `all`, with an optional `file` that selects the owning worktree and narrows focused `test` runs.
+Input: the `verify` tool accepts `types`, `lint`, or `test` with an optional file; `/harness-verify-all [worktree]` is the only repository-wide entrypoint.
 Output: `{ ok, status, worktree, failures: [{ file, line, rule, message }], duration }`.
-Errors: repository facts, package discovery, and command transport failures are represented as structured completed results; explicit caller cancellation is represented as interrupted.
+Errors: repository facts, package discovery, and command transport failures are structured completed results; caller cancellation is interrupted.
 
 ## Behaviour
-1. Resolve an absolute `file` through `RepoMapService.repositoryFactsFor` and run checks from the returned repository root rather than the Pi session checkout.
-2. Map `types`, `lint`, and non-focused `test` to corresponding repository check kinds, reporting an absent selected check as a missing-script failure.
-3. Reject `all` with `repository-wide-forbidden` when repository-wide verification is forbidden, before running a command.
-4. For focused `test`, require a focused-only or focused-then-all policy, discover the nearest package.json within the policy workspace root, validate its test script and runner, and run from package root with runner-specific focused arguments.
-5. Run repository-wide `all` in the exact order returned by repository facts when policy permits it.
-6. Run Vitest check scripts with `--run` so repository verification terminates instead of entering watch mode.
-7. Preserve complete command output and parse actionable diagnostics from it.
-8. Aggregate every selected check failure into one completed report.
+1. Resolve an absolute file through `RepoMapService.repositoryFactsFor` and run inside the owning worktree.
+2. Run only the requested focused check from the agent-facing tool.
+3. Run repository-wide checks only after the operator invokes `/harness-verify-all`.
+4. Serialize heavy verification plans across repositories.
+5. Cache a completed plan by action, selected worktree, file, Git HEAD, and working-tree status.
+6. Reuse the cached report when the selected snapshot is unchanged.
+7. Run Vitest scripts with `--run` so they terminate instead of entering watch mode.
+8. Preserve complete command output and parse actionable diagnostics.
 
 ## Edge cases
-- A repository map without `repositoryFactsFor` returns a structured repository-facts failure.
-- An absolute file inside another worktree selects that worktree; a missing or relative file preserves session-checkout behavior.
-- A selected individual check absent from the repository check list returns a structured missing-script failure without running a command.
-- A focused file outside the policy workspace or without a supported nearest package test script returns a structured focused-test-package failure without running a test command.
-- A failed command with no parseable diagnostic returns one command-level failure that includes the tail of the command output.
-- A failed command with multiple diagnostics returns all diagnostics, and later checks still run.
+- A missing or relative file preserves session-checkout behavior.
+- An untrusted Git fingerprint disables caching rather than reusing stale evidence.
+- A failed focused command returns diagnostics but does not launch repository-wide checks.
+- An explicit full verification may still report pre-existing repository failures without blocking a focused agent workflow.
+- Cancellation returns an interrupted report and never enters the cache.
 
 ## Non-goals
-This tool does not mutate files, truncate output, or create commits and merge requests.
+This tool does not mutate files, create commits or merge requests, or force agents to run repository-wide checks.
 
 ## Evidence
-Hydra-style focused-only verification must never launch its root test command through `verify all`; focused-then-all repositories may run both a focused file test and the complete check list.
-
+The measured CI-6833 session ran 23 verification calls and spent more than 18 minutes in four repository-wide plans; two unchanged dashboard plans repeated the same baseline failures.

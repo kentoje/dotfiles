@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import type {
   ExtensionAPI,
   ToolResultEvent,
@@ -42,10 +44,9 @@ export interface ShipGateSessionState extends ShipGateRuntimeState {
 const resetShipGateSessionState = (state: ShipGateSessionState): void => {
   state.attempt = 0;
   state.editGeneration = 0;
-  state.verificationEvidence = {
-    repositoryWideEditGeneration: undefined,
-    focusedTestEditGeneration: undefined,
-  };
+  state.changedWorktrees = {};
+  state.activeWorktree = undefined;
+  state.verificationEvidence = { focusedByWorktree: {} };
   state.figmaBacked = false;
   state.visualReviewComplete = false;
   state.records = [];
@@ -55,10 +56,9 @@ const resetShipGateSessionState = (state: ShipGateSessionState): void => {
 export const createShipGateSessionState = (): ShipGateSessionState => ({
   attempt: 0,
   editGeneration: 0,
-  verificationEvidence: {
-    repositoryWideEditGeneration: undefined,
-    focusedTestEditGeneration: undefined,
-  },
+  changedWorktrees: {},
+  activeWorktree: undefined,
+  verificationEvidence: { focusedByWorktree: {} },
   figmaBacked: false,
   visualReviewComplete: false,
   records: [],
@@ -74,17 +74,31 @@ const textContent = (event: ToolResultEvent): string | undefined => {
   return undefined;
 };
 
-const verifySucceeded = (event: ToolResultEvent): boolean => {
-  if (event.isError) return false;
+export const verifyResult = (
+  event: ToolResultEvent,
+): { readonly ok: boolean; readonly worktree: string | undefined } => {
+  if (event.isError) return { ok: false, worktree: undefined };
   const text = textContent(event);
-  if (text === undefined) return false;
+  if (text === undefined) return { ok: false, worktree: undefined };
   try {
     const parsed: unknown = JSON.parse(text);
-    return isRecord(parsed) && parsed.ok === true;
+    return isRecord(parsed)
+      ? {
+          ok: parsed.ok === true,
+          worktree:
+            typeof parsed.worktree === "string" ? parsed.worktree : undefined,
+        }
+      : { ok: false, worktree: undefined };
   } catch {
-    return false;
+    return { ok: false, worktree: undefined };
   }
 };
+
+/** Recognizes explicit ask-user approval from the rendered tool result. */
+export const isVisualApprovalToolResult = (event: ToolResultEvent): boolean =>
+  event.toolName === "ask_user" &&
+  !event.isError &&
+  /visual approval:\s*approve/iu.test(textContent(event) ?? "");
 
 /** Recognizes human acknowledgement of the required visual review. */
 export const isVisualReviewAcknowledgement = (text: string): boolean =>
@@ -94,6 +108,15 @@ export const isVisualReviewAcknowledgement = (text: string): boolean =>
 
 const hasFigmaReference = (text: string): boolean =>
   /figma\.com\/|\bfigma[-\s]+backed\b/iu.test(text);
+
+const fingerprintEditedFile = async (path: string): Promise<string> => {
+  try {
+    const content = await readFile(path);
+    return createHash("sha256").update(content).digest("hex");
+  } catch {
+    return "missing";
+  }
+};
 
 const settledFactsLayer = (
   state: ShipGateRuntimeState,
@@ -120,18 +143,27 @@ const settledFactsLayer = (
       return ShipGateFactsService.of({
         factsFor: ({ cwd }): Effect.Effect<ShipGateFacts, ShipGateFactsError> =>
           Effect.gen(function* () {
-            const commitsAheadOfBase = yield* git.commitsAheadOfBase({ cwd });
-            const facts = yield* repoMap.repositoryFactsFor({ cwd });
+            const worktree = state.activeWorktree ?? cwd;
+            const commitsAheadOfBase = yield* git.commitsAheadOfBase({
+              cwd: worktree,
+            });
+            const facts = yield* repoMap.repositoryFactsFor({ cwd: worktree });
             const releaseReadiness = yield* gitRelease.releaseReadinessFor({
-              cwd,
+              cwd: worktree,
               policy: facts.deliveryPolicy,
             });
             const currentMr =
-              yield* gitLab.findOpenMergeRequestForCurrentBranch({ cwd });
-            const ticketResult = yield* Effect.exit(ticket.current({ cwd }));
+              yield* gitLab.findOpenMergeRequestForCurrentBranch({
+                cwd: worktree,
+              });
+            const ticketResult = yield* Effect.exit(
+              ticket.current({ cwd: worktree }),
+            );
             const ticketBound = Exit.isSuccess(ticketResult);
             if (Option.isNone(currentMr)) {
               return {
+                worktree,
+                changedWorktrees: state.changedWorktrees,
                 commitsAheadOfBase,
                 mergeRequestExists: false,
                 unresolvedThreadCount: 0,
@@ -144,9 +176,11 @@ const settledFactsLayer = (
                 releaseReadiness,
               };
             }
-            const status = yield* mergeRequest.statusFor({ cwd });
-            const threads = yield* mergeRequest.threadsFor({ cwd });
+            const status = yield* mergeRequest.statusFor({ cwd: worktree });
+            const threads = yield* mergeRequest.threadsFor({ cwd: worktree });
             return {
+              worktree,
+              changedWorktrees: state.changedWorktrees,
               commitsAheadOfBase,
               mergeRequestExists: true,
               unresolvedThreadCount:
@@ -218,6 +252,18 @@ const sendBlockedFollowUp = (
   }
 };
 
+const absolutePathFromToolInput = (
+  input: Record<string, unknown>,
+): string | undefined => {
+  const path = input.path;
+  return typeof path === "string" && path.startsWith("/") ? path : undefined;
+};
+
+const worktreeForEditedPath = (path: string): string | undefined => {
+  const match = /^(.*\/\.pi\/worktrees\/[^/]+\/[^/]+)/u.exec(path);
+  return match?.[1];
+};
+
 /** Registers the non-tool agent-settled stop gate. */
 export default function registerShipGate(pi: ExtensionAPI): void {
   const state = createShipGateSessionState();
@@ -227,8 +273,9 @@ export default function registerShipGate(pi: ExtensionAPI): void {
   pi.on("input", (event) => {
     if (!sessionActive) return;
     if (hasFigmaReference(event.text)) state.figmaBacked = true;
-    if (isVisualReviewAcknowledgement(event.text))
+    if (isVisualReviewAcknowledgement(event.text)) {
       state.visualReviewComplete = true;
+    }
   });
 
   pi.on("tool_call", (event) => {
@@ -237,31 +284,68 @@ export default function registerShipGate(pi: ExtensionAPI): void {
       state.figmaBacked = true;
   });
 
-  pi.on("tool_result", (event) => {
+  pi.on("tool_result", async (event) => {
     if (!sessionActive) return;
+    if (event.toolName === "worktree" && !event.isError) {
+      const text = textContent(event);
+      if (text !== undefined) {
+        try {
+          const parsed: unknown = JSON.parse(text);
+          if (isRecord(parsed) && typeof parsed.path === "string") {
+            state.activeWorktree = parsed.path;
+          }
+        } catch {
+          // Ignore non-JSON worktree failures.
+        }
+      }
+    }
+    if (
+      event.toolName === "ticket" &&
+      !event.isError &&
+      isRecord(event.details)
+    ) {
+      const binding = event.details.binding;
+      if (isRecord(binding) && typeof binding.worktree === "string") {
+        state.activeWorktree = binding.worktree;
+      }
+    }
     if (event.toolName === "edit" && !event.isError) {
       state.editGeneration += 1;
-      state.verificationEvidence = {
-        ...state.verificationEvidence,
-        focusedTestEditGeneration: undefined,
-      };
-    }
-    if (event.toolName === "verify") {
-      const succeeded = verifySucceeded(event);
-      if (event.input.action === "all") {
-        state.verificationEvidence = {
-          ...state.verificationEvidence,
-          repositoryWideEditGeneration: succeeded
-            ? state.editGeneration
-            : undefined,
+      const editedPath = absolutePathFromToolInput(event.input);
+      const worktree =
+        editedPath === undefined
+          ? state.activeWorktree
+          : (worktreeForEditedPath(editedPath) ?? state.activeWorktree);
+      if (worktree !== undefined) {
+        const previousFingerprint = state.changedWorktrees?.[worktree] ?? "";
+        const fileFingerprint =
+          editedPath === undefined
+            ? String(state.editGeneration)
+            : await fingerprintEditedFile(editedPath);
+        state.changedWorktrees = {
+          ...(state.changedWorktrees ?? {}),
+          [worktree]: createHash("sha256")
+            .update(previousFingerprint)
+            .update(editedPath ?? "unknown")
+            .update(fileFingerprint)
+            .digest("hex"),
         };
       }
-      if (event.input.action === "test" && event.input.file !== undefined) {
+    }
+    if (isVisualApprovalToolResult(event)) {
+      state.visualReviewComplete = true;
+    }
+    if (event.toolName === "verify") {
+      const result = verifyResult(event);
+      if (result.ok && result.worktree !== undefined) {
         state.verificationEvidence = {
           ...state.verificationEvidence,
-          focusedTestEditGeneration: succeeded
-            ? state.editGeneration
-            : undefined,
+          focusedByWorktree: {
+            ...(state.verificationEvidence.focusedByWorktree ?? {}),
+            [result.worktree]:
+              state.changedWorktrees?.[result.worktree] ??
+              String(state.editGeneration),
+          },
         };
       }
     }
@@ -282,9 +366,10 @@ export default function registerShipGate(pi: ExtensionAPI): void {
       if (!sessionActive) return;
 
       const attempt = state.attempt + 1;
-      state.attempt = attempt;
       const runtimeState: ShipGateRuntimeState = {
         editGeneration: state.editGeneration,
+        changedWorktrees: state.changedWorktrees,
+        activeWorktree: state.activeWorktree,
         verificationEvidence: state.verificationEvidence,
         figmaBacked: state.figmaBacked,
         visualReviewComplete: state.visualReviewComplete,

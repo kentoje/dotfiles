@@ -377,7 +377,7 @@ The artifact therefore follows the documented subtraction rules and remains inte
 
 ### What it must contain
 
-1. **How the modules compose into the loop.** Ticket to worktree to implementation to verify to MR, with optional user-activated pipeline monitoring through `/harness-watch-pipeline`. Which tool owns which step, and the handoffs between them. This is the substance, and it is exactly what a generic prompt lacks.
+1. **How the modules compose into the loop.** Ticket to worktree to implementation to focused verification to MR, with optional user-activated full verification and pipeline monitoring. Which tool owns which step, and the handoffs between them. This is the substance, and it is exactly what a generic prompt lacks.
 2. **When to reach for a tool rather than bash.** `mr` for MR state, bash for MR creation because `mr-guard` covers it. Non-obvious, and wrong by default.
 3. **The invariants that are enforced.** The agent behaves better when it knows a block is an invariant rather than a bug, so it fixes the cause instead of routing around it.
 4. **The search-tool condition.** `ffgrep`/`fffind` inside a git repository, built-in `grep`/`find` outside one. HARNESS.md section 3 decided this has to be prose, since keeping both pairs means it cannot be a tool.
