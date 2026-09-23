@@ -263,7 +263,7 @@ See section 7.
 ### Credentials
 
 `auth.json` and `models.json` are symlinked from `~/.pi/agent/`.
-One authentication, shared between the stock config and the harness, and the gpt-5.6 provider setup stays in sync.
+One authentication, shared between the stock config and the harness, and the gpt-6 provider setup stays in sync.
 
 **`auth.json` must be gitignored.**
 It is a symlink to real credentials, and `.pi-custom-harness` lives inside a git repository.

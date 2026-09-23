@@ -39,3 +39,21 @@ test("live MR boundary decodes a safe status payload", async () => {
     boundTicket: "DASH-19",
   });
 });
+
+test("live MR boundary retains command output on lookup failure", async () => {
+  const transport: MergeRequestCommandTransport = () =>
+    Effect.succeed({
+      exitCode: 1,
+      output: 'No open merge request available for "main".\n',
+    });
+
+  const failure = await Effect.runPromise(
+    MergeRequestService.use((service) =>
+      Effect.flip(service.statusFor({ cwd: "/workspace" })),
+    ).pipe(Effect.provide(MergeRequestLiveLayerWithTransport(transport))),
+  );
+
+  expect(failure.message).toBe(
+    'Merge request lookup failed: command exited with 1: No open merge request available for "main".',
+  );
+});

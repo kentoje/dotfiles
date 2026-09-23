@@ -1,0 +1,24 @@
+# task-preflight
+
+## Intent
+Surface existing task worktrees, Jira tickets, and open merge requests before the harness creates duplicate task resources.
+
+## Contract
+Input: a repository working directory, task query, and requested resource kind. Output: matching worktrees, tickets, and merge requests plus `proceed` or `ask_user`. Errors: `TaskPreflightError` when a local or remote lookup cannot be trusted.
+
+## Behaviour
+1. Search registered Git worktrees, Jira issues, and open GitLab merge requests for the same task context.
+2. Preserve structured paths, ticket keys and summaries, and merge request identifiers, titles, and source branches.
+3. Require an explicit decision when the resource being created already has a relevant match.
+
+## Edge cases
+- Creating a worktree treats matching worktrees or merge requests as duplicates; the expected source Jira ticket alone does not block.
+- Creating a ticket treats a matching Jira ticket as a duplicate.
+- Creating a merge request treats any matching open merge request as a duplicate.
+- Malformed command output and failed commands fail closed.
+
+## Non-goals
+This module does not create, delete, or mutate worktrees, Jira tickets, or merge requests.
+
+## Evidence
+A task session created multiple worktrees and a merge request before discovering existing task state; the preflight makes that state visible before mutation.

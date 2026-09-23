@@ -1,11 +1,14 @@
 import { realpath } from "node:fs/promises";
 
-import type {
-  AgentToolResult,
-  ExtensionAPI,
+import {
+  type AgentToolResult,
+  type ExtensionAPI,
+  isToolCallEventType,
 } from "@earendil-works/pi-coding-agent";
 import { Effect } from "effect";
-import { runTool } from "../../lib/pi-bridge/core";
+import { runHandler, runTool } from "../../lib/pi-bridge/core";
+import { preflightTaskCreation } from "../../lib/task-preflight/core";
+import { TaskPreflightLiveLayer } from "../../lib/task-preflight/live";
 import { TicketLiveLayer } from "../../lib/ticket/live";
 import { runTicket, type TicketResult } from "./core";
 import { type TicketInput, TicketParams } from "./schema";
@@ -19,6 +22,37 @@ type TicketToolDetails = TicketResult | TicketFailureDetails;
 
 /** Registers ticket binding actions. */
 export default function registerTicket(pi: ExtensionAPI): void {
+  pi.on("tool_call", async (event, context) => {
+    if (!isToolCallEventType("bash", event)) return;
+    const match =
+      /(?:^|\s)jira\s+issue\s+create\b[^;&|]*(?:--summary|-s)(?:=|\s+)(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/u.exec(
+        event.input.command,
+      );
+    const summary = match?.[1] ?? match?.[2] ?? match?.[3];
+    if (summary === undefined) return;
+    const preflight = await runHandler(
+      preflightTaskCreation({
+        cwd: context.cwd,
+        query: summary,
+        resource: "ticket",
+      }).pipe(Effect.provide(TaskPreflightLiveLayer)),
+      { signal: context.signal, failurePrefix: "Ticket preflight" },
+    );
+    if ("block" in preflight) return preflight;
+    if (preflight.action !== "ask_user") return;
+    const confirmed = await context.ui.confirm(
+      "Existing Jira ticket found",
+      `${preflight.reason}\n${JSON.stringify(preflight, null, 2)}\nCreate another ticket anyway?`,
+      { signal: context.signal },
+    );
+    if (!confirmed) {
+      return {
+        block: true,
+        reason: "Jira ticket creation cancelled after duplicate preflight.",
+      };
+    }
+  });
+
   pi.registerTool<typeof TicketParams, TicketToolDetails>({
     name: "ticket",
     label: "Ticket",

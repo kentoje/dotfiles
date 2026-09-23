@@ -1,20 +1,20 @@
 # mr-guard
 
 ## Intent
-Prevent duplicate merge-request creation and enforce the repository map's canonical delivery policy before protected `mr-guard` or legacy `glab mr create` invocations execute.
+Prevent duplicate merge-request creation, require conventional ticket-suffixed titles, and enforce the repository map's canonical delivery policy before protected `mr-guard` or legacy `glab mr create` invocations execute.
 
 ## Contract
 Input: a Bash command and its working directory; `bin/mr-guard` provides the discoverable command entrypoint.
-Output: `allow` or a fail-closed block decision with an actionable reason.
-Errors: Git, GitLab, and repository-facts lookup failures abort MR creation rather than permitting an unverifiable delivery.
+Output: `allow` or a fail-closed block decision with an actionable reason; title and duplicate preflight may require an explicit user decision before the command runs.
+Errors: Git, GitLab, Jira, worktree, and repository-facts lookup failures abort MR creation rather than permitting an unverifiable delivery.
 
 ## Behaviour
 1. Ignore commands that do not invoke `mr-guard` or `glab mr create`.
 2. Resolve the effective working directory from leading chained `cd` statements before GitLab or Git lookup.
-3. Block creation when the branch already has an open merge request.
-4. Resolve `RepositoryFacts.deliveryPolicy` through `RepoMapService`.
-5. Ask `GitService` for release readiness under that policy.
-6. Block only when the shared readiness result requires a release artifact; name each publishable package missing a changeset.
+3. Derive the expected conventional title from branch commits and block nonconforming explicit or generated titles with the exact replacement.
+4. Search registered worktrees, Jira tickets, and open merge requests; ask the user before duplicate merge-request creation.
+5. Block creation when the current branch already has an open merge request.
+6. Resolve `RepositoryFacts.deliveryPolicy` through `RepoMapService` and enforce release readiness.
 
 ## Edge cases
 - Changeset repositories require committed changesets only for changed publishable packages.
@@ -22,6 +22,7 @@ Errors: Git, GitLab, and repository-facts lookup failures abort MR creation rath
 - A `none` delivery policy permits creation release-wise.
 - Existing-MR detection happens before release-policy lookup.
 - `cd /other && glab mr create` is checked against `/other`, not the Pi session `cwd`.
+- Duplicate preflight reports matching task resources before the branch-specific duplicate guard.
 - `mr-guard --help` remains available outside a session, while creation fails with an actionable diagnostic unless the Pi custom-harness environment and command path are active.
 
 ## Non-goals

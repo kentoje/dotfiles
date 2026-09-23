@@ -141,6 +141,40 @@ test("blocks an existing merge request before resolving delivery policy", async 
   });
 });
 
+test("allows a confirmed duplicate through to release readiness", async () => {
+  const decision = await Effect.runPromise(
+    guardMergeRequestCreation({
+      command: "mr-guard --title 'fix: update filter [CI-6861]'",
+      cwd: "/worktree",
+      allowExistingMergeRequest: true,
+    }).pipe(
+      Effect.provideService(GitLabService, {
+        findOpenMergeRequestForCurrentBranch: () =>
+          Effect.succeed(Option.some({ iid: 42 })),
+      }),
+      Effect.provideService(GitService, {
+        commitsAreConventional: () => Effect.succeed(true),
+        changedFilesSinceDefaultBranch: () => Effect.succeed([]),
+        committedChangesetsSinceDefaultBranch: () => Effect.succeed([]),
+        releaseReadinessFor: () =>
+          Effect.succeed({
+            kind: "none",
+            ready: true,
+            missingPackages: [],
+          }),
+      }),
+      Effect.provideService(RepoMapService, {
+        repositoryFactsFor: () =>
+          Effect.succeed(
+            facts({ kind: "none", verification: { kind: "repository-wide" } }),
+          ),
+      }),
+    ),
+  );
+
+  expect(decision).toEqual({ kind: "allow" });
+});
+
 test("recognizes the protected merge-request command", async () => {
   const decision = await Effect.runPromise(
     guardMergeRequestCreation({

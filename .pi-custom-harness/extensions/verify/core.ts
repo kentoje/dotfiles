@@ -1,4 +1,4 @@
-import { dirname, isAbsolute } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 
 import { Effect } from "effect";
 
@@ -15,6 +15,17 @@ import {
   type VerifyFocusedTestPackageError,
 } from "../../lib/verify/core";
 import type { VerifyInput } from "./schema";
+/** Resolves a requested file to the directory used for repository discovery. */
+export const verificationLookupPath = ({
+  cwd,
+  file,
+}: {
+  readonly cwd: string;
+  readonly file: string | undefined;
+}): string =>
+  file === undefined
+    ? cwd
+    : dirname(isAbsolute(file) ? file : resolve(cwd, file));
 
 /** Internal verification input; `all` is reachable only from /harness-verify-all. */
 export type VerifyCoreInput =
@@ -320,10 +331,13 @@ export const verify = Effect.fn("verify")(function* ({
   action,
   cwd,
   file,
-}: VerifyCoreInput & { readonly cwd: string }) {
+  resolvedWorktree,
+}: VerifyCoreInput & {
+  readonly cwd: string;
+  readonly resolvedWorktree?: string;
+}) {
   const startedAt = performance.now();
-  const lookupPath =
-    file !== undefined && isAbsolute(file) ? dirname(file) : cwd;
+  const lookupPath = resolvedWorktree ?? verificationLookupPath({ cwd, file });
   const repoMapService = yield* RepoMapService;
   const repositoryFactsFor = repoMapService.repositoryFactsFor;
   if (repositoryFactsFor === undefined) {
@@ -356,9 +370,13 @@ export const verify = Effect.fn("verify")(function* ({
       duration: performance.now() - startedAt,
     } satisfies VerifyReport;
   }
-  const worktree = factsResult.value.repositoryRoot;
-  const verificationPolicy = factsResult.value.deliveryPolicy.verification;
-  const selected = checksForAction(action, factsResult.value);
+  const worktree = resolvedWorktree ?? factsResult.value.repositoryRoot;
+  const repositoryFacts =
+    worktree === factsResult.value.repositoryRoot
+      ? factsResult.value
+      : { ...factsResult.value, repositoryRoot: worktree };
+  const verificationPolicy = repositoryFacts.deliveryPolicy.verification;
+  const selected = checksForAction(action, repositoryFacts);
   let failures: ReadonlyArray<VerifyFailure>;
   if (action === "test" && file !== undefined) {
     const workspaceRoot = verificationPolicyWorkspaceRoot(verificationPolicy);
@@ -381,7 +399,7 @@ export const verify = Effect.fn("verify")(function* ({
     failures = yield* runChecks({
       cwd: worktree,
       checks: selected.checks,
-      testRunner: factsResult.value.testRunner,
+      testRunner: repositoryFacts.testRunner,
     });
   }
 

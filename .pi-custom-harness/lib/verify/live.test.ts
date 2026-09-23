@@ -60,11 +60,15 @@ test("runs Vitest repository checks once instead of entering watch mode", async 
   expect(result).toEqual({ exitCode: 0, output: "passed" });
 });
 
-test("maps transport failures to VerifyCommandExecutionError", async () => {
+test("maps launch failures with program, arguments, and directory", async () => {
   await expect(
-    runCheck(() => Effect.fail(new Error("spawn denied"))),
+    runCheck(() => Effect.fail(new Error("spawn ENOTDIR"))),
   ).rejects.toMatchObject({
     _tag: "VerifyCommandExecutionError",
-    message: "verification command failed to start: spawn denied",
+    program: "pnpm",
+    args: ["run", "ts:check"],
+    cwd: "/workspace",
+    message:
+      "Verification command failed to start: pnpm run ts:check in /workspace: spawn ENOTDIR",
   });
 });

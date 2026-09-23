@@ -74,13 +74,17 @@ const makeMergeRequestService = (
       Effect.mapError((cause) =>
         lookupFailure(cause instanceof Error ? cause.message : String(cause)),
       ),
-      Effect.flatMap((result) =>
-        result.exitCode === 0
-          ? Effect.succeed(result.output)
-          : Effect.fail(
-              lookupFailure(`command exited with ${result.exitCode}`),
-            ),
-      ),
+      Effect.flatMap((result) => {
+        if (result.exitCode === 0) return Effect.succeed(result.output);
+        const commandOutput = result.output.trim();
+        return Effect.fail(
+          lookupFailure(
+            commandOutput.length > 0
+              ? `command exited with ${result.exitCode}: ${commandOutput}`
+              : `command exited with ${result.exitCode}`,
+          ),
+        );
+      }),
     );
 
   const readMergeRequest = (cwd: string) =>

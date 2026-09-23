@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 
 import {
+  isConventionalMergeRequestTitle,
   isMergeRequestPipelineSettled,
   MergeRequestClock,
   type MergeRequestCommit,
@@ -14,9 +15,9 @@ import {
   MergeRequestTimer,
   type MergeRequestUpdateData,
   type MergeRequestUpdateResult,
+  normalizeMergeRequestTitle,
 } from "../../lib/mr/core";
 import type { MergeRequestInput as SchemaMergeRequestInput } from "./schema";
-
 /** Input to one Pi-free merge request action, with cwd supplied by the boundary. */
 export interface MergeRequestActionInput {
   readonly cwd: string;
@@ -33,12 +34,16 @@ export type MergeRequestActionResult =
   | { readonly action: "reply"; readonly reply: MergeRequestReplyResult }
   | { readonly action: "update"; readonly update: MergeRequestUpdateResult };
 
-/** Derives title and description from commits without reading package metadata. */
+/** Derives a conventional title and complete description from branch commits. */
 export const deriveMergeRequestUpdateData = (
   commits: ReadonlyArray<MergeRequestCommit>,
 ): MergeRequestUpdateData => {
   const firstCommit = commits[0];
-  const title = firstCommit?.subject.trim() || "Update merge request";
+  const firstSubject = firstCommit?.subject.trim() || "Update merge request";
+  const title = normalizeMergeRequestTitle({
+    subject: firstSubject,
+    commits,
+  });
   const description = commits
     .map((commit) => {
       const subject = commit.subject.trim();
@@ -95,6 +100,12 @@ export const runMergeRequestAction = Effect.fn("runMergeRequestAction")(
         const commitService = yield* MergeRequestCommitService;
         const commits = yield* commitService.currentBranchCommits({ cwd });
         const updateData = deriveMergeRequestUpdateData(commits);
+        if (!isConventionalMergeRequestTitle(updateData.title)) {
+          return yield* new MergeRequestGitLabError({
+            message:
+              "Merge request title must match <type>(<scope>): <summary> [TICKET-123]. Add the ticket key to the branch commit before updating.",
+          });
+        }
         return {
           action: "update",
           update: yield* mergeRequestService.updateWith({

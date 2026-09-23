@@ -154,9 +154,7 @@ const makeTicketService = (
         message: "empty branch name",
       });
     }
-    if (
-      !new RegExp(`(?:^|[^A-Z0-9_])${ticketKey}(?:$|[^A-Z0-9_])`).test(branch)
-    ) {
+    if (!branch.toUpperCase().endsWith(ticketKey)) {
       return yield* new TicketWorktreeMismatchError({
         worktree,
         ticketKey,

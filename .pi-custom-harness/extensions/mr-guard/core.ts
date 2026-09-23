@@ -21,6 +21,7 @@ import {
 export interface MergeRequestCreationGuardInput {
   readonly command: string;
   readonly cwd: string;
+  readonly allowExistingMergeRequest?: boolean;
 }
 
 /** The handler outcome for an attempted merge request creation. */
@@ -86,7 +87,11 @@ export const effectiveWorkingDirectoryForCommand = (
 
 /** Blocks a duplicate merge request before the Pi bash tool can execute it. */
 export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
-  function* ({ command, cwd }: MergeRequestCreationGuardInput) {
+  function* ({
+    command,
+    cwd,
+    allowExistingMergeRequest,
+  }: MergeRequestCreationGuardInput) {
     if (!isMergeRequestCreationCommand(command)) {
       return { kind: "allow" } as const;
     }
@@ -100,7 +105,7 @@ export const guardMergeRequestCreation = Effect.fn("guardMergeRequestCreation")(
         cwd: targetDirectory,
       });
 
-    if (Option.isSome(existingMergeRequest)) {
+    if (Option.isSome(existingMergeRequest) && !allowExistingMergeRequest) {
       return {
         kind: "block",
         reason: `Branch already has MR !${existingMergeRequest.value.iid}. Update it instead of opening a second one.`,

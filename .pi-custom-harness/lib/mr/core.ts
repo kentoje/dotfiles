@@ -49,6 +49,46 @@ export interface MergeRequestCommit {
   readonly body: string;
 }
 
+const conventionalMergeRequestTitlePattern =
+  /^(feat|fix|chore|refactor|docs|test)(\([^)]*\))?: .+ \[[A-Z][A-Z0-9_]*-\d+\]$/u;
+const conventionalCommitSubjectPattern =
+  /^(feat|fix|chore|refactor|docs|test)(\([^)]*\))?:\s*(.+)$/u;
+const mergeRequestTicketKeyPattern = /\[([A-Z][A-Z0-9_]*-\d+)\]/u;
+
+/** Tests the repository-wide conventional merge request title contract. */
+export const isConventionalMergeRequestTitle = (title: string): boolean =>
+  conventionalMergeRequestTitlePattern.test(title.trim());
+
+/** Normalizes commit-derived text to the merge request title convention. */
+export const normalizeMergeRequestTitle = ({
+  subject,
+  commits,
+}: {
+  readonly subject: string;
+  readonly commits: ReadonlyArray<MergeRequestCommit>;
+}): string => {
+  const trimmedSubject = subject.trim();
+  if (isConventionalMergeRequestTitle(trimmedSubject)) {
+    return trimmedSubject;
+  }
+  const conventional = conventionalCommitSubjectPattern.exec(trimmedSubject);
+  const type = conventional?.[1] ?? "fix";
+  const scope = conventional?.[2] ?? "";
+  const summary = (conventional?.[3] ?? trimmedSubject)
+    .replace(mergeRequestTicketKeyPattern, "")
+    .trim();
+  const ticketKey = commits
+    .flatMap((commit) => [commit.subject, commit.body])
+    .map((text) => mergeRequestTicketKeyPattern.exec(text)?.[1])
+    .find((key): key is string => key !== undefined);
+  if (ticketKey === undefined) {
+    return trimmedSubject;
+  }
+  const normalizedSummary =
+    summary.length > 0 ? summary : "update merge request";
+  return `${type}${scope}: ${normalizedSummary} [${ticketKey}]`;
+};
+
 /** A successful reply mutation, including the resulting resolution state. */
 export interface MergeRequestReplyResult {
   readonly threadId: string;

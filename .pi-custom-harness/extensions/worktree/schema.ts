@@ -1,6 +1,6 @@
 import { Type } from "typebox";
 
-/** TypeBox contract for the four worktree actions; action-specific task presence is checked by the core. */
+/** TypeBox contract for worktree actions; `branch` is an optional contextual Git branch for `new`. */
 export const WorktreeParams = Type.Object({
   action: Type.Union([
     Type.Literal("new"),
@@ -14,11 +14,18 @@ export const WorktreeParams = Type.Object({
       pattern: "^[^/\\\\]+$",
     }),
   ),
+  branch: Type.Optional(
+    Type.String({
+      minLength: 1,
+      pattern:
+        "^(feat|fix|chore|refactor|docs|test)/[^/\\\\]+/[A-Z][A-Z0-9_]*-[0-9]+$",
+    }),
+  ),
 });
 
 /** Static input retains action-specific narrowing; core validation enforces task where required. */
 export type WorktreeInput =
-  | { readonly action: "new"; readonly task: string }
+  | { readonly action: "new"; readonly task: string; readonly branch?: string }
   | { readonly action: "verify"; readonly task: string }
   | { readonly action: "list" }
   | { readonly action: "rm"; readonly task: string };

@@ -5,7 +5,7 @@ import { runHandler } from "../../lib/pi-bridge/core";
 import { RepoMapService } from "../../lib/repo-map/core";
 import { RepoMapLiveLayer } from "../../lib/repo-map/live";
 import { VerifyCommandLiveLayer } from "../../lib/verify/live";
-import { type VerifyReport, verify } from "./core";
+import { type VerifyReport, verificationLookupPath, verify } from "./core";
 import { createVerifyExecutionCoordinator, runVerifyEffect } from "./execution";
 import { verificationGitFingerprint } from "./fingerprint";
 import { type VerifyInput, VerifyParams } from "./schema";
@@ -70,7 +70,10 @@ export default function registerVerify(pi: ExtensionAPI): void {
     parameters: VerifyParams,
     executionMode: "sequential",
     async execute(_toolCallId, params: VerifyInput, signal, _onUpdate, ctx) {
-      const lookupPath = params.file ?? ctx.cwd;
+      const lookupPath = verificationLookupPath({
+        cwd: ctx.cwd,
+        file: params.file,
+      });
       const facts = await runHandler(
         RepoMapService.use((service) =>
           service.repositoryFactsFor({ cwd: lookupPath }),
@@ -104,7 +107,11 @@ export default function registerVerify(pi: ExtensionAPI): void {
         },
         execute: () =>
           runVerifyEffect({
-            effect: verify({ ...params, cwd: ctx.cwd }).pipe(
+            effect: verify({
+              ...params,
+              cwd: ctx.cwd,
+              resolvedWorktree: facts.repositoryRoot,
+            }).pipe(
               Effect.provide(RepoMapLiveLayer),
               Effect.provide(VerifyCommandLiveLayer),
             ),

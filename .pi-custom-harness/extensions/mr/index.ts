@@ -66,6 +66,11 @@ export default function registerMergeRequestTool(pi: ExtensionAPI): void {
       "Inspect and update the existing merge request or reply to threads. There is no open or watch action.",
     promptSnippet:
       "Inspect MR status, threads, and reply to review discussions",
+    promptGuidelines: [
+      "Use mr for merge request state instead of hand-rolling glab api calls.",
+      "After an mr lookup miss, stay on mr; do not fall back to glab api.",
+      "Create merge requests with bash mr-guard, not with mr.",
+    ],
     parameters: MergeRequestParams,
     async execute(
       _toolCallId,

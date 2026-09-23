@@ -12,7 +12,7 @@ Errors: typed merge request, commit, clock, and watch errors remain in the Effec
 1. `status` returns IID, title, draft state, discussion state, pipeline state, unresolved count, and bound ticket.
 2. `threads` returns thread ID, author, bot metadata, file, line, body, and resolved state.
 3. `reply` posts a body to a thread and optionally resolves it.
-4. `update` derives a title and description from current-branch commits through a fakeable commit module, then updates the existing merge request.
+4. `update` derives a conventional title and description from current-branch commits through a fakeable commit module; the title retains or adds a supported conventional prefix and ends in the ticket key found in commit text.
 5. `/harness-watch-pipeline` starts polling only on explicit user invocation and reports settlement through `context.ui.notify`.
 6. Pipeline settlement never enqueues or triggers a model turn.
 7. Session shutdown aborts and clears every owned watch.
@@ -22,6 +22,7 @@ Errors: typed merge request, commit, clock, and watch errors remain in the Effec
 - A discussion without a code position reports undefined file and line values.
 - A pipeline that is already settled notifies without sleeping.
 - Aborting a watch or shutting down the session suppresses stale notification.
+- A nonconforming commit-derived title is normalized before the GitLab update; a title already matching the convention is preserved.
 - A missing repository-bound ticket is returned as undefined rather than inferred from package metadata.
 
 ## Non-goals

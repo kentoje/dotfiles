@@ -44,10 +44,15 @@ export class VerifyFocusedTestPackageError extends Schema.TaggedError<VerifyFocu
   { message: Schema.String },
 ) {}
 
-/** A command transport failure that the verify core converts into a report failure. */
+/** A command launch failure with the exact program, arguments, and directory. */
 export class VerifyCommandExecutionError extends Schema.TaggedError<VerifyCommandExecutionError>()(
   "VerifyCommandExecutionError",
-  { message: Schema.String },
+  {
+    program: Schema.String,
+    args: Schema.Array(Schema.String),
+    cwd: Schema.String,
+    message: Schema.String,
+  },
 ) {}
 
 /** Runs one repository-defined check without exposing subprocess details to policy code. */

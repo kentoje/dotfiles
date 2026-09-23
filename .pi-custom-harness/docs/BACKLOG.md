@@ -11,6 +11,87 @@ Recorded specs are `describe`/`test` blocks whose bodies are only `expect` calls
 
 ## Done
 
+- [x] Fix verify command launch failing with spawn ENOTDIR across repositories
+
+  - Kind: fix
+  - Evidence: Every `verify` call in this session failed with `guard failed unexpectedly. spawn ENOTDIR` regardless of target: a changed file in the task worktree `/Volumes/HomeX/kento/.pi/worktrees/conversation-center-ext/campaigns-filter`, a pristine main-checkout file (`src/pages/conversation_center/components/Filters/Filters.tsx`), the sibling worktree `CI-6861`, `analytics-extension/src/components/CampaignsFilter/CampaignsFilter.tsx`, and `dashboard-v4/src/index.tsx`. Both `types` and `lint` actions failed identically, which blocked the ship-gate verify requirement repeatedly with no actionable information. The fault is specific to the verify launch path, not the environment or the snapshot: `fleet status` returned full repository data in the same session, `git rev-parse --show-toplevel` and `pnpm run ts:check` succeeded when run directly in those directories, and a direct Effect `ChildProcessSpawner.spawn` of `git` and `pnpm` through `@effect/platform-bun/BunServices` succeeded with `cwd` set to the same worktree. A hydra file surfaced a different and actionable message (`Repository facts lookup failed: NotFound: FileSystem.access (/Users/kento/Documents/gitlab/hydra/src/hydra.ts)`), showing the boundary reports mapped causes correctly, while the `ENOTDIR` path escapes as an unmapped `Error` and reaches the generic `guard failed unexpectedly` branch with no program, cwd, or cause.
+  - Proposal: In `extensions/verify/index.ts` and `lib/verify/live.ts`, carry the failing program, argument list, and working directory into the failure reason, and map the launch error to a typed verification failure instead of letting it fall through the generic unmapped-defect branch of `failureReason`. Confirm the check command launches in the resolved worktree rather than an inherited environment, and add a regression test that exercises a launch failure and asserts the reported cause names the program and directory.
+  - Spec:
+
+    ```ts
+    describe("verify command launch", () => {
+      test("runs the requested check in the requested worktree", () => {
+        expect(report.worktree).toBe(requestedWorktree);
+        expect(report.status).toBe("completed");
+        expect(report.failures).toEqual([]);
+      });
+      test("names the program and directory when the check cannot start", () => {
+        expect(report.ok).toBe(false);
+        expect(report.failures[0].message).toContain("pnpm");
+        expect(report.failures[0].message).toContain(requestedWorktree);
+      });
+    });
+    ```
+
+- [x] Enforce context-aware ticket branch names
+
+  - Kind: fix
+  - Evidence: This session required a branch for frontend ticket CI-6861. The task worktree name cannot contain slashes, and ticket binding rejected contextual branches such as `ci-6861-campaign-filter` because it only accepted a branch exactly matching `CI-6861`. Three worktrees were created and two were removed before the exact-ticket branch could bind. Repository conventions observed in merged MRs use a type/context/ticket shape, such as `feat/add-team-picker-ci-6842`, while this harness forced `CI-6861`.
+  - Proposal: Let worktree creation accept a validated branch name shaped as `<type>/<context>/<ticket>` and make ticket binding validate the ticket suffix rather than requiring an exact branch match. Preserve the branch and ticket in the worktree binding record so the ship gate can resolve either path.
+  - Spec:
+
+    ```ts
+    describe("ticket branch naming", () => {
+      test("accepts the repository branch convention", () => {
+        expect(branchName).toMatch(/^(feat|fix|chore|refactor|docs|test)\/[^/]+\/[A-Z]+-\d+$/);
+      });
+      test("binds a ticket whose key is the branch suffix", () => {
+        expect(binding.ticketKey).toBe(ticketKey);
+        expect(binding.branch).toBe(branchName);
+      });
+    });
+    ```
+
+- [x] Enforce conventional merge-request titles
+
+  - Kind: fix
+  - Evidence: MR !1309 was initially created as `[CI-6861] Add campaign filter to Conversation Center`, but merged repository examples use a conventional prefix followed by context and the ticket, such as `feat: add team picker to automation users [CI-6842]`. The title had to be corrected manually after review, and the MR creation boundary accepted the nonconforming title without warning.
+  - Proposal: Have the guarded MR creation and update paths derive or validate titles against the repository convention, using the conventional commit prefix, a concise context, and the bound ticket suffix. Fail closed with the expected format when a supplied title does not conform, or normalize it before creation.
+  - Spec:
+
+    ```ts
+    describe("merge request title convention", () => {
+      test("accepts a conventional prefix, context, and ticket suffix", () => {
+        expect(title).toMatch(/^(feat|fix|chore|refactor|docs|test)(\([^)]*\))?: .+ \[[A-Z]+-\d+\]$/);
+      });
+      test("reports the expected title when the supplied title is nonconforming", () => {
+        expect(normalizedTitle).toBe(expectedTitle);
+        expect(titleError).toBeUndefined();
+      });
+    });
+    ```
+
+- [x] Preflight duplicate task worktrees and merge requests
+
+  - Kind: fix
+  - Evidence: The user warned that another worktree might exist, but the harness did not surface existing task state before implementation. This session created three CI-6861 worktrees because branch naming and ticket binding were incompatible, and GitLab already showed another open campaign-filter MR from a separate task branch. Existing-MR inspection happened only after the new branch and MR were created.
+  - Proposal: Add a preflight action before worktree creation or ticket creation that searches registered worktrees, branch bindings, Jira tickets, and open merge requests for the task context. Return the matches and require an explicit user decision before creating a potentially duplicate worktree, ticket, or MR.
+  - Spec:
+
+    ```ts
+    describe("task preflight deduplication", () => {
+      test("reports matching worktrees, tickets, and merge requests", () => {
+        expect(preflight.worktrees).toBeDefined();
+        expect(preflight.tickets).toBeDefined();
+        expect(preflight.mergeRequests).toBeDefined();
+      });
+      test("requires an explicit decision before duplicate creation", () => {
+        expect(preflight.action).toBe("ask_user");
+        expect(preflight.reason).toContain("existing");
+      });
+    });
+    ```
+
 - [x] Keep repository verification alive for the requested worktree
 
   - Kind: fix

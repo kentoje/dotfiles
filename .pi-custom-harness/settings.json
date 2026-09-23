@@ -1,7 +1,7 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "google-vertex/gemini-3.8-flash",
-  "defaultThinkingLevel": "xhigh",
+  "defaultModel": "openai/gpt-6-luna",
+  "defaultThinkingLevel": "max",
   "defaultProjectTrust": "never",
   "extensions": ["./extensions"],
   "packages": [

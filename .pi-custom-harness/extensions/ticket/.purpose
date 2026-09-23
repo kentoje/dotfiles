@@ -1,29 +1,30 @@
 # ticket
 
 ## Intent
-Keep the local branch-to-ticket association available to ship-gate and other harness policies without querying Jira.
+Keep the local branch-to-ticket association available to ship-gate and other harness policies, and intercept Jira CLI creation to prevent duplicate tickets.
 
 ## Contract
-Input: TypeBox `TicketParams` with action `bind` or `current`; `bind` requires a Jira-style key and absolute worktree path, while `current` accepts an optional explicit worktree path and otherwise uses the session checkout.
-Output: the validated ticket key, branch, and absolute worktree association.
-Errors: `TicketKeyValidationError` for malformed keys, `TicketBindingConflictError` when the worktree is already bound to another ticket, `TicketWorktreeMismatchError` when its branch does not identify the ticket, plus typed missing, malformed, deleted, branch, and write failures.
+Input: TypeBox `TicketParams` with action `bind` or `current`, or an intercepted `jira issue create` Bash command; `bind` requires a Jira-style key and absolute worktree path, while `current` accepts an optional explicit worktree path and otherwise uses the session checkout.
+Output: the validated ticket key, branch, and absolute worktree association; ticket creation preflight reports matching worktrees, tickets, and merge requests before asking for an explicit duplicate decision.
+Errors: `TicketKeyValidationError` for malformed keys, `TicketBindingConflictError` when the worktree is already bound to another ticket, `TicketWorktreeMismatchError` when its branch does not end in the ticket key, plus typed missing, malformed, deleted, branch, write, and preflight lookup failures.
 
 ## Behaviour
-`bind` validates the key, resolves the explicit worktree's branch, confirms that branch identifies the ticket, and writes the association to `<worktree>/.dev-flow.json`.
-`current` reads the explicitly selected worktree when supplied, preserving session-checkout behavior only when no worktree is supplied.
-The Pi boundary resolves the requested worktree to an absolute real path before invoking the Effect core.
+1. Intercept `jira issue create`, search task resources from its summary, and ask before creating a matching Jira ticket.
+2. `bind` validates the key, resolves the explicit worktree's branch, confirms that branch ends in the ticket key, and writes the association to `<worktree>/.dev-flow.json`.
+3. `current` reads the explicitly selected worktree when supplied, preserving session-checkout behavior only when no worktree is supplied.
+4. The Pi boundary resolves the requested worktree to an absolute real path before invoking the Effect core.
 
 ## Edge cases
 - `bind` cannot default to the session checkout; an explicit absolute worktree path is required.
 - `current` may omit the worktree only for callers already operating directly in the intended checkout.
 - Missing `.dev-flow.json` reports a missing binding rather than querying Jira.
 - Invalid JSON, missing fields, invalid keys, or a different worktree path report malformed state.
-- A worktree already bound to another ticket or checked out on a branch for another task is rejected before writing.
+- A worktree already bound to another ticket or checked out on a branch whose suffix identifies another task is rejected before writing.
 - A deleted worktree reports a typed deletion error before reading or writing state.
 - Each lookup is scoped to the requested absolute worktree and cannot use another worktree's file.
 
 ## Non-goals
-This module does not create tickets, query Jira, resolve ticket details, create merge requests, or maintain a central binding database.
+This module does not resolve ticket details or mutate remote Jira state itself; Jira creation remains a guarded CLI operation.
 
 ## Evidence
 The dev-flow workflow records a local `.dev-flow.json` manifest per worktree and uses a ticket key to seed branch and merge-request context; the ticket tool is intentionally limited to `bind` and `current`.

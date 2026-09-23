@@ -7,6 +7,7 @@ import {
   MergeRequestCommitService,
   MergeRequestService,
   MergeRequestTimer,
+  normalizeMergeRequestTitle,
 } from "../../lib/mr/core";
 import {
   deriveMergeRequestUpdateData,
@@ -177,7 +178,7 @@ test("reply passes optional resolution to GitLab", async () => {
   });
 });
 
-test("update derives title and description from commits", async () => {
+test("update normalizes title to conventional type and ticket suffix", async () => {
   let received: { title: string; description: string } | undefined;
   const result = await Effect.runPromise(
     runMergeRequestAction({
@@ -187,8 +188,8 @@ test("update derives title and description from commits", async () => {
       Effect.provideService(MergeRequestCommitService, {
         currentBranchCommits: () =>
           Effect.succeed([
-            { subject: "Fix title", body: "First body" },
-            { subject: "Add tests", body: "" },
+            { subject: "[CI-6861] Add campaign filter", body: "First body" },
+            { subject: "test: cover campaign filter", body: "" },
           ]),
       }),
       Effect.provideService(MergeRequestService, {
@@ -206,17 +207,64 @@ test("update derives title and description from commits", async () => {
     ),
   );
   expect(received).toEqual({
-    title: "Fix title",
-    description: "Fix title\n\nFirst body\n\nAdd tests",
+    title: "fix: Add campaign filter [CI-6861]",
+    description:
+      "[CI-6861] Add campaign filter\n\nFirst body\n\ntest: cover campaign filter",
   });
   expect(result).toEqual({
     action: "update",
     update: {
       iid: 17,
-      title: "Fix title",
-      description: "Fix title\n\nFirst body\n\nAdd tests",
+      title: "fix: Add campaign filter [CI-6861]",
+      description:
+        "[CI-6861] Add campaign filter\n\nFirst body\n\ntest: cover campaign filter",
     },
   });
+});
+
+test("keeps a conforming conventional merge request title", () => {
+  expect(
+    normalizeMergeRequestTitle({
+      subject: "feat(filters): add campaign picker [CI-6861]",
+      commits: [
+        {
+          subject: "feat(filters): add campaign picker [CI-6861]",
+          body: "",
+        },
+      ],
+    }),
+  ).toBe("feat(filters): add campaign picker [CI-6861]");
+});
+
+test("update rejects a title when commits contain no ticket key", async () => {
+  let updates = 0;
+  const exit = await Effect.runPromiseExit(
+    runMergeRequestAction({
+      cwd: "/workspace",
+      request: { action: "update" },
+    }).pipe(
+      Effect.provideService(MergeRequestCommitService, {
+        currentBranchCommits: () =>
+          Effect.succeed([{ subject: "fix: update filter", body: "" }]),
+      }),
+      Effect.provideService(MergeRequestService, {
+        statusFor: () => Effect.die("status should not run"),
+        threadsFor: () => Effect.die("threads should not run"),
+        replyTo: () => Effect.die("reply should not run"),
+        updateWith: () => {
+          updates += 1;
+          return Effect.die("invalid title must not update GitLab");
+        },
+        pipelineFor: () => Effect.die("watch should not run"),
+      }),
+      Effect.provideService(MergeRequestClock, unusedClock),
+      Effect.provideService(MergeRequestTimer, unusedTimer),
+    ),
+  );
+
+  expect(exit._tag).toBe("Failure");
+  expect(String(exit)).toContain("Merge request title must match");
+  expect(updates).toBe(0);
 });
 
 test("update derivation has a safe empty-commit fallback", () => {

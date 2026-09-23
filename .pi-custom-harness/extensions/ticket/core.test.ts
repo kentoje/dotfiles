@@ -63,7 +63,7 @@ const runExit = (
 test("bind validates, resolves branch, and writes a worktree association", async () => {
   const state = makeState();
   state.directories.add("/worktrees/one");
-  state.branches.set("/worktrees/one", "feature/CI-6600-button");
+  state.branches.set("/worktrees/one", "feat/campaign-filter/CI-6600");
 
   const result = await run(
     {
@@ -79,14 +79,14 @@ test("bind validates, resolves branch, and writes a worktree association", async
 
   expect(result.binding).toEqual({
     ticketKey: "CI-6600",
-    branch: "feature/CI-6600-button",
+    branch: "feat/campaign-filter/CI-6600",
     worktree: "/worktrees/one",
   });
   expect(
     JSON.parse(state.files.get("/worktrees/one/.dev-flow.json") ?? "{}"),
   ).toEqual({
     ticket: { key: "CI-6600" },
-    branch: "feature/CI-6600-button",
+    branch: "feat/campaign-filter/CI-6600",
     worktree: "/worktrees/one",
   });
 });
@@ -146,6 +146,27 @@ test("bind refuses to replace another ticket's worktree association", async () =
   expect(state.files.get("/worktrees/task/.dev-flow.json")).toContain(
     "DAT-623",
   );
+});
+
+test("bind rejects a ticket that appears before the branch suffix", async () => {
+  const state = makeState();
+  state.directories.add("/worktrees/task");
+  state.branches.set("/worktrees/task", "feature/CI-6861-campaign-filter");
+
+  const exit = await runExit(
+    {
+      input: {
+        action: "bind",
+        key: "CI-6861",
+        worktree: "/worktrees/task",
+      },
+      cwd: "/repositories/example",
+    },
+    state.operations,
+  );
+
+  expect(exit._tag).toBe("Failure");
+  expect(String(exit)).toContain("TicketWorktreeMismatchError");
 });
 
 test("bind rejects a checkout whose branch belongs to another task", async () => {

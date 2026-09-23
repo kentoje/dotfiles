@@ -75,7 +75,10 @@ const makeVerifyCommandService = (
       Effect.mapError(
         (cause) =>
           new VerifyCommandExecutionError({
-            message: `verification command failed to start: ${describeFailure(cause)}`,
+            program: request.program,
+            args: [...request.args],
+            cwd: request.cwd,
+            message: `Verification command failed to start: ${request.program} ${request.args.join(" ")} in ${request.cwd}: ${describeFailure(cause)}`,
           }),
       ),
     );

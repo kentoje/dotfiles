@@ -9,10 +9,16 @@ import {
   type RepositoryVerificationPolicy,
 } from "../../lib/repo-map/core";
 import {
+  VerifyCommandExecutionError,
   VerifyCommandService,
   VerifyFocusedTestPackageError,
 } from "../../lib/verify/core";
-import { commandOutputTail, parseDiagnostics, verify } from "./core";
+import {
+  commandOutputTail,
+  parseDiagnostics,
+  verificationLookupPath,
+  verify,
+} from "./core";
 
 const facts = (
   checks: ReadonlyArray<RepositoryCheck>,
@@ -77,6 +83,63 @@ const runFocusedVerify = (
       Effect.provideService(VerifyCommandService, commandService),
     ),
   );
+
+test("resolves relative and absolute files to repository lookup directories", () => {
+  expect(
+    verificationLookupPath({
+      cwd: "/worktrees/task",
+      file: "src/component.tsx",
+    }),
+  ).toBe("/worktrees/task/src");
+  expect(
+    verificationLookupPath({
+      cwd: "/repositories/main",
+      file: "/worktrees/task/src/component.tsx",
+    }),
+  ).toBe("/worktrees/task/src");
+});
+
+test("reports a typed command launch failure without rejecting verify", async () => {
+  const report = await Effect.runPromise(
+    verify({
+      action: "types",
+      cwd: "/repositories/main",
+      resolvedWorktree: "/worktrees/task",
+    }).pipe(
+      Effect.provideService(RepoMapService, {
+        repositoryFactsFor: ({ cwd }) =>
+          Effect.succeed({
+            ...facts(["ts:check"]),
+            repositoryRoot: cwd,
+          }),
+      }),
+      Effect.provideService(VerifyCommandService, {
+        runCheck: ({ cwd }) =>
+          Effect.fail(
+            new VerifyCommandExecutionError({
+              program: "pnpm",
+              args: ["run", "ts:check"],
+              cwd,
+              message: `Verification command failed to start: pnpm run ts:check in ${cwd}: spawn ENOTDIR`,
+            }),
+          ),
+      }),
+    ),
+  );
+
+  expect(report).toMatchObject({
+    ok: false,
+    status: "completed",
+    worktree: "/worktrees/task",
+    failures: [
+      {
+        rule: "command",
+        message:
+          "Verification command failed to start: pnpm run ts:check in /worktrees/task: spawn ENOTDIR",
+      },
+    ],
+  });
+});
 
 test("explicit full verification runs the repository check list", async () => {
   const calls: RepositoryCheck[] = [];

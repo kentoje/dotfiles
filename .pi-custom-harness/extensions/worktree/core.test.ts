@@ -138,6 +138,48 @@ test("delegates setup script and portless without repository checks", async () =
   ).toBe(false);
 });
 
+test("creates a contextual ticket branch at a slash-free task path", async () => {
+  const calls: string[][] = [];
+  const result = await run(
+    {
+      action: "new",
+      task: "campaign-filter",
+      branch: "feat/campaign-filter/CI-6861",
+      cwd: "/repo/example",
+    },
+    {
+      facts: facts("scripts/setup-worktree.sh"),
+      command: (args) => calls.push([...args]),
+    },
+  );
+
+  expect(calls).toContainEqual([
+    "create",
+    "feat/campaign-filter/CI-6861",
+    "/tmp/worktrees/example/campaign-filter",
+  ]);
+  expect(result).toMatchObject({
+    action: "new",
+    task: "campaign-filter",
+    path: "/tmp/worktrees/example/campaign-filter",
+    branch: "feat/campaign-filter/CI-6861",
+  });
+});
+
+test("rejects a contextual branch for another ticket", async () => {
+  await expect(
+    run(
+      {
+        action: "new",
+        task: "campaign-filter-CI-6861",
+        branch: "feat/campaign-filter/CI-7000",
+        cwd: "/repo/example",
+      },
+      { facts: facts(undefined) },
+    ),
+  ).rejects.toBeInstanceOf(WorktreePathError);
+});
+
 test("installs dependencies when no repository setup script is mapped", async () => {
   const calls: string[][] = [];
   const result = await run(

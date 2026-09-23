@@ -135,7 +135,12 @@ export type WorktreeToolError =
 
 /** Input passed to the Pi-free worktree policy. */
 export type WorktreeToolInput =
-  | { readonly action: "new"; readonly task: string; readonly cwd: string }
+  | {
+      readonly action: "new";
+      readonly task: string;
+      readonly branch?: string;
+      readonly cwd: string;
+    }
   | { readonly action: "verify"; readonly task: string; readonly cwd: string }
   | { readonly action: "list"; readonly cwd: string }
   | { readonly action: "rm"; readonly task: string; readonly cwd: string };
@@ -146,6 +151,7 @@ export type WorktreeToolResult =
       readonly action: "new";
       readonly task: string;
       readonly path: string;
+      readonly branch: string;
       readonly url: string;
       readonly verification: WorktreeVerificationSummary;
     }
@@ -169,6 +175,36 @@ const isSafeTaskName = (task: string | undefined): task is string =>
   task !== "." &&
   task !== ".." &&
   !/[\\/]/u.test(task);
+
+const contextualBranchPattern =
+  /^(feat|fix|chore|refactor|docs|test)\/[^/\\]+\/[A-Z][A-Z0-9_]*-\d+$/u;
+
+const branchTicketKey = (branch: string): string | undefined =>
+  branch.match(/(?:^|\/)([A-Z][A-Z0-9_]*-\d+)$/u)?.[1];
+
+const ticketKeyForTask = (task: string): string | undefined =>
+  task
+    .toUpperCase()
+    .match(/(?:^|[^A-Z0-9_])([A-Z][A-Z0-9_]*-\d+)(?:$|[^A-Z0-9_])/u)?.[1];
+
+const ensureBranch = (task: string, branch: string | undefined) => {
+  if (branch === undefined) return Effect.succeed(task);
+  const taskTicketKey = ticketKeyForTask(task);
+  const branchKey = branchTicketKey(branch);
+  if (
+    !contextualBranchPattern.test(branch) ||
+    branchKey === undefined ||
+    (taskTicketKey !== undefined && branchKey !== taskTicketKey)
+  ) {
+    return Effect.fail(
+      new WorktreePathError({
+        message:
+          "Worktree branch must match <type>/<context>/<ticket> and end with the task ticket key.",
+      }),
+    );
+  }
+  return Effect.succeed(branch);
+};
 
 const absolutePath = (path: string): string =>
   path.startsWith("/") ? path : `/${path}`;
@@ -302,7 +338,6 @@ const verifyWorktree = Effect.fn("worktree.verifyWorktree")(function* ({
     cwd: path,
     root,
     repositoryRoot,
-    expectedBranch: task,
     fileSystem,
     git,
   });
@@ -329,6 +364,7 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
     }
     case "new": {
       const safeTask = yield* ensureTask(input.task);
+      const branch = yield* ensureBranch(safeTask, input.branch);
       const facts = yield* repositoryFacts({ cwd });
       const root = yield* configuredRoot(facts.worktreeRoot);
       const git = yield* WorktreeGitService;
@@ -356,7 +392,7 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
           yield* git.createWorktree({
             repositoryRoot,
             path,
-            branch: safeTask,
+            branch,
           });
           if (facts.setupScript !== undefined) {
             const result = yield* command.run({
@@ -417,7 +453,7 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
             cwd: path,
             root,
             repositoryRoot,
-            expectedBranch: safeTask,
+            expectedBranch: branch,
             fileSystem: fileSystemForReadiness,
             git: gitForReadiness,
           });
@@ -425,6 +461,7 @@ export const runWorktreeTool = Effect.fn("runWorktreeTool")(function* (
             action: "new",
             task: safeTask,
             path,
+            branch,
             url,
             verification,
           } as const;

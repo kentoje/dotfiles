@@ -1,24 +1,25 @@
 # worktree
 
 ## Intent
-Create and maintain safe task worktrees using repository-owned facts and setup contracts.
+Create and maintain safe task worktrees using repository-owned facts and setup contracts, with duplicate task preflight before creation.
 
 ## Contract
-Input: one TypeBox action: `{ action: "new", task }`, `{ action: "verify", task }`, `{ action: "list" }`, or `{ action: "rm", task }`.
-Output: a created worktree with setup and readiness summary, a task-targeted readiness result with path and branch, configured-root listing, or safe removal result.
-Errors: `WorktreeRepositoryFactsError | WorktreeGitError | WorktreeCommandError | WorktreeFilesystemError | WorktreePathError | WorktreeMutationError`.
+Input: one TypeBox action: `{ action: "new", task, branch? }`, `{ action: "verify", task }`, `{ action: "list" }`, or `{ action: "rm", task }`; `branch` uses `<type>/<context>/<ticket>` while the slash-free `task` remains the worktree handle.
+Output: a created worktree with its task, branch, setup and readiness summary, a task-targeted readiness result with path and branch, configured-root listing, or safe removal result.
+Errors: `WorktreeRepositoryFactsError | WorktreeGitError | WorktreeCommandError | WorktreeFilesystemError | WorktreePathError | WorktreeMutationError`; preflight lookup errors block creation.
 
 ## Behaviour
 1. Resolve repository facts through `RepoMapService`; never infer package metadata or configuration in this module.
-2. Use the configured worktree root and reject empty, separator-containing, or traversal task names.
-3. For `new`, create a Git worktree, run the configured setup script when present, otherwise install dependencies for a package repository or use the minimal Git fallback, register its typed portless route, and verify readiness.
-4. For `verify`, resolve the requested task beneath the repository's configured worktree root and verify that registered path and branch through Git/filesystem readiness checks.
-5. List only Git worktrees below the configured root.
-6. Remove only a recognized Git worktree below the configured root.
-7. Queue absolute-path mutations at the Pi boundary.
+2. Before `new`, search registered worktrees, Jira tickets, and open merge requests for the task context; ask explicitly before creating a duplicate.
+3. Use the configured worktree root and reject empty, separator-containing, or traversal task names.
+4. For `new`, accept a validated contextual branch ending in the task's ticket key while keeping the task path slash-free; otherwise retain the task as the branch for backwards compatibility.
+5. Create the Git worktree, run the configured setup script when present, otherwise install dependencies for a package repository or use the minimal Git fallback, register its typed portless route, and verify readiness.
+6. For `verify`, resolve the requested task beneath the repository's configured worktree root and verify that registered path and branch through Git/filesystem readiness checks.
+7. List only Git worktrees below the configured root and remove only a recognized worktree.
+8. Queue absolute-path mutations at the Pi boundary.
 
 ## Edge cases
-- Missing repository facts fail closed instead of falling back to package metadata.
+- Contextual branches must match `<type>/<context>/<ticket>` and end in the task ticket key when the task contains one.
 - Setup-script, dependency-install, fallback-command, portless, Git, filesystem, or mutation-queue failure returns a typed error; repository checks are never launched.
 - A repository without a setup script but with `package.json` receives a synchronous frozen install before `new` returns.
 - Live portless registration is a no-op because portless has no `add` subcommand.
