@@ -1,11 +1,11 @@
 modelRoles:
-  smol: llmgateway/azure/gpt-5.6-luna:xhigh
-  slow: llmgateway/azure/gpt-5.6-sol:xhigh
-  plan: azure/gpt-5.6-sol:xhigh
-  commit: azure/gpt-5.6-luna
+  smol: llmgateway/openai/gpt-6-luna:xhigh
+  slow: llmgateway/openai/gpt-6-sol:xhigh
+  plan: openai/gpt-6-sol:xhigh
+  commit: openai/gpt-6-luna
   advisor: llmgateway/azure/gpt-5.6-terra:xhigh
-  task: llmgateway/azure/gpt-5.6-luna:xhigh
-  default: llmgateway/aws-bedrock/grok-4-6:high
+  task: llmgateway/openai/gpt-6-luna:xhigh
+  default: llmgateway/xai/grok-4-7:high
 symbolPreset: nerd
 theme:
   dark: melange_dark
