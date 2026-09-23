@@ -11,8 +11,8 @@ abbr -a ma maestro
 # kind is what its virtuosi inherit, so this choice picks the whole fleet.
 #
 #   mcc  claude - Opus 4.8 1M
-#   mcp  pi     - GPT-5.6 Sol conducting, Luna implementing, both at max
-#   mco  omp    - GPT-5.6 Terra conducting, Luna implementing, both at xhigh
+#   mcp  pi     - GPT-6 Sol conducting, Luna implementing, both at max
+#   mco  omp    - GPT-5.6 Terra conducting, GPT-6 Luna implementing, both at xhigh
 #
 # (mc* is conducting, ma* is dev-browser control - the two families stay apart.)
 abbr -a mcc 'maestro conduct --agent claude'
