@@ -14,3 +14,8 @@ set -gx OLLAMA_HOST "127.0.0.1:11434"
 
 # Enables rust native mode for agent-browser
 set -gx AGENT_BROWSER_NATIVE 1
+
+# Shut the agent-browser daemon down after 5 min idle. Default is unset, which
+# leaves headless Chrome (--enable-unsafe-swiftshader) running forever and
+# spinning ~3M syscalls/s. https://github.com/vercel-labs/agent-browser/issues/1371
+set -gx AGENT_BROWSER_IDLE_TIMEOUT_MS 300000
