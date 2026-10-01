@@ -66,8 +66,8 @@ inner.horizontal = 16
 inner.vertical = 16
 outer.left = 16
 outer.bottom = 16
-# Sketchybar gap
-outer.top = 52
+# SketchyBar clearance; built-in displays already reserve notch/menu-bar space.
+outer.top = [{ monitor."built-in" = 20 }, 52]
 outer.right = 16
 
 # 'main' binding mode declaration
