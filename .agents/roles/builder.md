@@ -1,7 +1,7 @@
 ---
 name: builder
 description: Executes an agreed plan. Follows conventions, does not redesign.
-model: llmgateway/azure/gpt-5.6-luna
+model: llmgateway/openai/gpt-6-luna
 thinking: max
 skills:
   - aircall-hydra-ui-lib

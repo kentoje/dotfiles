@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews a diff for correctness and structural quality. No browser, no edits.
-model: llmgateway/azure/gpt-5.6-sol
+model: llmgateway/openai/gpt-6-sol
 thinking: max
 skills:
   - typescript-best-practices

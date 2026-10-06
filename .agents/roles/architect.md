@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Decides how a change should be shaped, and diagnoses hard bugs. Writes no code.
-model: llmgateway/azure/gpt-5.6-sol
+model: llmgateway/openai/gpt-6-sol
 thinking: max
 skills:
   - improve-codebase-architecture

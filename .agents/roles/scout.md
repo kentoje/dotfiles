@@ -1,7 +1,7 @@
 ---
 name: scout
 description: Finds where things live in a codebase and reports locations, not opinions
-model: llmgateway/azure/gpt-5.6-luna
+model: llmgateway/openai/gpt-6-luna
 thinking: low
 inheritSkills: false
 extensions:
