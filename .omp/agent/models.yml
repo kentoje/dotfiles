@@ -56,6 +56,29 @@ providers:
           cacheRead: 0.2
           cacheWrite: 2.5
 
+      - id: openai/gpt-6.1-sol
+        name: GPT-6.1 Sol
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: xhigh
+          requiresEffort: true
+          effortMap:
+            minimal: low
+        input: [text, image]
+        contextWindow: 1050000
+        maxTokens: 128000
+        compat:
+          supportsReasoningEffort: true
+          reasoningEffortMap:
+            minimal: low
+        cost:
+          input: 2.0
+          output: 10.0
+          cacheRead: 0.2
+          cacheWrite: 2.5
+
       - id: azure/gpt-5.6-terra
         name: GPT-5.6 Terra
         reasoning: true
@@ -169,6 +192,24 @@ providers:
           cacheRead: 0.007
           cacheWrite: 0
 
+      - id: deepinfra/deepseek-v4.1-flash
+        name: DeepSeek V4.1 Flash (DeepInfra)
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        maxTokens: 384000
+        compat:
+          supportsReasoningEffort: true
+          # DeepInfra accepts none|low|high|xhigh|max, not minimal or medium.
+          reasoningEffortMap:
+            minimal: low
+            medium: high
+        cost:
+          input: 0.2
+          output: 0.6
+          cacheRead: 0.006
+          cacheWrite: 0
+
       - id: anthropic/claude-opus-5-5
         name: Claude Opus 5.5
         reasoning: true
@@ -191,3 +232,31 @@ providers:
           output: 20.0
           cacheRead: 0.2
           cacheWrite: 5.0
+
+      - id: deepinfra/mimo-v2.6-pro
+        name: MiMo V2.6 Pro
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        maxTokens: 65536
+        compat:
+          supportsReasoningEffort: true
+        cost:
+          input: 0.435
+          output: 0.87
+          cacheRead: 0.0036
+          cacheWrite: 0
+
+      - id: deepinfra/mimo-v2.6-flash
+        name: MiMo V2.6 Flash
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        maxTokens: 65536
+        compat:
+          supportsReasoningEffort: true
+        cost:
+          input: 0.14
+          output: 0.28
+          cacheRead: 0.0028
+          cacheWrite: 0
