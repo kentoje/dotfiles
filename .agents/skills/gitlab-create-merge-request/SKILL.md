@@ -2,13 +2,30 @@
 name: gitlab-create-merge-request
 description: >
   Create a GitLab merge request using glab CLI with the first commit message
-  as the title. Use when the user asks to open an MR for the current branch
+  as the title. Before creating, run the repo's pre-MR command when package.json
+  defines one. Use when the user asks to open an MR for the current branch
   targeting main, or after completing work that needs review.
 ---
 
 # Create Merge Request
 
 Create a GitLab merge request for the current branch targeting `main`.
+
+
+## Pre-MR check (mandatory)
+
+Before pushing or creating the MR, look in the repo's `package.json` `scripts`
+for a command whose name contains `pre-mr` (this repo: `pnpm pre-mr`).
+
+- If one exists, run it from the worktree and wait for it to exit 0. Do not
+  open the MR while it is failing. A failure is a code problem on this branch:
+  fix it here, do not skip the command, and do not open a second MR.
+- If none exists, say so and continue. Do not invent a stand-in check.
+
+`pnpm pre-mr` in conversation-center-ext runs the feature-branch quality jobs
+(lint, unit coverage, typecheck, fallow, react-doctor, locale diff) and the
+seven hermetic e2e projects. It is slow. Run it once, on the commit you are
+about to ship.
 
 ## Steps
 
