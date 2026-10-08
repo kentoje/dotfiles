@@ -4,7 +4,7 @@
   "editorPaddingX": 0,
   "defaultThinkingLevel": "high",
   "defaultProvider": "llmgateway",
-  "defaultModel": "xai/grok-4-7",
+  "defaultModel": "openai/gpt-6.1-sol",
   "enabledModels": [
     "llmgateway/openai/gpt-6.1-sol",
     "llmgateway/anthropic/claude-opus-5-5",
