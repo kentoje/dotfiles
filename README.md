@@ -68,3 +68,25 @@ The lockfile is committed but `node_modules` is gitignored, so a fresh clone mus
 ```bash
 $ ./setup/macos/setup_pi_harness_deps.sh
 ```
+
+### Pi agent status
+
+Pi's settings load `.pi/agent/extensions/agent-gossips/index.ts` for agent-gossip and SketchyBar.
+It reports interactive sessions only, keeps working status until `agent_settled`, and refreshes every 15 seconds so idle agents reappear after the gossip server restarts.
+Namespaced startup events preserve multiple live agents in the same directory.
+
+Install Herdr's separately managed Pi integration on each machine:
+
+```bash
+herdr integration install pi
+herdr integration status
+```
+
+Run `/reload` in each existing Pi session after installing or changing these integrations.
+No agent or Herdr server restart is needed.
+
+Run the gossip reporter's regression tests with:
+
+```bash
+bun test ./.pi/agent/extensions/agent-gossips/agent-gossips.test.js
+```

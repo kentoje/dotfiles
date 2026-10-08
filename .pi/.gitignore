@@ -18,6 +18,10 @@
 !/agent/keybindings.json
 !/agent/mcp.json
 !/agent/themes/
+# Hand-written status reporter only; Herdr's generated integration stays local.
+!/agent/extensions/
+/agent/extensions/*
+!/agent/extensions/agent-gossips/
 !/supi
 
 # The experimental RLM profile, selected by PI_CODING_AGENT_DIR=~/.pi/agent-rlm

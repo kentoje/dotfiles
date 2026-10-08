@@ -4,7 +4,7 @@
   "editorPaddingX": 0,
   "defaultThinkingLevel": "high",
   "defaultProvider": "llmgateway",
-  "defaultModel": "openai/gpt-6.1-sol",
+  "defaultModel": "xai/grok-4-7",
   "enabledModels": [
     "llmgateway/openai/gpt-6.1-sol",
     "llmgateway/anthropic/claude-opus-5-5",
@@ -21,6 +21,9 @@
     "npm:@mrclrchtr/supi-code-intelligence",
     "npm:@narumitw/pi-btw",
     "npm:pi-open-tui"
+  ],
+  "extensions": [
+    "~/dotfiles/.pi/agent/extensions/agent-gossips/index.ts"
   ],
   "subagents": {
     "disableBuiltins": true
