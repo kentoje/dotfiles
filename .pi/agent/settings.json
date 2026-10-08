@@ -1,23 +1,26 @@
 {
-  "lastChangelogVersion": "1.0.0",
+  "lastChangelogVersion": "1.1.0",
   "showHardwareCursor": true,
   "editorPaddingX": 0,
   "defaultThinkingLevel": "high",
-  "theme": "melange_dark",
   "defaultProvider": "llmgateway",
-  "defaultModel": "openai/gpt-6-luna",
+  "defaultModel": "openai/gpt-6.1-sol",
+  "enabledModels": [
+    "llmgateway/openai/gpt-6.1-sol",
+    "llmgateway/anthropic/claude-opus-5-5",
+    "llmgateway/xai/grok-4-7",
+    "llmgateway/fireworks/deepseek-v4.1-flash"
+  ],
   "packages": [
     "npm:pi-subagents",
     "npm:@juicesharp/rpiv-todo",
     "npm:@ff-labs/pi-fff",
-    "npm:pi-powerline-footer",
-    "npm:pi-mcp-adapter",
-    "git:github.com/DietrichGebert/ponytail",
-    "npm:@codexstar/pi-listen",
     "npm:@mrclrchtr/supi-settings",
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",
-    "npm:@mrclrchtr/supi-code-intelligence"
+    "npm:@mrclrchtr/supi-code-intelligence",
+    "npm:@narumitw/pi-btw",
+    "npm:pi-open-tui"
   ],
   "subagents": {
     "disableBuiltins": true
