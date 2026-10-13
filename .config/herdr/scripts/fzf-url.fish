@@ -15,6 +15,8 @@ test -n "$herdr"; and set herdr (command -v herdr)
 
 # How many lines of scrollback to scan. recent-unwrapped rejoins soft-wrapped
 # lines so URLs split across the terminal width are recovered intact.
+# 3000 is already cheap (~30ms). Do not raise it: a full 10MB scrollback is the
+# only way this scan gets slow, and older URLs are not what Cmd+o is for.
 set -l limit 3000
 
 set -l url_re '(https?|ftp|file|ssh|git)://[A-Za-z0-9._~:/?#@!$&*+,;=%-]+|www\.[A-Za-z0-9._~:/?#@!$&*+,;=%-]+'
