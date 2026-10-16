@@ -1,2 +1,1 @@
 require("slack")
-require("open")

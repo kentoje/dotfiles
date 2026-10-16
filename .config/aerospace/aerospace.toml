@@ -126,29 +126,31 @@ alt-shift-semicolon = 'resize smart -50'
 alt-shift-quote = 'resize smart +50'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
+# Focus the app's workspace, launching it when it has no window there.
+# Replaces the alt hotkeys previously bound in Hammerspoon.
 alt-0 = 'workspace 0'
 # alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
 # alt-b = 'workspace B'
-alt-c = 'workspace C'
-# alt-d = 'workspace D'
+alt-c = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh C "Notion Calendar"'
+alt-d = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh D DrawPen'
 # alt-e = 'workspace E'
-alt-f = 'workspace F'
-alt-g = 'workspace G'
+alt-f = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh F Figma'
+alt-g = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh G Helium'
 # alt-i = 'workspace I'
-alt-m = 'workspace M'
+alt-m = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh M Spotify'
 # alt-n = 'workspace N'
 # alt-o = 'workspace O'
 # alt-p = 'workspace P'
 # alt-q = 'workspace Q'
-alt-r = 'workspace R'
-alt-s = 'workspace S'
-alt-t = 'workspace T'
+alt-r = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh R Telegram'
+alt-s = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh S Slack'
+alt-t = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh T Ghostty'
 # alt-u = 'workspace U'
-alt-v = 'workspace V'
-alt-w = 'workspace W'
-# alt-x = 'workspace X'
+alt-v = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh V Codex'
+alt-w = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh W WhatsApp'
+alt-x = 'exec-and-forget open -a Finder'
 # alt-y = 'workspace Y'
-alt-z = 'workspace Z'
+alt-z = 'exec-and-forget ~/.config/aerospace/focus-or-launch.sh Z UTM'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-shift-0 = 'move-node-to-workspace 0'
@@ -288,6 +290,10 @@ run = 'move-node-to-workspace W'
 [[on-window-detected]]
 if.app-id = 'com.utmapp.UTM'
 run = 'move-node-to-workspace Z'
+
+[[on-window-detected]]
+if.app-id = 'dmytro.vasin.drawpen'
+run = 'move-node-to-workspace D'
 
 [[on-window-detected]]
 if.app-id = 'com.openai.codex'
