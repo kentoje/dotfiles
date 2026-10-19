@@ -57,44 +57,40 @@ quick-terminal-animation-duration = 0.08
 quick-terminal-position = "center"
 quick-terminal-size = 70%,70%
 
-# Cmd-layer forwarding. \x01 == Ctrl-A, the prefix for BOTH tmux and herdr (both
-# set prefix = ctrl+a), so each Cmd chord = "send prefix, then <key>". These bytes
-# are tuned to the tmux keymap; herdr's config.toml is mapped to answer the same
-# chords, so this block is shared, unchanged, by both multiplexers.
-keybind = super+digit_1=text:\x01\x31
-keybind = super+digit_2=text:\x01\x32
-keybind = super+digit_3=text:\x01\x33
-keybind = super+digit_4=text:\x01\x34
-keybind = super+digit_5=text:\x01\x35
-keybind = super+digit_6=text:\x01\x36
-keybind = super+digit_7=text:\x01\x37
-keybind = super+digit_8=text:\x01\x38
-keybind = super+digit_9=text:\x01\x39
+# Cmd-layer forwarding. \x01 is Ctrl-A, the prefix for both tmux and herdr.
+# The follow-up key is CSI-u (ESC[<code>u), not a plain byte. herdr 0.9.4 drops a
+# plain byte sent in the same write as the prefix (herdrdev/herdr#5255); typing
+# the prefix yourself still works. 0.9.5 fixed that, so super+o below is a plain
+# byte again. The other chords stay CSI-u until each one is checked. These chords
+# are tuned to the tmux keymap, and herdr's config.toml answers the same prefix
+# sequences.
+keybind = super+digit_1=text:\x01\x1b[49u
+keybind = super+digit_2=text:\x01\x1b[50u
+keybind = super+digit_3=text:\x01\x1b[51u
+keybind = super+digit_4=text:\x01\x1b[52u
+keybind = super+digit_5=text:\x01\x1b[53u
+keybind = super+digit_6=text:\x01\x1b[54u
+keybind = super+digit_7=text:\x01\x1b[55u
+keybind = super+digit_8=text:\x01\x1b[56u
+keybind = super+digit_9=text:\x01\x1b[57u
 
-keybind = super+o=text:\x01\x6f
-# Cmd+b → Ghostty quick terminal (Quake-style dropdown scratchpad), replacing the
-# old tmux-floax float (which was also Cmd+b). Non-global: toggles only while
-# Ghostty is focused, matching floax's terminal-scoped behavior. The quick
-# terminal is a separate shell surface, NOT part of the herdr session.
-# Was: forwarded to herdr as prefix+b → toggle_sidebar (now unbound from Cmd).
-# keybind = super+b=text:\x01\x62
+keybind = super+o=text:\x01o
+# Cmd+b stays a Ghostty action: quick terminal, not part of the herdr session.
 keybind = super+b=toggle_quick_terminal
-# Cmd+shift+b → prefix+shift+b (B) → herdr toggle_sidebar.
-keybind = super+shift+b=text:\x01\x42
+# Cmd+Shift+B → prefix+shift+b → herdr toggle_sidebar.
+keybind = super+shift+b=text:\x01\x1b[66u
 
-keybind = super+d=text:\x01\x25
-keybind = super+shift+d=text:\x01\x22
-keybind = super+s=text:\x01\x5b\x30
-keybind = super+f=text:\x01\x7a
-keybind = super+t=text:\x01\x63
-keybind = super+g=text:\x01\x6a
-keybind = super+a=text:\x01\x6b
-keybind = super+p=text:\x01\x70
-# Cmd+n → prefix+shift+n (N) → herdr new_workspace. Overrides Ghostty's default
-# super+n = new_window (new OS window), repurposed as "new herdr workspace".
-keybind = super+n=text:\x01\x4e
-# Cmd+r → prefix+& → herdr rename_tab. herdr-specific: in tmux prefix+& is
-# kill-window (confirm-gated), so avoid Cmd+r while running tmux.
-# keybind = super+r=text:\x01\x26
+keybind = super+d=text:\x01\x1b[37u
+keybind = super+shift+d=text:\x01\x1b[34u
+# Cmd+S → prefix+[ then 0: copy mode, then jump to the start of the line.
+# The bracket is already an escape sequence, so only the 0 needs CSI-u.
+keybind = super+s=text:\x01\x5b\x1b[48u
+keybind = super+f=text:\x01\x1b[122u
+keybind = super+t=text:\x01\x1b[99u
+keybind = super+g=text:\x01\x1b[106u
+keybind = super+a=text:\x01\x1b[107u
+keybind = super+p=text:\x01\x1b[112u
+# Cmd+N → prefix+shift+n → herdr new_workspace. Overrides Ghostty's new_window.
+keybind = super+n=text:\x01\x1b[78u
 
 keybind = shift+enter=text:\n

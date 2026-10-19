@@ -114,7 +114,6 @@ close_tab = "prefix+shift+x"
 # split_vertical = "prefix+v"
 # split_horizontal = "prefix+minus"
 close_pane = "prefix+x"
-# zoom = "prefix+z"       # legacy alias: fullscreen
 # resize_mode = "prefix+r"
 toggle_sidebar = "prefix+shift+b"
 
@@ -150,17 +149,17 @@ type = "pane"
 description = "fuzzy file path → paste into focused pane"
 command = "fish -c 'set sel (fd --type f --absolute-path --hidden | fzf); and test -n \"$sel\"; and \"$HERDR_BIN_PATH\" pane send-text \"$HERDR_ACTIVE_PANE_ID\" \"$sel\"'"
 
-# Cmd-equivalent: fzf URLs from the focused pane's scrollback → open in browser.
-# herdr port of wfxr/tmux-fzf-url. `herdr pane read --source recent-unwrapped`
-# is the capture-pane analogue; the script greps URLs, fzf multi-selects, opens.
+# Cmd-equivalent: fzf URLs from the focused pane → open in browser.
+# herdr port of wfxr/tmux-fzf-url. The script reads `visible` plus a shallow
+# `recent`, not deep scrollback: on an alt-screen pane, herdr 0.9.5 spends
+# ~1.8s in PendingAltScreenRead before fzf can draw.
 # No community plugin does the fzf+open flow (rmarganti/herdr-pluck is the
 # closest — tmux-fingers-style hints that copy, not fzf that opens).
 [[keys.command]]
 key = "prefix+o"
 type = "pane"
-description = "fzf URLs from focused pane scrollback → open in browser"
+description = "fzf URLs from focused pane → open in browser"
 # --no-config: the script only needs herdr/grep/fzf/open, all already on the server PATH.
-# A configured fish pays ~180ms (atuin, fnm, git) before fzf can draw.
 command = "fish --no-config -c 'source $HOME/.config/herdr/scripts/fzf-url.fish'"
 
 # Ctrl+h/j/k/l → vim-herdr-navigation plugin: seamless nav between herdr panes and
