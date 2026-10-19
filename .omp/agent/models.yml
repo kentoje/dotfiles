@@ -116,6 +116,30 @@ providers:
           cacheRead: 0.01
           cacheWrite: 0.125
 
+      - id: google-ai-studio/gemini-4-argon
+        name: Gemini 4 Argon
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        # Gateway reports max_output equal to the context window for this route.
+        maxTokens: 1048576
+        compat:
+          supportsReasoningEffort: true
+          # /v1/models lists only "high" for google-ai-studio/gemini-4-argon.
+          # Other tiers 400, so every Pi/omp level collapses to high.
+          reasoningEffortMap:
+            minimal: high
+            low: high
+            medium: high
+            high: high
+            xhigh: high
+            max: high
+        cost:
+          input: 4.0
+          output: 20.0
+          cacheRead: 0.2
+          cacheWrite: 0.375
+
       - id: google-vertex/gemini-3.8-flash
         name: Gemini 3.8 Flash
         reasoning: true

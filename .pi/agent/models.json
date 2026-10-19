@@ -141,6 +141,32 @@
           }
         },
         {
+          "id": "google-ai-studio/gemini-4-argon",
+          "name": "Gemini 4 Argon",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 1048576,
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "thinkingLevelMap": {
+            "off": "high",
+            "minimal": "high",
+            "low": "high",
+            "medium": "high",
+            "high": "high",
+            "xhigh": "high",
+            "max": "high"
+          },
+          "cost": {
+            "input": 4.0,
+            "output": 20.0,
+            "cacheRead": 0.2,
+            "cacheWrite": 0.375
+          }
+        },
+        {
           "id": "google-vertex/gemini-3.8-flash",
           "name": "Gemini 3.8 Flash",
           "reasoning": true,
