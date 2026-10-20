@@ -1,5 +1,5 @@
 ---
-name: boxd-cli
+name: remote-boxd-cli
 description: |
   Manage boxd cloud machines from the user's local terminal using the **external** `boxd` CLI.
   Use when: creating, forking, listing, stopping/starting, or destroying machines; running commands inside

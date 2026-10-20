@@ -23,12 +23,19 @@ from mvm_cli.ssh_access import ensure_mvm_ssh_key, write_ssh_config_block
 
 
 def link_mvm_laptop_file(link, target):
-    """Symlink LINK to TARGET (a file in this skill). Idempotent; never replaces a file it did not create."""
+    """Symlink LINK to TARGET (a file in this skill). Idempotent; never replaces a file it did not create.
+
+    A dangling symlink is replaced: that is what an old link looks like after the skill moved
+    (renamed folder, other checkout), and it points at nothing that could be lost.
+    """
     if link.is_symlink() and link.resolve() == target:
         return
-    if link.exists() or link.is_symlink():
+    dangling = link.is_symlink() and not link.exists()
+    if link.exists() and not dangling:
         log_mvm(f"not touching {link}: it is not a link to {target}")
         return
+    if dangling:
+        link.unlink()
     link.parent.mkdir(parents=True, exist_ok=True)
     link.symlink_to(target)
     log_mvm(f"linked {link} -> {target}")

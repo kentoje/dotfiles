@@ -59,7 +59,7 @@
     zoxide
     gitmux
     # AWS CLI v2 (incl. `aws lambda-microvms`) and websocat: the `mvm` dev MicroVM CLI and its
-    # ssh ProxyCommand (~/.agents/skills/lambda-microvm-machine).
+    # ssh ProxyCommand (~/.agents/skills/remote-lambda-microvm-machine).
     awscli2
     websocat
     qmk

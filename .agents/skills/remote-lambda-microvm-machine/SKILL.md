@@ -1,5 +1,5 @@
 ---
-name: lambda-microvm-machine
+name: remote-lambda-microvm-machine
 description: |
   Create and use Kento's dev machines on AWS Lambda MicroVMs (the `mvm` CLI), reach them over SSH, show their dev servers on the laptop, and use them in Herdr.
   Use when the user says mvm, microvm, lambda microvm, lambda dev machine, or wants a boxd-like dev machine on AWS.

@@ -35,9 +35,16 @@ class LinkMvmLaptopFileTest(unittest.TestCase):
         self.assertIn("not touching", self.link_quietly())
         self.assertEqual(self.link.read_text(), "# hand-written\n")
         self.link.unlink()
+        (self.root / "elsewhere.fish").write_text("# another tool's completion\n")
         self.link.symlink_to(self.root / "elsewhere.fish")
         self.assertIn("not touching", self.link_quietly())
         self.assertEqual(self.link.readlink(), self.root / "elsewhere.fish")
+
+    def test_replaces_a_dangling_link_left_by_a_moved_skill(self):
+        self.link.parent.mkdir(parents=True)
+        self.link.symlink_to(self.root / "old-skill-name" / "mvm.fish")
+        self.assertIn("linked", self.link_quietly())
+        self.assertEqual(self.link.resolve(), self.target)
 
 
 if __name__ == "__main__":

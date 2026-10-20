@@ -30,7 +30,7 @@ Maintenance:
   secrets push        copy your dev env vars from this shell into the machines' secret
   image build         rebuild the dev image after changing image/
 
-Run `mvm COMMAND --help` for flags. Docs: ~/.agents/skills/lambda-microvm-machine/SKILL.md
+Run `mvm COMMAND --help` for flags. Docs: ~/.agents/skills/remote-lambda-microvm-machine/SKILL.md
 """
 
 

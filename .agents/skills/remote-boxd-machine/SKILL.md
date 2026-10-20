@@ -1,5 +1,5 @@
 ---
-name: boxd-machine
+name: remote-boxd-machine
 description: |
   Create and use Kento's boxd dev machines from the aircall-dev snapshot, and attach them in Herdr.
   Use when the user says boxd machine, setup-machine, aircall-dev, spin up a dev machine, snapshot a machine, or wants a boxd SSH session in Herdr.
@@ -7,7 +7,7 @@ description: |
 
 # boxd machine
 
-Kento's reusable dev image. The external CLI is `boxd` on the laptop. Command syntax is `boxd <cmd> --help`. Behavior for the generic CLI lives in the `boxd-cli` skill. This skill is the local workflow.
+Kento's reusable dev image. The external CLI is `boxd` on the laptop. Command syntax is `boxd <cmd> --help`. Behavior for the generic CLI lives in the `remote-boxd-cli` skill. This skill is the local workflow.
 
 Agents pass every argument and use `--json`. No prompts.
 
@@ -76,7 +76,7 @@ Then `portless alias <app> <port>` on the machine. Drive the browser there (`age
 Route the identity API through the laptop with a reverse SSH tunnel. Run on the laptop:
 
 ```bash
-~/.agents/skills/boxd-machine/scripts/staging-identity-tunnel.sh start <name>
+~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh start <name>
 ```
 
 It ends with `staging identity tunnel open: ... (probe HTTP 400)`. 400 is `'email' is required` from the auth app, so the request got past the gateway. Then everything on the machine logs in with no token handling:
@@ -96,8 +96,8 @@ Boxd's SSH gateway accepts `ssh -R` and reports success, but never opens the por
 The tunnel lives as long as the laptop is awake and online. A closed lid or lost network means 000 on the machine instead of 403. Check with `status`, and run `start` again to reopen. `start` is idempotent.
 
 ```bash
-~/.agents/skills/boxd-machine/scripts/staging-identity-tunnel.sh status <name>   # 400 = through laptop, 403 = blocked egress, 000 = tunnel down
-~/.agents/skills/boxd-machine/scripts/staging-identity-tunnel.sh stop <name>
+~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh status <name>   # 400 = through laptop, 403 = blocked egress, 000 = tunnel down
+~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh stop <name>
 ```
 
 Run `stop` before `boxd machine remove`, and always before `boxd snapshots save`. A snapshot captures running processes and `/etc/hosts`, so a save taken while the tunnel is open bakes a dead tunnel into every machine made from it. `start` kills a leftover tunnel sshd, but keep the snapshot clean anyway. If the machine is already gone, `stop` still closes the laptop side.

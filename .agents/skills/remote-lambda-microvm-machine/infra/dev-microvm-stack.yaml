@@ -3,7 +3,7 @@ Description: >-
   Personal dev MicroVM plumbing (Lambda MicroVMs): artifact bucket (image build zips and the
   pnpm store cache), image build role, MicroVM execution role, the env secret the MicroVM reads
   at /run, and log retention.
-  Deployed by `mvm setup` from the lambda-microvm-machine skill.
+  Deployed by `mvm setup` from the remote-lambda-microvm-machine skill.
 
 Parameters:
   Owner:

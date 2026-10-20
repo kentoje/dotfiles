@@ -1,4 +1,4 @@
-# Dev MicroVM git config (from the lambda-microvm-machine skill image). Holds no tokens:
+# Dev MicroVM git config (from the remote-lambda-microvm-machine skill image). Holds no tokens:
 # gitlab.com credentials come from GITLAB_TOKEN through the helper below.
 [user]
 	name = Kento
