@@ -43,7 +43,8 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         cloc \
         crush \
         nono \
-        terraform
+        terraform \
+        aws-vault
 
     echo "🍺 Starting homebrew sync..."
 
