@@ -71,7 +71,7 @@ Then `portless alias <app> <port>` on the machine. Drive the browser there (`age
 
 ## Staging login
 
-`id.aircall-staging.com` answers every request from a boxd machine with 403 `ForbiddenException`. Boxd machines share the egress IP `67.213.121.191` (Latitude.sh, Frankfurt), not the machine's public IP. The API Gateway in front of the identity API rejects that source before the auth app runs. From the Mac, the same request reaches the app. Every other staging host (`dashboard`, `internal`, `internal-api`, `cdn`, the AppSync APIs) answers the machine the same way it answers the Mac. Only the identity API is blocked. That covers both login (`POST /auth/v2/users/session`) and token refresh (`GET /auth/v1/tokens/refresh`).
+`id.aircall-staging.com` answers every request from a boxd machine with 403 `ForbiddenException`, while the same request from the Mac reaches the auth app. Every other staging host (`dashboard`, `internal`, `internal-api`, `cdn`, the AppSync APIs) answers the machine the same way it answers the Mac. Only the identity API is blocked. That covers both login (`POST /auth/v2/users/session`) and token refresh (`GET /auth/v1/tokens/refresh`).
 
 Route the identity API through the laptop with a reverse SSH tunnel. Run on the laptop:
 
@@ -79,7 +79,7 @@ Route the identity API through the laptop with a reverse SSH tunnel. Run on the 
 ~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh start <name>
 ```
 
-It ends with `staging identity tunnel open: ... (probe HTTP 400)`. 400 is `'email' is required` from the auth app, so the request got past the gateway. Then everything on the machine logs in with no token handling:
+It ends with `staging identity tunnel open: ... (probe HTTP 400)`. 400 is `'email' is required` from the auth app, so the request reached the auth app. Then everything on the machine logs in with no token handling:
 
 - `pnpm dev` in `conversation-center-ext`: `build/dev-auth.ts` logs in with the injected `AIRCALL_STAGING_EMAIL` / `AIRCALL_STAGING_PASSWORD` on the first page load and sets the `ac-auth.*` cookies on the portless host.
 - The app in the machine's browser refreshes its own token through the tunnel, so the session survives past the 1-hour token expiry.
@@ -96,7 +96,7 @@ Boxd's SSH gateway accepts `ssh -R` and reports success, but never opens the por
 The tunnel lives as long as the laptop is awake and online. A closed lid or lost network means 000 on the machine instead of 403. Check with `status`, and run `start` again to reopen. `start` is idempotent.
 
 ```bash
-~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh status <name>   # 400 = through laptop, 403 = blocked egress, 000 = tunnel down
+~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh status <name>   # 400 = through laptop, 403 = not through the tunnel, 000 = tunnel down
 ~/.agents/skills/remote-boxd-machine/scripts/staging-identity-tunnel.sh stop <name>
 ```
 

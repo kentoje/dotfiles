@@ -9,11 +9,11 @@ import sys
 from mvm_cli.mvm_errors import MvmError
 from mvm_cli.mvm_settings import (
     AWS_CLI,
-    AWS_VAULT_PROFILE,
     IMAGE_NAME,
     MVM_ENTRY_SCRIPT,
     REGION,
     STACK_NAME,
+    aws_vault_profile,
 )
 
 # MicroVM states after which the machine is gone for good: no ssh, no herdr, no local name.
@@ -42,7 +42,7 @@ def reexec_under_aws_vault():
         return
     if not shutil.which("aws-vault"):
         raise MvmError("no AWS credentials in the environment and aws-vault is not installed")
-    argv = ["aws-vault", "exec", AWS_VAULT_PROFILE, "--", sys.executable, str(MVM_ENTRY_SCRIPT), *sys.argv[1:]]
+    argv = ["aws-vault", "exec", aws_vault_profile(), "--", sys.executable, str(MVM_ENTRY_SCRIPT), *sys.argv[1:]]
     os.execvp(argv[0], argv)
 
 
@@ -56,7 +56,7 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     if parse_json:
         cmd += ["--output", "json"]
     if not has_aws_credentials_in_env():
-        cmd = ["aws-vault", "exec", AWS_VAULT_PROFILE, "--", *cmd]
+        cmd = ["aws-vault", "exec", aws_vault_profile(), "--", *cmd]
     try:
         result = subprocess.run(
             cmd,
@@ -70,7 +70,7 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     except subprocess.TimeoutExpired:
         raise AwsCliError(
             f"aws {' '.join(args[:2])} timed out after {timeout}s; if AWS SSO expired, "
-            f"run: aws-vault exec {AWS_VAULT_PROFILE} -- true",
+            f"run: aws-vault exec {aws_vault_profile()} -- true",
             stderr="timeout",
         ) from None
     if result.returncode != 0:

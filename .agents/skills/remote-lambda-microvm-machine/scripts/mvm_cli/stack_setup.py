@@ -13,11 +13,11 @@ from mvm_cli.mvm_settings import (
     MVM_FISH_COMPLETION_SOURCE,
     MVM_ON_PATH,
     OWNER,
-    OWNER_EMAIL,
     REGION,
     SECRET_ENV_NAMES,
     STACK_NAME,
     STACK_TEMPLATE,
+    owner_email,
 )
 from mvm_cli.ssh_access import ensure_mvm_ssh_key, write_ssh_config_block
 
@@ -54,6 +54,7 @@ def install_mvm_fish_completion():
 def cmd_setup(args):
     """Deploy the CloudFormation stack, create the ssh key and config block, put `mvm` on PATH, link fish completion."""
     reexec_under_aws_vault()
+    email = owner_email()
     log_mvm(f"deploying stack {STACK_NAME} in {REGION}")
     subprocess.run(
         [
@@ -70,9 +71,9 @@ def cmd_setup(args):
             "CAPABILITY_NAMED_IAM",
             "--parameter-overrides",
             f"Owner={OWNER}",
-            f"OwnerEmail={OWNER_EMAIL}",
+            f"OwnerEmail={email}",
             "--tags",
-            f"owner={OWNER_EMAIL}",
+            f"owner={email}",
             "purpose=dev-microvm",
             "--no-fail-on-empty-changeset",
         ],

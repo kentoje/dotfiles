@@ -2,14 +2,14 @@
 # staging-identity-tunnel.sh - send a boxd machine's Aircall staging login and token
 # refresh through this laptop.
 #
-# id.aircall-staging.com sits behind an AWS API Gateway that answers every request
-# from boxd's shared egress IP with 403 ForbiddenException. Every other staging host
-# answers the machine normally. This script opens an SSH reverse tunnel from the
-# laptop and points the machine's /etc/hosts entry for the identity host at it, so
-# login (POST /auth/v2/users/session) and token refresh (GET /auth/v1/tokens/refresh)
-# leave from the laptop's network. TLS stays end to end between the machine and AWS:
-# the tunnel only carries the encrypted TCP stream, and no password or token is
-# handled by the laptop.
+# id.aircall-staging.com answers every request from a boxd machine with 403
+# ForbiddenException. Every other staging host answers the machine normally. This
+# script opens an SSH reverse tunnel from the laptop and points the machine's
+# /etc/hosts entry for the identity host at it, so login (POST
+# /auth/v2/users/session) and token refresh (GET /auth/v1/tokens/refresh) leave from
+# the laptop's network. TLS stays end to end between the machine and AWS: the tunnel
+# only carries the encrypted TCP stream, and no password or token is handled by the
+# laptop.
 #
 # boxd's SSH gateway accepts `ssh -R` but never opens the port inside the machine.
 # The tunnel therefore runs through a private OpenSSH server that the laptop starts
@@ -186,7 +186,7 @@ REMOTE
 
 # Prints the HTTP status the machine gets for an empty login request.
 # 400: the request reached Aircall's auth service, so the tunnel works.
-# 403: the request still leaves from boxd's egress IP.
+# 403: the request did not go through the tunnel.
 # 000: nothing answered on the tunnel address.
 probe_identity_api_from_machine() {
   machine_ssh bash -s <<REMOTE
@@ -226,7 +226,7 @@ status_staging_identity_tunnel() {
   code=$(probe_identity_api_from_machine)
   echo "tunnel: $tunnel"
   echo "hosts line on machine: ${hosts_line:-0}"
-  echo "identity API probe from machine: HTTP $code (400 = through laptop, 403 = blocked egress, 000 = tunnel down)"
+  echo "identity API probe from machine: HTTP $code (400 = through laptop, 403 = not through the tunnel, 000 = tunnel down)"
   [ "$tunnel" = open ] && [ "$code" = 400 ]
 }
 

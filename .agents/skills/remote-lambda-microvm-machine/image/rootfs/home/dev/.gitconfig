@@ -1,8 +1,6 @@
 # Dev MicroVM git config (from the remote-lambda-microvm-machine skill image). Holds no tokens:
-# gitlab.com credentials come from GITLAB_TOKEN through the helper below.
-[user]
-	name = Kento
-	email = kento.monthubert@aircall.io
+# gitlab.com credentials come from GITLAB_TOKEN through the helper below. user.name and
+# user.email are in ~/.config/git/config, written at image build from the laptop's mvm settings.
 [init]
 	defaultBranch = main
 [credential "https://gitlab.com"]

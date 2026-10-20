@@ -38,7 +38,7 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 The workspace setup continues in the background, usually for under a minute (`mvm logs <name> -f`, or `~/.local/state/mvm/bootstrap-status.json` on the machine, whose `phase` becomes `ready`):
 
 - `conversation-center-ext` is cloned with its `.env.local` (staging), dependencies and Playwright Chromium.
-- The other repos are cloned into `~/Documents/gitlab/aircall/<group>/<repo>`; they still need `pnpm install`.
+- The other repos (`workspaceRepos` in the laptop settings) are cloned into `~/Documents/gitlab/aircall/<group>/<repo>`; they still need `pnpm install`.
 - `~/dotfiles` is pulled, so pushed skill changes reach new machines.
 
 On the machine:
@@ -130,11 +130,11 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
 - `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS SSO session expired.
-  Ask the user to run `aws-vault exec ConversationInteAdmin-886862221201 -- true` and approve the browser prompt.
+  Ask the user to run `aws-vault exec <awsVaultProfile> -- true` (profile from the laptop settings) and approve the browser prompt.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
-- Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); 403 means blocked egress.
+- Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
 - gitlab.com web pages answer AWS IPs with 403; git over HTTPS and the API work.
-- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws-vault exec ConversationInteAdmin-886862221201 -- aws s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
+- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws-vault exec <awsVaultProfile> -- aws s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
   The next machine installs cold and saves a fresh snapshot.
 - Host key warnings: each machine gets fresh host keys; `mvm` forgets old ones in `~/.ssh/known_hosts_mvm`.
 
@@ -147,6 +147,23 @@ scripts/mvm, scripts/mvm_cli/  laptop CLI (Python stdlib); tests are *_test.py n
 scripts/completions/mvm.fish   fish completion, linked by `mvm setup`
 ```
 
+Per-person values stay out of this public repo, in `~/.config/mvm/settings.json` on the laptop (`MVM_SETTINGS_FILE` overrides the path).
+Create it before `mvm setup`:
+
+```json
+{
+  "awsVaultProfile": "<aws-vault profile of the AWS account>",
+  "ownerEmail": "<work email>",
+  "gitUserName": "<name for git commits>",
+  "workspaceRepos": ["dashboard-extensions/conversation-center-ext", "<group>/<repo>"]
+}
+```
+
+- `awsVaultProfile`: every AWS call, `mvm proxy` included (`MVM_AWS_VAULT_PROFILE` overrides it).
+- `ownerEmail`: owner tag on the stack and image, and git `user.email` on the machines, with `gitUserName` as `user.name`.
+- `workspaceRepos`: GitLab repos every new machine clones; keep `conversation-center-ext` first.
+- `mvm image build` bakes the git identity and the repo list into the image: rebuild after changing them.
+
 ```bash
 mvm setup           # deploy the stack, ssh key + ~/.ssh/config block, ~/.local/bin/mvm, fish completion
 mvm secrets push    # copy the dev env vars from this shell into the machines' secret (rerun after rotating a token)
@@ -157,7 +174,7 @@ mvm image build     # new image version from image/ (about 6 minutes); new machi
 - A new command or flag needs `scripts/completions/mvm.fish` too: `fish_completion_test.py` fails until it matches.
 - Secret names come from `SECRET_ENV_NAMES` in `scripts/mvm_cli/mvm_settings.py`.
   No secret ever goes into the image, `image/rootfs`, `~/.gitconfig` or `~/.npmrc`.
-- AWS: account `886862221201`, aws-vault profile `ConversationInteAdmin-886862221201`, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
+- AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
 - Machine names exist only on the laptop, in `~/.local/state/mvm/machines/<name>.json`.
   Cleanup forgets a machine only after AWS confirms it ended.

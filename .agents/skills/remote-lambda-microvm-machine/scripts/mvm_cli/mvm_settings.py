@@ -1,17 +1,21 @@
 """mvm settings: AWS account layout, image sizing, laptop paths. Override the env-backed ones with MVM_* vars.
 
+Per-person values (aws-vault profile, email, git name, workspace repos) are not in this public
+repo: they come from the laptop settings file, read on demand by the accessors at the bottom.
+
 Must stay compatible with macOS's /usr/bin/python3 (3.9): ssh and herdr run `mvm proxy` with a
 minimal PATH where `env python3` resolves to it.
 """
 
+import json
 import os
 import re
 from pathlib import Path
 
+from mvm_cli.mvm_errors import MvmError
+
 OWNER = os.environ.get("MVM_OWNER", "kento")
-OWNER_EMAIL = os.environ.get("MVM_OWNER_EMAIL", "kento.monthubert@aircall.io")
 REGION = os.environ.get("MVM_REGION", "eu-central-1")
-AWS_VAULT_PROFILE = os.environ.get("MVM_AWS_VAULT_PROFILE", "ConversationInteAdmin-886862221201")
 # AWS CLI v2 with the `lambda-microvms` commands (2.35+). nix-darwin's comes first on PATH (see
 # NIX_SYSTEM_BIN_DIR), ahead of older standalone installs in /usr/local/bin.
 AWS_CLI = os.environ.get("MVM_AWS_CLI", "aws")
@@ -94,3 +98,57 @@ HERDR_LABEL_PREFIX = "aws-"
 NIX_SYSTEM_BIN_DIR = "/run/current-system/sw/bin"
 # Appended to PATH: ssh and herdr run `mvm proxy` with whatever PATH they were started with.
 EXTRA_PATH_DIRS = ["/opt/homebrew/bin", "/usr/local/bin", str(Path.home() / ".local/bin")]
+
+# Laptop settings file: untracked JSON with the per-person values below. MVM_SETTINGS_FILE overrides the path.
+MVM_LAPTOP_SETTINGS_FILE = Path.home() / ".config/mvm/settings.json"
+
+
+def mvm_laptop_settings_path():
+    return Path(os.environ.get("MVM_SETTINGS_FILE") or MVM_LAPTOP_SETTINGS_FILE)
+
+
+def read_mvm_laptop_setting(key, env_name=None):
+    """Return one laptop setting: env var ENV_NAME when set, else KEY in the laptop settings file.
+
+    Read on each call, never at import, so a command needs only the keys it uses. Raises MvmError
+    naming the file and the key when the setting is missing.
+    """
+    if env_name and os.environ.get(env_name):
+        return os.environ[env_name]
+    path = mvm_laptop_settings_path()
+    try:
+        settings = json.loads(path.read_text())
+    except FileNotFoundError:
+        settings = {}
+    except (OSError, ValueError) as error:
+        raise MvmError(f"mvm settings file unreadable: {path}: {error}") from None
+    if not isinstance(settings, dict):
+        raise MvmError(f"mvm settings file unreadable: {path}: expected a JSON object")
+    value = settings.get(key)
+    if not value:
+        override = f" (or set {env_name})" if env_name else ""
+        raise MvmError(f"mvm settings missing {key}: add it to {path}{override}")
+    return value
+
+
+def aws_vault_profile():
+    """aws-vault profile for every AWS call (its account holds the stack and the MicroVMs)."""
+    return read_mvm_laptop_setting("awsVaultProfile", "MVM_AWS_VAULT_PROFILE")
+
+
+def owner_email():
+    """Owner email: the stack's and image's owner tags, and git user.email on the machines."""
+    return read_mvm_laptop_setting("ownerEmail", "MVM_OWNER_EMAIL")
+
+
+def git_user_name():
+    """git user.name on the machines (the WIP save at terminate commits with it)."""
+    return read_mvm_laptop_setting("gitUserName", "MVM_GIT_USER_NAME")
+
+
+def workspace_repo_paths():
+    """GitLab repo paths (`group/repo`) every new machine clones; the first one is cloned and installed first."""
+    repos = read_mvm_laptop_setting("workspaceRepos")
+    if not isinstance(repos, list) or not all(isinstance(repo, str) and repo.strip() for repo in repos):
+        raise MvmError(f"mvm settings workspaceRepos must be a list of GitLab paths: {mvm_laptop_settings_path()}")
+    return [repo.strip() for repo in repos]

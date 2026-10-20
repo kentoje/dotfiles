@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Workspace bootstrap for the dev MicroVM. Started as dev in the background by mvm-on-run.
 #
-# Clones the GitLab repos listed in /opt/mvm/etc/workspace-repos.txt (blob-less, in parallel)
+# Clones the GitLab repos listed in /opt/mvm/etc/workspace-repos.txt (blob-less, in parallel;
+# written at image build from workspaceRepos in the laptop's mvm settings, cc-ext first)
 # into ~/Documents/gitlab/aircall/<path>, then makes conversation-center-ext ready to run:
 # .env.local, pnpm install (from the S3 pnpm store cache when it has a snapshot, see
 # mvm-pnpm-store-cache), Playwright Chromium. The GraphQL schema and gql.tada types are

@@ -71,7 +71,7 @@ RUN curl -fsSL -o /usr/local/bin/agent-browser \
       "https://github.com/vercel-labs/agent-browser/releases/download/v${AGENT_BROWSER_VERSION}/agent-browser-linux-arm64" \
  && chmod 755 /usr/local/bin/agent-browser
 
-# --- dev user (uid 1000, no password: sshd keys only) -------------------------------------------
+# --- dev user (uid 1000, locked account: login with ssh keys only) -------------------------------
 # No sudo grant: Lambda starts PID 1 with no_new_privs, so sudo can never raise privileges on a
 # MicroVM (it exits saying so). System packages and root setup belong in this Dockerfile.
 RUN userdel -r ubuntu 2>/dev/null || true; \
@@ -137,8 +137,9 @@ RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfi
  && ln -s ~/dotfiles/.config/nvim ~/.config/nvim \
  && ln -s ~/dotfiles/.config/yazi ~/.config/yazi
 
-# Optional laptop files added to the build zip by `mvm image build`: allowlisted non-secret
-# config, and git bundles of private repos (the build has no GitHub credentials).
+# Laptop files added to the build zip by `mvm image build`: the workspace repo list and git
+# identity from the laptop's mvm settings (always there), allowlisted non-secret config, and git
+# bundles of private repos (the build has no GitHub credentials).
 COPY --chown=dev:dev laptop-files/ /opt/mvm/laptop-files/
 
 # herdr ctrl+hjkl navigation plugin (private repo, native Rust build), linked like on the laptop.
@@ -169,6 +170,8 @@ COPY rootfs/ /
 RUN chmod 755 /opt/mvm/bin/* \
  && cat /opt/mvm/etc/dev-bashrc-prelude.sh /etc/skel/.bashrc >/home/dev/.bashrc \
  && chmod 755 /home/dev/.config/git/gitlab-credential.sh \
+ && install -m 644 /opt/mvm/laptop-files/workspace-repos.txt /opt/mvm/etc/workspace-repos.txt \
+ && install -m 644 /opt/mvm/laptop-files/git-identity.gitconfig /home/dev/.config/git/config \
  && if [ -f /opt/mvm/laptop-files/jira-config.yml ]; then \
       install -D -m 600 /opt/mvm/laptop-files/jira-config.yml /home/dev/.config/.jira/.config.yml; fi \
  && chown -R dev:dev /home/dev \

@@ -2,7 +2,7 @@
 # Network and credential health check for the dev MicroVM. Prints JSON; never prints secrets.
 #
 # Checks that the staging identity API answers this machine (HTTP 400 "'email' is required"
-# means the request passed the WAF; 403 means the egress IP is blocked), the egress IP,
+# means the request reached the auth app), the egress IP,
 # the execution role identity, and reachability of the package and git hosts.
 #
 # Usage: mvm-network-doctor [--write]   (--write also saves /var/lib/mvm/network-doctor.json)
