@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Runs as root from the /terminate lifecycle hook (lifetime cap reached or `mvm rm`).
+# Pushes unpushed work to wip/mvm/<machine>/<branch> refs before the disk is gone.
+# Lambda does not call /terminate for a SUSPENDED MicroVM: mvm-on-suspend covers that case.
+set -uo pipefail
+timeout 45 runuser -u dev -- bash -lc /opt/mvm/bin/mvm-save-wip-branches || echo "[mvm-on-terminate] WIP save incomplete"

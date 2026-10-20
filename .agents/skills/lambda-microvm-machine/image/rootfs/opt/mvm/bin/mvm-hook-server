@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""Dev MicroVM lifecycle hook server and process supervisor (PID 1's only child, under tini).
+
+Lambda MicroVMs call the lifecycle hooks on HOOK_PORT at
+/aws/lambda-microvms/runtime/v1/<hook>: /ready during the image build, then /run, /resume,
+/suspend and /terminate at runtime. Each hook delegates to a script in /opt/mvm/bin so the
+behavior stays readable in shell.
+
+After /run succeeds, this server starts and supervises the long-running services (sshd and the
+WebSocket-to-SSH bridge). Nothing is started before /run, so the image snapshot holds no sshd,
+no host keys and no secrets.
+
+This process is captured in the image snapshot, so it must never hold secrets or do TLS itself.
+"""
+
+import json
+import os
+import subprocess
+import sys
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+HOOK_PORT = 9000
+HOOK_PATH_PREFIX = "/aws/lambda-microvms/runtime/v1/"
+MVM_BIN = "/opt/mvm/bin"
+STATE_DIR = "/run/mvm"
+
+# Long-running services started after /run. Restarted with backoff when they exit.
+SUPERVISED_SERVICES = {
+    "sshd": ["/usr/sbin/sshd", "-D", "-e"],
+    # Lambda forwards WebSocket connections on the MicroVM endpoint to this port. Each
+    # connection becomes one TCP stream to sshd, so `ssh` on the laptop can use the
+    # endpoint through a websocat ProxyCommand.
+    "ssh-websocket-bridge": [
+        "/usr/local/bin/websocat",
+        "--binary",
+        "--ping-interval",
+        "30",
+        "ws-l:0.0.0.0:2222",
+        "tcp:127.0.0.1:22",
+    ],
+}
+
+
+def log_hook_event(message):
+    """Write one line to stdout, which Lambda ships to the image's CloudWatch log group."""
+    print(f"[mvm-hook-server] {message}", flush=True)
+
+
+def run_hook_script(script_name, args, timeout_seconds):
+    """Run /opt/mvm/bin/<script_name>; return True on exit code 0. Output goes to our stdout."""
+    path = os.path.join(MVM_BIN, script_name)
+    if not os.path.exists(path):
+        return True
+    started = time.monotonic()
+    try:
+        result = subprocess.run([path, *args], timeout=timeout_seconds, stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        log_hook_event(f"{script_name} timed out after {timeout_seconds}s")
+        return False
+    log_hook_event(f"{script_name} exited {result.returncode} in {time.monotonic() - started:.1f}s")
+    return result.returncode == 0
+
+
+class ServiceSupervisor:
+    """Keeps SUPERVISED_SERVICES running once started; idempotent start."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._started = False
+        self._processes = {}
+
+    def start(self):
+        with self._lock:
+            if self._started:
+                return
+            self._started = True
+        threading.Thread(target=self._loop, name="supervisor", daemon=True).start()
+
+    def _loop(self):
+        backoff = {name: 1 for name in SUPERVISED_SERVICES}
+        while True:
+            for name, argv in SUPERVISED_SERVICES.items():
+                process = self._processes.get(name)
+                if process is not None and process.poll() is None:
+                    continue
+                if process is not None:
+                    log_hook_event(f"service {name} exited {process.returncode}, restarting in {backoff[name]}s")
+                    time.sleep(backoff[name])
+                    backoff[name] = min(backoff[name] * 2, 30)
+                else:
+                    log_hook_event(f"service {name} starting")
+                self._processes[name] = subprocess.Popen(argv, stdin=subprocess.DEVNULL, start_new_session=True)
+            time.sleep(2)
+
+    def status(self):
+        return {name: (p.poll() is None) for name, p in self._processes.items()}
+
+
+SUPERVISOR = ServiceSupervisor()
+PHASE = {"value": "image-build"}
+
+
+class HookHandler(BaseHTTPRequestHandler):
+    server_version = "mvm-hook-server/1"
+
+    def log_message(self, fmt, *args):
+        # command/path are unset when the request line itself was malformed.
+        log_hook_event(f"{getattr(self, 'command', '-')} {getattr(self, 'path', '-')} -> {fmt % args}")
+
+    def _reply(self, status, body):
+        data = json.dumps(body).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _read_body(self):
+        length = int(self.headers.get("Content-Length") or 0)
+        return self.rfile.read(length) if length else b""
+
+    def do_GET(self):
+        if self.path == "/mvm/health":
+            return self._reply(200, {"phase": PHASE["value"], "services": SUPERVISOR.status()})
+        return self._reply(404, {"error": "not found"})
+
+    def do_POST(self):
+        if not self.path.startswith(HOOK_PATH_PREFIX):
+            return self._reply(404, {"error": "not found"})
+        hook = self.path[len(HOOK_PATH_PREFIX):].strip("/")
+        body = self._read_body()
+
+        if hook == "ready":
+            # Image build: everything the snapshot needs is already on disk.
+            return self._reply(200, {"ready": True})
+        if hook == "validate":
+            return self._reply(200, {"valid": True})
+        if hook == "run":
+            os.makedirs(STATE_DIR, mode=0o700, exist_ok=True)
+            request_path = os.path.join(STATE_DIR, "run-request.json")
+            fd = os.open(request_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "wb") as f:
+                f.write(body or b"{}")
+            ok = run_hook_script("mvm-on-run", [request_path], timeout_seconds=50)
+            if not ok:
+                PHASE["value"] = "run-failed"
+                return self._reply(500, {"error": "mvm-on-run failed, see logs"})
+            SUPERVISOR.start()
+            PHASE["value"] = "running"
+            return self._reply(200, {"ok": True})
+        if hook == "resume":
+            run_hook_script("mvm-on-resume", [], timeout_seconds=25)
+            PHASE["value"] = "running"
+            return self._reply(200, {"ok": True})
+        if hook == "suspend":
+            PHASE["value"] = "suspending"
+            run_hook_script("mvm-on-suspend", [], timeout_seconds=50)
+            return self._reply(200, {"ok": True})
+        if hook == "terminate":
+            PHASE["value"] = "terminating"
+            run_hook_script("mvm-on-terminate", [], timeout_seconds=50)
+            return self._reply(200, {"ok": True})
+        return self._reply(404, {"error": f"unknown hook {hook}"})
+
+
+def main():
+    server = ThreadingHTTPServer(("0.0.0.0", HOOK_PORT), HookHandler)
+    log_hook_event(f"listening on :{HOOK_PORT}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

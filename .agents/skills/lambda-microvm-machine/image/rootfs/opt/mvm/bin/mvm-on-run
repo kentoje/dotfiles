@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Runs as root from the /run lifecycle hook, once per MicroVM, right after it starts from the
+# image snapshot. Must finish well inside the hook timeout: anything slow goes to the
+# background workspace bootstrap.
+#
+# Usage: mvm-on-run <run-request.json>
+#   run-request.json is Lambda's /run body: {"microvmId": "...", "runHookPayload": "<json>"}.
+#   runHookPayload is written by `mvm new` on the laptop (see MvmRunPayload there):
+#   {"name", "sshAuthorizedKeys": [...], "envSecretId", "envSecretRegion", "bootstrapWorkspace",
+#    "pnpmStoreCacheUri", "devServerPort"}
+set -euo pipefail
+
+request_file=$1
+dev_home=/home/dev
+log() { echo "[mvm-on-run] $*"; }
+
+payload=$(jq -r '.runHookPayload // "{}"' "$request_file")
+microvm_id=$(jq -r '.microvmId // empty' "$request_file")
+machine_name=$(jq -r '.name // empty' <<<"$payload")
+env_secret_id=$(jq -r '.envSecretId // empty' <<<"$payload")
+env_secret_region=$(jq -r '.envSecretRegion // empty' <<<"$payload")
+pnpm_store_cache_uri=$(jq -r '.pnpmStoreCacheUri // empty' <<<"$payload")
+dev_server_port=$(jq -r '.devServerPort // empty' <<<"$payload")
+# Not `// true`: jq's alternative operator treats an explicit false like null.
+bootstrap_workspace=$(jq -r 'if .bootstrapWorkspace == false then "false" else "true" end' <<<"$payload")
+log "microvm=$microvm_id name=${machine_name:-<none>}"
+
+# Identity of this machine, readable by the dev user and by `mvm` helpers on the machine
+# (mvm-pnpm-store-cache reads pnpmStoreCacheUri, mvm-bootstrap-workspace devServerPort; empty
+# or null when an older `mvm` started it).
+install -d -m 755 /etc/mvm
+jq -n --arg id "$microvm_id" --arg name "$machine_name" --arg region "${AWS_REGION:-}" \
+  --arg cache "$pnpm_store_cache_uri" --arg port "$dev_server_port" \
+  '{microvmId: $id, name: $name, region: $region, pnpmStoreCacheUri: $cache,
+    devServerPort: ($port | if . == "" then null else tonumber end)}' >/etc/mvm/machine.json
+chmod 644 /etc/mvm/machine.json
+
+# Hostname = machine name, so prompts and herdr show which MicroVM this is. Cosmetic: never
+# allowed to fail /run. It resolves through nss myhostname (see the Dockerfile): Lambda's
+# /etc/hosts is read-only.
+if [ -n "$machine_name" ]; then
+  hostname "$machine_name" 2>/dev/null || true
+fi
+
+# Fresh SSH host keys per MicroVM. The image snapshot never contains any.
+rm -f /etc/ssh/ssh_host_*
+ssh-keygen -A -q
+install -d -m 755 /run/sshd
+
+install -d -m 700 -o dev -g dev "$dev_home/.ssh"
+jq -r '.sshAuthorizedKeys // [] | .[]' <<<"$payload" >"$dev_home/.ssh/authorized_keys"
+chown dev:dev "$dev_home/.ssh/authorized_keys"
+chmod 600 "$dev_home/.ssh/authorized_keys"
+log "authorized keys: $(wc -l <"$dev_home/.ssh/authorized_keys")"
+
+# Env vars for every dev shell (secrets plus the AWS credential pointers Lambda gives PID 1).
+/opt/mvm/bin/mvm-write-dev-env "$env_secret_id" "$env_secret_region" || log "WARNING: dev env incomplete, see above"
+
+# Background jobs below keep this script's stdout: the container's, which Lambda ships to the
+# machine's CloudWatch stream (`mvm logs NAME` on the laptop).
+
+# Network and credential diagnostics as one JSON line, in the background so /run returns fast.
+setsid -f bash -c '/opt/mvm/bin/mvm-network-doctor --write | jq -c "{mvmNetworkDoctor: .}"' </dev/null
+
+if [ "$bootstrap_workspace" = "true" ] && [ -x /opt/mvm/bin/mvm-bootstrap-workspace ]; then
+  install -d -m 755 -o dev -g dev "$dev_home/.local/state/mvm"
+  # Also kept on the machine in ~/.local/state/mvm/bootstrap.log.
+  setsid -f bash -c 'runuser -u dev -- bash -lc /opt/mvm/bin/mvm-bootstrap-workspace 2>&1 | tee -a "$1"' \
+    _ "$dev_home/.local/state/mvm/bootstrap.log" </dev/null
+  log "workspace bootstrap started"
+fi

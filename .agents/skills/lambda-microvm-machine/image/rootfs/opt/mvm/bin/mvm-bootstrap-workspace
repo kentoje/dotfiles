@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Workspace bootstrap for the dev MicroVM. Started as dev in the background by mvm-on-run.
+#
+# Clones the GitLab repos listed in /opt/mvm/etc/workspace-repos.txt (blob-less, in parallel)
+# into ~/Documents/gitlab/aircall/<path>, then makes conversation-center-ext ready to run:
+# .env.local, pnpm install (from the S3 pnpm store cache when it has a snapshot, see
+# mvm-pnpm-store-cache), Playwright Chromium. The GraphQL schema and gql.tada types are
+# committed in the repo; refresh them with `pnpm graphql:download && pnpm graphql:generate`.
+#
+# Progress: ~/.local/state/mvm/bootstrap-status.json (per-step status and durations).
+# Log:      ~/.local/state/mvm/bootstrap.log, also in CloudWatch (`mvm logs NAME` on the laptop).
+# Safe to re-run: existing clones are fetched instead of cloned.
+set -uo pipefail
+
+state_dir="$HOME/.local/state/mvm"
+status_file="$state_dir/bootstrap-status.json"
+repos_file=/opt/mvm/etc/workspace-repos.txt
+gitlab_root="$HOME/Documents/gitlab/aircall"
+clone_staging_root="$HOME/.cache/mvm/clones"
+cc_ext="$gitlab_root/dashboard-extensions/conversation-center-ext"
+clone_parallelism=8
+
+mkdir -p "$state_dir" "$gitlab_root"
+started_at=$(date +%s)
+jq -n --arg at "$(date -u +%FT%TZ)" '{phase: "running", startedAt: $at, steps: {}}' >"$status_file"
+
+# update_bootstrap_status JQ_ARGS...: apply a jq filter to the status file under a lock
+# (the conversation-center-ext job and the clone loop write concurrently).
+update_bootstrap_status() {
+  (
+    flock 9
+    tmp=$(mktemp)
+    jq "$@" "$status_file" >"$tmp" && mv "$tmp" "$status_file"
+  ) 9>"$status_file.lock"
+}
+
+# record_bootstrap_step NAME STATUS SECONDS: merge one step result into the status file.
+record_bootstrap_step() {
+  update_bootstrap_status --arg name "$1" --arg status "$2" --argjson seconds "$3" \
+    '.steps[$name] = {status: $status, seconds: $seconds}'
+}
+
+# run_bootstrap_step NAME CMD...: run CMD, log it, record ok/failed with its duration.
+run_bootstrap_step() {
+  local name=$1 t0 rc
+  shift
+  t0=$(date +%s)
+  record_bootstrap_step "$name" running 0
+  echo "[mvm-bootstrap] $(date -u +%T) $name: start"
+  "$@"
+  rc=$?
+  local status=ok
+  [ $rc -eq 0 ] || status=failed
+  record_bootstrap_step "$name" "$status" $(($(date +%s) - t0))
+  echo "[mvm-bootstrap] $(date -u +%T) $name: $status ($(($(date +%s) - t0))s)"
+  return $rc
+}
+
+# clone_or_fetch_gitlab_repo GROUP/REPO
+# A new clone is made in $clone_staging_root and moved into ~/Documents only once complete:
+# mvm-save-wip-branches (run at suspend/terminate) must never see a half-done clone, which
+# looks like a checkout with uncommitted work.
+clone_or_fetch_gitlab_repo() {
+  local path=$1 dest="$gitlab_root/$1" staging
+  if [ -d "$dest/.git" ]; then
+    git -C "$dest" fetch --quiet origin
+    return
+  fi
+  staging="$clone_staging_root/${path//\//__}"
+  rm -rf "$staging"
+  mkdir -p "$(dirname "$dest")" "$clone_staging_root"
+  git clone --quiet --filter=blob:none "https://gitlab.com/aircall/$path.git" "$staging" \
+    && mv "$staging" "$dest"
+}
+export -f clone_or_fetch_gitlab_repo
+export gitlab_root clone_staging_root
+
+clone_other_repos() {
+  grep -v -E '^\s*(#|$)' "$repos_file" | tail -n +2 |
+    xargs -P "$clone_parallelism" -I{} bash -c 'clone_or_fetch_gitlab_repo "$1" || echo "[mvm-bootstrap] clone failed: $1"' _ {}
+}
+
+# write_cc_ext_env_local: the README's `cp .env.example` (staging PUBLIC_* URLs), minus the
+# empty AWS key and E2E password placeholders: empty AWS_* values would shadow the machine's
+# execution role. scripts/new-worktree.sh copies this file into each worktree.
+# Plus PORT = the machine's devServerPort (from `mvm new`, unique among the laptop's machines),
+# so `mvm forward` can serve the main checkout's dev server at the same port on the laptop.
+write_cc_ext_env_local() {
+  [ -f "$cc_ext/.env.local" ] && return 0
+  grep -v -E '^(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|E2E_USER_PASSWORD)=' \
+    "$cc_ext/.env.example" >"$cc_ext/.env.local"
+  local dev_server_port
+  dev_server_port=$(jq -r '.devServerPort // empty' /etc/mvm/machine.json 2>/dev/null)
+  [ -n "$dev_server_port" ] || return 0
+  # `export PORT=`, not `PORT=`: scripts/setup-worktree.sh only assigns a worktree its own port
+  # when the copied file has no `^PORT=` line. dotenv and `source` both read the export form, and
+  # the worktree's appended PORT= line comes later, so it wins there.
+  printf '\n%s\n%s\nexport PORT=%s\n' \
+    "# mvm: this machine's dev server port, unique among your mvm machines (mvm forward maps it to the same localhost port)." \
+    "# In a worktree, the PORT= line that scripts/setup-worktree.sh appends below wins." \
+    "$dev_server_port" >>"$cc_ext/.env.local"
+}
+
+# Hit kind of the pnpm store restore: exact | latest | present | miss (see mvm-pnpm-store-cache).
+cc_ext_pnpm_store_hit=miss
+
+restore_cc_ext_pnpm_store() {
+  cc_ext_pnpm_store_hit=$(mvm-pnpm-store-cache restore "$cc_ext") || cc_ext_pnpm_store_hit=miss
+  echo "[mvm-bootstrap] pnpm store cache: $cc_ext_pnpm_store_hit"
+}
+
+# save_cc_ext_pnpm_store: archive now, while nothing else uses the store, and upload in the
+# background so the machine is ready without waiting for S3. Skipped when the snapshot for this
+# lockfile already exists. Never fails the workspace setup.
+save_cc_ext_pnpm_store() {
+  case $cc_ext_pnpm_store_hit in exact | present) return 0 ;; esac
+  run_bootstrap_step cc-ext-pnpm-store-archive mvm-pnpm-store-cache archive "$cc_ext" || return 0
+  run_bootstrap_step cc-ext-pnpm-store-upload mvm-pnpm-store-cache upload "$cc_ext" &
+}
+
+# --prefer-offline downloads only what the restored store lacks: nothing after an exact hit
+# (measured as fast as --offline), the changed packages after a latest hit.
+prepare_conversation_center_ext() {
+  run_bootstrap_step cc-ext-env-local write_cc_ext_env_local &&
+    run_bootstrap_step cc-ext-pnpm-store-restore restore_cc_ext_pnpm_store &&
+    run_bootstrap_step cc-ext-pnpm-install bash -c "cd '$cc_ext' && pnpm install --frozen-lockfile --prefer-offline" &&
+    save_cc_ext_pnpm_store &&
+    run_bootstrap_step cc-ext-playwright bash -c "cd '$cc_ext' && pnpm exec playwright install chromium"
+}
+
+if [ -z "${GITLAB_TOKEN:-}" ]; then
+  echo "[mvm-bootstrap] GITLAB_TOKEN missing from ~/.config/mvm/env.sh; run 'mvm secrets push' on the laptop"
+  update_bootstrap_status '.phase = "failed" | .error = "GITLAB_TOKEN missing"'
+  exit 1
+fi
+
+run_bootstrap_step dotfiles-pull git -C "$HOME/dotfiles" pull --ff-only --quiet
+
+first_repo=$(grep -v -E '^\s*(#|$)' "$repos_file" | head -1)
+run_bootstrap_step clone-first-repo clone_or_fetch_gitlab_repo "$first_repo"
+
+# conversation-center-ext setup runs while the other repos clone.
+prepare_conversation_center_ext &
+cc_pid=$!
+run_bootstrap_step clone-other-repos clone_other_repos
+wait "$cc_pid"
+cc_rc=$?
+
+phase=ready
+[ $cc_rc -eq 0 ] || phase=degraded
+update_bootstrap_status --arg phase "$phase" --argjson seconds $(($(date +%s) - started_at)) --arg at "$(date -u +%FT%TZ)" \
+  '.phase = $phase | .totalSeconds = $seconds | .finishedAt = $at'
+echo "[mvm-bootstrap] $(date -u +%T) done: $phase in $(($(date +%s) - started_at))s"

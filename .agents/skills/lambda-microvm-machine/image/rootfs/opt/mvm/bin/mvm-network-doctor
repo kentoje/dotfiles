@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Network and credential health check for the dev MicroVM. Prints JSON; never prints secrets.
+#
+# Checks that the staging identity API answers this machine (HTTP 400 "'email' is required"
+# means the request passed the WAF; 403 means the egress IP is blocked), the egress IP,
+# the execution role identity, and reachability of the package and git hosts.
+#
+# Usage: mvm-network-doctor [--write]   (--write also saves /var/lib/mvm/network-doctor.json)
+set -uo pipefail
+
+http_status() { curl -s -o /dev/null -m 10 -w '%{http_code}' "$@" || true; }
+
+identity_api_status=$(http_status -X POST https://id.aircall-staging.com/auth/v2/users/session \
+  -H 'content-type: application/json' -d '{}')
+egress_ip=$(curl -s -m 10 https://checkip.amazonaws.com | tr -d '[:space:]' || true)
+aws_identity_arn=$(timeout 20 aws sts get-caller-identity --query Arn --output text 2>&1 | tail -1)
+imds_token_status=$(http_status -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 60')
+ecs_credentials_status=$(http_status http://169.254.170.2/)
+aws_env_names=$(env | cut -d= -f1 | grep -E '^AWS_' | sort | tr '\n' ' ')
+
+jq -n \
+  --arg checkedAt "$(date -u +%FT%TZ)" \
+  --arg identityApiStatus "$identity_api_status" \
+  --arg egressIp "$egress_ip" \
+  --arg awsIdentityArn "$aws_identity_arn" \
+  --arg imdsTokenStatus "$imds_token_status" \
+  --arg ecsCredentialsStatus "$ecs_credentials_status" \
+  --arg awsEnvNames "$aws_env_names" \
+  --arg gitlab "$(http_status https://gitlab.com/api/v4/version)" \
+  --arg npmRegistry "$(http_status https://registry.npmjs.org/)" \
+  --arg gemfury "$(http_status https://npm.fury.io/)" \
+  --arg dashboardStaging "$(http_status https://dashboard.aircall-staging.com/)" \
+  --arg disk "$(df -h / | tail -1 | awk '{print $2" total, "$4" free"}')" \
+  --arg memory "$(free -m | awk '/^Mem:/ {print $2" MiB total, "$7" MiB available"}')" \
+  --arg cpus "$(nproc)" \
+  --arg kernel "$(uname -r)" \
+  --arg capEff "$(grep CapEff /proc/self/status | awk '{print $2}')" \
+  '{checkedAt: $checkedAt, identityApiStatus: $identityApiStatus, egressIp: $egressIp,
+    awsIdentityArn: $awsIdentityArn, imdsTokenStatus: $imdsTokenStatus,
+    ecsCredentialsStatus: $ecsCredentialsStatus, awsEnvNames: $awsEnvNames,
+    reachability: {gitlab: $gitlab, npmRegistry: $npmRegistry, gemfury: $gemfury, dashboardStaging: $dashboardStaging},
+    disk: $disk, memory: $memory, cpus: $cpus, kernel: $kernel, capEff: $capEff}' >/tmp/mvm-network-doctor.json
+
+cat /tmp/mvm-network-doctor.json
+if [ "${1:-}" = "--write" ]; then
+  install -d -m 755 /var/lib/mvm
+  mv /tmp/mvm-network-doctor.json /var/lib/mvm/network-doctor.json
+  chmod 644 /var/lib/mvm/network-doctor.json
+fi

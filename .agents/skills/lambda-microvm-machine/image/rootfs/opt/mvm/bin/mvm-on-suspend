@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Runs as root from the /suspend lifecycle hook (an idle policy or a suspend-microvm API call;
+# `mvm new` sets no idle policy, so machines only suspend when asked).
+# Pushes unpushed work to wip/mvm/<machine>/<branch> refs, because Lambda terminates a
+# SUSPENDED MicroVM (lifetime cap, suspended-duration limit, `mvm rm`) without calling
+# /terminate. Nothing changes while suspended, so this snapshot is the machine's last state.
+set -uo pipefail
+timeout 45 runuser -u dev -- bash -lc /opt/mvm/bin/mvm-save-wip-branches || echo "[mvm-on-suspend] WIP save incomplete"

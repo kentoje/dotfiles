@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Personal dev MicroVM plumbing (Lambda MicroVMs): artifact bucket (image build zips and the
+  pnpm store cache), image build role, MicroVM execution role, the env secret the MicroVM reads
+  at /run, and log retention.
+  Deployed by `mvm setup` from the lambda-microvm-machine skill.
+
+Parameters:
+  Owner:
+    Type: String
+    Description: Short owner handle used in resource names (for example "kento").
+    AllowedPattern: "[a-z0-9-]+"
+  OwnerEmail:
+    Type: String
+    Description: Owner email, written to the owner tag only.
+  AppSyncRegion:
+    Type: String
+    Default: us-west-2
+    Description: Region of the staging AppSync APIs whose introspection schema the MicroVM downloads.
+
+Resources:
+  # Build zips (Dockerfile + rootfs) uploaded by `mvm image build`, and pnpm store snapshots
+  # (pnpm-store/, written and read by mvm-pnpm-store-cache on the machines). Both expire.
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "dev-microvm-${Owner}-${AWS::AccountId}-${AWS::Region}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-build-zips
+            Status: Enabled
+            Prefix: builds/
+            ExpirationInDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+          # A snapshot (and the `latest` pointer) is rewritten whenever a machine installs a new
+          # lockfile; one untouched for 30 days is stale. Uploads cut short by `mvm rm` or the
+          # lifetime cap leave multipart parts behind: drop them after a day.
+          - Id: expire-pnpm-store-cache
+            Status: Enabled
+            Prefix: pnpm-store/
+            ExpirationInDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      Tags:
+        - { Key: owner, Value: !Ref OwnerEmail }
+        - { Key: purpose, Value: dev-microvm }
+
+  # Build and runtime logs. Lambda writes both under /aws/lambda-microvms/<image-name>.
+  ImageLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda-microvms/dev-microvm-${Owner}"
+      RetentionInDays: 14
+      Tags:
+        - { Key: owner, Value: !Ref OwnerEmail }
+        - { Key: purpose, Value: dev-microvm }
+
+  # Holds the env vars the MicroVM exports to the dev user (GITLAB_TOKEN, GEMFURY_AUTH, ...),
+  # as one JSON object. `mvm secrets push` writes the value from the laptop environment.
+  # Only the execution role can read it, never the build role, so no image snapshot holds it.
+  EnvSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "dev-microvm/${Owner}/env"
+      Description: Env vars exported to the dev user inside the dev MicroVM at /run.
+      SecretString: "{}"
+      Tags:
+        - { Key: owner, Value: !Ref OwnerEmail }
+        - { Key: purpose, Value: dev-microvm }
+
+  # Assumed by Lambda while it builds the image: reads the build zip and writes build logs.
+  # Deliberately has no access to the env secret.
+  BuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "dev-microvm-${Owner}-build"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: [sts:AssumeRole, sts:TagSession]
+      Policies:
+        - PolicyName: build
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${ArtifactBucket.Arn}/builds/*"
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-microvms/*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-microvms/*:*"
+      Tags:
+        - { Key: owner, Value: !Ref OwnerEmail }
+        - { Key: purpose, Value: dev-microvm }
+
+  # Assumed by each running MicroVM: reads the env secret at /run, downloads AppSync
+  # introspection schemas, reads and writes the pnpm store cache, writes runtime logs.
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "dev-microvm-${Owner}-execution"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: [sts:AssumeRole, sts:TagSession]
+      Policies:
+        - PolicyName: runtime
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref EnvSecret
+              # GetIntrospectionSchema authorizes against the "/v1/apis/<id>/schema" ARN form.
+              - Effect: Allow
+                Action: appsync:GetIntrospectionSchema
+                Resource:
+                  - !Sub "arn:aws:appsync:${AppSyncRegion}:${AWS::AccountId}:/v1/apis/*"
+                  - !Sub "arn:aws:appsync:${AppSyncRegion}:${AWS::AccountId}:apis/*"
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-microvms/*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-microvms/*:*"
+              # pnpm store cache (mvm-pnpm-store-cache): read and write snapshots under pnpm-store/ only.
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:AbortMultipartUpload]
+                Resource: !Sub "${ArtifactBucket.Arn}/pnpm-store/*"
+              # Listing rights make a missing snapshot answer 404 instead of 403, so the machine's
+              # log tells "not cached yet" apart from a broken role.
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt ArtifactBucket.Arn
+                Condition:
+                  StringLike:
+                    s3:prefix: pnpm-store/*
+      Tags:
+        - { Key: owner, Value: !Ref OwnerEmail }
+        - { Key: purpose, Value: dev-microvm }
+
+Outputs:
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+  BuildRoleArn:
+    Value: !GetAtt BuildRole.Arn
+  ExecutionRoleArn:
+    Value: !GetAtt ExecutionRole.Arn
+  EnvSecretArn:
+    Value: !Ref EnvSecret
+  ImageLogGroupName:
+    Value: !Ref ImageLogGroup

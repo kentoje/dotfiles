@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Writes the dev user's env file (~dev/.config/mvm/env.sh) at /run.
+
+The file exports:
+- every key of the env secret (a JSON object in Secrets Manager, pushed by `mvm secrets push`),
+- the AWS variables of this process that point at the MicroVM execution role credentials,
+  because sshd sessions start with a clean environment and would not see them otherwise,
+- MVM_NAME and MVM_MICROVM_ID from /etc/mvm/machine.json.
+
+~/.bashrc sources it before its non-interactive early return, so login shells, `ssh host cmd`
+and herdr panes all get the same variables. Values are never printed.
+
+Usage: mvm-write-dev-env <secret-id> <secret-region>
+"""
+
+import json
+import os
+import pwd
+import re
+import shlex
+import subprocess
+import sys
+
+DEV_USER = "dev"
+ENV_FILE_RELATIVE = ".config/mvm/env.sh"
+# AWS variables passed through to dev shells when present in this process.
+AWS_PASSTHROUGH_PREFIXES = ("AWS_CONTAINER_", "AWS_REGION", "AWS_DEFAULT_REGION", "AWS_LAMBDA_")
+ENV_NAME_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def log_dev_env(message):
+    print(f"[mvm-write-dev-env] {message}", flush=True)
+
+
+def fetch_env_secret(secret_id, region):
+    """Return the env secret as a dict, or {} when unavailable."""
+    if not secret_id:
+        log_dev_env("no env secret id in the run payload, skipping secrets")
+        return {}
+    cmd = ["aws", "secretsmanager", "get-secret-value", "--secret-id", secret_id,
+           "--query", "SecretString", "--output", "text"]
+    if region:
+        cmd += ["--region", region]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    if result.returncode != 0:
+        # stderr of a failed call holds the error, not the secret.
+        log_dev_env(f"env secret fetch failed: {result.stderr.strip()[:400]}")
+        return {}
+    values = json.loads(result.stdout)
+    bad = [k for k in values if not ENV_NAME_PATTERN.match(k)]
+    for k in bad:
+        log_dev_env(f"skipping invalid env name in secret: {k!r}")
+    return {k: str(v) for k, v in values.items() if k not in bad}
+
+
+def main():
+    secret_id = sys.argv[1] if len(sys.argv) > 1 else ""
+    region = sys.argv[2] if len(sys.argv) > 2 else ""
+
+    exports = {}
+    for name, value in os.environ.items():
+        if name.startswith(AWS_PASSTHROUGH_PREFIXES):
+            exports[name] = value
+    try:
+        with open("/etc/mvm/machine.json") as f:
+            machine = json.load(f)
+        exports["MVM_NAME"] = machine.get("name", "")
+        exports["MVM_MICROVM_ID"] = machine.get("microvmId", "")
+    except FileNotFoundError:
+        pass
+
+    secret_values = fetch_env_secret(secret_id, region)
+    exports.update(secret_values)
+
+    dev = pwd.getpwnam(DEV_USER)
+    env_path = os.path.join(dev.pw_dir, ENV_FILE_RELATIVE)
+    os.makedirs(os.path.dirname(env_path), exist_ok=True)
+    os.chown(os.path.dirname(env_path), dev.pw_uid, dev.pw_gid)
+    tmp_path = env_path + ".tmp"
+    fd = os.open(tmp_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write("# Written by mvm-write-dev-env at MicroVM /run. Do not edit; regenerated on every run.\n")
+        for name in sorted(exports):
+            f.write(f"export {name}={shlex.quote(exports[name])}\n")
+    os.chown(tmp_path, dev.pw_uid, dev.pw_gid)
+    os.replace(tmp_path, env_path)
+    log_dev_env(f"wrote {len(secret_values)} secret vars and {len(exports) - len(secret_values)} other vars")
+    return 0 if secret_values or not secret_id else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

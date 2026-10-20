@@ -1,0 +1,26 @@
+# GitLab repos cloned by mvm-bootstrap-workspace into ~/Documents/gitlab/aircall/<path>.
+# Same set as boxd's aircall-dev snapshot. The first entry is cloned and installed first.
+dashboard-extensions/conversation-center-ext
+dashboard-extensions/account-extension
+dashboard-extensions/agent-productivity-extension
+dashboard-extensions/analytics-extension
+dashboard-extensions/calendar-mgmt-extension
+dashboard-extensions/call-timeline-extension
+dashboard-extensions/campaign-extension
+dashboard-extensions/dashboard-gitlab-templates
+dashboard-extensions/flow-editor-extension
+dashboard-extensions/home-extension
+dashboard-extensions/integration-extension
+dashboard-extensions/knowledge-base-extension
+dashboard-extensions/live-monitoring-extension
+dashboard-extensions/messaging-extension
+dashboard-extensions/number-extension
+dashboard-extensions/team-extension
+dashboard-extensions/user-extension
+dashboard-extensions/voice-virtual-agent-extension
+clients/assets-page
+clients/dashboard-extension-boilerplate
+clients/dashboard-modules
+clients/dashboard-v4
+shared/hydra
+support-ops/support-portal

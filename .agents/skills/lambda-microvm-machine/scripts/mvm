@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""mvm - dev machines on AWS Lambda MicroVMs, driven from the laptop. Run `mvm --help`.
+
+Entry point only: the commands live in the mvm_cli package next to this file (cli_main.py).
+~/.local/bin/mvm links here, and ~/.ssh/config's `Host *.mvm` ProxyCommand runs this file.
+Stdlib only, Python 3.9+ (ssh may run it with macOS's /usr/bin/python3).
+"""
+
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # no __pycache__ in the dotfiles checkout
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from mvm_cli.cli_main import run_mvm_cli  # noqa: E402
+
+if __name__ == "__main__":
+    run_mvm_cli()

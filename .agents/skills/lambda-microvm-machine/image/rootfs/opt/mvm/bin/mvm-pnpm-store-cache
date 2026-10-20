@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+# pnpm store cache in S3 for the workspace bootstrap (mvm-bootstrap-workspace), so a new machine
+# links a checkout's packages from a cached pnpm store instead of downloading ~2,300 packages and
+# recompiling native modules (cold cc-ext install: 41-66s; from a warm store: about 3s).
+#
+# Usage, as dev, for a checkout with a pnpm-lock.yaml:
+#   mvm-pnpm-store-cache restore CHECKOUT   prints the hit kind on stdout (logs go to stderr):
+#                                             exact    snapshot saved from this very lockfile
+#                                             latest   newest snapshot, saved from another lockfile
+#                                             present  pnpm store already on disk, nothing restored
+#                                             miss     no usable snapshot (or no cache configured)
+#   mvm-pnpm-store-cache archive CHECKOUT   write a local snapshot; run right after `pnpm install`,
+#                                           before anything else can write to the store
+#   mvm-pnpm-store-cache upload CHECKOUT    upload that snapshot, then point `latest` at it
+#
+# A snapshot holds the pnpm store (with pnpm's side-effects cache: built native modules) and
+# pnpm's metadata cache, which the lockfile's minimumReleaseAge check reads.
+# Cache location: .pnpmStoreCacheUri in /etc/mvm/machine.json (s3://<artifact bucket>/pnpm-store/),
+# from `mvm new`'s run payload; when absent, every command is a no-op. Keys, per checkout name:
+#   <uri><checkout>/<sha256 of pnpm-lock.yaml>.tar.zst   one snapshot per lockfile
+#   <uri><checkout>/latest                                 file name of the newest snapshot
+# Old snapshots expire through the stack's lifecycle rule. Cache problems never fail the caller:
+# every error degrades to a cold install.
+set -uo pipefail
+
+# pnpm's default XDG locations for the dev user (no store-dir or cache-dir override on machines).
+pnpm_store_rel=.local/share/pnpm/store
+pnpm_metadata_cache_rel=.cache/pnpm
+work_dir="$HOME/.cache/mvm/pnpm-store-cache"
+
+log() { echo "[mvm-pnpm-store-cache] $*" >&2; }
+
+usage() {
+  echo "usage: mvm-pnpm-store-cache restore|archive|upload CHECKOUT" >&2
+  exit 2
+}
+
+[ $# -eq 2 ] || usage
+command=$1
+checkout=${2%/}
+repo=$(basename "$checkout")
+lockfile="$checkout/pnpm-lock.yaml"
+
+# MVM_MACHINE_JSON: tests point it at a fixture; machines use the file mvm-on-run writes.
+machine_json=${MVM_MACHINE_JSON:-/etc/mvm/machine.json}
+cache_uri=$(jq -r '.pnpmStoreCacheUri // empty' "$machine_json" 2>/dev/null)
+aws_region=$(jq -r '.region // empty' "$machine_json" 2>/dev/null)
+aws_region_args=()
+[ -n "$aws_region" ] && aws_region_args=(--region "$aws_region")
+
+# s3_get_object S3_URI DEST ("-" for stdout): download one object; on failure log why and return 1.
+s3_get_object() {
+  local err
+  if err=$(aws s3 cp "${aws_region_args[@]}" --only-show-errors "$1" "$2" 2>&1 >/dev/null); then
+    return 0
+  fi
+  case $err in
+    *"(404)"*) log "not cached yet: $1" ;;
+    *) log "cache read failed for $1: ${err%%$'\n'*}" ;;
+  esac
+  return 1
+}
+
+elapsed_since() { echo "$(($(date +%s) - $1))s"; }
+
+# restore_pnpm_store_snapshot: print exact|latest|present|miss (see the header).
+restore_pnpm_store_snapshot() {
+  local lock_hash archive staging t0
+  if [ -z "$cache_uri" ]; then
+    log "no cache location in $machine_json (machine started by an older mvm): skipping"
+    echo miss
+    return
+  fi
+  if [ -n "$(ls -A "$HOME/$pnpm_store_rel" 2>/dev/null)" ]; then
+    log "pnpm store already in ~/$pnpm_store_rel: not restoring over it"
+    echo present
+    return
+  fi
+  lock_hash=$(sha256sum "$lockfile" | cut -d' ' -f1) || {
+    echo miss
+    return
+  }
+  mkdir -p "$work_dir"
+  # Not *.tar.zst: `upload` sends whatever *.tar.zst `archive` left in $work_dir.
+  archive="$work_dir/download.partial"
+  t0=$(date +%s)
+  local hit=exact key_name="$lock_hash.tar.zst"
+  if ! s3_get_object "$cache_uri$repo/$key_name" "$archive"; then
+    hit=latest
+    key_name=$(aws s3 cp "${aws_region_args[@]}" --only-show-errors "$cache_uri$repo/latest" - 2>/dev/null) || key_name=
+    if [ -z "$key_name" ] || ! s3_get_object "$cache_uri$repo/$key_name" "$archive"; then
+      rm -f "$archive"
+      log "no snapshot for $repo: cold install"
+      echo miss
+      return
+    fi
+  fi
+  log "downloaded $hit snapshot $repo/$key_name ($(du -h "$archive" | cut -f1)) in $(elapsed_since "$t0")"
+
+  # Unpack beside the real locations and move into place only when complete.
+  t0=$(date +%s)
+  staging="$work_dir/restore-staging"
+  rm -rf "$staging" && mkdir -p "$staging"
+  if ! zstd -dc --quiet "$archive" | tar -x -C "$staging"; then
+    rm -rf "$staging" "$archive"
+    log "snapshot $repo/$key_name is unreadable: treating it as a miss"
+    echo miss
+    return
+  fi
+  rm -f "$archive"
+  local rel
+  for rel in "$pnpm_store_rel" "$pnpm_metadata_cache_rel"; do
+    [ -e "$staging/$rel" ] || continue
+    rm -rf "${HOME:?}/$rel"
+    mkdir -p "$(dirname "$HOME/$rel")"
+    mv "$staging/$rel" "$HOME/$rel"
+  done
+  rm -rf "$staging"
+  log "restored $hit snapshot into ~/$pnpm_store_rel and ~/$pnpm_metadata_cache_rel in $(elapsed_since "$t0")"
+  echo "$hit"
+}
+
+# archive_pnpm_store_snapshot: write $work_dir/<lock hash>.tar.zst from the current store.
+archive_pnpm_store_snapshot() {
+  local lock_hash partial t0 rel
+  [ -n "$cache_uri" ] || return 0
+  lock_hash=$(sha256sum "$lockfile" | cut -d' ' -f1) || return 1
+  local -a paths=()
+  for rel in "$pnpm_store_rel" "$pnpm_metadata_cache_rel"; do
+    [ -d "$HOME/$rel" ] && paths+=("$rel")
+  done
+  if [ ${#paths[@]} -eq 0 ]; then
+    log "no pnpm store to archive"
+    return 1
+  fi
+  mkdir -p "$work_dir"
+  rm -f "$work_dir"/*.tar.zst "$work_dir"/*.partial
+  partial="$work_dir/$lock_hash.tar.zst.partial"
+  t0=$(date +%s)
+  # A local file, verified before upload: a tar failure halfway must never reach S3 as a
+  # truncated snapshot under the lockfile's key.
+  if ! tar -C "$HOME" -cf - "${paths[@]}" | zstd -T0 -3 --quiet -o "$partial" ||
+    ! zstd -t --quiet "$partial"; then
+    rm -f "$partial"
+    log "archiving the pnpm store failed"
+    return 1
+  fi
+  mv "$partial" "$work_dir/$lock_hash.tar.zst"
+  log "archived ~/$pnpm_store_rel and ~/$pnpm_metadata_cache_rel ($(du -h "$work_dir/$lock_hash.tar.zst" | cut -f1)) in $(elapsed_since "$t0")"
+}
+
+# upload_pnpm_store_snapshot: upload the archive written by `archive`, then repoint `latest`.
+upload_pnpm_store_snapshot() {
+  local archive key_name t0 err
+  [ -n "$cache_uri" ] || return 0
+  archive=$(ls "$work_dir"/*.tar.zst 2>/dev/null | head -1)
+  if [ -z "$archive" ]; then
+    log "no archived snapshot to upload"
+    return 0
+  fi
+  key_name=$(basename "$archive")
+  t0=$(date +%s)
+  if ! err=$(aws s3 cp "${aws_region_args[@]}" --only-show-errors "$archive" "$cache_uri$repo/$key_name" 2>&1); then
+    log "upload failed for $repo/$key_name: ${err%%$'\n'*}"
+    return 1
+  fi
+  # `latest` moves only after the snapshot itself is fully uploaded.
+  if ! err=$(printf '%s' "$key_name" | aws s3 cp "${aws_region_args[@]}" --only-show-errors - "$cache_uri$repo/latest" 2>&1); then
+    log "updating $repo/latest failed: ${err%%$'\n'*}"
+    return 1
+  fi
+  rm -f "$archive"
+  log "uploaded $repo/$key_name and pointed $repo/latest at it in $(elapsed_since "$t0")"
+}
+
+case $command in
+  restore) restore_pnpm_store_snapshot ;;
+  archive) archive_pnpm_store_snapshot ;;
+  upload) upload_pnpm_store_snapshot ;;
+  *) usage ;;
+esac

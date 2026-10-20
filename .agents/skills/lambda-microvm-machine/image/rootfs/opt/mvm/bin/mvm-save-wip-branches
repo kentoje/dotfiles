@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Saves unpushed work from every git checkout and worktree under ~/Documents to GitLab before
+# the MicroVM is suspended or terminated (8h lifetime cap or `mvm rm`). Runs as dev from
+# mvm-on-suspend and mvm-on-terminate, and can be run by hand.
+#
+# For each checkout with uncommitted changes, untracked files (minus .gitignore) or commits on
+# no remote branch, it builds a snapshot commit on a throwaway index (the real index and
+# working tree are untouched) and force-pushes it to
+#   refs/heads/wip/mvm/<machine>/<branch>
+# with ci.skip, so no pipeline runs. Recover with: git fetch origin wip/mvm/<machine>/<branch>
+#
+# Skipped entirely when ~/.local/state/mvm/skip-wip-save exists (`mvm rm --discard`).
+set -uo pipefail
+
+machine=${MVM_NAME:-$(jq -r '.name // "unknown"' /etc/mvm/machine.json 2>/dev/null)}
+skip_marker="$HOME/.local/state/mvm/skip-wip-save"
+# Aircall's GitLab push rules reject commit messages without a Jira key; CI-0000 is the
+# no-ticket key the team already uses.
+wip_commit_jira_key=CI-0000
+if [ -e "$skip_marker" ]; then
+  echo "[mvm-save-wip] skipped: $skip_marker exists"
+  exit 0
+fi
+
+# save_wip_for_checkout DIR: push a snapshot commit if DIR has work that exists nowhere else.
+save_wip_for_checkout() {
+  local dir=$1 branch head dirty on_remote_branch index add_note tree commit ref
+  cd "$dir" || return 0
+  git remote get-url origin >/dev/null 2>&1 || return 0
+  branch=$(git symbolic-ref --quiet --short HEAD || echo "detached-$(git rev-parse --short HEAD)")
+  head=$(git rev-parse HEAD 2>/dev/null) || return 0
+  dirty=$(git status --porcelain --untracked-files=normal | head -1)
+  on_remote_branch=$(git branch -r --contains "$head" 2>/dev/null | head -1)
+  if [ -z "$dirty" ] && [ -n "$on_remote_branch" ]; then
+    return 0
+  fi
+  index=$(mktemp)
+  cp "$(git rev-parse --git-path index)" "$index" 2>/dev/null || true
+  add_note=
+  GIT_INDEX_FILE=$index git add -A >/dev/null 2>&1 || add_note=" (git add reported errors: snapshot may be incomplete)"
+  tree=$(GIT_INDEX_FILE=$index git write-tree 2>/dev/null) || tree=
+  rm -f "$index"
+  commit=
+  if [ -n "$tree" ]; then
+    commit=$(git commit-tree "$tree" -p "$head" \
+      -m "wip: MicroVM $machine snapshot of $branch at $(date -u +%FT%TZ) [$wip_commit_jira_key]" 2>/dev/null) || commit=
+  fi
+  # Never push an empty commit id: "$commit:$ref" would become ":$ref", which deletes the ref
+  # (an earlier save of this branch) and still exits 0.
+  if [ -z "$commit" ]; then
+    echo "[mvm-save-wip] FAILED to snapshot $dir ($branch)"
+    return 0
+  fi
+  ref="refs/heads/wip/mvm/$machine/$branch"
+  if timeout 30 git push --quiet --force -o ci.skip origin "$commit:$ref" 2>&1; then
+    echo "[mvm-save-wip] $dir -> $ref$add_note"
+  else
+    echo "[mvm-save-wip] FAILED to push $dir ($branch)"
+  fi
+}
+
+# Every worktree of every repo cloned under ~/Documents (main checkouts are worktrees too).
+find "$HOME/Documents" -maxdepth 5 -name .git -type d -prune 2>/dev/null | while read -r gitdir; do
+  git -C "$(dirname "$gitdir")" worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p'
+done | sort -u | {
+  # `wait` must run in the same subshell as the loop, or it returns before the pushes finish.
+  checked=0
+  while read -r checkout; do
+    save_wip_for_checkout "$checkout" &
+    checked=$((checked + 1))
+  done
+  wait
+  # Always logged, so `mvm logs NAME` shows the save ran even when there was nothing to push.
+  echo "[mvm-save-wip] done: checked $checked checkouts (pushes and failures listed above)"
+}
