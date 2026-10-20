@@ -137,6 +137,12 @@ RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfi
  && ln -s ~/dotfiles/.config/nvim ~/.config/nvim \
  && ln -s ~/dotfiles/.config/yazi ~/.config/yazi
 
+# pi's packages (settings.json "packages") into ~/.pi/agent/npm, so the first `pi -p` on a machine
+# does not spend a minute installing them. Packages added to the dotfiles later install on first use.
+RUN export PATH="$HOME/.bun/bin:$HOME/.local/share/fnm/aliases/default/bin:$PATH" \
+ && pi update --extensions </dev/null \
+ && rm -rf ~/.npm/_cacache
+
 # Laptop files added to the build zip by `mvm image build`: the workspace repo list and git
 # identity from the laptop's mvm settings (always there), allowlisted non-secret config, and git
 # bundles of private repos (the build has no GitHub credentials).
