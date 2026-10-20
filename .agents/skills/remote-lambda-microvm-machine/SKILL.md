@@ -83,8 +83,10 @@ Keep the `export` form if you edit that file: with a plain `PORT=` line, new wor
 A dev server must outlive the ssh session, so detach it:
 
 ```bash
-ssh <name>.mvm 'cd <checkout> && setsid pnpm dev > /tmp/dev.log 2>&1 < /dev/null &'
+ssh <name>.mvm 'cd <checkout> && setsid -f pnpm dev > /tmp/dev.log 2>&1 < /dev/null'
 ```
+
+Use `setsid -f`, not `setsid ... &`: a trailing `&` backgrounds the whole `cd && setsid` list in a subshell that keeps ssh's output open, so `ssh` hangs until the dev server stops.
 
 - It is up when `/tmp/dev.log` shows `Local: http://localhost:<PORT>/`.
 - Stop it with `pkill -f rsbuild-node`, not `pkill -f "rsbuild dev"`.
