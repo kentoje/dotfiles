@@ -46,6 +46,7 @@
 node_modules/
 __pycache__/
 
+.agents/skills/synced
 .config/agents/commands
 .config/agents/skills
 .config/opencode/commands
