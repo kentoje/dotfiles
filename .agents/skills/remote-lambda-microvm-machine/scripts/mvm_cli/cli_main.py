@@ -17,9 +17,9 @@ MVM_HELP_DESCRIPTION = """\
 mvm - dev machines on AWS Lambda MicroVMs.
 
 Machines:
-  new [NAME]          start a machine (random name if omitted), wait for ssh, add it to herdr
-  rm NAME...          terminate machines and remove them from herdr (unpushed work is pushed first)
-  ls                  list machines: state, image version, age, time left, herdr label, forwarded ports
+  new [NAME]          start a machine (random name if omitted), wait for ssh, add it to herdr and tuios
+  rm NAME...          terminate machines and remove them from herdr and tuios (unpushed work is pushed first)
+  ls                  list machines: state, image version, age, time left, herdr label, tuios host, forwarded ports
   ssh NAME [CMD...]   same as `ssh NAME.mvm`
   forward NAME [PORT...]
                       reach the machine's dev servers at http://localhost:PORT (--stop closes them)
@@ -58,7 +58,7 @@ def build_mvm_parser():
     sub = parser.add_subparsers(dest="command", metavar="COMMAND", help=argparse.SUPPRESS, prog="mvm")
     sub.required = True
 
-    new = sub.add_parser("new", description="Start a machine, wait for ssh, add it to herdr as aws-NAME.")
+    new = sub.add_parser("new", description="Start a machine, wait for ssh, add it to herdr and tuios as aws-NAME.")
     new.add_argument("name", nargs="?", help="machine name (default: random adjective-noun)")
     new.add_argument("--ttl", default="8h", help="lifetime before AWS terminates it: 1m to 8h (default 8h)")
     new.add_argument("--json", action="store_true", help="print the result as JSON")
@@ -66,7 +66,7 @@ def build_mvm_parser():
 
     rm = sub.add_parser(
         "rm",
-        description="Terminate machines and remove them from herdr. Unpushed work is pushed to wip/mvm/NAME/<branch> first.",
+        description="Terminate machines and remove them from herdr and tuios. Unpushed work is pushed to wip/mvm/NAME/<branch> first.",
     )
     rm.add_argument("names", nargs="+", metavar="NAME")
     rm.add_argument("--discard", action="store_true", help="do not push unpushed work to wip/mvm/NAME/* branches")
@@ -75,7 +75,7 @@ def build_mvm_parser():
     ls = sub.add_parser(
         "ls",
         aliases=["list"],
-        description="List machines: state, image version, age, time left, herdr label, forwarded ports.",
+        description="List machines: state, image version, age, time left, herdr label, tuios host, forwarded ports.",
     )
     ls.add_argument("--json", action="store_true")
     ls.set_defaults(func=cmd_ls)

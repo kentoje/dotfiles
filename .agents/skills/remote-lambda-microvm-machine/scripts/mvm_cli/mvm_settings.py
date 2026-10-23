@@ -93,6 +93,15 @@ SSH_CONFIG = Path.home() / ".ssh" / "config"
 SSH_HOST_SUFFIX = ".mvm"
 # Herdr sidebar label prefix: keeps MicroVMs apart from boxd machines.
 HERDR_LABEL_PREFIX = "aws-"
+# tuios host name prefix: the same as herdr's label, so both sidebars name a machine alike.
+TUIOS_HOST_PREFIX = HERDR_LABEL_PREFIX
+# The tuios [hosts] entries for live machines. mvm owns and rewrites this whole file; tuios reads
+# every config.d/*.toml next to its config.toml. ~/.config is the dotfiles checkout: gitignored.
+TUIOS_MVM_HOSTS_FILE = Path(
+    os.environ.get("MVM_TUIOS_HOSTS_FILE", str(Path.home() / ".config/tuios/config.d/mvm-hosts.toml"))
+)
+# Where the image installs tuios (image/Dockerfile): the link runs it without searching.
+TUIOS_REMOTE_BINARY = "/home/dev/.local/bin/tuios"
 
 # Prepended to PATH: nix-darwin's aws (awscli2) and websocat win over older copies elsewhere.
 NIX_SYSTEM_BIN_DIR = "/run/current-system/sw/bin"

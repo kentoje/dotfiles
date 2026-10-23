@@ -18,6 +18,8 @@
 !.config/alacritty/themes/poimandres*.toml
 
 .config/tmux/plugins
+# Machine-local tuios config: mvm's generated hosts, the ntfy topic.
+.config/tuios/config.d/
 .config/btop
 
 .config/lazygit/state.yml

@@ -1,7 +1,7 @@
-"""Cleanup of ended machines: drop their herdr sidebar entry, local name record, ssh host key and port forwards.
+"""Cleanup of ended machines: drop their herdr and tuios entries, local name record, ssh host key and port forwards.
 
 Machines end on their own (8h cap) or through `mvm rm`. `mvm new|rm|ls` prune them, and so does
-`mvm proxy` when herdr tries to reconnect to one. Fails closed: a record is forgotten only after
+`mvm proxy` when herdr or tuios tries to reconnect to one. Fails closed: a record is forgotten only after
 AWS confirms the MicroVM ended, never because a listing or an auth call failed.
 """
 
@@ -15,10 +15,11 @@ from mvm_cli.machine_registry import (
     machine_name_from_ssh_host,
 )
 from mvm_cli.mvm_errors import log_mvm
+from mvm_cli.tuios_host_sync import write_tuios_mvm_hosts
 
 
 def forget_ended_machine(name, ended_microvm_id, herdr_profiles=None):
-    """Remove NAME from local state and herdr, once AWS confirmed ENDED_MICROVM_ID ended.
+    """Remove NAME from local state, herdr and tuios, once AWS confirmed ENDED_MICROVM_ID ended.
 
     Names are reused: when NAME's record now points at another MicroVM (`mvm rm X && mvm new X`
     while a stale herdr proxy for the old X was still exiting), keep everything and return False.
@@ -32,6 +33,8 @@ def forget_ended_machine(name, ended_microvm_id, herdr_profiles=None):
     # gone no herdr entry for NAME can belong to a newer machine.
     delete_machine_record(name)
     remove_machine_from_herdr(name, herdr_profiles)
+    # Rebuilt from the records, so NAME's tuios host goes (tuios applies a removal at once).
+    write_tuios_mvm_hosts()
     return True
 
 
@@ -60,5 +63,5 @@ def prune_ended_machines(microvm_listing):
                 remove_machine_from_herdr(name, [profile])
                 pruned.append(name)
     for name in pruned:
-        log_mvm(f"{name}: ended, removed from herdr and local state")
+        log_mvm(f"{name}: ended, removed from herdr, tuios and local state")
     return pruned

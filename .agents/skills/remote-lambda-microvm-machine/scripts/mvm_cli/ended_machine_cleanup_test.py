@@ -19,7 +19,14 @@ class LocalRecordFakesTestCase(unittest.TestCase):
         self.removed_from_herdr = []
         self.deleted = []
         self.stopped_forwards = []
+        self.tuios_rebuilds = []
         patches = [
+            # Never the live ~/.config/tuios/config.d file: it would follow this laptop's real records.
+            mock.patch.object(
+                ended_machine_cleanup,
+                "write_tuios_mvm_hosts",
+                side_effect=lambda: self.tuios_rebuilds.append([r["name"] for r in self.records]),
+            ),
             mock.patch.object(
                 ended_machine_cleanup, "forget_machine_port_forwards", side_effect=self.stopped_forwards.append
             ),
@@ -98,6 +105,8 @@ class ForgetEndedMachineTest(LocalRecordFakesTestCase):
         self.assertEqual(self.deleted, ["gone"])
         self.assertEqual(self.removed_from_herdr, ["gone"])
         self.assertEqual(self.stopped_forwards, ["gone"])
+        # Rebuilt after the record is gone, so the tuios hosts file no longer names it.
+        self.assertEqual(self.tuios_rebuilds, [["live"]])
 
     def test_keeps_a_record_that_now_points_at_a_new_microvm(self):
         self.assertFalse(ended_machine_cleanup.forget_ended_machine("gone", "m-older"))
@@ -105,6 +114,7 @@ class ForgetEndedMachineTest(LocalRecordFakesTestCase):
         self.assertEqual(self.removed_from_herdr, [])
         # The new machine's forwards share the name: they must survive.
         self.assertEqual(self.stopped_forwards, [])
+        self.assertEqual(self.tuios_rebuilds, [])
 
     def test_already_forgotten_record_still_drops_herdr_entry(self):
         self.assertTrue(ended_machine_cleanup.forget_ended_machine("absent", "m-x"))

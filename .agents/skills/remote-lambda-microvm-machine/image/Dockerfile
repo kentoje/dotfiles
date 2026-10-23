@@ -22,6 +22,8 @@ ARG PI_VERSION=1.2.0
 ARG PORTLESS_VERSION=0.15.7
 ARG OMP_VERSION=18.10.3
 ARG HERDR_VERSION=0.9.5
+# Keep equal to the laptop's tuios (brew): a remote daemon on another protocol shows `incompatible`.
+ARG TUIOS_VERSION=0.10.1
 ARG CODEX_VERSION=0.162.1
 ARG JIRA_CLI_VERSION=1.7.0
 ARG NVIM_VERSION=0.12.6
@@ -105,6 +107,7 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}" \
 RUN set -e; cd /tmp; \
     curl -fsSL -o ~/.local/bin/omp "https://github.com/can1357/oh-my-pi/releases/download/v${OMP_VERSION}/omp-linux-arm64"; \
     curl -fsSL -o ~/.local/bin/herdr "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-linux-aarch64"; \
+    curl -fsSL "https://github.com/Gaurav-Gosain/tuios/releases/download/v${TUIOS_VERSION}/tuios_${TUIOS_VERSION}_Linux_arm64.tar.gz" | tar -xz -C ~/.local/bin tuios; \
     curl -fsSL "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-aarch64-unknown-linux-musl.tar.gz" | tar -xz -C /tmp; \
     mv /tmp/codex-aarch64-unknown-linux-musl ~/.local/bin/codex; \
     curl -fsSL "https://github.com/ankitpokhrel/jira-cli/releases/download/v${JIRA_CLI_VERSION}/jira_${JIRA_CLI_VERSION}_linux_arm64.tar.gz" | tar -xz -C /tmp; \
@@ -116,7 +119,7 @@ RUN set -e; cd /tmp; \
     curl -fsSL "https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-arm64.tar.gz" | tar -xz -C ~/.local; \
     mv ~/.local/nvim-linux-arm64 ~/.local/nvim && ln -sf ~/.local/nvim/bin/nvim ~/.local/bin/nvim; \
     chmod 755 ~/.local/bin/*; rm -rf /tmp/*; \
-    for t in omp herdr codex lazygit yazi tree-sitter nvim; do printf '%s: ' "$t"; ~/.local/bin/$t --version 2>&1 | head -1 || true; done; \
+    for t in omp herdr tuios codex lazygit yazi tree-sitter nvim; do printf '%s: ' "$t"; ~/.local/bin/$t --version 2>&1 | head -1 || true; done; \
     ~/.local/bin/jira version
 
 # Claude Code, uv, and rust (for the herdr-vim-nav plugin).

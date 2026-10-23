@@ -58,9 +58,9 @@ complete -c mvm -f
 complete -c mvm -s h -l help -d 'Show help'
 
 # Commands (descriptions follow `mvm --help`; fish lists them alphabetically).
-complete -c mvm -n __fish_use_subcommand -a new -d 'Start a machine, wait for ssh, add it to herdr'
-complete -c mvm -n __fish_use_subcommand -a rm -d 'Terminate machines, remove them from herdr'
-complete -c mvm -n __fish_use_subcommand -a ls -d 'List machines: state, image, age, time left, herdr'
+complete -c mvm -n __fish_use_subcommand -a new -d 'Start a machine, wait for ssh, add it to herdr and tuios'
+complete -c mvm -n __fish_use_subcommand -a rm -d 'Terminate machines, remove them from herdr and tuios'
+complete -c mvm -n __fish_use_subcommand -a ls -d 'List machines: state, image, age, time left, herdr, tuios'
 complete -c mvm -n __fish_use_subcommand -a ssh -d 'Same as ssh NAME.mvm'
 complete -c mvm -n __fish_use_subcommand -a forward -d "Reach the machine's dev servers at localhost:PORT"
 complete -c mvm -n __fish_use_subcommand -a logs -d "The machine's logs: setup, hooks, WIP saves"

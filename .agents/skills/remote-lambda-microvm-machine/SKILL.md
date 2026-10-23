@@ -1,22 +1,22 @@
 ---
 name: remote-lambda-microvm-machine
 description: |
-  Create and use Kento's dev machines on AWS Lambda MicroVMs (the `mvm` CLI), reach them over SSH, show their dev servers on the laptop, and use them in Herdr.
+  Create and use Kento's dev machines on AWS Lambda MicroVMs (the `mvm` CLI), reach them over SSH, show their dev servers on the laptop, and use them in Herdr or tuios.
   Use when the user says mvm, microvm, lambda microvm, lambda dev machine, or wants a boxd-like dev machine on AWS.
 ---
 
 # Lambda MicroVM machine
 
-One dev image, one machine per task, plain `ssh <name>.mvm`, Herdr on top.
+One dev image, one machine per task, plain `ssh <name>.mvm`, Herdr or tuios on top.
 The coding agent runs on the machine, not on the laptop: the laptop starts the machine and forwards the user's prompt to `pi` or `omp` there.
 The machine reaches staging (identity API, AppSync schema) on its own: no tunnel, no copying.
 
 ## Commands
 
 ```bash
-mvm new [NAME] [--ttl 8h] [--json]   # start a machine (random adjective-noun name if omitted), wait for ssh, add to herdr
-mvm rm NAME... [--discard]           # terminate (unpushed work is pushed first), remove from herdr
-mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, forwarded ports
+mvm new [NAME] [--ttl 8h] [--json]   # start a machine (random adjective-noun name if omitted), wait for ssh, add to herdr and tuios
+mvm rm NAME... [--discard]           # terminate (unpushed work is pushed first), remove from herdr and tuios
+mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, tuios host, forwarded ports
 mvm ssh NAME [CMD...]                # same as ssh NAME.mvm [CMD...]
 mvm forward NAME [PORT...] [--stop]  # reach the machine's dev servers at http://localhost:PORT
 mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hooks, network doctor, WIP saves
@@ -45,7 +45,7 @@ On the machine:
 
 - User `dev`, bash (not fish), no nix.
 - No root: `sudo` cannot work. System packages go in the image (see Maintaining mvm).
-- Tools: node (fnm) with pnpm, bun, `pi`, `omp`, `claude`, `codex`, `herdr`, `nvim`, `lazygit`, `glab`, `gh`, `jira`, `uv`, rust, AWS CLI, `agent-browser` with Chromium.
+- Tools: node (fnm) with pnpm, bun, `pi`, `omp`, `claude`, `codex`, `herdr`, `tuios`, `nvim`, `lazygit`, `glab`, `gh`, `jira`, `uv`, rust, AWS CLI, `agent-browser` with Chromium.
 - Every bash, including `ssh <name>.mvm 'cmd'`, has the secrets (`GITLAB_TOKEN`, `GEMFURY_AUTH`, `LLM_GATEWAY_KEY`, `AIRCALL_STAGING_EMAIL`, `AIRCALL_STAGING_PASSWORD`, ...) from `~/.config/mvm/env.sh`.
   Git and npm read them at runtime: never write a token into `~/.gitconfig`, `~/.npmrc` or a repo.
 - The AWS CLI uses the machine's own role (env secret, logs, the pnpm cache, AppSync schema introspection).
@@ -118,6 +118,15 @@ Automatic: `mvm new` adds the machine as `aws-<name>` (an open herdr window conn
 Never run `herdr machine add|remove` for `.mvm` hosts by hand.
 Herdr reconnects need a valid AWS SSO session (see Troubleshooting).
 
+## tuios
+
+Automatic too: `mvm new` writes the machine as tuios host `aws-<name>` and starts its tuios daemon (`tuios hosts test aws-<name> --start`).
+mvm owns `~/.config/tuios/config.d/mvm-hosts.toml` (gitignored) and rebuilds it from the machine records on `mvm new`, `mvm rm` and every prune, so an ended machine leaves tuios at once.
+A new host waits for `tuios config apply` from a terminal outside tuios, for example the Cmd+b quick terminal: tuios refuses it inside a pane by design.
+`mvm new` runs it itself when it is not inside tuios, and otherwise logs that one step.
+Never edit `mvm-hosts.toml` or run `tuios hosts add|remove` for `.mvm` hosts by hand.
+Then press enter on `aws-<name>` in the rail, or `tuios new --host aws-<name>`.
+
 ## Unpushed work
 
 When a machine is suspended or terminated (`mvm rm`, the `--ttl` cap), every checkout and worktree under `~/Documents` with uncommitted changes, untracked files or unpushed commits is pushed to GitLab as `wip/mvm/<name>/<branch>`.
@@ -178,6 +187,7 @@ mvm image build     # new image version from image/ (about 6 minutes); new machi
   No secret ever goes into the image, `image/rootfs`, `~/.gitconfig` or `~/.npmrc`.
 - AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
+- Keep the laptop's tuios (brew) on the image's `TUIOS_VERSION`: a link to a daemon on another protocol shows `incompatible`; `tuios hosts sync aws-<name>` fixes one running machine.
 - Machine names exist only on the laptop, in `~/.local/state/mvm/machines/<name>.json`.
   Cleanup forgets a machine only after AWS confirms it ended.
 - The pnpm store cache (`image/rootfs/opt/mvm/bin/mvm-pnpm-store-cache`) is shared and writable by every machine: a compromised machine could poison later installs, beyond what the lockfile checks.
