@@ -5,6 +5,13 @@ theme = "Melange Dark"
 # custom-shader = "shaders/cursor-blaze-tapered.glsl"
 # custom-shader = "shaders/rainbow-glass.glsl"
 # cursor-color = "#E8E0D8"
+# Draw the space background first, then the emerald cursor animation on top.
+# custom-shader = "shaders/chromatic-grain.glsl"
+# custom-shader = "shaders/chromatic-emerald.glsl"
+# custom-shader = "shaders/chromatic-ruby.glsl"
+custom-shader = "shaders/chromatic-prism.glsl"
+# custom-shader = "shaders/chromatic-sapphire.glsl"
+# custom-shader = "shaders/chromatic-emerald.glsl"
 custom-shader = "shaders/emerald-torch.glsl"
 # cursor-color = "#EB1664"
 cursor-color = "#D9FFE6"
@@ -27,8 +34,8 @@ window-decoration = true
 window-padding-x = 16
 window-padding-y = 12
 
-background-opacity = "0.65"
-# background-opacity = "1"
+# background-opacity = "0.75"
+background-opacity = "0.85"
 # background-blur-radius = 60
 background-blur-radius = 45
 #background = "000000"
@@ -89,7 +96,9 @@ keybind = super+f=text:\x01\x1b[122u
 keybind = super+t=text:\x01\x1b[99u
 keybind = super+g=text:\x01\x1b[106u
 keybind = super+a=text:\x01\x1b[107u
-keybind = super+p=text:\x01\x1b[112u
+# Cmd+p reaches the multiplexer directly: tuios binds it to its command palette.
+# Uncomment to send prefix+p (fd|fzf file picker in herdr and tuios) again.
+# keybind = super+p=text:\x01\x1b[112u
 # Cmd+N → prefix+shift+n → herdr new_workspace. Overrides Ghostty's new_window.
 keybind = super+n=text:\x01\x1b[78u
 
