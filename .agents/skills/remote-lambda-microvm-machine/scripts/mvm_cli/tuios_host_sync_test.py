@@ -1,5 +1,6 @@
 """Tests for tuios_host_sync: the hosts file it rebuilds and the `config apply` guard inside tuios."""
 
+import json
 import os
 import subprocess
 import tempfile
@@ -45,41 +46,57 @@ class TuiosHostSyncTest(unittest.TestCase):
             self.assertFalse(tuios_host_sync.write_tuios_mvm_hosts())
         self.assertFalse(self.hosts_file.exists())
 
-    def add_machine(self, daemon_result, hosts_output):
-        """add_machine_to_tuios("dev") with fake tuios answers; returns (host, tuios calls, log lines)."""
+    def add_machine(self, inside_tuios=False, daemon_ok=True, apply_output="{}"):
+        """add_machine_to_tuios("dev") against a fake tuios; returns (host, tuios calls, log lines).
+
+        The fake daemon holds the host once an apply-config call answers without an error.
+        """
         self.records = [{"name": "dev"}]
         calls = []
+        applied = []
 
         def fake_run(args, timeout=60):
             calls.append(args)
             if args[:2] == ["hosts", "test"]:
-                return daemon_result
-            return subprocess.CompletedProcess([], 0, stdout=hosts_output, stderr="")
+                return subprocess.CompletedProcess([], 0 if daemon_ok else 1, stdout="{}", stderr="ssh: unreachable")
+            if args[:2] == ["call", "apply-config"]:
+                if '"error"' not in apply_output:
+                    applied.append(json.loads(args[2])["host"])
+                return subprocess.CompletedProcess([], 0, stdout=apply_output, stderr="")
+            hosts = [{"host": h, "addr": "dev.mvm"} for h in applied]
+            return subprocess.CompletedProcess([], 0, stdout=json.dumps({"hosts": hosts}), stderr="")
 
-        with mock.patch.object(tuios_host_sync, "run_tuios_command", side_effect=fake_run):
-            with mock.patch.object(tuios_host_sync, "log_mvm") as log:
-                host = tuios_host_sync.add_machine_to_tuios("dev")
+        env = {k: v for k, v in os.environ.items() if k != "TUIOS_ENV"}
+        if inside_tuios:
+            env["TUIOS_ENV"] = "1"
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(tuios_host_sync, "run_tuios_command", side_effect=fake_run):
+                with mock.patch.object(tuios_host_sync, "log_mvm") as log:
+                    host = tuios_host_sync.add_machine_to_tuios("dev")
         return host, calls, [c.args[0] for c in log.call_args_list]
 
-    def test_never_runs_config_apply_inside_or_outside_tuios(self):
-        started = subprocess.CompletedProcess([], 0, stdout="{}", stderr="")
-        for env in [{"TUIOS_ENV": "1"}, {k: v for k, v in os.environ.items() if k != "TUIOS_ENV"}]:
-            with mock.patch.dict(os.environ, env, clear=True):
-                host, calls, logs = self.add_machine(started, '{"hosts":[]}')
-            self.assertEqual(host, "aws-dev")
-            self.assertNotIn(["config", "apply"], calls)
-            self.assertTrue(any("tuios config apply" in line for line in logs))
-
-    def test_failed_daemon_start_still_explains_the_apply(self):
-        failed = subprocess.CompletedProcess([], 1, stdout="", stderr="ssh: unreachable")
-        host, calls, logs = self.add_machine(failed, '{"hosts":[]}')
+    def test_outside_tuios_applies_only_this_host(self):
+        host, calls, logs = self.add_machine()
         self.assertEqual(host, "aws-dev")
+        self.assertIn(["call", "apply-config", '{"host": "aws-dev"}'], calls)
+        self.assertNotIn(["config", "apply"], calls)
+        self.assertEqual(logs, ["dev: added to tuios as aws-dev"])
+
+    def test_inside_tuios_only_explains_the_apply(self):
+        host, calls, logs = self.add_machine(inside_tuios=True)
+        self.assertEqual(host, "aws-dev")
+        self.assertFalse([c for c in calls if c[0] in ("call", "config")])
         self.assertTrue(any("tuios config apply" in line for line in logs))
 
-    def test_applied_host_needs_no_hint(self):
-        started = subprocess.CompletedProcess([], 0, stdout="{}", stderr="")
-        _, _, logs = self.add_machine(started, '{"hosts":[{"host":"aws-dev","addr":"dev.mvm"}]}')
-        self.assertEqual(logs, ["dev: added to tuios as aws-dev"])
+    def test_failed_daemon_start_still_applies_the_host(self):
+        _, calls, logs = self.add_machine(daemon_ok=False)
+        self.assertIn(["call", "apply-config", '{"host": "aws-dev"}'], calls)
+        self.assertEqual(logs[-1], "dev: added to tuios as aws-dev")
+
+    def test_refused_apply_explains_the_apply(self):
+        refused = '{"error":{"code":"forbidden","message":"apply-config is for the person"}}'
+        _, _, logs = self.add_machine(apply_output=refused)
+        self.assertTrue(any("tuios config apply" in line for line in logs))
 
     def test_lists_applied_hosts_by_addr(self):
         output = '{"hosts":[{"host":"aws-dev","addr":"dev.mvm","status":"up"},{"host":"omarchy","addr":"omarchy.ts"}]}'

@@ -122,8 +122,9 @@ Herdr reconnects need a valid AWS SSO session (see Troubleshooting).
 
 Automatic too: `mvm new` writes the machine as tuios host `aws-<name>` and starts its tuios daemon (`tuios hosts test aws-<name> --start`).
 mvm owns `~/.config/tuios/config.d/mvm-hosts.toml` (gitignored) and rebuilds it from the machine records on `mvm new`, `mvm rm` and every prune, so an ended machine leaves tuios at once.
-A new host waits for `tuios config apply` from a terminal outside tuios, for example the Cmd+b quick terminal: tuios refuses it inside a pane by design.
-`mvm new` never runs it (it would also approve any other pending widening, such as an agent's permissions edit): it logs that one step.
+A new host waits for an apply from a terminal outside tuios: tuios refuses it inside a pane by design.
+Run `mvm new` outside tuios (for example the Cmd+b quick terminal) and it applies that one host itself (`tuios call apply-config '{"host":"aws-<name>"}'`), never the rest of the file.
+Run inside a tuios pane, it logs the one step left: `tuios config apply` outside tuios.
 Never edit `mvm-hosts.toml` or run `tuios hosts add|remove` for `.mvm` hosts by hand.
 Then press enter on `aws-<name>` in the rail, or `tuios new --host aws-<name>`.
 

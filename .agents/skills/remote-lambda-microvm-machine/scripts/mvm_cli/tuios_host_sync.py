@@ -2,8 +2,9 @@
 
 mvm owns one config.d file (TUIOS_MVM_HOSTS_FILE) and rebuilds it from the local machine records
 on `mvm new` and whenever a machine is forgotten, so adding, removing and pruning are one idempotent
-write. tuios drops a removed host at once, but a new host waits for the person to run
-`tuios config apply` outside tuios: mvm only says so, it never applies or routes around that guard.
+write. tuios drops a removed host at once, but a new host waits for an apply from outside tuios.
+Run outside tuios, mvm applies only that host's entry; inside a tuios pane it only says what to run,
+never routing around the daemon's refusal.
 Every function degrades to a warning: tuios being absent or failing must not block a machine command.
 """
 
@@ -90,18 +91,41 @@ def start_tuios_daemon_on_machine(name):
     return True
 
 
-def add_machine_to_tuios(name):
-    """Make NAME a tuios host `aws-<name>`: rebuild the hosts file and start the machine's daemon.
+def apply_tuios_host_entry(name):
+    """Apply only the `aws-<name>` host entry (the `apply-config` verb with `host`). True when applied.
 
-    Never runs `tuios config apply`: it would also approve every other pending widening (an agent's
-    [agents.permissions] edit), and only the person may. It logs that step instead.
+    Never `tuios config apply`: that would also approve every other pending widening, such as an
+    agent's [agents.permissions] edit. Skipped inside a tuios pane, where the daemon refuses the verb.
+    """
+    if os.environ.get("TUIOS_ENV"):
+        return False
+    params = json.dumps({"host": tuios_host_for_machine(name)})
+    try:
+        result = run_tuios_command(["call", "apply-config", params])
+    except subprocess.TimeoutExpired:
+        return False
+    if result is None:
+        return False
+    # A verb error prints {"error": {...}} (and exits 1).
+    if result.returncode != 0 or '"error"' in (result.stdout or ""):
+        log_mvm(f"{name}: tuios apply-config failed: {(result.stdout or result.stderr).strip()[-300:]}")
+        return False
+    return True
+
+
+def add_machine_to_tuios(name):
+    """Make NAME a tuios host `aws-<name>`: rebuild the hosts file, start its daemon, apply its link.
+
+    Outside tuios the new host is applied on its own, and nothing else is. Inside a tuios pane only
+    the person can apply it, so this logs that step.
     Returns the host name when the file holds it (applied or waiting for the person), else None.
     """
     if not write_tuios_mvm_hosts():
         return None
     host = tuios_host_for_machine(name)
-    # Independent of the apply hint: a daemon that did not start can be started later by hand.
+    # Independent of the apply: a daemon that did not start can be started later by hand.
     start_tuios_daemon_on_machine(name)
+    apply_tuios_host_entry(name)
     if ssh_host_for_machine(name) in list_tuios_hosts_by_addr():
         log_mvm(f"{name}: added to tuios as {host}")
     else:
