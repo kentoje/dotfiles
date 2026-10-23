@@ -31,12 +31,14 @@ fi
 # OMP uses the Greek pi glyph rendered by Hack Nerd Font, matching its terminal
 # identity without borrowing a vendor app icon.
 ICON_CLAUDE=$($CONFIG_DIR/plugins/icon_map_fn.sh "Claude")
+ICON_CODEX=$($CONFIG_DIR/plugins/icon_map_fn.sh "Codex")
 ICON_DROID=$($CONFIG_DIR/plugins/icon_map_fn.sh "Bilibili")
 ICON_PI=$($CONFIG_DIR/plugins/icon_map_fn.sh "Pi-hole Remote")
 ICON_OMP="π"
 
 # Icon colors per source
 ICON_COLOR_CLAUDE="${RED_BRIGHT:-0xffD47766}"
+ICON_COLOR_CODEX="${BLUE_BRIGHT:-0xff89B3B6}"
 ICON_COLOR_DROID="${GREEN_BRIGHT:-0xff85B695}"
 ICON_COLOR_PI="${BLUE_BRIGHT:-0xff89B3B6}"
 ICON_COLOR_OMP="${YELLOW_BRIGHT:-0xffEBC06D}"
@@ -69,6 +71,7 @@ get_icons_for_state() {
         color="$ICON_COLOR_OMP"
         font="Hack Nerd Font:Bold:16.0"
         ;;
+      codex) icon="$ICON_CODEX";  color="$ICON_COLOR_CODEX" ;;
       pi)    icon="$ICON_PI";     color="$ICON_COLOR_PI" ;;
       droid) icon="$ICON_DROID";  color="$ICON_COLOR_DROID" ;;
       *)     icon="$ICON_CLAUDE"; color="$ICON_COLOR_CLAUDE" ;;
