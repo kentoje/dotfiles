@@ -1,6 +1,6 @@
 """mvm settings: AWS account layout, image sizing, laptop paths. Override the env-backed ones with MVM_* vars.
 
-Per-person values (aws-vault profile, email, git name, workspace repos) are not in this public
+Per-person values (AWS authentication, email, git name, workspace repos) are not in this public
 repo: they come from the laptop settings file, read on demand by the accessors at the bottom.
 
 Must stay compatible with macOS's /usr/bin/python3 (3.9): ssh and herdr run `mvm proxy` with a
@@ -116,14 +116,8 @@ def mvm_laptop_settings_path():
     return Path(os.environ.get("MVM_SETTINGS_FILE") or MVM_LAPTOP_SETTINGS_FILE)
 
 
-def read_mvm_laptop_setting(key, env_name=None):
-    """Return one laptop setting: env var ENV_NAME when set, else KEY in the laptop settings file.
-
-    Read on each call, never at import, so a command needs only the keys it uses. Raises MvmError
-    naming the file and the key when the setting is missing.
-    """
-    if env_name and os.environ.get(env_name):
-        return os.environ[env_name]
+def read_mvm_laptop_settings():
+    """Read laptop settings on demand; an absent file is allowed for environment-only callers."""
     path = mvm_laptop_settings_path()
     try:
         settings = json.loads(path.read_text())
@@ -133,6 +127,15 @@ def read_mvm_laptop_setting(key, env_name=None):
         raise MvmError(f"mvm settings file unreadable: {path}: {error}") from None
     if not isinstance(settings, dict):
         raise MvmError(f"mvm settings file unreadable: {path}: expected a JSON object")
+    return settings
+
+
+def read_mvm_laptop_setting(key, env_name=None):
+    """Return one required laptop setting, preferring its environment override when present."""
+    if env_name and os.environ.get(env_name):
+        return os.environ[env_name]
+    path = mvm_laptop_settings_path()
+    settings = read_mvm_laptop_settings()
     value = settings.get(key)
     if not value:
         override = f" (or set {env_name})" if env_name else ""
@@ -140,8 +143,35 @@ def read_mvm_laptop_setting(key, env_name=None):
     return value
 
 
+def aws_authentication():
+    """Select persistent AWS authentication for CLI and independent SSH proxy processes.
+
+    None preserves legacy environment/aws-vault behavior. An explicit selection never falls
+    back to the personal awsVaultProfile (SSO). MVM_AWS_PROFILE allows a deliberate per-command
+    profile override, such as an admin SSO profile for `mvm image build`.
+    """
+    override = os.environ.get("MVM_AWS_PROFILE")
+    if override:
+        return {"kind": "profile", "profile": override}
+    settings = read_mvm_laptop_settings()
+    if "awsAuthentication" not in settings:
+        return None
+    auth = settings["awsAuthentication"]
+    if isinstance(auth, dict):
+        if auth == {"kind": "default-chain"}:
+            return auth
+        if set(auth) == {"kind", "profile"} and auth["kind"] == "profile":
+            profile = auth["profile"]
+            if isinstance(profile, str) and profile.strip():
+                return {"kind": "profile", "profile": profile.strip()}
+    raise MvmError(
+        f"mvm settings awsAuthentication invalid: {mvm_laptop_settings_path()}: "
+        'use {"kind":"profile","profile":"NAME"} or {"kind":"default-chain"}'
+    )
+
+
 def aws_vault_profile():
-    """aws-vault profile for every AWS call (its account holds the stack and the MicroVMs)."""
+    """aws-vault profile for AWS calls when awsAuthentication is unset (legacy interactive SSO)."""
     return read_mvm_laptop_setting("awsVaultProfile", "MVM_AWS_VAULT_PROFILE")
 
 

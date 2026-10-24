@@ -24,8 +24,8 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 
 - Use `--json` to read results (`mvm new --json` gives `name` and `devServerPort`).
   No command prompts.
-- `mvm` runs itself under aws-vault.
-  If it prints an SSO device URL, the user must approve it in the browser: ask them.
+- If the laptop settings set `awsAuthentication` (an unattended `credential_process` profile), no command and no ssh connection waits for a login.
+  Otherwise `mvm` runs itself under aws-vault SSO; if it prints an SSO device URL, the user must approve it in the browser: ask them.
 - Create one machine per task.
   Parallel `mvm new` runs are safe.
 - A machine lives at most 8 hours (`--ttl`), then AWS terminates it.
@@ -116,7 +116,7 @@ An agent running on the machine has no `mvm`: it reports the port, and the lapto
 
 Automatic: `mvm new` adds the machine as `aws-<name>` (an open herdr window connects on its own), `mvm rm` removes it, and a machine that hits its `--ttl` is removed by herdr's next reconnect or the next `mvm` command.
 Never run `herdr machine add|remove` for `.mvm` hosts by hand.
-Herdr reconnects need a valid AWS SSO session (see Troubleshooting).
+Herdr reconnects need working AWS credentials: unattended with `awsAuthentication`, otherwise a valid aws-vault SSO session (see Troubleshooting).
 
 ## tuios
 
@@ -141,14 +141,48 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 ## Troubleshooting
 
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
-- `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS SSO session expired.
-  Ask the user to run `aws-vault exec <awsVaultProfile> -- true` (profile from the laptop settings) and approve the browser prompt.
+- `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS credentials do not resolve.
+  With `awsAuthentication`, run `aws sts get-caller-identity --profile <profile>`: its error names the failing credential_process (for aws-vault: a locked keychain, or a keychain access prompt after an aws-vault upgrade).
+  Without it, the AWS SSO session expired: ask the user to run `aws-vault exec <awsVaultProfile> -- true` (profile from the laptop settings) and approve the browser prompt.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
 - Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
 - gitlab.com web pages answer AWS IPs with 403; git over HTTPS and the API work.
 - pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws-vault exec <awsVaultProfile> -- aws s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
   The next machine installs cold and saves a fresh snapshot.
 - Host key warnings: each machine gets fresh host keys; `mvm` forgets old ones in `~/.ssh/known_hosts_mvm`.
+
+## Unattended AWS authentication: blocked
+
+Status on 2026-10-24: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) still authenticates with the personal aws-vault SSO session, so they stop when it expires.
+An attempt to make the laptop dispatcher (the dev-workflows support worker) authenticate unattended could not be completed.
+Do not retry it until the access below exists.
+
+- Planned: a dedicated IAM user with a scoped inline policy and no console password.
+  Its access key would live in the macOS login keychain through aws-vault.
+  An AWS CLI profile would use `credential_process = aws-vault export --format=json`, with one-hour GetSessionToken sessions renewed from the keychain.
+  `awsAuthentication` would select that profile.
+- Why it failed: the admin SSO permission set has an inline policy that explicitly denies `iam:CreateUser` and `iam:CreateAccessKey` on every resource.
+  An explicit deny overrides its AdministratorAccess: `AccessDenied ... with an explicit deny in an identity-based policy`.
+  No existing IAM user can receive a key either, and every future key rotation would hit the same deny.
+  Nothing was created in AWS.
+- It is an organization guardrail: do not work around it with another role, another user or edits to the SSO role.
+  Unblocking needs the IAM Identity Center admins. They can grant a scoped exception (user and access-key actions only on the dispatcher's IAM path), or run the setup and every rotation themselves on the laptop.
+- Ready for that day:
+  - `awsAuthentication` support in mvm, inactive until set.
+  - The private dev-workflows helper `bun run aws:dispatcher setup|rotate-key|check`.
+  - The policy, runbook, rotation and revocation steps in that repo's `docs/aws-workflow-authentication.md`.
+- Ruled out by the user: IAM Roles Anywhere, and moving the dispatcher to EC2/ECS.
+  The deny does not cover role creation, but whether an SCP blocks Roles Anywhere was not tested.
+- Notes for the retry:
+  - MicroVM IAM actions use the `lambda:` prefix.
+    `RunMicrovm`, `GetMicrovm`, `TerminateMicrovm` and `CreateMicrovmAuthToken` scope to the image ARN; `ListMicrovms` needs `*`.
+  - Still unverified:
+    - whether `RunMicrovm` needs `lambda:PassNetworkConnector`;
+    - the `iam:PassedToService` value Lambda uses;
+    - whether `sts:GetCallerIdentity` (mvm builds the image ARN from it) and `iam:PassRole` work with GetSessionToken credentials.
+  - Homebrew's aws-vault is ad-hoc signed, so the keychain item trusts that exact binary.
+    An upgrade makes the next access show a keychain dialog that nobody can answer unattended.
+    `brew pin aws-vault` before storing the key.
 
 ## Maintaining mvm
 
@@ -167,11 +201,16 @@ Create it before `mvm setup`:
   "awsVaultProfile": "<aws-vault profile of the AWS account>",
   "ownerEmail": "<work email>",
   "gitUserName": "<name for git commits>",
-  "workspaceRepos": ["dashboard-extensions/conversation-center-ext", "<group>/<repo>"]
+  "workspaceRepos": ["dashboard-extensions/conversation-center-ext", "<group>/<repo>"],
+  "awsAuthentication": {"kind": "profile", "profile": "<AWS CLI profile>"}
 }
 ```
 
-- `awsVaultProfile`: every AWS call, `mvm proxy` included (`MVM_AWS_VAULT_PROFILE` overrides it).
+- `awsAuthentication` (optional): how every AWS call authenticates, `mvm proxy` included, so herdr, tuios and ssh reconnect unattended.
+  `{"kind": "profile", "profile": NAME}` uses that AWS CLI profile (typically a `credential_process`) and drops inherited credentials, `AWS_VAULT` included; `{"kind": "default-chain"}` uses the AWS SDK chain (EC2/ECS role).
+  Either one never falls back to `awsVaultProfile`.
+  `MVM_AWS_PROFILE=NAME` overrides it for one command.
+- `awsVaultProfile`: aws-vault SSO profile for every AWS call when `awsAuthentication` is absent (`MVM_AWS_VAULT_PROFILE` overrides it).
 - `ownerEmail`: owner tag on the stack and image, and git `user.email` on the machines, with `gitUserName` as `user.name`.
 - `workspaceRepos`: GitLab repos every new machine clones; keep `conversation-center-ext` first.
 - `mvm image build` bakes the git identity and the repo list into the image: rebuild after changing them.
@@ -181,6 +220,10 @@ mvm setup           # deploy the stack, ssh key + ~/.ssh/config block, ~/.local/
 mvm secrets push    # copy the dev env vars from this shell into the machines' secret (rerun after rotating a token)
 mvm image build     # new image version from image/ (about 6 minutes); new machines use the latest successful one
 ```
+
+These three need administrator rights, which a scoped `awsAuthentication` profile does not have.
+Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then `MVM_AWS_PROFILE=<admin> mvm image build`.
+`aws-vault exec <admin> -- mvm ...` does not work once `awsAuthentication` is set: the configured profile replaces inherited credentials.
 
 - Tests: `cd scripts && nix shell nixpkgs#zstd -c python3 -m unittest discover -s mvm_cli -p '*_test.py' -t .`, and again with `/usr/bin/python3` (3.9): ssh and herdr run `mvm proxy` with macOS's python.
 - A new command or flag needs `scripts/completions/mvm.fish` too: `fish_completion_test.py` fails until it matches.

@@ -1,4 +1,4 @@
-"""AWS access for mvm: runs the AWS CLI (through aws-vault when the env has no credentials) and the MicroVM API calls."""
+"""AWS access for mvm: persistent credential providers, legacy aws-vault, and MicroVM API calls."""
 
 import json
 import os
@@ -13,6 +13,7 @@ from mvm_cli.mvm_settings import (
     MVM_ENTRY_SCRIPT,
     REGION,
     STACK_NAME,
+    aws_authentication,
     aws_vault_profile,
 )
 
@@ -36,9 +37,40 @@ def has_aws_credentials_in_env():
     return bool(os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_PROFILE"))
 
 
+# Inherited credential selectors a configured profile replaces. AWS_VAULT marks a shell inside
+# `aws-vault exec` (personal SSO): aws-vault refuses to nest, which would break a profile whose
+# credential_process runs aws-vault. Container URIs are where `aws-vault exec --server` serves.
+INHERITED_AWS_CREDENTIAL_ENV_NAMES = (
+    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "AWS_SECURITY_TOKEN",
+    "AWS_CREDENTIAL_EXPIRATION", "AWS_SESSION_EXPIRATION", "AWS_DEFAULT_PROFILE",
+    "AWS_ROLE_ARN", "AWS_WEB_IDENTITY_TOKEN_FILE", "AWS_ROLE_SESSION_NAME",
+    "AWS_CONTAINER_CREDENTIALS_FULL_URI", "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+    "AWS_CONTAINER_AUTHORIZATION_TOKEN", "AWS_VAULT",
+)
+
+
+def configure_aws_authentication():
+    """Apply explicit AWS authentication to this process and its SSH/logging children.
+
+    A configured profile owns credential resolution: inherited session credentials, web
+    identity selectors and an enclosing personal aws-vault session must not mask its renewable
+    provider. Default-chain mode deliberately leaves AWS's own provider chain intact for an
+    EC2/ECS workload role.
+    """
+    auth = aws_authentication()
+    if auth is None:
+        return False
+    if auth["kind"] == "profile":
+        for name in INHERITED_AWS_CREDENTIAL_ENV_NAMES:
+            os.environ.pop(name, None)
+        os.environ["AWS_PROFILE"] = auth["profile"]
+    os.environ["AWS_CLI_AUTO_PROMPT"] = "off"
+    return True
+
+
 def reexec_under_aws_vault():
-    """Re-run this mvm command inside `aws-vault exec` once, so its AWS calls skip per-call aws-vault."""
-    if has_aws_credentials_in_env():
+    """Select persistent authentication, or re-exec under aws-vault for legacy interactive use."""
+    if configure_aws_authentication() or has_aws_credentials_in_env():
         return
     if not shutil.which("aws-vault"):
         raise MvmError("no AWS credentials in the environment and aws-vault is not installed")
@@ -49,13 +81,15 @@ def reexec_under_aws_vault():
 def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     """Run `aws <args>` in REGION and return parsed JSON (or text). Raises AwsCliError on failure.
 
-    Without credentials in the env (`mvm proxy`, which skips the re-exec), the call goes through
-    `aws-vault exec`; the timeout then also bounds a stuck SSO browser login.
+    SSH's `mvm proxy` resolves the same persistent provider without a shell or Flue's .env.
+    Explicit providers fail without falling back to an interactive aws-vault login.
     """
+    explicit_auth = configure_aws_authentication()
     cmd = [AWS_CLI, *args, "--region", REGION]
     if parse_json:
         cmd += ["--output", "json"]
-    if not has_aws_credentials_in_env():
+    using_vault = not explicit_auth and not has_aws_credentials_in_env()
+    if using_vault:
         cmd = ["aws-vault", "exec", aws_vault_profile(), "--", *cmd]
     try:
         result = subprocess.run(
@@ -68,9 +102,12 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
             stdin=None if stdin_text is not None else subprocess.DEVNULL,
         )
     except subprocess.TimeoutExpired:
+        recovery = (
+            f"if AWS SSO expired, run: aws-vault exec {aws_vault_profile()} -- true"
+            if using_vault else "check the configured AWS credential provider and network"
+        )
         raise AwsCliError(
-            f"aws {' '.join(args[:2])} timed out after {timeout}s; if AWS SSO expired, "
-            f"run: aws-vault exec {aws_vault_profile()} -- true",
+            f"aws {' '.join(args[:2])} timed out after {timeout}s; {recovery}",
             stderr="timeout",
         ) from None
     if result.returncode != 0:

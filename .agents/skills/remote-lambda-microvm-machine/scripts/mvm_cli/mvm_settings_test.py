@@ -10,7 +10,7 @@ from unittest import mock
 from mvm_cli import mvm_settings
 from mvm_cli.mvm_errors import MvmError
 
-LAPTOP_SETTINGS_ENV_NAMES = ("MVM_SETTINGS_FILE", "MVM_AWS_VAULT_PROFILE", "MVM_OWNER_EMAIL", "MVM_GIT_USER_NAME")
+LAPTOP_SETTINGS_ENV_NAMES = ("MVM_SETTINGS_FILE", "MVM_AWS_VAULT_PROFILE", "MVM_AWS_PROFILE", "MVM_OWNER_EMAIL", "MVM_GIT_USER_NAME")
 
 
 def isolate_mvm_laptop_settings(test_case):
@@ -58,6 +58,28 @@ class LaptopSettingsTest(unittest.TestCase):
     def test_env_var_works_without_a_settings_file(self):
         with mock.patch.dict(os.environ, {"MVM_OWNER_EMAIL": "dev@example.com"}):
             self.assertEqual(mvm_settings.owner_email(), "dev@example.com")
+
+    def test_authentication_defaults_to_legacy_without_a_file_or_key(self):
+        self.assertIsNone(mvm_settings.aws_authentication())
+        self.write_settings({"awsVaultProfile": "dev-admin"})
+        self.assertIsNone(mvm_settings.aws_authentication())
+
+    def test_authentication_selects_named_profile_or_default_chain(self):
+        for auth in [{"kind": "profile", "profile": "machine"}, {"kind": "default-chain"}]:
+            self.write_settings({"awsAuthentication": auth})
+            self.assertEqual(mvm_settings.aws_authentication(), auth)
+
+    def test_authentication_override_does_not_require_settings(self):
+        with mock.patch.dict(os.environ, {"MVM_AWS_PROFILE": "maintenance"}):
+            self.assertEqual(mvm_settings.aws_authentication(), {"kind": "profile", "profile": "maintenance"})
+
+    def test_invalid_authentication_never_silently_uses_legacy_sso(self):
+        for auth in [None, {}, "machine", {"kind": "typo"}, {"kind": "profile"},
+                     {"kind": "profile", "profile": " "}, {"kind": "profile", "profile": 1},
+                     {"kind": "default-chain", "profile": "unexpected"}]:
+            self.write_settings({"awsAuthentication": auth})
+            with self.assertRaisesRegex(MvmError, "mvm settings awsAuthentication invalid", msg=repr(auth)):
+                mvm_settings.aws_authentication()
 
     def test_missing_setting_names_the_key_the_file_and_the_env_var(self):
         with self.assertRaises(MvmError) as raised:

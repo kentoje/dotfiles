@@ -34,7 +34,7 @@ from mvm_cli.mvm_settings import (
 
 SSH_CONFIG_BEGIN = "# BEGIN mvm (managed by `mvm setup`; do not edit between markers)"
 SSH_CONFIG_END = "# END mvm"
-# Token minting goes through aws-vault in the proxy; bound a stuck SSO login.
+# Bounds token minting in the proxy: a stuck credential provider, or a legacy aws-vault SSO login.
 PROXY_AWS_TIMEOUT_SECONDS = 30
 
 
