@@ -12,15 +12,17 @@ from mvm_cli.mvm_errors import MvmError, log_mvm
 from mvm_cli.mvm_settings import EXTRA_PATH_DIRS, NIX_SYSTEM_BIN_DIR
 from mvm_cli.ssh_access import cmd_proxy, cmd_ssh
 from mvm_cli.stack_setup import cmd_secrets_push, cmd_setup
+from mvm_cli.tuios_machine_session import cmd_tuios
 
 MVM_HELP_DESCRIPTION = """\
 mvm - dev machines on AWS Lambda MicroVMs.
 
 Machines:
-  new [NAME]          start a machine (random name if omitted), wait for ssh, add it to herdr and tuios
+  new [NAME]          start a machine (random name if omitted), wait for ssh, add it to herdr, open its tuios session
   rm NAME...          terminate machines and remove them from herdr and tuios (unpushed work is pushed first)
-  ls                  list machines: state, image version, age, time left, herdr label, tuios host, forwarded ports
+  ls                  list machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
   ssh NAME [CMD...]   same as `ssh NAME.mvm`
+  tuios NAME          open the machine's tuios session aws-NAME again (after a dropped connection)
   forward NAME [PORT...]
                       reach the machine's dev servers at http://localhost:PORT (--stop closes them)
   logs NAME           the machine's logs: workspace setup, hooks, WIP saves
@@ -58,7 +60,9 @@ def build_mvm_parser():
     sub = parser.add_subparsers(dest="command", metavar="COMMAND", help=argparse.SUPPRESS, prog="mvm")
     sub.required = True
 
-    new = sub.add_parser("new", description="Start a machine, wait for ssh, add it to herdr and tuios as aws-NAME.")
+    new = sub.add_parser(
+        "new", description="Start a machine, wait for ssh, add it to herdr and open its tuios session, both aws-NAME."
+    )
     new.add_argument("name", nargs="?", help="machine name (default: random adjective-noun)")
     new.add_argument("--ttl", default="8h", help="lifetime before AWS terminates it: 1m to 8h (default 8h)")
     new.add_argument("--json", action="store_true", help="print the result as JSON")
@@ -75,7 +79,7 @@ def build_mvm_parser():
     ls = sub.add_parser(
         "ls",
         aliases=["list"],
-        description="List machines: state, image version, age, time left, herdr label, tuios host, forwarded ports.",
+        description="List machines: state, image version, age, time left, herdr label, tuios session, forwarded ports.",
     )
     ls.add_argument("--json", action="store_true")
     ls.set_defaults(func=cmd_ls)
@@ -84,6 +88,14 @@ def build_mvm_parser():
     ssh.add_argument("name")
     ssh.add_argument("command", nargs=argparse.REMAINDER, help="optional command to run instead of a shell")
     ssh.set_defaults(func=cmd_ssh)
+
+    tuios = sub.add_parser(
+        "tuios",
+        description="Open the machine's local tuios session aws-NAME again, its window attaching the machine's own"
+        " session `main` over ssh. Replaces a session whose ssh connection dropped; agents on the machine keep running.",
+    )
+    tuios.add_argument("name")
+    tuios.set_defaults(func=cmd_tuios)
 
     forward = sub.add_parser(
         "forward",

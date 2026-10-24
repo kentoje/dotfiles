@@ -85,7 +85,8 @@ class FishCompletionInFishTest(unittest.TestCase):
 
     def test_commands_hide_proxy(self):
         self.assertEqual(
-            sorted(self.complete("mvm ")), ["forward", "image", "logs", "ls", "new", "rm", "secrets", "setup", "ssh"]
+            sorted(self.complete("mvm ")),
+            ["forward", "image", "logs", "ls", "new", "rm", "secrets", "setup", "ssh", "tuios"],
         )
 
     def test_machine_names_come_from_local_records(self):
@@ -99,8 +100,10 @@ class FishCompletionInFishTest(unittest.TestCase):
         self.assertEqual(self.complete("mvm forward quiet-yak "), [])
         self.assertEqual(self.complete("mvm forward dev --st"), ["--stop"])
 
-    def test_ssh_stops_completing_after_the_name(self):
+    def test_ssh_and_tuios_stop_completing_after_the_name(self):
         self.assertEqual(sorted(self.complete("mvm ssh ")), ["dev", "quiet-yak"])
+        self.assertEqual(sorted(self.complete("mvm tuios ")), ["dev", "quiet-yak"])
+        self.assertEqual(self.complete("mvm tuios dev "), [])
         self.assertEqual(self.complete("mvm ssh dev "), [])
 
 

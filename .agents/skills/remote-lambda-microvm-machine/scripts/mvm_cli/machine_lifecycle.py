@@ -1,4 +1,4 @@
-"""Machine lifecycle commands: `mvm new` (start + herdr/tuios add), `mvm rm` (terminate + herdr/tuios remove), `mvm ls`."""
+"""Machine lifecycle commands: `mvm new` (start + herdr add + tuios session), `mvm rm` (terminate + remove both), `mvm ls`."""
 
 import datetime as dt
 import json
@@ -48,7 +48,11 @@ from mvm_cli.mvm_settings import (
     REGION,
 )
 from mvm_cli.ssh_access import read_mvm_ssh_public_key, wait_for_ssh
-from mvm_cli.tuios_host_sync import add_machine_to_tuios, list_tuios_hosts_by_addr
+from mvm_cli.tuios_machine_session import (
+    list_tuios_machine_sessions,
+    open_tuios_session_for_machine,
+    tuios_session_for_machine,
+)
 
 
 def parse_duration_seconds(text):
@@ -138,7 +142,7 @@ def reserve_and_start_microvm(requested_name, ssh_public_key, stack_outputs, ttl
 
 
 def cmd_new(args):
-    """Start a machine from the latest image, wait for ssh, add it to herdr and tuios as `aws-<name>`."""
+    """Start a machine from the latest image, wait for ssh, add it to herdr and open its tuios session, both `aws-<name>`."""
     reexec_under_aws_vault()
     if args.name:
         validate_machine_name(args.name)
@@ -163,13 +167,13 @@ def cmd_new(args):
     in_herdr = add_machine_to_herdr(name)
     if in_herdr:
         log_mvm(f"{name}: added to herdr as {herdr_label_for_machine(name)}")
-    tuios_host = add_machine_to_tuios(name)
+    tuios_session = open_tuios_session_for_machine(name)
 
     summary = {
         "name": name,
         "ssh": f"ssh {ssh_host_for_machine(name)}",
         "herdr": herdr_label_for_machine(name) if in_herdr else None,
-        "tuios": tuios_host,
+        "tuios": tuios_session,
         "expiresAt": machine_expires_at(record).isoformat(),
         "devServerPort": dev_server_port,
         "microvmId": record["microvmId"],
@@ -207,7 +211,7 @@ def write_skip_wip_marker(name):
 
 
 def cmd_rm(args):
-    """Terminate machines (their hook pushes unpushed work first), then drop them from herdr, tuios and local state."""
+    """Terminate machines (their hook pushes unpushed work first), then drop their herdr entry, tuios session and local state."""
     reexec_under_aws_vault()
     failed = []
     herdr_profiles = list_herdr_mvm_profiles()
@@ -233,14 +237,13 @@ def cmd_rm(args):
 
 
 def cmd_ls(args):
-    """List live machines: name, state, image version, age, time left, herdr label, tuios host, forwarded ports."""
+    """List live machines: name, state, image version, age, time left, herdr label, tuios session, forwarded ports."""
     reexec_under_aws_vault()
     listing = list_image_microvms()
     prune_ended_machines(listing)
     names_by_id = {record["microvmId"]: record for record in list_machine_records()}
     herdr_labels = {p["target"]: p.get("label") for p in (list_herdr_mvm_profiles() or [])}
-    # Only hosts the daemon applied: one still waiting for `tuios config apply` shows as "-".
-    tuios_hosts = list_tuios_hosts_by_addr()
+    tuios_sessions = set(list_tuios_machine_sessions() or [])
     now = dt.datetime.now(dt.timezone.utc)
     rows = []
     for microvm in listing:
@@ -262,7 +265,9 @@ def cmd_ls(args):
                 "startedAt": started.isoformat() if started else None,
                 "expiresAt": machine_expires_at(record).isoformat() if record else None,
                 "herdr": herdr_labels.get(ssh_host_for_machine(name)) if name else None,
-                "tuios": tuios_hosts.get(ssh_host_for_machine(name)) if name else None,
+                "tuios": tuios_session_for_machine(name)
+                if name and tuios_session_for_machine(name) in tuios_sessions
+                else None,
                 "devServerPort": record.get("devServerPort") if record else None,
                 "forwardedPorts": list_machine_forwarded_ports(name) if name else [],
                 "microvmId": microvm["microvmId"],

@@ -19,13 +19,17 @@ class LocalRecordFakesTestCase(unittest.TestCase):
         self.removed_from_herdr = []
         self.deleted = []
         self.stopped_forwards = []
-        self.tuios_rebuilds = []
+        self.closed_tuios_sessions = []
+        self.tuios_sessions = []
         patches = [
-            # Never the live ~/.config/tuios/config.d file: it would follow this laptop's real records.
+            # Never the live tuios daemon: it holds this laptop's real sessions.
             mock.patch.object(
                 ended_machine_cleanup,
-                "write_tuios_mvm_hosts",
-                side_effect=lambda: self.tuios_rebuilds.append([r["name"] for r in self.records]),
+                "close_tuios_session_for_machine",
+                side_effect=lambda name: self.closed_tuios_sessions.append(name) or True,
+            ),
+            mock.patch.object(
+                ended_machine_cleanup, "list_tuios_machine_sessions", side_effect=lambda: list(self.tuios_sessions)
             ),
             mock.patch.object(
                 ended_machine_cleanup, "forget_machine_port_forwards", side_effect=self.stopped_forwards.append
@@ -93,6 +97,14 @@ class PruneEndedMachinesTest(LocalRecordFakesTestCase):
         self.assertEqual(self.removed_from_herdr, ["orphan"])
         self.assertEqual(self.deleted, [])
 
+    def test_tuios_session_without_local_record_is_closed(self):
+        listing = [{"microvmId": "m-live", "state": "RUNNING"}, {"microvmId": "m-gone", "state": "RUNNING"}]
+        self.tuios_sessions = ["aws-live", "aws-orphan"]
+        pruned = self.prune(listing, lambda mid: False, [herdr_profile("live"), herdr_profile("orphan")])
+        self.assertEqual(pruned, ["orphan"])
+        # Closed even though its herdr entry already put it in the pruned list.
+        self.assertEqual(self.closed_tuios_sessions, ["orphan"])
+
     def test_unknown_herdr_listing_skips_herdr_cleanup(self):
         listing = [{"microvmId": "m-live", "state": "RUNNING"}, {"microvmId": "m-gone", "state": "RUNNING"}]
         self.assertEqual(self.prune(listing, lambda mid: False, None), [])
@@ -105,8 +117,7 @@ class ForgetEndedMachineTest(LocalRecordFakesTestCase):
         self.assertEqual(self.deleted, ["gone"])
         self.assertEqual(self.removed_from_herdr, ["gone"])
         self.assertEqual(self.stopped_forwards, ["gone"])
-        # Rebuilt after the record is gone, so the tuios hosts file no longer names it.
-        self.assertEqual(self.tuios_rebuilds, [["live"]])
+        self.assertEqual(self.closed_tuios_sessions, ["gone"])
 
     def test_keeps_a_record_that_now_points_at_a_new_microvm(self):
         self.assertFalse(ended_machine_cleanup.forget_ended_machine("gone", "m-older"))
@@ -114,7 +125,7 @@ class ForgetEndedMachineTest(LocalRecordFakesTestCase):
         self.assertEqual(self.removed_from_herdr, [])
         # The new machine's forwards share the name: they must survive.
         self.assertEqual(self.stopped_forwards, [])
-        self.assertEqual(self.tuios_rebuilds, [])
+        self.assertEqual(self.closed_tuios_sessions, [])
 
     def test_already_forgotten_record_still_drops_herdr_entry(self):
         self.assertTrue(ended_machine_cleanup.forget_ended_machine("absent", "m-x"))

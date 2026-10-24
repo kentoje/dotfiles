@@ -22,7 +22,7 @@ ARG PI_VERSION=1.2.0
 ARG PORTLESS_VERSION=0.15.7
 ARG OMP_VERSION=18.10.3
 ARG HERDR_VERSION=0.9.5
-# Keep equal to the laptop's tuios (brew): a remote daemon on another protocol shows `incompatible`.
+# The laptop's `aws-<name>` tuios window runs this client over ssh (`tuios attach main`): no version link to the laptop's tuios.
 ARG TUIOS_VERSION=0.10.1
 ARG CODEX_VERSION=0.162.1
 ARG JIRA_CLI_VERSION=1.7.0

@@ -14,10 +14,11 @@ The machine reaches staging (identity API, AppSync schema) on its own: no tunnel
 ## Commands
 
 ```bash
-mvm new [NAME] [--ttl 8h] [--json]   # start a machine (random adjective-noun name if omitted), wait for ssh, add to herdr and tuios
+mvm new [NAME] [--ttl 8h] [--json]   # start a machine (random adjective-noun name if omitted), wait for ssh, add to herdr, open its tuios session
 mvm rm NAME... [--discard]           # terminate (unpushed work is pushed first), remove from herdr and tuios
-mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, tuios host, forwarded ports
+mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
 mvm ssh NAME [CMD...]                # same as ssh NAME.mvm [CMD...]
+mvm tuios NAME                       # open the machine's tuios session aws-NAME again (after a dropped connection)
 mvm forward NAME [PORT...] [--stop]  # reach the machine's dev servers at http://localhost:PORT
 mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hooks, network doctor, WIP saves
 ```
@@ -34,7 +35,7 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 
 ## New machine
 
-`mvm new` returns in about 20 seconds with the machine ssh-ready and in herdr.
+`mvm new` returns in about 20 seconds with the machine ssh-ready, in herdr and in the tuios rail.
 The workspace setup continues in the background, usually for under a minute (`mvm logs <name> -f`, or `~/.local/state/mvm/bootstrap-status.json` on the machine, whose `phase` becomes `ready`):
 
 - `conversation-center-ext` is cloned with its `.env.local` (staging), dependencies and Playwright Chromium.
@@ -64,6 +65,7 @@ ssh <name>.mvm 'cd <worktree> && omp -p < /tmp/prompt.md'
 Redirect stdin so the agent does not wait on it.
 Follow-ups resume the same remote session (`pi --resume <id>` from the first JSON result).
 The laptop does not edit the checkout: the remote agent edits, tests, runs the dev server and drives `agent-browser` on the machine.
+When the user wants to watch or steer the agent, run it live in the machine's tuios window instead (see tuios).
 
 ## Working on a ticket
 
@@ -120,13 +122,36 @@ Herdr reconnects need working AWS credentials: unattended with `awsAuthenticatio
 
 ## tuios
 
-Automatic too: `mvm new` writes the machine as tuios host `aws-<name>` and starts its tuios daemon (`tuios hosts test aws-<name> --start`).
-mvm owns `~/.config/tuios/config.d/mvm-hosts.toml` (gitignored) and rebuilds it from the machine records on `mvm new`, `mvm rm` and every prune, so an ended machine leaves tuios at once.
-A new host waits for an apply from a terminal outside tuios: tuios refuses it inside a pane by design.
-Run `mvm new` outside tuios (for example the Cmd+b quick terminal) and it applies that one host itself (`tuios call apply-config '{"host":"aws-<name>"}'`), never the rest of the file.
-Run inside a tuios pane, it logs the one step left: `tuios config apply` outside tuios.
-Never edit `mvm-hosts.toml` or run `tuios hosts add|remove` for `.mvm` hosts by hand.
-Then press enter on `aws-<name>` in the rail, or `tuios new --host aws-<name>`.
+Automatic too: `mvm new` opens the local tuios session `aws-<name>` in the space `mvm`, so every machine shows in the rail under one `mvm` heading.
+Its one window, `<name>.mvm`, runs `ssh -t <name>.mvm tuios attach main --create --terminal-mode`: the machine's own tuios session `main`.
+Keys typed in the window go to the machine's pane, and the machine's own rail and dock stay hidden (`~/.config/tuios/config.d/mvm-laptop-window.toml` on the machine, written by `mvm new`).
+Nothing waits for `tuios config apply`: the window only runs ssh, with no tuios grants, from a tuios pane or from anywhere else.
+It is deliberately not a tuios host link: a `[hosts]` entry gives every pane more, so tuios holds it until the person applies it outside tuios.
+`mvm rm` and every prune close the session; prune also closes `aws-*` sessions in the space `mvm` that have no machine record, so never create one by hand.
+After a dropped connection the window keeps its last lines and exit status: `mvm tuios <name>` replaces the session, and whatever runs in `main` on the machine keeps running.
+
+### A live agent the user watches
+
+Start the agent in the window when the user wants to watch or steer it:
+
+```bash
+scp ./prompt.md <name>.mvm:/tmp/prompt.md
+tuios send-text -s aws-<name> -w <name>.mvm 'cd <checkout> && pi --approve @/tmp/prompt.md
+'
+tuios capture-pane -s aws-<name> -w <name>.mvm   # read progress
+# follow-up: the text, then Enter as a key once pi shows its input box
+tuios send-text -s aws-<name> -w <name>.mvm '<follow-up>'
+sleep 1; tuios send-keys -s aws-<name> -w <name>.mvm Enter
+```
+
+- `pi --approve` trusts the checkout's project files for that run, so pi does not stop on its trust question.
+  `@/tmp/prompt.md` is the first prompt: no quoting, and no Enter racing pi's start-up.
+- After a follow-up, check with `capture-pane` that the text left the input box; if it is still there, send Enter again (an Enter right after pi started was once ignored).
+- The rail shows the agent's state (idle, done) on the `aws-<name>` window, reported through the nested client.
+- The user types in the same pane: say before sending, and read the screen before typing over their input.
+- Text goes to the focused pane of `main`: keep one agent there, and open other windows on the machine over plain `ssh <name>.mvm`.
+- Never exit the shell in `main` (`exit`, a second ctrl+d): an empty `main` shows tuios's start screen, where typed text drives the machine's window manager.
+- If the window shows a closed connection or that start screen, run `mvm tuios <name>`: it reconnects and gives an empty `main` a new window; an agent in `main` keeps running.
 
 ## Unpushed work
 
@@ -231,7 +256,6 @@ Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then 
   No secret ever goes into the image, `image/rootfs`, `~/.gitconfig` or `~/.npmrc`.
 - AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
-- Keep the laptop's tuios (brew) on the image's `TUIOS_VERSION`: a link to a daemon on another protocol shows `incompatible`; `tuios hosts sync aws-<name>` fixes one running machine.
 - Machine names exist only on the laptop, in `~/.local/state/mvm/machines/<name>.json`.
   Cleanup forgets a machine only after AWS confirms it ended.
 - The pnpm store cache (`image/rootfs/opt/mvm/bin/mvm-pnpm-store-cache`) is shared and writable by every machine: a compromised machine could poison later installs, beyond what the lockfile checks.

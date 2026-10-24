@@ -58,10 +58,11 @@ complete -c mvm -f
 complete -c mvm -s h -l help -d 'Show help'
 
 # Commands (descriptions follow `mvm --help`; fish lists them alphabetically).
-complete -c mvm -n __fish_use_subcommand -a new -d 'Start a machine, wait for ssh, add it to herdr and tuios'
+complete -c mvm -n __fish_use_subcommand -a new -d 'Start a machine, wait for ssh, add it to herdr, open its tuios session'
 complete -c mvm -n __fish_use_subcommand -a rm -d 'Terminate machines, remove them from herdr and tuios'
 complete -c mvm -n __fish_use_subcommand -a ls -d 'List machines: state, image, age, time left, herdr, tuios'
 complete -c mvm -n __fish_use_subcommand -a ssh -d 'Same as ssh NAME.mvm'
+complete -c mvm -n __fish_use_subcommand -a tuios -d "Open the machine's tuios session again"
 complete -c mvm -n __fish_use_subcommand -a forward -d "Reach the machine's dev servers at localhost:PORT"
 complete -c mvm -n __fish_use_subcommand -a logs -d "The machine's logs: setup, hooks, WIP saves"
 complete -c mvm -n __fish_use_subcommand -a setup -d 'One-time: AWS stack, ssh config, PATH, completion'
@@ -86,6 +87,9 @@ complete -c mvm -n '__fish_seen_subcommand_from ssh; and __mvm_needs_machine_nam
 complete -c mvm -n '__fish_seen_subcommand_from forward; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
 complete -c mvm -n '__fish_seen_subcommand_from forward; and not __mvm_needs_machine_name' -a '(__mvm_dev_server_port (__mvm_positional_args)[1])' -d 'dev server port'
 complete -c mvm -n '__fish_seen_subcommand_from forward' -l stop -d "Close all of the machine's forwards"
+
+# mvm tuios NAME
+complete -c mvm -n '__fish_seen_subcommand_from tuios; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
 
 # mvm logs NAME [-f] [--since 1h]
 complete -c mvm -n '__fish_seen_subcommand_from logs; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine

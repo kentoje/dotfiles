@@ -1,7 +1,7 @@
 """Cleanup of ended machines: drop their herdr and tuios entries, local name record, ssh host key and port forwards.
 
 Machines end on their own (8h cap) or through `mvm rm`. `mvm new|rm|ls` prune them, and so does
-`mvm proxy` when herdr or tuios tries to reconnect to one. Fails closed: a record is forgotten only after
+`mvm proxy` when herdr or a tuios window tries to reconnect to one. Fails closed: a record is forgotten only after
 AWS confirms the MicroVM ended, never because a listing or an auth call failed.
 """
 
@@ -15,7 +15,11 @@ from mvm_cli.machine_registry import (
     machine_name_from_ssh_host,
 )
 from mvm_cli.mvm_errors import log_mvm
-from mvm_cli.tuios_host_sync import write_tuios_mvm_hosts
+from mvm_cli.tuios_machine_session import (
+    close_tuios_session_for_machine,
+    list_tuios_machine_sessions,
+    machine_name_for_tuios_session,
+)
 
 
 def forget_ended_machine(name, ended_microvm_id, herdr_profiles=None):
@@ -33,13 +37,12 @@ def forget_ended_machine(name, ended_microvm_id, herdr_profiles=None):
     # gone no herdr entry for NAME can belong to a newer machine.
     delete_machine_record(name)
     remove_machine_from_herdr(name, herdr_profiles)
-    # Rebuilt from the records, so NAME's tuios host goes (tuios applies a removal at once).
-    write_tuios_mvm_hosts()
+    close_tuios_session_for_machine(name)
     return True
 
 
 def prune_ended_machines(microvm_listing):
-    """Forget every local machine that AWS confirms ended, and herdr `*.mvm` entries with no record.
+    """Forget every local machine that AWS confirms ended, and herdr `*.mvm` entries and tuios `aws-*` sessions with no record.
 
     MICROVM_LISTING must come from a successful list_image_microvms() call. Returns pruned names.
     """
@@ -54,14 +57,17 @@ def prune_ended_machines(microvm_listing):
             continue
         if forget_ended_machine(record["name"], record["microvmId"], herdr_profiles or []):
             pruned.append(record["name"])
-    if herdr_profiles is not None:
-        # Without a local record nothing can connect through these entries (the proxy needs it).
-        recorded_names = {record["name"] for record in list_machine_records()}
-        for profile in herdr_profiles:
-            name = machine_name_from_ssh_host(profile["target"])
-            if name not in recorded_names and name not in pruned:
-                remove_machine_from_herdr(name, [profile])
-                pruned.append(name)
+    # Without a local record nothing can connect through these entries (the proxy needs it).
+    recorded_names = {record["name"] for record in list_machine_records()}
+    for profile in herdr_profiles or []:
+        name = machine_name_from_ssh_host(profile["target"])
+        if name not in recorded_names and name not in pruned:
+            remove_machine_from_herdr(name, [profile])
+            pruned.append(name)
+    for session in list_tuios_machine_sessions() or []:
+        name = machine_name_for_tuios_session(session)
+        if name not in recorded_names and close_tuios_session_for_machine(name) and name not in pruned:
+            pruned.append(name)
     for name in pruned:
         log_mvm(f"{name}: ended, removed from herdr, tuios and local state")
     return pruned
