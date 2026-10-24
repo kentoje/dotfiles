@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.3.0",
+  "lastChangelogVersion": "1.4.0",
   "showHardwareCursor": true,
   "editorPaddingX": 0,
   "defaultThinkingLevel": "high",
@@ -21,7 +21,9 @@
     "npm:@mrclrchtr/supi-web",
     "npm:@mrclrchtr/supi-code-intelligence",
     "npm:@narumitw/pi-btw",
-    "npm:pi-open-tui"
+    "npm:pi-open-tui",
+    "git:git@github.com:kentoje/pi-copy-mode.git",
+    "npm:@luan.sh/pi-xsettings"
   ],
   "extensions": [
     "~/dotfiles/.pi/agent/extensions/agent-gossips/index.ts"
