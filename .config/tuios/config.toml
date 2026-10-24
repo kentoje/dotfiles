@@ -150,6 +150,7 @@ window_title_style = "plain"
 # Neovim announces itself over OSC 7777, so ctrl+h/j/k/l reach it and it hands
 # focus back to tuios at a split edge.
 nvim_navigation = true
+motion = "none"
 
 [appearance.sidebar]
 # The default rail minus the files section (oil and yazi do files better) and
