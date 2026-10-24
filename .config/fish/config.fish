@@ -14,6 +14,13 @@ if not test -f $_workmux_cache
 end
 source $_workmux_cache
 
+# boxd: dynamic clap completion (commands, flags, live machine names).
+# Fish autoloads ~/.config/fish/completions/boxd.fish; source it here so an
+# already-open shell picks it up without a restart.
+if command -q boxd; and test -f ~/.config/fish/completions/boxd.fish
+    source ~/.config/fish/completions/boxd.fish
+end
+
 # Temp fix
 # fish 4.0 deprecates `bind -k`. transform's Atuin's init to drop -k and ensure up-binding works.
 # Interactive only: this block shells out to `atuin` twice (~100ms) and only rebinds Up,
@@ -72,7 +79,7 @@ bind -M insert ctrl-d delete-char
 # requires https://github.com/louislva/claude-peers-mcp
 alias cl="CLAUDE_CODE_NO_FLICKER=1 ~/.local/bin/claude --model opus[1m] --dangerously-skip-permissions"
 
-alias co="codex --ask-for-approval never --sandbox danger-full-access -c model_reasoning_summary="detailed" -c model_supports_reasoning_summaries=true"
+alias co="codex --ask-for-approval never --sandbox danger-full-access"
 
 # Advance merged sprint tickets (dry-run by default; pass --apply to execute).
 # Needs JIRA_API_TOKEN in env + glab authenticated.
