@@ -12,6 +12,7 @@ else
 	require("kentoje.set")
 	require("kentoje.remap")
 	require("kentoje.lazy")
+	require("kentoje.rex-italic-removal").setup()
 end
 
 local has = function(x)

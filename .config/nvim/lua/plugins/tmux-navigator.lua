@@ -15,5 +15,9 @@ return {
 		-- Sets the <C-h/j/k/l> maps: move between nvim splits, and at a split
 		-- edge hand off to herdr (HERDR_PANE_ID) → tmux ($TMUX) → plain wincmd.
 		dofile(vim.fn.expand("~/Documents/github/vim-herdr-navigation/editor/nvim.lua"))
+		-- Inside Rex, the same keys hand off to Rex panes instead (no-op elsewhere).
+		require("kentoje.rex-pane-navigation").setup()
+		-- Inside tuios, they hand off to tuios panes over OSC 7777 (no-op elsewhere).
+		require("kentoje.tuios-pane-navigation").setup()
 	end,
 }
