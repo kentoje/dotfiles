@@ -23,13 +23,18 @@ from mvm_cli.mvm_settings import (
     TUIOS_SESSION_PREFIX,
 )
 
-# The machine's tuios config.d file hiding its client's rail and dock, which the laptop's window would draw
-# inside its pane. A file, not set-option or set-config: a client that attaches later reads only the files.
+# The machine's tuios config.d file: it hides its client's rail and dock, which the laptop's window would draw
+# inside its pane, and gives the machine its own color theme. A file, not set-option or set-config: a client
+# that attaches later reads only the files.
 MACHINE_TUIOS_CONFIG_FILE = "~/.config/tuios/config.d/mvm-laptop-window.toml"
 MACHINE_TUIOS_CONFIG_TOML = """\
 # Written by mvm: the laptop shows this machine in one tuios window, so no rail or dock here.
+# Catppuccin Mocha with its own background, not the laptop's Melange, tells a machine apart at a glance.
+# pi's default `system` theme derives its colors from it; with no theme, pi fell back to raw ANSI colors.
 [appearance]
 dockbar_position = "hidden"
+theme = "catppuccin_mocha"
+background = "theme"
 
 [appearance.sidebar]
 enabled = false
@@ -70,7 +75,8 @@ def call_tuios_verb(verb, params, timeout=30):
 
 
 def render_machine_tuios_session_script():
-    """Shell run over ssh on the machine: hide its tuios rail and dock, then make sure its session `main` has a window.
+    """Shell run over ssh on the machine: write its tuios config (no rail or dock, its own theme), then make sure
+    its session `main` has a window.
 
     Creates `main` (and the daemon) when missing. A `main` whose last shell exited gets a new window: an empty
     session shows tuios's start screen, where typed text would drive the machine's window manager.
@@ -90,7 +96,7 @@ def render_machine_tuios_session_script():
 
 
 def start_machine_tuios_session(name):
-    """Over ssh: hide the machine's tuios rail and dock, create its own session `main`. True when the config is written."""
+    """Over ssh: write the machine's tuios config, create its own session `main`. True when the config is written."""
     try:
         result = subprocess.run(
             [
@@ -110,7 +116,9 @@ def start_machine_tuios_session(name):
     except subprocess.TimeoutExpired:
         result = None
     if result is None or result.returncode != 0:
-        log_mvm(f"{name}: machine tuios not prepared; the window still attaches, with the machine's rail and dock")
+        log_mvm(
+            f"{name}: machine tuios not prepared; the window still attaches, with the machine's rail, dock and default colors"
+        )
         return False
     return True
 

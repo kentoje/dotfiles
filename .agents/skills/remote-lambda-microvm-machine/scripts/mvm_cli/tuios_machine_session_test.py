@@ -165,7 +165,10 @@ class TuiosMachineSessionTest(unittest.TestCase):
         # No tuios at /home/dev here: `tuios new` fails, the script still succeeds.
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(written, tuios_machine_session.MACHINE_TUIOS_CONFIG_TOML)
-        self.assertIn('dockbar_position = "hidden"', written)
+        # No dock, and Catppuccin Mocha painted behind the panes, so a machine's window never looks like a laptop pane.
+        self.assertIn(
+            '[appearance]\ndockbar_position = "hidden"\ntheme = "catppuccin_mocha"\nbackground = "theme"\n', written
+        )
         self.assertIn("[appearance.sidebar]\nenabled = false", written)
         script = tuios_machine_session.render_machine_tuios_session_script()
         self.assertIn("T=/home/dev/.local/bin/tuios", script)

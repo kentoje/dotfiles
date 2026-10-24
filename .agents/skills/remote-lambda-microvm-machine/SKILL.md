@@ -131,6 +131,8 @@ The code is `scripts/mvm_cli/tuios_machine_session.py`.
 
 1. Over ssh, on the machine:
    - writes `~/.config/tuios/config.d/mvm-laptop-window.toml`, which hides the machine's own rail and dock, so the window shows only the machine's pane;
+   - in that file, sets the theme `catppuccin_mocha` with its background, so a machine's window never looks like a laptop pane (Melange).
+     Pi's default `system` theme derives its colors from it; with no theme there, Pi fell back to raw ANSI colors (navy, olive, magenta);
    - creates the session `main` (starting the machine's tuios daemon), or gives an existing `main` a window if its last shell exited.
 2. On the laptop, `tuios call new-session` creates `aws-<name>` in the space `mvm`, without a window.
    A session of that name left by an earlier machine is replaced, unless `mvm` runs inside it.
@@ -198,7 +200,7 @@ Its agents run through the workflow's own ssh runner, not in `main`: the window 
 ### When the window looks wrong
 
 - No `aws-<name>` session: `mvm new` logged why (tuios missing, daemon not running); run `mvm tuios <name>`.
-- The window shows the machine's own rail and dock: `mvm new` could not reach the machine to write its config file (it logged `machine tuios not prepared`); `mvm tuios <name>` writes it and reattaches.
+- The window shows the machine's own rail and dock, or default colors instead of Catppuccin Mocha: `mvm new` could not reach the machine to write its config file (it logged `machine tuios not prepared`); `mvm tuios <name>` writes it and reattaches.
 - tuios's start screen ("new window", "new session") inside the window: `main` lost its last window; `mvm tuios <name>`.
 - The window ends with a closed connection: a network drop or the machine ended; `mvm ls` tells which, and `mvm tuios <name>` reconnects a live machine.
 - A laptop that ran mvm before tuios sessions may still have `~/.config/tuios/config.d/mvm-hosts.toml` (host links): delete it, mvm no longer writes or cleans it.
