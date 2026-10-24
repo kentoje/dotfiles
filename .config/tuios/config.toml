@@ -143,6 +143,8 @@ hide_window_buttons = true
 border_focused_color = "#85B695"
 border_unfocused_color = "#403A36"
 shared_borders = false
+# border_style = "hidden"
+window_title_position = "hidden" # optional, removes the title row too
 # Titles as plain text on the border: pill, tab or plain.
 window_title_style = "plain"
 # Neovim announces itself over OSC 7777, so ctrl+h/j/k/l reach it and it hands
@@ -150,9 +152,9 @@ window_title_style = "plain"
 nvim_navigation = true
 
 [appearance.sidebar]
-# The default rail minus the files section (oil and yazi do files better); its
-# 25% goes to the agents.
-sections = "sessions:25,terminals,agents:59"
+# The default rail minus the files section (oil and yazi do files better) and
+# the terminals section (Cmd+g reaches every pane).
+sections = "sessions:60,agents:40"
 
 [spotlight]
 enabled = false
