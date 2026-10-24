@@ -122,13 +122,50 @@ Herdr reconnects need working AWS credentials: unattended with `awsAuthenticatio
 
 ## tuios
 
-Automatic too: `mvm new` opens the local tuios session `aws-<name>` in the space `mvm`, so every machine shows in the rail under one `mvm` heading.
-Its one window, `<name>.mvm`, runs `ssh -t <name>.mvm tuios attach main --create --terminal-mode`: the machine's own tuios session `main`.
-Keys typed in the window go to the machine's pane, and the machine's own rail and dock stay hidden (`~/.config/tuios/config.d/mvm-laptop-window.toml` on the machine, written by `mvm new`).
-Nothing waits for `tuios config apply`: the window only runs ssh, with no tuios grants, from a tuios pane or from anywhere else.
-It is deliberately not a tuios host link: a `[hosts]` entry gives every pane more, so tuios holds it until the person applies it outside tuios.
-`mvm rm` and every prune close the session; prune also closes `aws-*` sessions in the space `mvm` that have no machine record, so never create one by hand.
-After a dropped connection the window keeps its last lines and exit status: `mvm tuios <name>` replaces the session, and whatever runs in `main` on the machine keeps running.
+Automatic too: every machine gets a local tuios session `aws-<name>` in the space `mvm`, so all machines show in the rail under one `mvm` heading.
+Its one window, `<name>.mvm`, is a plain ssh connection that shows the machine's own tuios session `main`.
+The user watches and steers whatever runs in `main` from that window; no `tuios config apply` is ever needed.
+The code is `scripts/mvm_cli/tuios_machine_session.py`.
+
+### What `mvm new` does
+
+1. Over ssh, on the machine:
+   - writes `~/.config/tuios/config.d/mvm-laptop-window.toml`, which hides the machine's own rail and dock, so the window shows only the machine's pane;
+   - creates the session `main` (starting the machine's tuios daemon), or gives an existing `main` a window if its last shell exited.
+2. On the laptop, `tuios call new-session` creates `aws-<name>` in the space `mvm`, without a window.
+   A session of that name left by an earlier machine is replaced, unless `mvm` runs inside it.
+3. `tuios call new-window` adds the window `<name>.mvm`, which runs `ssh -t <name>.mvm /home/dev/.local/bin/tuios attach main --create --terminal-mode`.
+   - Terminal mode: keys typed in the window go to the machine's pane, not to the machine's window manager.
+   - No tuios grants (`none`): the window only runs ssh, and nothing in it can drive the laptop's tuios.
+   - Kept open: when the connection drops, the window keeps its last lines and the exit status.
+   - It does not take the focus.
+4. It logs `<name>: tuios session aws-<name> (space mvm) shows the machine's session main`, and `mvm new --json` reports the session as `tuios` (`null` when none was opened).
+
+It works the same from a tuios pane, from a terminal outside tuios, and from the dev-workflows support worker.
+Without tuios installed the step is skipped; a stopped daemon or a refusal only logs a warning, and the machine is still created.
+
+### Lifecycle
+
+| When | What happens to `aws-<name>` |
+| --- | --- |
+| `mvm new` | Opened, as above. |
+| `mvm ls` | The `TUIOS` column names the session when the laptop's daemon holds it. |
+| `mvm tuios <name>` | Replaced by a fresh session and window; also rewrites the machine's config file and gives an empty `main` a window. Whatever runs in `main` keeps running. |
+| `mvm rm <name>` | Closed. |
+| `--ttl` reached | The window shows the closed connection; the next `mvm new` or `mvm ls`, or herdr's next reconnect, closes the session. |
+| Session with no machine record | Closed by every prune: never create `aws-*` sessions in the space `mvm` by hand. |
+
+`mvm` never closes the session it runs inside.
+
+### Why a session and not a tuios host
+
+Herdr's `herdr machine add` only saves a connection profile in its client state, and herdr has no permission model, so a new machine appears in its sidebar at once.
+A tuios host link (`[hosts]` in the tuios config) is different: every pane can then read and type into that machine's sessions, so tuios treats a new host as giving panes more.
+tuios holds such a change until the person runs `tuios config apply` in a terminal outside tuios, and refuses it from any pane, the support worker's included.
+A session whose window only runs ssh gives no pane anything new, so tuios accepts it from anywhere.
+The cost: local panes cannot address the machine as `<host>:<session>`.
+A local agent types into the `aws-<name>` window instead (below), or runs the machine's own tuios over ssh: `ssh <name>.mvm /home/dev/.local/bin/tuios capture-pane -s main -w <window id>`.
+Do not add `.mvm` machines to `[hosts]` or run `tuios hosts add` for them.
 
 ### A live agent the user watches
 
@@ -152,6 +189,19 @@ sleep 1; tuios send-keys -s aws-<name> -w <name>.mvm Enter
 - Text goes to the focused pane of `main`: keep one agent there, and open other windows on the machine over plain `ssh <name>.mvm`.
 - Never exit the shell in `main` (`exit`, a second ctrl+d): an empty `main` shows tuios's start screen, where typed text drives the machine's window manager.
 - If the window shows a closed connection or that start screen, run `mvm tuios <name>`: it reconnects and gives an empty `main` a new window; an agent in `main` keeps running.
+
+### Machines of the support workflow
+
+The dev-workflows support worker creates its machines with `mvm new`, so each gets its `aws-<name>` session too.
+Its agents run through the workflow's own ssh runner, not in `main`: the window shows `main`'s idle shell, not the job's agent.
+
+### When the window looks wrong
+
+- No `aws-<name>` session: `mvm new` logged why (tuios missing, daemon not running); run `mvm tuios <name>`.
+- The window shows the machine's own rail and dock: `mvm new` could not reach the machine to write its config file (it logged `machine tuios not prepared`); `mvm tuios <name>` writes it and reattaches.
+- tuios's start screen ("new window", "new session") inside the window: `main` lost its last window; `mvm tuios <name>`.
+- The window ends with a closed connection: a network drop or the machine ended; `mvm ls` tells which, and `mvm tuios <name>` reconnects a live machine.
+- A laptop that ran mvm before tuios sessions may still have `~/.config/tuios/config.d/mvm-hosts.toml` (host links): delete it, mvm no longer writes or cleans it.
 
 ## Unpushed work
 
@@ -256,6 +306,8 @@ Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then 
   No secret ever goes into the image, `image/rootfs`, `~/.gitconfig` or `~/.npmrc`.
 - AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
+- The laptop's tuios and the image's `TUIOS_VERSION` may differ: the laptop's window only runs ssh, and the machine's own tuios client draws inside it.
+  The window runs that client by its path, `/home/dev/.local/bin/tuios` (`TUIOS_REMOTE_BINARY` in `mvm_settings.py`): keep the image installing it there.
 - Machine names exist only on the laptop, in `~/.local/state/mvm/machines/<name>.json`.
   Cleanup forgets a machine only after AWS confirms it ended.
 - The pnpm store cache (`image/rootfs/opt/mvm/bin/mvm-pnpm-store-cache`) is shared and writable by every machine: a compromised machine could poison later installs, beyond what the lockfile checks.
