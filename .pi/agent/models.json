@@ -245,8 +245,8 @@
           }
         },
         {
-          "id": "fireworks/deepseek-v4.1-flash",
-          "name": "DeepSeek V4.1 Flash",
+          "id": "deepinfra/deepseek-v4.1-flash-1017",
+          "name": "DeepSeek V4.1 Flash 1017",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -256,35 +256,9 @@
           },
           "thinkingLevelMap": {
             "off": "none",
-            "minimal": null,
+            "minimal": "minimal",
             "low": "low",
             "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 0.22,
-            "output": 0.66,
-            "cacheRead": 0.007,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "deepinfra/deepseek-v4.1-flash",
-          "name": "DeepSeek V4.1 Flash (DeepInfra)",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 384000,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": "high",
             "high": "high",
             "xhigh": "xhigh",
             "max": "max"
@@ -296,7 +270,7 @@
             "cacheWrite": 0
           }
         },
-        {
+                {
           "id": "deepinfra/mimo-v2.6-pro",
           "name": "MiMo V2.6 Pro",
           "reasoning": true,

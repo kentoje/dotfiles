@@ -10,7 +10,7 @@
     "llmgateway/anthropic/claude-opus-5-5",
     "llmgateway/xai/grok-4-7",
     "llmgateway/google-ai-studio/gemini-4-argon",
-    "llmgateway/fireworks/deepseek-v4.1-flash"
+    "llmgateway/deepinfra/deepseek-v4.1-flash-1017"
   ],
   "packages": [
     "npm:pi-subagents",
@@ -23,7 +23,8 @@
     "npm:@narumitw/pi-btw",
     "npm:pi-open-tui",
     "git:git@github.com:kentoje/pi-copy-mode.git",
-    "npm:@luan.sh/pi-xsettings"
+    "npm:@luan.sh/pi-xsettings",
+    "npm:@tifan/pi-inline-skills"
   ],
   "extensions": [
     "~/dotfiles/.pi/agent/extensions/agent-gossips/index.ts"
