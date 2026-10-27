@@ -155,7 +155,14 @@ motion = "none"
 [appearance.sidebar]
 # The default rail minus the files section (oil and yazi do files better) and
 # the terminals section (Cmd+g reaches every pane).
-sections = "sessions:60,agents:40"
+sections = "sessions:60,custom:40"
+
+[appearance.sidebar.custom]
+# Two rows per agent, with a pink gutter mark on the client's focused agent pane.
+# The interval also catches states suppressed by TuiOS's notification events.
+title = "Agents"
+command = '/Users/kento/.local/bin/tuios-agent-rail'
+refresh = "1s"
 
 [spotlight]
 enabled = false
@@ -211,7 +218,7 @@ prev_workspace = ["super+h"]
 next_workspace = ["super+l"]
 prev_session = ["super+k"]
 next_session = ["super+j"]
-# Cmd+e / Cmd+Shift+e cycle every agent pane: command keys below. The tuios
+# Cmd+e / Cmd+Shift+e cycle interactive agent panes: command keys below. The tuios
 # jumps stay on the prefix: ctrl+t o for the agent waiting on you, O for the
 # newest finished turn.
 rename_workspace = ["super+r"]
@@ -308,18 +315,18 @@ command = "$HOME/.config/tuios/scripts/close-session-and-switch.sh"
 width = "60"
 height = "8"
 
-# Cmd+e / Cmd+Shift+e: herdr next_agent / previous_agent, every agent pane in
-# every session, whatever its state.
+# Cmd+e / Cmd+Shift+e: herdr next_agent / previous_agent, interactive agent panes
+# in every session, whatever their state. Headless workflow Claude runs are skipped.
 [[keybindings.command]]
 key = "super+e"
 type = "shell"
-description = "Focus the next agent pane"
+description = "Focus the next interactive agent pane"
 command = "$HOME/.config/tuios/scripts/cycle-agent-pane-focus.sh next"
 
 [[keybindings.command]]
 key = "super+shift+e"
 type = "shell"
-description = "Focus the previous agent pane"
+description = "Focus the previous interactive agent pane"
 command = "$HOME/.config/tuios/scripts/cycle-agent-pane-focus.sh prev"
 
 # prefix p: fuzzy file path, typed into the focused pane without a newline.
@@ -353,3 +360,6 @@ height = "30%"
 
 [hosts.omarchy]
 addr = "omarchy.ts"
+
+[notifications.agent]
+notify = false

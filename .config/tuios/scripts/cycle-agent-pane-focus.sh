@@ -1,6 +1,6 @@
 #!/bin/sh
-# Cycles focus through every agent pane in every tuios session, whatever its
-# state: tuios's port of herdr's next_agent / previous_agent. tuios 0.10.1 only
+# Cycles focus through interactive agent panes in every tuios session, whatever
+# their state: tuios's port of herdr's next_agent / previous_agent. tuios 0.10.1 only
 # ships prefix_next_attention (agents waiting on you) and prefix_next_finished.
 #
 # Usage: cycle-agent-pane-focus.sh next|prev
@@ -16,10 +16,20 @@ next | prev) ;;
 	;;
 esac
 
-# One "window_id<TAB>session" row per agent, in session then workspace order.
+# One "window_id<TAB>session" row per interactive agent, in session then workspace order.
 # sort_by is stable, so panes keep tuios's order inside a workspace.
-agent_rows=$(tuios list-agents --all-sessions --json |
-	jq -r '.agents | sort_by(.session, .workspace) | .[] | "\(.window_id)\t\(.session)"') || exit 1
+agent_list=$(tuios list-agents --all-sessions --json) || exit 1
+agent_rows=$(printf '%s\n' "$agent_list" |
+	jq -r '.agents | sort_by(.session, .workspace) | .[] | [.window_id, .session, (.protocol // "")] | @tsv' |
+	while IFS="$(printf '\t')" read -r window_id session protocol; do
+		# Protocol panes have their own conversation UI. For terminal agents,
+		# ignore stale hook reports from workflow children that already exited.
+		if [ -z "$protocol" ]; then
+			detection=$(tuios explain-agent-detect -s "$session" -w "$window_id" --json) || continue
+			printf '%s\n' "$detection" | jq -e -f "$(dirname "$0")/interactive-agent-detection.jq" >/dev/null || continue
+		fi
+		printf '%s\t%s\n' "$window_id" "$session"
+	done) || exit 1
 [ -n "$agent_rows" ] || exit 0
 
 target_row=$(printf '%s\n' "$agent_rows" | awk -F '\t' -v current="$TUIOS_ACTIVE_PANE_ID" -v direction="$direction" '
