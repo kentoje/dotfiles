@@ -86,8 +86,13 @@ class FishCompletionInFishTest(unittest.TestCase):
     def test_commands_hide_proxy(self):
         self.assertEqual(
             sorted(self.complete("mvm ")),
-            ["forward", "image", "logs", "ls", "new", "rm", "secrets", "setup", "ssh", "tuios"],
+            ["agent", "forward", "image", "logs", "ls", "new", "rm", "secrets", "setup", "ssh", "tuios"],
         )
+
+    def test_agent_offers_names_then_agent_kinds(self):
+        self.assertEqual(sorted(self.complete("mvm agent ")), ["dev", "quiet-yak"])
+        self.assertEqual(self.complete("mvm agent --agent claude dev "), [])
+        self.assertEqual(sorted(self.complete("mvm agent dev --agent ")), ["claude", "omp", "pi"])
 
     def test_machine_names_come_from_local_records(self):
         self.assertEqual(sorted(self.complete("mvm rm ")), ["dev", "quiet-yak"])

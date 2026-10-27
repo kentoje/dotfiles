@@ -24,7 +24,7 @@ function __mvm_positional_args
     for token in $tokens[3..-1]
         if test $skip_next = 1
             set skip_next 0
-        else if contains -- $token --ttl --since
+        else if contains -- $token --ttl --since --agent --prompt-file --cwd
             set skip_next 1
         else if not string match -q -- '-*' $token
             echo $token
@@ -63,6 +63,7 @@ complete -c mvm -n __fish_use_subcommand -a rm -d 'Terminate machines, remove th
 complete -c mvm -n __fish_use_subcommand -a ls -d 'List machines: state, image, age, time left, herdr, tuios'
 complete -c mvm -n __fish_use_subcommand -a ssh -d 'Same as ssh NAME.mvm'
 complete -c mvm -n __fish_use_subcommand -a tuios -d "Open the machine's tuios session again"
+complete -c mvm -n __fish_use_subcommand -a agent -d "Start claude, omp or pi in the machine's tuios session"
 complete -c mvm -n __fish_use_subcommand -a forward -d "Reach the machine's dev servers at localhost:PORT"
 complete -c mvm -n __fish_use_subcommand -a logs -d "The machine's logs: setup, hooks, WIP saves"
 complete -c mvm -n __fish_use_subcommand -a setup -d 'One-time: AWS stack, ssh config, PATH, completion'
@@ -90,6 +91,12 @@ complete -c mvm -n '__fish_seen_subcommand_from forward' -l stop -d "Close all o
 
 # mvm tuios NAME
 complete -c mvm -n '__fish_seen_subcommand_from tuios; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
+
+# mvm agent NAME [PROMPT...] [--agent claude|omp|pi] [--prompt-file FILE] [--cwd DIR]: PROMPT is free text.
+complete -c mvm -n '__fish_seen_subcommand_from agent; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
+complete -c mvm -n '__fish_seen_subcommand_from agent' -l agent -x -a 'claude omp pi' -d 'Which agent (default: defaultAgent, else pi)'
+complete -c mvm -n '__fish_seen_subcommand_from agent' -l prompt-file -r -F -d 'File whose content is the first message'
+complete -c mvm -n '__fish_seen_subcommand_from agent' -l cwd -x -d 'Directory on the machine (default: the main checkout)'
 
 # mvm logs NAME [-f] [--since 1h]
 complete -c mvm -n '__fish_seen_subcommand_from logs; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine

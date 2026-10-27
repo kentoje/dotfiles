@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 
-from mvm_cli.aws_cli_access import read_stack_outputs, reexec_under_aws_vault, run_aws_cli
+from mvm_cli.aws_cli_access import AwsCliError, read_stack_outputs, reexec_under_aws_vault, run_aws_cli
 from mvm_cli.mvm_errors import log_mvm
 from mvm_cli.mvm_settings import (
     AWS_CLI,
@@ -14,6 +14,7 @@ from mvm_cli.mvm_settings import (
     MVM_ON_PATH,
     OWNER,
     REGION,
+    SECRET_ENV_LAPTOP_NAMES,
     SECRET_ENV_NAMES,
     STACK_NAME,
     STACK_TEMPLATE,
@@ -87,17 +88,57 @@ def cmd_setup(args):
         print(f"{key}: {value}")
 
 
+def merge_env_secret_values(current, environ, names):
+    """The env secret after a push: NAMES set in ENVIRON replace CURRENT's values, the others keep them.
+
+    A name is read from its SECRET_ENV_LAPTOP_NAMES laptop variable when it has one.
+    Returns (merged values, names pushed, names kept, names in neither).
+    A shell missing some variables never drops them from the secret.
+    """
+    merged = dict(current)
+    pushed, kept, missing = [], [], []
+    for name in names:
+        value = environ.get(SECRET_ENV_LAPTOP_NAMES.get(name, name))
+        if value:
+            merged[name] = value
+            pushed.append(name)
+        elif name in current:
+            kept.append(name)
+        else:
+            missing.append(name)
+    return merged, pushed, kept, missing
+
+
+def read_env_secret_values(secret_arn):
+    """The env secret's current JSON object; {} when it has no value yet."""
+    try:
+        text = run_aws_cli(
+            ["secretsmanager", "get-secret-value", "--secret-id", secret_arn, "--query", "SecretString"],
+        )
+    except AwsCliError as error:
+        if "ResourceNotFoundException" in str(error):
+            return {}
+        raise
+    values = json.loads(text or "{}")
+    return values if isinstance(values, dict) else {}
+
+
 def cmd_secrets_push(args):
-    """Copy SECRET_ENV_NAMES (+ MVM_EXTRA_SECRET_NAMES) from this shell into the env secret. Prints names only."""
+    """Copy SECRET_ENV_NAMES (+ MVM_EXTRA_SECRET_NAMES) from this shell into the env secret. Prints names only.
+
+    Names absent from this shell keep their current secret value.
+    """
     reexec_under_aws_vault()
     names = SECRET_ENV_NAMES + [n for n in os.environ.get("MVM_EXTRA_SECRET_NAMES", "").split(",") if n]
-    values = {n: os.environ[n] for n in names if os.environ.get(n)}
-    missing = [n for n in names if n not in values]
-    if missing:
-        log_mvm(f"not in this environment, skipped: {', '.join(missing)}")
     secret_arn = read_stack_outputs()["EnvSecretArn"]
+    values, pushed, kept, missing = merge_env_secret_values(read_env_secret_values(secret_arn), os.environ, names)
+    if kept:
+        log_mvm(f"not in this environment, kept the secret's value: {', '.join(kept)}")
+    if missing:
+        laptop_names = [SECRET_ENV_LAPTOP_NAMES.get(n, n) for n in missing]
+        log_mvm(f"not in this environment nor the secret, skipped: {', '.join(laptop_names)}")
     run_aws_cli(
         ["secretsmanager", "put-secret-value", "--secret-id", secret_arn, "--secret-string", "file:///dev/stdin"],
         stdin_text=json.dumps(values),
     )
-    log_mvm(f"pushed {len(values)} vars to {secret_arn}: {', '.join(sorted(values))}")
+    log_mvm(f"pushed {len(pushed)} vars to {secret_arn}: {', '.join(sorted(pushed))}")

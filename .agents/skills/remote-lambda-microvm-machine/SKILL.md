@@ -2,13 +2,14 @@
 name: remote-lambda-microvm-machine
 description: |
   Create and use Kento's dev machines on AWS Lambda MicroVMs (the `mvm` CLI), reach them over SSH, show their dev servers on the laptop, and use them in Herdr or tuios.
+  Run Claude Code (Opus 5.5, Claude subscription), omp or pi on them, chosen per request ("using claude", "with omp").
   Use when the user says mvm, microvm, lambda microvm, lambda dev machine, or wants a boxd-like dev machine on AWS.
 ---
 
 # Lambda MicroVM machine
 
 One dev image, one machine per task, plain `ssh <name>.mvm`, Herdr or tuios on top.
-The coding agent runs on the machine, not on the laptop: the laptop starts the machine and forwards the user's prompt to `pi` or `omp` there.
+The coding agent runs on the machine, not on the laptop: the laptop starts the machine and forwards the user's prompt to `claude`, `omp` or `pi` there (see Choosing the agent).
 The machine reaches staging (identity API, AppSync schema) on its own: no tunnel, no copying.
 
 ## Commands
@@ -19,6 +20,8 @@ mvm rm NAME... [--discard]           # terminate (unpushed work is pushed first)
 mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
 mvm ssh NAME [CMD...]                # same as ssh NAME.mvm [CMD...]
 mvm tuios NAME                       # open the machine's tuios session aws-NAME again (after a dropped connection)
+mvm agent NAME [--agent claude|omp|pi] [--cwd DIR] [--prompt-file FILE | PROMPT...]
+                                     # start the agent live in the machine's tuios session, which the user watches
 mvm forward NAME [PORT...] [--stop]  # reach the machine's dev servers at http://localhost:PORT
 mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hooks, network doctor, WIP saves
 ```
@@ -52,20 +55,47 @@ On the machine:
 - The AWS CLI uses the machine's own role (env secret, logs, the pnpm cache, AppSync schema introspection).
   Never copy laptop AWS keys onto the machine.
 
-## Running commands and the agent
+## Choosing the agent
+
+Three agents run on a machine; the user picks one per request, e.g. "/remote-lambda-microvm-machine using claude: fix CI-1234".
+
+| Agent | Say | Model | Signs in with |
+| --- | --- | --- | --- |
+| `claude` (Claude Code) | "using claude", "with Claude" | Opus 5.5 (`claude-opus-5-5`, from `~/.claude/settings.json` in the image) | the Claude subscription: `CLAUDE_CODE_OAUTH_TOKEN` in the env secret |
+| `omp` | "using omp" | `~/.omp/agent/config.yml` in the dotfiles (default role: Opus 5.5) | the LLM gateway (`LLM_GATEWAY_KEY`) |
+| `pi` | "using pi" | `~/.pi/agent/settings.json` in the dotfiles | the LLM gateway (`LLM_GATEWAY_KEY`) |
+
+- No agent named: `defaultAgent` in the laptop settings, else `pi`.
+- Unlisted agents (`codex`) are installed but have no sign-in on the machines.
+- Claude on a machine runs with `bypassPermissions`, like on the laptop, and never shows onboarding or the folder trust question under `/home/dev`.
+  It has the dotfiles skills (`~/.claude/skills`) but not the laptop's `CLAUDE.md`, hooks or MCP servers.
+
+### Live, in the user's tuios window (default)
+
+```bash
+mvm new --json                                                   # name, devServerPort
+mvm agent <name> --agent claude --prompt-file ./prompt.md        # or: mvm agent <name> --agent omp 'fix the flaky test'
+```
+
+- It waits for the workspace setup (`phase` not `running`), so it can follow `mvm new` directly.
+- The agent starts in the main `conversation-center-ext` checkout; `--cwd` picks another directory (absolute, `~/...` or relative to the home), e.g. a worktree.
+- It refuses while `main` runs something else (`session main is busy running <cmd>`): the user stops it first, or use a separate machine.
+- Follow-ups and reading progress: see tuios, A live agent the user watches.
+
+### Headless, for a scripted result
 
 `ssh <name>.mvm` is real OpenSSH: `scp`, `rsync` and `-L` work, and commands get the full environment.
 
 ```bash
 scp ./prompt.md <name>.mvm:/tmp/prompt.md
-ssh <name>.mvm 'cd <worktree> && pi -p --mode json < /tmp/prompt.md'
+ssh <name>.mvm 'cd <worktree> && claude -p --output-format json < /tmp/prompt.md'
 ssh <name>.mvm 'cd <worktree> && omp -p < /tmp/prompt.md'
+ssh <name>.mvm 'cd <worktree> && pi -p --mode json < /tmp/prompt.md'
 ```
 
 Redirect stdin so the agent does not wait on it.
-Follow-ups resume the same remote session (`pi --resume <id>` from the first JSON result).
+Follow-ups resume the same remote session (`claude -p --resume <session_id>`, `pi --resume <id>`, both from the first JSON result).
 The laptop does not edit the checkout: the remote agent edits, tests, runs the dev server and drives `agent-browser` on the machine.
-When the user wants to watch or steer the agent, run it live in the machine's tuios window instead (see tuios).
 
 ## Working on a ticket
 
@@ -171,21 +201,23 @@ Do not add `.mvm` machines to `[hosts]` or run `tuios hosts add` for them.
 
 ### A live agent the user watches
 
-Start the agent in the window when the user wants to watch or steer it:
+Start the agent with `mvm agent` (see Choosing the agent), then read and steer it:
 
 ```bash
-scp ./prompt.md <name>.mvm:/tmp/prompt.md
-tuios send-text -s aws-<name> -w <name>.mvm 'cd <checkout> && pi --approve @/tmp/prompt.md
-'
-tuios capture-pane -s aws-<name> -w <name>.mvm   # read progress
-# follow-up: the text, then Enter as a key once pi shows its input box
+mvm agent <name> --agent claude --prompt-file ./prompt.md
+ssh <name>.mvm /home/dev/.local/bin/tuios capture-pane -s main   # read progress
+# follow-up: the text, then Enter as a key once the agent shows its input box
 tuios send-text -s aws-<name> -w <name>.mvm '<follow-up>'
 sleep 1; tuios send-keys -s aws-<name> -w <name>.mvm Enter
 ```
 
-- `pi --approve` trusts the checkout's project files for that run, so pi does not stop on its trust question.
-  `@/tmp/prompt.md` is the first prompt: no quoting, and no Enter racing pi's start-up.
+- `mvm agent` types one line into `main`'s shell, e.g. `cd <checkout> && claude "$(cat /tmp/mvm-agent-prompt-....md)"`: the prompt file is the first message, with no quoting and no Enter racing the agent's start-up.
+  For claude it first marks the directory as trusted in `~/.claude.json` (Claude asks again in every new directory); `pi --approve` trusts the checkout's project files.
+- Read progress on the machine (`ssh ... tuios capture-pane -s main`): the laptop's `aws-<name>` window can show stale lines of an earlier agent.
+- omp takes about 30 seconds to draw its interface on a fresh machine; it reports `working` meanwhile.
 - After a follow-up, check with `capture-pane` that the text left the input box; if it is still there, send Enter again (an Enter right after pi started was once ignored).
+- tuios refuses to type into a window that waits on a question (a dialog, a confirmation): only the user answers it there.
+- To switch agents, quit the running one first (`/exit` in claude, ctrl+d in pi or omp): `mvm agent` refuses while `main` runs anything but its shell.
 - The rail shows the agent's state (idle, done) on the `aws-<name>` window, reported through the nested client.
 - The user types in the same pane: say before sending, and read the screen before typing over their input.
 - Text goes to the focused pane of `main`: keep one agent there, and open other windows on the machine over plain `ssh <name>.mvm`.
@@ -294,7 +326,7 @@ Create it before `mvm setup`:
 
 ```bash
 mvm setup           # deploy the stack, ssh key + ~/.ssh/config block, ~/.local/bin/mvm, fish completion
-mvm secrets push    # copy the dev env vars from this shell into the machines' secret (rerun after rotating a token)
+mvm secrets push    # copy the dev env vars from this shell into the machines' secret (rerun after rotating a token); vars absent from the shell keep their value
 mvm image build     # new image version from image/ (about 6 minutes); new machines use the latest successful one
 ```
 
@@ -306,6 +338,10 @@ Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then 
 - A new command or flag needs `scripts/completions/mvm.fish` too: `fish_completion_test.py` fails until it matches.
 - Secret names come from `SECRET_ENV_NAMES` in `scripts/mvm_cli/mvm_settings.py`.
   No secret ever goes into the image, `image/rootfs`, `~/.gitconfig` or `~/.npmrc`.
+- Claude's subscription token: create it with `claude setup-token` (browser login, valid one year) and keep it on the laptop as `MVM_CLAUDE_CODE_OAUTH_TOKEN` in `~/.config/fish/includes/private-vars.fish`; `mvm secrets push` stores it as `CLAUDE_CODE_OAUTH_TOKEN` (`SECRET_ENV_LAPTOP_NAMES`).
+  Never name it `CLAUDE_CODE_OAUTH_TOKEN` on the laptop: it would replace the laptop's own Claude login, whose claude.ai connectors it cannot use.
+  Running machines read the secret at start only: a new token reaches new machines.
+- Private GitHub repos the image needs are git bundles of laptop checkouts (`LAPTOP_GIT_BUNDLES`): `herdr-vim-nav`, and the pi package `pi-copy-mode`, whose ssh URL the Dockerfile rewrites to its bundle for `pi update`.
 - AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
 - The laptop's tuios and the image's `TUIOS_VERSION` may differ: the laptop's window only runs ssh, and the machine's own tuios client draws inside it.

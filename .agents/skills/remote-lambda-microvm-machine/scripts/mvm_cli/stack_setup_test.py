@@ -47,5 +47,27 @@ class LinkMvmLaptopFileTest(unittest.TestCase):
         self.assertEqual(self.link.resolve(), self.target)
 
 
+class MergeEnvSecretValuesTest(unittest.TestCase):
+    def test_shell_values_replace_absent_ones_keep_the_secret_value(self):
+        merged, pushed, kept, missing = stack_setup.merge_env_secret_values(
+            {"GITLAB_TOKEN": "old", "GEMFURY_AUTH": "kept", "UNLISTED": "stays"},
+            {"GITLAB_TOKEN": "new", "JIRA_EMAIL": ""},
+            ["GITLAB_TOKEN", "GEMFURY_AUTH", "JIRA_EMAIL"],
+        )
+        self.assertEqual(merged, {"GITLAB_TOKEN": "new", "GEMFURY_AUTH": "kept", "UNLISTED": "stays"})
+        self.assertEqual((pushed, kept, missing), (["GITLAB_TOKEN"], ["GEMFURY_AUTH"], ["JIRA_EMAIL"]))
+
+    def test_claude_token_comes_from_its_laptop_name_only(self):
+        names = ["CLAUDE_CODE_OAUTH_TOKEN"]
+        merged, pushed, _, _ = stack_setup.merge_env_secret_values(
+            {}, {"MVM_CLAUDE_CODE_OAUTH_TOKEN": "sub-token"}, names
+        )
+        self.assertEqual((merged, pushed), ({"CLAUDE_CODE_OAUTH_TOKEN": "sub-token"}, names))
+        merged, _, _, missing = stack_setup.merge_env_secret_values(
+            {}, {"CLAUDE_CODE_OAUTH_TOKEN": "laptop-login"}, names
+        )
+        self.assertEqual((merged, missing), ({}, names))
+
+
 if __name__ == "__main__":
     unittest.main()

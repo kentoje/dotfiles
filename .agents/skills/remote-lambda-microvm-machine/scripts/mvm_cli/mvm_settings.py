@@ -48,6 +48,7 @@ SECRET_ENV_NAMES = [
     "AIRCALL_STAGING_EMAIL",
     "AIRCALL_STAGING_PASSWORD",
     "CI_JOB_TOKEN",
+    "CLAUDE_CODE_OAUTH_TOKEN",
     "GEMFURY_AUTH",
     "GITLAB_TOKEN",
     "JIRA_API_TOKEN",
@@ -57,6 +58,12 @@ SECRET_ENV_NAMES = [
     "STAGING_509_PASSWORD",
     "TYPESAFE_API_KEY",
 ]
+# Secret names read from a differently named laptop env var (machine name -> laptop name).
+# The Claude subscription token (`claude setup-token`) must not be CLAUDE_CODE_OAUTH_TOKEN on the
+# laptop: it would replace the laptop's own Claude login, whose claude.ai connectors it cannot use.
+SECRET_ENV_LAPTOP_NAMES = {
+    "CLAUDE_CODE_OAUTH_TOKEN": "MVM_CLAUDE_CODE_OAUTH_TOKEN",
+}
 
 # Non-secret laptop config baked into the image (zip name -> laptop path). Files that look like
 # they hold a token or password are refused; secrets only travel through Secrets Manager.
@@ -67,6 +74,8 @@ LAPTOP_CONFIG_FILES = {
 # the build has no GitHub credentials. The current branch at HEAD is bundled, not the work tree.
 LAPTOP_GIT_BUNDLES = {
     "herdr-vim-nav.bundle": Path.home() / "Documents/github/kentoje/herdr-vim-nav",
+    # A pi package (`git:git@github.com:kentoje/pi-copy-mode.git` in ~/.pi/agent/settings.json).
+    "pi-copy-mode.bundle": Path.home() / "Documents/github/kentoje/pi-copy-mode",
 }
 SECRET_LOOKING_LINE = re.compile(r"(?im)^\s*[\w.-]*(token|password|secret|api[_-]?key)[\w.-]*\s*[:=]\s*\S")
 
@@ -101,6 +110,11 @@ TUIOS_MACHINE_SPACE = "mvm"
 MACHINE_TUIOS_SESSION = "main"
 # Where the image installs tuios (image/Dockerfile): ssh runs it without a login shell's PATH.
 TUIOS_REMOTE_BINARY = "/home/dev/.local/bin/tuios"
+# The machine's home and where mvm-bootstrap-workspace clones the workspaceRepos (`<group>/<repo>` below it).
+MACHINE_HOME_DIR = "/home/dev"
+MACHINE_GITLAB_ROOT = "/home/dev/Documents/gitlab/aircall"
+# Coding agents `mvm agent` starts on a machine; each reads its model from its own config there.
+MACHINE_AGENT_KINDS = ["claude", "omp", "pi"]
 
 # Prepended to PATH: nix-darwin's aws (awscli2) and websocat win over older copies elsewhere.
 NIX_SYSTEM_BIN_DIR = "/run/current-system/sw/bin"
@@ -182,6 +196,16 @@ def owner_email():
 def git_user_name():
     """git user.name on the machines (the WIP save at terminate commits with it)."""
     return read_mvm_laptop_setting("gitUserName", "MVM_GIT_USER_NAME")
+
+
+def default_machine_agent():
+    """Coding agent `mvm agent` starts without --agent: `defaultAgent` in the laptop settings, else pi."""
+    agent = os.environ.get("MVM_DEFAULT_AGENT") or read_mvm_laptop_settings().get("defaultAgent") or "pi"
+    if agent not in MACHINE_AGENT_KINDS:
+        raise MvmError(
+            f"mvm settings defaultAgent invalid: {agent!r}: use one of {', '.join(MACHINE_AGENT_KINDS)}"
+        )
+    return agent
 
 
 def workspace_repo_paths():

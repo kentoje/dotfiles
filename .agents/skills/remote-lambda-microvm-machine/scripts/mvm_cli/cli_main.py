@@ -5,11 +5,12 @@ import os
 import sys
 
 from mvm_cli.image_build import cmd_image_build
+from mvm_cli.machine_agent_launch import cmd_agent
 from mvm_cli.machine_lifecycle import cmd_ls, cmd_new, cmd_rm
 from mvm_cli.machine_logs import cmd_logs
 from mvm_cli.machine_port_forwarding import cmd_forward
 from mvm_cli.mvm_errors import MvmError, log_mvm
-from mvm_cli.mvm_settings import EXTRA_PATH_DIRS, NIX_SYSTEM_BIN_DIR
+from mvm_cli.mvm_settings import EXTRA_PATH_DIRS, MACHINE_AGENT_KINDS, NIX_SYSTEM_BIN_DIR
 from mvm_cli.ssh_access import cmd_proxy, cmd_ssh
 from mvm_cli.stack_setup import cmd_secrets_push, cmd_setup
 from mvm_cli.tuios_machine_session import cmd_tuios
@@ -23,6 +24,8 @@ Machines:
   ls                  list machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
   ssh NAME [CMD...]   same as `ssh NAME.mvm`
   tuios NAME          open the machine's tuios session aws-NAME again (after a dropped connection)
+  agent NAME [PROMPT...]
+                      start claude, omp or pi (--agent) live in the machine's tuios session
   forward NAME [PORT...]
                       reach the machine's dev servers at http://localhost:PORT (--stop closes them)
   logs NAME           the machine's logs: workspace setup, hooks, WIP saves
@@ -96,6 +99,23 @@ def build_mvm_parser():
     )
     tuios.add_argument("name")
     tuios.set_defaults(func=cmd_tuios)
+
+    agent = sub.add_parser(
+        "agent",
+        description="Start a coding agent live in the machine's tuios session `main`, which the laptop's aws-NAME"
+        " window shows. Waits for the workspace setup; refuses while `main` runs something else."
+        " claude runs Opus 5.5 on the Claude subscription; omp and pi use their own model config.",
+    )
+    agent.add_argument("name")
+    agent.add_argument("prompt", nargs="*", metavar="PROMPT", help="first message (or use --prompt-file)")
+    agent.add_argument(
+        "--agent", choices=MACHINE_AGENT_KINDS, help="which agent (default: defaultAgent in the mvm settings, else pi)"
+    )
+    agent.add_argument("--prompt-file", help="file whose content is the first message")
+    agent.add_argument(
+        "--cwd", help="directory on the machine: absolute, ~/... or relative to the home (default: the main checkout)"
+    )
+    agent.set_defaults(func=cmd_agent)
 
     forward = sub.add_parser(
         "forward",

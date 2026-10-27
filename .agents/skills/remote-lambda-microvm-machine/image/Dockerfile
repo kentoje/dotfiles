@@ -123,6 +123,8 @@ RUN set -e; cd /tmp; \
     ~/.local/bin/jira version
 
 # Claude Code, uv, and rust (for the herdr-vim-nav plugin).
+# Claude Code signs in with the subscription token CLAUDE_CODE_OAUTH_TOKEN from the env secret;
+# rootfs seeds ~/.claude.json (onboarding done, /home/dev trusted) and ~/.claude/settings.json (Opus 5.5).
 RUN curl -fsSL https://claude.ai/install.sh | bash \
  && curl -LsSf https://astral.sh/uv/install.sh | env UV_NO_MODIFY_PATH=1 sh \
  && curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path \
@@ -131,7 +133,8 @@ RUN curl -fsSL https://claude.ai/install.sh | bash \
 # Dotfiles (public) and the same links boxd's aircall-dev snapshot has.
 RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfiles \
  && ln -s ~/dotfiles/.agents ~/.agents \
- && mkdir -p ~/.pi/agent ~/.omp ~/.config/herdr \
+ && mkdir -p ~/.pi/agent ~/.omp ~/.config/herdr ~/.claude \
+ && ln -s ~/dotfiles/.claude/skills ~/.claude/skills \
  && for f in AGENTS.md extensions keybindings.json mcp.json models.json settings.json themes; do \
       if [ -e ~/dotfiles/.pi/agent/$f ]; then ln -s ~/dotfiles/.pi/agent/$f ~/.pi/agent/$f; fi; done \
  && ln -s ~/dotfiles/.omp/agent ~/.omp/agent \
@@ -140,16 +143,21 @@ RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfi
  && ln -s ~/dotfiles/.config/nvim ~/.config/nvim \
  && ln -s ~/dotfiles/.config/yazi ~/.config/yazi
 
-# pi's packages (settings.json "packages") into ~/.pi/agent/npm, so the first `pi -p` on a machine
-# does not spend a minute installing them. Packages added to the dotfiles later install on first use.
-RUN export PATH="$HOME/.bun/bin:$HOME/.local/share/fnm/aliases/default/bin:$PATH" \
- && pi update --extensions </dev/null \
- && rm -rf ~/.npm/_cacache
-
 # Laptop files added to the build zip by `mvm image build`: the workspace repo list and git
 # identity from the laptop's mvm settings (always there), allowlisted non-secret config, and git
 # bundles of private repos (the build has no GitHub credentials).
 COPY --chown=dev:dev laptop-files/ /opt/mvm/laptop-files/
+
+# pi's packages (settings.json "packages") into ~/.pi/agent, so the first `pi -p` on a machine
+# does not spend a minute installing them. Packages added to the dotfiles later install on first use.
+# The private git package pi-copy-mode clones from its bundle: git rewrites its ssh URL for this step only.
+RUN export PATH="$HOME/.bun/bin:$HOME/.local/share/fnm/aliases/default/bin:$PATH" \
+ && if [ -f /opt/mvm/laptop-files/pi-copy-mode.bundle ]; then \
+      export GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0=url./opt/mvm/laptop-files/pi-copy-mode.bundle.insteadOf \
+        GIT_CONFIG_VALUE_0=git@github.com:kentoje/pi-copy-mode.git; fi \
+ && pi update --extensions </dev/null \
+ && rm -rf ~/.npm/_cacache
 
 # herdr ctrl+hjkl navigation plugin (private repo, native Rust build), linked like on the laptop.
 RUN if [ ! -f /opt/mvm/laptop-files/herdr-vim-nav.bundle ]; then \
