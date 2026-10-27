@@ -12,9 +12,34 @@ import { readFileSync } from "fs";
  *
  * Costs roughly $0.04 and 10-20 seconds per call, because every call boots a fresh
  * Claude Code session. Treat it as an expensive RPC, not a cheap lookup.
+ *
+ * The subprocess must authenticate as the claude.ai login. An API key in the
+ * environment takes precedence over that login and disables connectors entirely,
+ * and managed settings here require a first-party login (forceLoginMethod), so a
+ * key-authenticated session is refused before it can call Slack or Figma. Codex
+ * injects ANTHROPIC_API_KEY into MCP servers; drop every such credential so the
+ * subprocess falls back to the stored claude.ai session.
  */
 
 const CLAUDE_BIN = "/Users/kento/.local/bin/claude";
+
+/**
+ * Credentials that make `claude -p` skip the claude.ai login. Any one of them
+ * disables claude.ai connectors, which is the whole point of this bridge.
+ */
+const API_KEY_AUTH_ENV_VARS = [
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_AUTH_TOKEN",
+  "CLAUDE_CODE_OAUTH_TOKEN",
+  "CLAUDE_CODE_OAUTH_TOKEN_FILE",
+  "CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR",
+];
+
+function envWithoutApiKeyAuth(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  for (const name of API_KEY_AUTH_ENV_VARS) delete env[name];
+  return env;
+}
 
 /** Runs the subprocess from a git repo, because fff-mcp fails to init when cwd is $HOME. */
 const BRIDGE_CWD = "/Users/kento/dotfiles";
@@ -244,7 +269,11 @@ export async function askClaudeCodeForConnector(
 
   const timeoutMs = request.timeoutMs ?? 180_000;
   const raw = await new Promise<string>((resolve, reject) => {
-    const child = spawn(CLAUDE_BIN, args, { cwd: BRIDGE_CWD, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(CLAUDE_BIN, args, {
+      cwd: BRIDGE_CWD,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: envWithoutApiKeyAuth(),
+    });
 
     let stdout = "";
     let stderr = "";

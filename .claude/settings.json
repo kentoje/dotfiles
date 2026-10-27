@@ -54,6 +54,15 @@
             "command": "workmux set-window-status waiting"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
       }
     ],
     "PermissionRequest": [
@@ -63,6 +72,15 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 310,
+            "type": "command"
           }
         ]
       }
@@ -82,6 +100,15 @@
           {
             "type": "command",
             "command": "workmux set-window-status working"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
           }
         ]
       }
@@ -114,6 +141,15 @@
             "command": "node /Users/kento/.claude/plugins/cache/context-mode/context-mode/1.0.52/hooks/pretooluse.mjs"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
       }
     ],
     "SessionEnd": [
@@ -125,6 +161,15 @@
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -134,6 +179,15 @@
           {
             "type": "command",
             "command": "~/dotfiles/.config/sketchybar/scripts/claude_hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
           }
         ]
       }
@@ -155,6 +209,15 @@
             "command": "workmux set-window-status done"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -172,6 +235,81 @@
           {
             "type": "command",
             "command": "workmux set-window-status working"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "ElicitationResult": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/kento/dotfiles/.config/tuios/scripts/report-interactive-claude-state.sh",
+            "timeout": 5,
+            "type": "command"
           }
         ]
       }
