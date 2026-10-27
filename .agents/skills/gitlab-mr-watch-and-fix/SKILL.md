@@ -19,7 +19,7 @@ Monitor one existing MR and apply safe follow-up fixes on that MR's branch.
 
 ## Start the watcher first
 
-Do not say “I’m watching” after a one-off API query. Start the bundled read-only watcher with `hub op:start` and report its process name plus the baseline it prints.
+Do not say "I'm watching" after a one-off API query. Start the bundled read-only watcher directly with `python3` and report the baseline it prints. Do not require a `hub` process launcher.
 
 Default settings:
 
@@ -27,20 +27,18 @@ Default settings:
 - Quiet period: 10 minutes without new feedback or a pipeline transition.
 - Override either when the user gives a different interval or quiet period.
 
-From the MR worktree:
+From the MR worktree, run it in the background so the session can keep reading its output:
 
 ```bash
-hub op:start \
-  name="mr-watch-<IID>" \
-  application="python3" \
-  args=["/Users/kento/.agents/skills/gitlab-mr-watch-and-fix/scripts/watch-mr-comments.py", \
-        "--project", "group%2Fproject", "--iid", "123", \
-        "--worktree", "/path/to/worktree", \
-        "--interval-seconds", "60", "--quiet-seconds", "600"] \
-  ready={"log":"\\\"event\\\": \\"baseline\\\"", "timeout":30}
+python3 /Users/kento/.agents/skills/gitlab-mr-watch-and-fix/scripts/watch-mr-comments.py \
+  --project "group%2Fproject" \
+  --iid "123" \
+  --worktree "/path/to/worktree" \
+  --interval-seconds 60 \
+  --quiet-seconds 600
 ```
 
-Use `hub op:logs` to read events. The watcher tracks both MR notes and discussion notes, deduplicates note IDs, reports updated feedback, and reports pipeline `(id, SHA, status)` transitions. It is read-only; only the main agent edits, validates, commits, and pushes.
+Read the process output for events. The watcher tracks both MR notes and discussion notes, deduplicates note IDs, reports updated feedback, and reports pipeline `(id, SHA, status)` transitions. It is read-only; only the main agent edits, validates, commits, and pushes.
 
 If the watcher cannot start or baseline readiness is not observed, say that monitoring is not active. Do not substitute manual snapshots for a watcher.
 
