@@ -337,7 +337,7 @@ height = "80%"
 key = "prefix+o"
 type = "popup"
 description = "Open URLs from the focused pane"
-command = '''fish --no-config -c 'source $HOME/.config/herdr/scripts/fzf-url.fish' '''
+command = '''fish --no-config -c 'source $HOME/.config/terminal/scripts/fzf-url.fish' '''
 width = "80%"
 height = "80%"
 

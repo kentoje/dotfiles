@@ -1,5 +1,5 @@
 -- Cmd+o: pick URLs from the focused pane with fzf and open them in the browser.
--- Rex port of ~/.config/herdr/scripts/fzf-url.fish (tmux-fzf-url).
+-- Rex port of ~/.config/terminal/scripts/fzf-url.fish (tmux-fzf-url).
 
 local TERMINAL = "com.superlogical.terminal"
 local URL_SCHEMES = { http = true, https = true, ftp = true, file = true, ssh = true, git = true }

@@ -160,7 +160,7 @@ key = "prefix+o"
 type = "pane"
 description = "fzf URLs from focused pane → open in browser"
 # --no-config: the script only needs herdr/grep/fzf/open, all already on the server PATH.
-command = "fish --no-config -c 'source $HOME/.config/herdr/scripts/fzf-url.fish'"
+command = "fish --no-config -c 'source $HOME/.config/terminal/scripts/fzf-url.fish'"
 
 # Ctrl+h/j/k/l → vim-herdr-navigation plugin: seamless nav between herdr panes and
 # Neovim splits (vim-tmux-navigator port). The action checks the focused pane's

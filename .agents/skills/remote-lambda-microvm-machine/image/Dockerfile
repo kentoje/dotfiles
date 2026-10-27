@@ -139,7 +139,7 @@ RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfi
       if [ -e ~/dotfiles/.pi/agent/$f ]; then ln -s ~/dotfiles/.pi/agent/$f ~/.pi/agent/$f; fi; done \
  && ln -s ~/dotfiles/.omp/agent ~/.omp/agent \
  && ln -s ~/dotfiles/.config/herdr/config.toml ~/.config/herdr/config.toml \
- && ln -s ~/dotfiles/.config/herdr/scripts ~/.config/herdr/scripts \
+ && ln -s ~/dotfiles/.config/terminal ~/.config/terminal \
  && ln -s ~/dotfiles/.config/nvim ~/.config/nvim \
  && ln -s ~/dotfiles/.config/yazi ~/.config/yazi
 
