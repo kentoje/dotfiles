@@ -37,8 +37,8 @@ function sync_brew -d "Sync homebrew packages to match defined lists"
         herdr \
         fury-cli \
         ifstat \
+        tuios \
         free-for-macos \
-        glab \
         croc \
         cloc \
         crush \

@@ -12,17 +12,19 @@ function fish_prompt
     # Directory (blue bold) - starship-style: repo root + relative path, or truncated to 3 segments
     set_color --bold blue
     if test -n "$__fish_cached_git_root"
-        set -l repo_name (string replace -r '.*/' '' $__fish_cached_git_root)
-        set -l rel (string replace "$__fish_cached_git_root" '' $PWD)
-        echo -n "$repo_name$rel"
+        # `--` everywhere: a path segment starting with "-" (e.g. "-Users-kento")
+        # is otherwise read as an option and the prompt errors out.
+        set -l repo_name (string replace -r -- '.*/' '' $__fish_cached_git_root)
+        set -l rel (string replace -- "$__fish_cached_git_root" '' $PWD)
+        echo -n -- "$repo_name$rel"
     else
         # Outside git: show last 3 segments, with ~ for home
-        set -l dir (string replace $HOME '~' $PWD)
-        set -l parts (string split '/' $dir)
+        set -l dir (string replace -- $HOME '~' $PWD)
+        set -l parts (string split -- '/' $dir)
         if test (count $parts) -le 3
-            echo -n $dir
+            echo -n -- $dir
         else
-            echo -n (string join '/' $parts[-3..-1])
+            echo -n -- (string join -- '/' $parts[-3..-1])
         end
     end
     set_color normal
