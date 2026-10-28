@@ -21,22 +21,9 @@ if command -q boxd; and test -f ~/.config/fish/completions/boxd.fish
     source ~/.config/fish/completions/boxd.fish
 end
 
-# Temp fix
-# fish 4.0 deprecates `bind -k`. transform's Atuin's init to drop -k and ensure up-binding works.
-# Interactive only: this block shells out to `atuin` twice (~100ms) and only rebinds Up,
-# which scripts never use. `fish -c` (herdr popups, prompt workers) must not pay for it.
-if status is-interactive; and type -q atuin
-    set -l __atuin_init (atuin init fish | string replace -ra -- 'bind -M ([^ ]+)\s+-k ' 'bind -M $1 ' | string replace -ra -- 'bind\s+-k ' 'bind ')
-    if test -n "$__atuin_init"
-        printf '%s\n' $__atuin_init | source
-        if functions -q _atuin_bind_up
-            bind up _atuin_bind_up
-            bind -M insert up _atuin_bind_up
-        end
-    else
-        # fallback: source unmodified but silence deprecation noise
-        atuin init fish 2>/dev/null | source
-    end
+# Atuin provides Fish 4 bindings directly; initialize only for interactive shells.
+if status is-interactive; and command -q atuin
+    atuin init fish | source
 end
 
 # oh-my-posh init fish --config ~/.config/oh-my-posh/config.toml | source
