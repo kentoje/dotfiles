@@ -317,17 +317,19 @@ height = "8"
 
 # Cmd+e / Cmd+Shift+e: herdr next_agent / previous_agent, interactive agent panes
 # in every session, whatever their state. Headless workflow Claude runs are skipped.
+# Direct Rust socket client: fresh membership + target validation on every press.
+# Build/update with scripts/install-agent-pane-focus.sh; never compile on keypress.
 [[keybindings.command]]
 key = "super+e"
 type = "shell"
 description = "Focus the next interactive agent pane"
-command = "$HOME/.config/tuios/scripts/cycle-agent-pane-focus.sh next"
+command = 'exec "$HOME/.local/bin/tuios-agent-pane-focus" next'
 
 [[keybindings.command]]
 key = "super+shift+e"
 type = "shell"
 description = "Focus the previous interactive agent pane"
-command = "$HOME/.config/tuios/scripts/cycle-agent-pane-focus.sh prev"
+command = 'exec "$HOME/.local/bin/tuios-agent-pane-focus" prev'
 
 # prefix p: fuzzy file path, typed into the focused pane without a newline.
 [[keybindings.command]]

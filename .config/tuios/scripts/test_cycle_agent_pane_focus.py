@@ -1,11 +1,13 @@
 """Exercise agent cycling without changing focus in the running TUiOS daemon."""
 
 import json
-import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+import socketserver
+import threading
+from contextlib import contextmanager
 
 
 SCRIPT = Path(__file__).with_name("cycle-agent-pane-focus.sh")
@@ -24,39 +26,67 @@ def detection(harness="codex", args=None, matched=True):
 
 
 class CycleAgentPaneFocusTest(unittest.TestCase):
-    def cycle(self, agents, detections, direction="next", current="a", session="work"):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "fixture.json").write_text(json.dumps({
-                "agents": agents, "detections": detections,
-            }))
-            mock = root / "tuios"
-            mock.write_text("""#!/usr/bin/env python3
-import json, os, pathlib, sys
-root = pathlib.Path(os.environ['CYCLE_TEST_DIR'])
-fixture = json.loads((root / 'fixture.json').read_text())
-args = sys.argv[1:]
-if args[0] == 'list-agents':
-    print(json.dumps({'agents': fixture['agents']}))
-elif args[0] == 'explain-agent-detect':
-    result = fixture['detections'][args[args.index('-w') + 1]]
-    if result is None:
-        sys.exit(1)
-    print(json.dumps(result))
-else:
-    with (root / 'focus.jsonl').open('a') as output:
-        output.write(json.dumps(args) + '\\n')
-""")
-            mock.chmod(0o755)
-            result = subprocess.run(
-                ["sh", str(SCRIPT), direction], capture_output=True, text=True,
-                env=dict(os.environ, PATH=f"{root}:{os.environ['PATH']}",
-                         CYCLE_TEST_DIR=str(root), TUIOS_ACTIVE_PANE_ID=current,
-                         TUIOS_SESSION=session),
-            )
+    @classmethod
+    def setUpClass(cls):
+        cls.binary = SCRIPT.parent.parent / "agent-pane-focus/target/release/tuios-agent-pane-focus"
+        subprocess.run(["cargo", "build", "--release", "--locked", "--manifest-path",
+                        str(SCRIPT.parent.parent / "agent-pane-focus/Cargo.toml")], check=True)
+
+    @contextmanager
+    def daemon(self, fixture):
+        calls = []
+        class Handler(socketserver.StreamRequestHandler):
+            def handle(self):
+                for line in self.rfile:
+                    request = json.loads(line)
+                    verb, params = request["verb"], request["params"]
+                    error = None
+                    if verb in ("hello", "pane-grants"):
+                        result = {}
+                    elif verb == "list-clients":
+                        result = {"clients": fixture.get("clients", [])}
+                    elif verb == "list-agents":
+                        result = {"agents": fixture["agents"]}
+                    elif verb == "explain-agent-detect":
+                        result = fixture["detections"][params["window"]]
+                        if result is None:
+                            error = {"code": "window_not_found", "message": "pane closed"}
+                    else:
+                        calls.append([verb, params])
+                        error = fixture.get("errors", {}).get((verb, params.get("window")))
+                        result = {}
+                    response = {"id": request["id"]}
+                    response["error" if error else "result"] = error or result
+                    self.wfile.write((json.dumps(response) + "\n").encode())
+        with tempfile.TemporaryDirectory(dir="/tmp") as directory:
+            path = str(Path(directory) / "tuios.sock")
+            server = socketserver.ThreadingUnixStreamServer(path, Handler)
+            thread = threading.Thread(target=lambda: server.serve_forever(poll_interval=0.01))
+            thread.start()
+            try:
+                yield path, calls
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join()
+
+    def invoke(self, path, direction="next", current="a", session="work"):
+        return subprocess.run(
+            [str(self.binary), direction, "--socket", path, "--current", current, "--session", session],
+            capture_output=True, text=True,
+        )
+
+    def cycle(self, agents, detections, direction="next", current="a", session="work", errors=None):
+        with self.daemon(dict(agents=agents, detections=detections, errors=errors or {})) as (path, calls):
+            result = self.invoke(path, direction, current, session)
             self.assertEqual(result.returncode, 0, result.stderr)
-            log = root / "focus.jsonl"
-            return [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
+        converted = []
+        for verb, params in calls:
+            if verb == "focus-window":
+                converted.append([verb, "-s", params["session"], params["window"]])
+            elif verb == "switch-session":
+                converted.append([verb, "-s", params["session"], params["name"]])
+        return converted
 
     def test_skips_headless_claude_in_both_directions(self):
         panes = [agent("a"), agent("worker"), agent("b")]
@@ -99,7 +129,7 @@ else:
         detections = {key: detection() for key in ("a", "b", "c")}
         self.assertEqual(self.cycle(panes, detections), [["focus-window", "-s", "work", "b"]])
         self.assertEqual(self.cycle(panes, detections, current="b"), [
-            ["switch-session", "-s", "work", "other"], ["focus-window", "-s", "other", "c"],
+            ["focus-window", "-s", "other", "c"], ["switch-session", "-s", "work", "other"],
         ])
 
     def test_non_agent_start_selects_first_or_last(self):
@@ -116,6 +146,43 @@ else:
         panes = [agent("a"), agent("closed"), agent("b")]
         detections = {"a": detection(), "closed": None, "b": detection()}
         self.assertEqual(self.cycle(panes, detections), [["focus-window", "-s", "work", "b"]])
+
+    def test_live_additions_and_removals_between_presses(self):
+        fixture = dict(agents=[agent("a"), agent("b")], detections={"a": detection(), "b": detection(), "c": detection()})
+        with self.daemon(fixture) as (path, calls):
+            self.assertEqual(self.invoke(path).returncode, 0)
+            self.assertEqual(calls[-1][1]["window"], "b")
+            fixture["agents"] = [agent("a"), agent("c")]
+            self.assertEqual(self.invoke(path).returncode, 0)
+            self.assertEqual(calls[-1][1]["window"], "c")
+
+    def test_closed_between_detection_and_focus_retries_next(self):
+        panes = [agent("a"), agent("closed"), agent("b")]
+        errors = {("focus-window", "closed"): {"code": "window_not_found", "message": "gone"}}
+        calls = self.cycle(panes, {key: detection() for key in ("a", "closed", "b")}, errors=errors)
+        self.assertEqual(calls[-1], ["focus-window", "-s", "work", "b"])
+
+    def test_repeated_cross_session_press_uses_attached_client_session(self):
+        fixture = dict(agents=[agent("a"), agent("b", session="other", focused=True), agent("c", session="other")],
+                       detections={key: detection() for key in ("a", "b", "c")},
+                       clients=[{"session": "other", "client_id": "attached"}, {"session": ""}])
+        with self.daemon(fixture) as (path, calls):
+            self.assertEqual(self.invoke(path).returncode, 0)
+            self.assertEqual(calls, [["focus-window", {"session": "other", "window": "c"}]])
+
+    def test_permission_errors_stop_instead_of_skipping(self):
+        fixture = dict(agents=[agent("a"), agent("b")], detections={"a": detection(), "b": detection()},
+                       errors={("focus-window", "b"): {"code": "forbidden", "message": "no grant"}})
+        with self.daemon(fixture) as (path, calls):
+            result = self.invoke(path)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("forbidden", result.stderr)
+            self.assertEqual(len(calls), 1)
+
+    def test_repeated_press_uses_daemon_focus_over_stale_frame(self):
+        panes = [agent("a"), agent("b", focused=True), agent("c")]
+        self.assertEqual(self.cycle(panes, {key: detection() for key in ("a", "b", "c")}),
+                         [["focus-window", "-s", "work", "c"]])
 
 
 if __name__ == "__main__":
