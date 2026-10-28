@@ -76,8 +76,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
         // Smear color: cursor color with rainbow tint
         vec3 smearColor = iCurrentCursorColor.rgb;
         float hue = fract(t * 0.8 + iTime * 0.3);
-        vec3 rainbow = hsv2rgb(hue, 0.35, 1.0);
-        smearColor = mix(smearColor, rainbow, 0.3);
+        vec3 rainbow = hsv2rgb(hue, 0.85, 1.0);
+        smearColor = mix(smearColor, rainbow, 0.5);
 
         fragColor.rgb = mix(fragColor.rgb, smearColor, smear * TRAIL_OPACITY * speed);
     }
