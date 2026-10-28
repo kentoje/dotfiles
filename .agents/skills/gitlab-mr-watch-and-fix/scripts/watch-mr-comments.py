@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Poll one GitLab MR for new feedback and pipeline transitions."""
+"""Poll one GitLab MR for new feedback and pipeline transitions.
+
+Runs until killed. The caller decides when the MR is done and kills this process.
+"""
 
 from __future__ import annotations
 
@@ -109,12 +112,17 @@ def main() -> int:
     parser.add_argument("--iid", required=True, help="Merge request IID")
     parser.add_argument("--worktree", default="", help="Worktree recorded in the baseline")
     parser.add_argument("--interval-seconds", type=int, default=60)
-    parser.add_argument("--quiet-seconds", type=int, default=600)
+    parser.add_argument(
+        "--quiet-seconds",
+        type=int,
+        default=0,
+        help="Ignored. The watcher no longer exits on a quiet period.",
+    )
     parser.add_argument("--once", action="store_true", help="Capture baseline and exit")
     args = parser.parse_args()
 
-    if args.interval_seconds <= 0 or args.quiet_seconds <= 0:
-        parser.error("interval and quiet period must be positive")
+    if args.interval_seconds <= 0:
+        parser.error("interval must be positive")
 
     mr_endpoint = f"projects/{args.project}/merge_requests/{args.iid}"
     mr = glab_json(mr_endpoint)
@@ -146,7 +154,6 @@ def main() -> int:
     if args.once:
         return 0
 
-    quiet_started = time.monotonic()
     while True:
         time.sleep(args.interval_seconds)
         try:
@@ -185,28 +192,6 @@ def main() -> int:
                 flush=True,
             )
             pipeline_state = latest_pipeline_state
-            changed = True
-
-        if changed or (
-            latest_pipeline is not None
-            and latest_pipeline.get("status") not in TERMINAL_PIPELINE_STATES
-        ):
-            quiet_started = time.monotonic()
-        else:
-            quiet_for = int(time.monotonic() - quiet_started)
-            print(
-                json.dumps(
-                    {
-                        "event": "quiet",
-                        "quiet_seconds": quiet_for,
-                        "quiet_target_seconds": args.quiet_seconds,
-                    }
-                ),
-                flush=True,
-            )
-            if quiet_for >= args.quiet_seconds:
-                print(json.dumps({"event": "quiet-period-reached"}), flush=True)
-                return 0
 
 
 if __name__ == "__main__":
