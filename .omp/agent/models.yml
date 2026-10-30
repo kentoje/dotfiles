@@ -199,35 +199,24 @@ providers:
           cacheRead: 0.5
           cacheWrite: 0
 
-      - id: fireworks/deepseek-v4.1-flash
-        name: DeepSeek V4.1 Flash
+      - id: deepinfra/deepseek-v4.1-flash-1017
+        name: DeepSeek V4.1 Flash 1017
         reasoning: true
+        thinking:
+          mode: effort
+          efforts: [minimal, low, medium, high, xhigh, max]
+          defaultLevel: high
+          requiresEffort: true
+          effortMap:
+            minimal: minimal
         input: [text, image]
         contextWindow: 1050000
         maxTokens: 393216
         compat:
           supportsReasoningEffort: true
-          # Fireworks accepts none|low|medium|high|xhigh|max, not minimal.
+          # DeepInfra accepts none|minimal|low|medium|high|xhigh|max.
           reasoningEffortMap:
-            minimal: low
-        cost:
-          input: 0.22
-          output: 0.66
-          cacheRead: 0.007
-          cacheWrite: 0
-
-      - id: deepinfra/deepseek-v4.1-flash
-        name: DeepSeek V4.1 Flash (DeepInfra)
-        reasoning: true
-        input: [text, image]
-        contextWindow: 1048576
-        maxTokens: 384000
-        compat:
-          supportsReasoningEffort: true
-          # DeepInfra accepts none|low|high|xhigh|max, not minimal or medium.
-          reasoningEffortMap:
-            minimal: low
-            medium: high
+            minimal: minimal
         cost:
           input: 0.2
           output: 0.6

@@ -1,5 +1,5 @@
 modelRoles:
-  smol: llmgateway/deepinfra/deepseek-v4.1-flash:xhigh
+  smol: llmgateway/deepinfra/deepseek-v4.1-flash-1017:xhigh
   slow: llmgateway/openai/gpt-6-sol:xhigh
   plan: openai/gpt-6-sol:xhigh
   commit: openai/gpt-6-luna
