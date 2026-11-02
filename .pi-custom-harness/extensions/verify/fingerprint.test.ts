@@ -14,6 +14,7 @@ test("fingerprint includes changed and untracked file content", async () => {
           stderr: "",
           code: 0,
           killed: false,
+          truncated: false,
         });
       }
       if (joined.startsWith("status ")) {
@@ -22,6 +23,7 @@ test("fingerprint includes changed and untracked file content", async () => {
           stderr: "",
           code: 0,
           killed: false,
+          truncated: false,
         });
       }
       if (joined === "diff --binary HEAD --") {
@@ -30,6 +32,7 @@ test("fingerprint includes changed and untracked file content", async () => {
           stderr: "",
           code: 0,
           killed: false,
+          truncated: false,
         });
       }
       if (joined === "ls-files --others --exclude-standard") {
@@ -38,6 +41,7 @@ test("fingerprint includes changed and untracked file content", async () => {
           stderr: "",
           code: 0,
           killed: false,
+          truncated: false,
         });
       }
       return Promise.resolve({
@@ -45,6 +49,7 @@ test("fingerprint includes changed and untracked file content", async () => {
         stderr: "",
         code: 0,
         killed: false,
+        truncated: false,
       });
     },
   };
