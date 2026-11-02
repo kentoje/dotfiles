@@ -78,6 +78,13 @@ class AwsCredentialProviderTest(unittest.TestCase):
         run.assert_called_once()
         self.assertEqual(run.call_args.args[0][0], aws_cli_access.AWS_CLI)
 
+    def test_expired_sso_profile_asks_for_aws_sso_login_not_aws_vault(self):
+        self.select_authentication({"kind": "profile", "profile": "machine"})
+        stderr = "aws: [ERROR]: Error when retrieving token from sso: Token has expired and refresh failed"
+        with self.assertRaisesRegex(AwsCliError, "run: aws sso login --profile machine") as raised:
+            self.run_fake_cli(subprocess.CompletedProcess([], 255, "", stderr))
+        self.assertNotIn("aws-vault", str(raised.exception))
+
     def test_workload_timeout_does_not_request_a_personal_sso_login(self):
         self.select_authentication({"kind": "default-chain"})
         with self.assertRaisesRegex(AwsCliError, "configured AWS credential provider") as raised:

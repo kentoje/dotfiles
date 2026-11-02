@@ -78,6 +78,21 @@ def reexec_under_aws_vault():
     os.execvp(argv[0], argv)
 
 
+def aws_sso_login_hint(stderr):
+    """The command that renews an expired AWS SSO session for the configured profile, or None.
+
+    With `awsAuthentication` set to an SSO profile, mvm calls the plain AWS CLI, so the renewal
+    is `aws sso login`, never `aws-vault exec`.
+    """
+    auth = aws_authentication()
+    if not auth or auth["kind"] != "profile":
+        return None
+    lowered = stderr.lower()
+    if "sso" not in lowered or not ("expired" in lowered or "invalid" in lowered):
+        return None
+    return f"AWS SSO session expired, run: aws sso login --profile {auth['profile']}"
+
+
 def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     """Run `aws <args>` in REGION and return parsed JSON (or text). Raises AwsCliError on failure.
 
@@ -111,7 +126,9 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
             stderr="timeout",
         ) from None
     if result.returncode != 0:
-        raise AwsCliError(f"aws {' '.join(args[:2])} failed: {result.stderr.strip()[-600:]}", stderr=result.stderr)
+        message = f"aws {' '.join(args[:2])} failed: {result.stderr.strip()[-600:]}"
+        login_hint = aws_sso_login_hint(result.stderr)
+        raise AwsCliError(f"{message}; {login_hint}" if login_hint else message, stderr=result.stderr)
     if not parse_json:
         return result.stdout
     return json.loads(result.stdout) if result.stdout.strip() else {}

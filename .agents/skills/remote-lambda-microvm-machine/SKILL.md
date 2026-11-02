@@ -28,8 +28,9 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 
 - Use `--json` to read results (`mvm new --json` gives `name` and `devServerPort`).
   No command prompts.
-- If the laptop settings set `awsAuthentication` (an unattended `credential_process` profile), no command and no ssh connection waits for a login.
-  Otherwise `mvm` runs itself under aws-vault SSO; if it prints an SSO device URL, the user must approve it in the browser: ask them.
+- AWS access: the laptop settings' `awsAuthentication` selects a plain AWS CLI profile (today the AWS SSO profile `ConversationInteAdmin-886862221201`), and mvm calls `aws` with it.
+  aws-vault is not involved; `awsVaultProfile` in the settings is a legacy fallback used only when `awsAuthentication` is absent.
+  When the SSO session expires, mvm's error ends with `run: aws sso login --profile <profile>`: ask the user to run exactly that and approve the browser prompt, then retry.
 - Create one machine per task.
   Parallel `mvm new` runs are safe.
 - A machine lives at most 8 hours (`--ttl`), then AWS terminates it.
@@ -176,7 +177,7 @@ An agent running on the machine has no `mvm`: it reports the port, and the lapto
 
 Automatic: `mvm new` adds the machine as `aws-<name>` (an open herdr window connects on its own), `mvm rm` removes it, and a machine that hits its `--ttl` is removed by herdr's next reconnect or the next `mvm` command.
 Never run `herdr machine add|remove` for `.mvm` hosts by hand.
-Herdr reconnects need working AWS credentials: unattended with `awsAuthentication`, otherwise a valid aws-vault SSO session (see Troubleshooting).
+Herdr reconnects need a valid AWS SSO session for the `awsAuthentication` profile (see Troubleshooting).
 
 ## tuios
 
@@ -279,18 +280,19 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
 - `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS credentials do not resolve.
-  With `awsAuthentication`, run `aws sts get-caller-identity --profile <profile>`: its error names the failing credential_process (for aws-vault: a locked keychain, or a keychain access prompt after an aws-vault upgrade).
-  Without it, the AWS SSO session expired: ask the user to run `aws-vault exec <awsVaultProfile> -- true` (profile from the laptop settings) and approve the browser prompt.
+  Run `aws sts get-caller-identity --profile <profile>` with the `awsAuthentication` profile from `~/.config/mvm/settings.json`.
+  `Token has expired` or `SSO session ... expired`: ask the user to run `aws sso login --profile <profile>` and approve the browser prompt.
+  Never suggest `aws-vault exec` while `awsAuthentication` is set: mvm does not read aws-vault sessions then.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
 - Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
 - gitlab.com web pages answer AWS IPs with 403; git over HTTPS and the API work.
-- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws-vault exec <awsVaultProfile> -- aws s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
+- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws --profile <profile> s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
   The next machine installs cold and saves a fresh snapshot.
 - Host key warnings: each machine gets fresh host keys; `mvm` forgets old ones in `~/.ssh/known_hosts_mvm`.
 
 ## Unattended AWS authentication: blocked
 
-Status on 2026-10-24: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) still authenticates with the personal aws-vault SSO session, so they stop when it expires.
+Status on 2026-11-02: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) authenticates with the personal AWS SSO profile selected by `awsAuthentication`, so they stop when its session expires (renew with `aws sso login`).
 An attempt to make the laptop dispatcher (the dev-workflows support worker) authenticate unattended could not be completed.
 Do not retry it until the access below exists.
 
@@ -343,8 +345,8 @@ Create it before `mvm setup`:
 }
 ```
 
-- `awsAuthentication` (optional): how every AWS call authenticates, `mvm proxy` included, so herdr, tuios and ssh reconnect unattended.
-  `{"kind": "profile", "profile": NAME}` uses that AWS CLI profile (typically a `credential_process`) and drops inherited credentials, `AWS_VAULT` included; `{"kind": "default-chain"}` uses the AWS SDK chain (EC2/ECS role).
+- `awsAuthentication` (optional): how every AWS call authenticates, `mvm proxy` included.
+  `{"kind": "profile", "profile": NAME}` uses that AWS CLI profile (an SSO profile renewed with `aws sso login`, or a `credential_process` for unattended use) and drops inherited credentials, `AWS_VAULT` included; `{"kind": "default-chain"}` uses the AWS SDK chain (EC2/ECS role).
   Either one never falls back to `awsVaultProfile`.
   `MVM_AWS_PROFILE=NAME` overrides it for one command.
 - `awsVaultProfile`: aws-vault SSO profile for every AWS call when `awsAuthentication` is absent (`MVM_AWS_VAULT_PROFILE` overrides it).
@@ -370,7 +372,7 @@ Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then 
   Never name it `CLAUDE_CODE_OAUTH_TOKEN` on the laptop: it would replace the laptop's own Claude login, whose claude.ai connectors it cannot use.
   Running machines read the secret at start only: a new token reaches new machines.
 - Private GitHub repos the image needs are git bundles of laptop checkouts (`LAPTOP_GIT_BUNDLES`): `herdr-vim-nav`, and the pi package `pi-copy-mode`, whose ssh URL the Dockerfile rewrites to its bundle for `pi update`.
-- AWS: the account of the `awsVaultProfile` aws-vault profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
+- AWS: the account of the `awsAuthentication` profile, region `eu-central-1`; `mvm` needs AWS CLI >= 2.35 and `websocat` (nix-darwin).
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
 - The laptop's tuios and the image's `TUIOS_VERSION` may differ: the laptop's window only runs ssh, and the machine's own tuios client draws inside it.
   The window runs that client by its path, `/home/dev/.local/bin/tuios` (`TUIOS_REMOTE_BINARY` in `mvm_settings.py`): keep the image installing it there.
