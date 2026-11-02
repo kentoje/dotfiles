@@ -13,6 +13,31 @@ pub struct AgentPane {
     pub protocol: String,
     #[serde(default)]
     pub focused: bool,
+    /// Where the pane's agent state came from; `program` is an OSC 7501 report.
+    #[serde(default)]
+    pub source: String,
+}
+
+/// Terminal clients whose pane shows a session running on another machine.
+const REMOTE_TERMINAL_CLIENTS: [&str; 2] = ["ssh", "mosh-client"];
+
+/// A remote agent terminal is an ssh/mosh pane whose state the far side sends
+/// back over the terminal (OSC 7501, e.g. a remote tuios attached in terminal
+/// mode). A plain ssh shell never reports one, so it stays out of the cycle.
+pub fn detection_is_remote_agent_terminal(source: &str, detection: &Value) -> bool {
+    if source != "program" {
+        return false;
+    }
+    let process = &detection["process"];
+    let comm = process["comm"].as_str().or_else(|| {
+        process["argv"]
+            .as_array()?
+            .first()?
+            .as_str()?
+            .rsplit('/')
+            .next()
+    });
+    comm.is_some_and(|comm| REMOTE_TERMINAL_CLIENTS.contains(&comm))
 }
 
 /// Match the existing interactive-agent filter, including wrapped Claude processes.
@@ -110,7 +135,9 @@ pub fn cycle_agent_pane(
                 Err(error) if error.target_disappeared() => continue,
                 Err(error) => return Err(error.into()),
             };
-            if !detection_is_interactive(&detection) {
+            if !detection_is_interactive(&detection)
+                && !detection_is_remote_agent_terminal(&target.source, &detection)
+            {
                 continue;
             }
         }
@@ -159,5 +186,21 @@ mod tests {
             &json!({"matched":true,"matched_harness":"codex","process":{"argv":["codex","-p","work"]}})
         ));
         assert!(!detection_is_interactive(&json!({"matched":false})));
+    }
+
+    #[test]
+    fn remote_agent_terminals_need_a_program_report_and_a_remote_client() {
+        let ssh = json!({"matched":false,"process":{"comm":"ssh","argv":["/usr/bin/ssh","-t","amber-lemur.mvm"]}});
+        assert!(detection_is_remote_agent_terminal("program", &ssh));
+        assert!(detection_is_remote_agent_terminal(
+            "program",
+            &json!({"matched":false,"process":{"argv":["/opt/homebrew/bin/mosh-client","host"]}})
+        ));
+        assert!(!detection_is_remote_agent_terminal("report", &ssh));
+        assert!(!detection_is_remote_agent_terminal("", &ssh));
+        assert!(!detection_is_remote_agent_terminal(
+            "program",
+            &json!({"matched":false,"process":{"comm":"fish","argv":["fish"]}})
+        ));
     }
 }

@@ -124,6 +124,19 @@ class CycleAgentPaneFocusTest(unittest.TestCase):
         panes = [agent("a"), agent("b", protocol="acp")]
         self.assertEqual(self.cycle(panes, {"a": detection()}), [["focus-window", "-s", "work", "b"]])
 
+    def test_remote_agent_over_ssh_is_reachable(self):
+        ssh = {"matched": False, "process": {"comm": "ssh", "argv": ["/usr/bin/ssh", "-t", "amber-lemur.mvm"]}}
+        panes = [agent("a"), agent("remote", session="aws-amber-lemur", source="program")]
+        self.assertEqual(self.cycle(panes, {"a": detection(), "remote": ssh}),
+                         [["focus-window", "-s", "aws-amber-lemur", "remote"],
+                          ["switch-session", "-s", "work", "aws-amber-lemur"]])
+
+    def test_plain_ssh_shell_without_program_report_is_skipped(self):
+        ssh = {"matched": False, "process": {"comm": "ssh", "argv": ["ssh", "box"]}}
+        panes = [agent("a"), agent("shell", source="report"), agent("b")]
+        detections = {"a": detection(), "b": detection(), "shell": ssh}
+        self.assertEqual(self.cycle(panes, detections), [["focus-window", "-s", "work", "b"]])
+
     def test_orders_workspaces_and_wraps_across_sessions(self):
         panes = [agent("c", session="other"), agent("b", workspace=2), agent("a")]
         detections = {key: detection() for key in ("a", "b", "c")}

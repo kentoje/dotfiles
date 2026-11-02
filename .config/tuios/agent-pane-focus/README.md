@@ -12,6 +12,9 @@ pane permissions, reads live client/session focus and agent membership, then che
 only candidates it could select. It uses the same interactive-agent rules as the
 previous shell script, including excluding Claude `--print` workflow children and
 accepting protocol panes. Ordering is session, workspace, then daemon pane order.
+Remote agents are included too: an `ssh` or `mosh-client` pane whose state arrives as
+an OSC 7501 program report (source `program`), such as a remote tuios attached in
+terminal mode on an mvm machine. A plain ssh shell never reports one and stays out.
 All agent states remain reachable.
 
 There is no cache, background service, TTL, or subscription to lose synchronization.
