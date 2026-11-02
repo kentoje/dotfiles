@@ -33,6 +33,8 @@ clients, the binding's originating session selects the client as before.
 
 Builds happen explicitly, never on keypress. The installer atomically replaces the
 binary at `~/.local/bin/tuios-agent-pane-focus`. Existing TuiOS config reloads on save.
+If the binary is missing, the bindings open `scripts/warn-agent-pane-focus-missing.sh`
+in a popup, which explains the problem and offers to run the installer.
 The old `scripts/cycle-agent-pane-focus.sh` entry point forwards to this binary.
 
 ## Verification

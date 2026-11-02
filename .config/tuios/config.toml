@@ -319,17 +319,18 @@ height = "8"
 # in every session, whatever their state. Headless workflow Claude runs are skipped.
 # Direct Rust socket client: fresh membership + target validation on every press.
 # Build/update with scripts/install-agent-pane-focus.sh; never compile on keypress.
+# If the binary is missing, a popup warns and offers to install it.
 [[keybindings.command]]
 key = "super+e"
 type = "shell"
 description = "Focus the next interactive agent pane"
-command = 'exec "$HOME/.local/bin/tuios-agent-pane-focus" next'
+command = 'b="$HOME/.local/bin/tuios-agent-pane-focus"; [ -x "$b" ] && exec "$b" next; exec "$HOME/.config/tuios/scripts/warn-agent-pane-focus-missing.sh" next'
 
 [[keybindings.command]]
 key = "super+shift+e"
 type = "shell"
 description = "Focus the previous interactive agent pane"
-command = 'exec "$HOME/.local/bin/tuios-agent-pane-focus" prev'
+command = 'b="$HOME/.local/bin/tuios-agent-pane-focus"; [ -x "$b" ] && exec "$b" prev; exec "$HOME/.config/tuios/scripts/warn-agent-pane-focus-missing.sh" prev'
 
 # prefix p: fuzzy file path, typed into the focused pane without a newline.
 [[keybindings.command]]
