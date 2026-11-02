@@ -131,7 +131,7 @@ To check on it, read the remote screen (`capture-pane`, below) or run the read-o
 - The GraphQL schema and `src/graphql-env.d.ts` are committed.
   When a change needs newer fields, run `pnpm graphql:download && pnpm graphql:generate` on the machine, and commit the result only with the change that needs it.
 - `pnpm dev` logs in to staging with the injected staging credentials and loads real staging data; use it, not `pnpm dev:mock`, when the proof needs real data.
-- `pnpm e2e:local` also needs `E2E_USER_PASSWORD` in `.env.local`, which machines do not have yet.
+- Playwright e2e (conversation-center-ext, assets-page) reads `E2E_USER_PASSWORD` from the machine env (`mvm secrets push`); never write it into `.env.local`.
 - A new dashboard-v4 worktree needs `pnpm graphql:generate` and `pnpm module-federation:generate` before Jest and `pnpm ts:check` pass; both outputs are gitignored.
 
 ## Dev server
