@@ -73,6 +73,13 @@ Worth considering, not required:
   its own line. Preserve normal Markdown structure, but avoid wrapping multiple
   sentences onto one physical line.
 
+## Tasks that end in a GitLab MR
+
+- Own them through "ready for human review", following the `aircall-dev-flow` skill: commit, push, open a draft MR, then loop `gitlab-mr-watch-and-fix` until its readiness check passes.
+  Do not stop for approval before committing, pushing or opening the draft unless the user or the repository asks for a review stop.
+- Never merge or deploy without the user's explicit approval.
+- Never claim an MR is being monitored unless the readiness loop is running in the current turn.
+
 ## Bug fixes and UI work
 
 - Start bug fixes by reproducing the bug end to end, as close to real end-user

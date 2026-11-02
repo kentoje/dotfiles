@@ -1,168 +1,86 @@
 ---
 name: aircall-dev-flow
 description: >
-  Orchestrates Kento's per-ticket dev loop end-to-end in this session: Jira
-  ticket → create/reuse a git worktree → implement → debug in the browser →
-  commit, push, open the MR → optionally watch the pipeline. Runs autonomously
-  through setup and implementation, then STOPS at a readiness gate before
-  shipping. Use when the user wants to start work on a ticket/feature/fix, "spin
-  up a worktree and implement", "take this from ticket to MR", or kick off the
-  dev flow. Delegates each step to existing skills - it does not reimplement
-  them. For work that maestro owns or should own, use `aircall-dev-flow-maestro`.
+  Kento's per-ticket loop, owned end to end: Jira ticket → worktree → implement →
+  verify → commit, push and open a draft MR → drive it to "ready for human review"
+  (pipeline green, Qodo / Bugbot / reviewer feedback fixed) → report. No approval
+  gate before committing or opening the draft unless the user asks for one; never
+  merges or deploys. Use when the user wants to start or continue work on a
+  ticket, feature or fix that should end in a GitLab MR, "take this from ticket to
+  MR", or runs a task on a remote machine.
 ---
 
-# Aircall Dev Flow
+# Aircall dev flow
 
-One orchestrator for the whole loop.
-It is **glue + sequencing**, not new behaviour: each step hands off to the dedicated skill/tool that already does it.
-Your job is to drive the sequence, make the optional-branch decisions, and **respect the gate**.
+You own the task until its MR is ready for human review, then you report.
+The user should not have to steer you between the request and that report.
+Each phase hands off to the skill that already does the work; this file only sequences them.
 
-This is the plain flow: inspect Git and GitLab for existing work rather than keeping a separate workflow-state file.
-If the ticket is tracked as a maestro task, or a virtuoso may be live on it, use [`aircall-dev-flow-maestro`](../aircall-dev-flow-maestro/SKILL.md) instead.
-It adds an ownership check before phase 2 and `maestro adopt` after phase 6.
+## Ownership contract
 
-## One MR, one branch - follow-up work never forks
+- Run every phase without asking: committing, pushing, opening a draft MR, fixing checks and bot findings, `/agentic_review`, marking the MR ready.
+- Stop and ask only when:
+  - the scope or the ticket's epic is genuinely ambiguous;
+  - the user, the dispatch prompt or the repository asks for a review stop ("stop before pushing", "don't open the MR"): then stop after phase 4 and report;
+  - an action is destructive or irreversible: force-push, rebase, history rewrite, deleting branches or data;
+  - a blocker you cannot fix (permissions, missing tooling, a red job unrelated to the change after one retry).
+- Never merge or deploy without the user's explicit approval.
+- Project rules win: the repository's `AGENTS.md`, its required checks and skills override this file.
+  Use repository-specific modes such as poteto-mode only when that repository's instructions or the user ask for them.
 
-Follow-up work on an MR that already exists happens on **that MR's own branch, in that MR's own worktree**.
-Never cut a new branch, and never open a second MR, for a ticket that already has one.
-A review comment, a red pipeline, a broken test, a missed edge case: each is a commit pushed to the existing branch, which updates the open MR automatically.
-The in-flight check at the top of phase 2 is what enforces this: run it before creating anything.
+## One MR, one branch
 
-## Autonomy contract - "auto until the first gate"
-
-Run **phases 1–4 autonomously** (ticket → worktree → implement → debug).
-Do **not** ask for permission between them.
-Then **STOP at the gate** (phase 5) and ask the user _"is it good?"_ before any commit/push/MR.
-Never cross the gate on your own.
-
-## Resume existing work
-
-Inspect the registered worktree, `git status`, recent commits, and the existing MR's review and pipeline state before continuing.
-Do not infer shipping approval from a branch or MR; if the current request does not authorize shipping, stop at phase 5.
-No separate workflow-state file is required.
+Follow-up work on a ticket that has an MR happens on that MR's branch and worktree.
+Never cut a new branch or open a second MR for it: a review comment, a red pipeline or a missed edge case is a commit pushed to the existing branch.
 
 ## Phases
 
-### 1. Ticket (mandatory by default - explicit opt-out only)
+### 1. Ticket
 
-- If the user provides a Jira key/URL: read it with the `jira` skill (`jira issue view <KEY>`) to scope the work.
-- If the user explicitly says “no ticket”, skip ticket creation.
-- Otherwise, create a Jira ticket **before creating a branch, worktree, or source change**. Never infer “no ticket” merely because the user did not provide a Jira key.
-- Requests such as `fe-maintenance, size 1, fix` are ticket metadata, not permission to skip ticket creation:
-  1. `fe-maintenance` → resolve the relevant epic/category/label using Jira conventions.
-  2. `size 1` → story points `1`.
-  3. `fix` → fix/bug classification reflected in the summary and issue description.
-- If the epic cannot be resolved uniquely, ask before implementation. Do not begin worktree creation until the ticket is scoped.
-- **Phase-order invariant:** phase 1 MUST complete and the Jira ticket MUST be created and verified before phase 2 starts. The agent MUST NOT create a branch, worktree, or source change before then.
-- If they want a _new_ ticket, create it and **always set these four fields** (Kento specifies them every time):
-  1. **Sprint** - the **current/active** sprint (project `CI`, board `4795`). ⚠️ The `jira` CLI **cannot** assign sprints here: it's configured for board `1260`, whose sprint endpoint 404s, so every `jira sprint list` variant fails. Get the active sprint from the REST agile API and create the issue via REST - see below.
-  2. **Assignee** - **Kento Monthubert** (account id `61623175d9820f0070f2d020`; or `jira me`). Always self-assigned.
-  3. **Epic** - link it to the **relevant epic** (e.g. csat, scorecard-template). Ask which if not obvious.
-  4. **Story points** - always set them; ask for the estimate if the user didn't give one.
-- Two disciplines, every time:
-  - **Dedup first** - check the epic for an existing ticket before creating, so you don't duplicate.
-  - **Batch gate** - when creating several, create **one** first, then **wait for the user's "go"** before the rest.
-- Capture the ticket key - it names the branch and seeds the MR title.
+- A Jira key or URL given: read it (`jira issue view <KEY>`).
+- "No ticket" said explicitly: skip.
+- Otherwise create one with the `jira` skill (Create a CI ticket) before any branch, worktree or source change.
+  A ticket the dispatch prompt says already exists is not created again.
 
-**Verify the surface that ships, not a rehearsal of it.** A playground or storybook page that renders the component directly does not exercise the branch a real page takes to get there - the CI-6569 fix was "proved" that way twice and rejected twice.
-Reach the actual route, and work out up front what data or filters make the change visible: real data often has none of the rows you need, and finding the query string that produces them (`?user=<id>`, a filter combination, a seeded fixture) is part of the debugging, not a detail to discover after claiming the gate.
+### 2. Worktree
 
-> **Creating the ticket (REST recipe - the CLI can't do sprints):** token is in the `$JIRA_API_TOKEN` env var (not the keychain).
-> Auth for ALL THREE steps below is `-u "$(jira me):$JIRA_API_TOKEN"` - the email comes from `jira me`, **not** from `$USER_EMAIL`, which is unset in most shells here (`jira me` is a local config read, ~20ms, so calling it per curl costs nothing).
-> Basic auth with an empty username returns `401`, which reads exactly like an expired token: that misdiagnosis stopped a ticket being created and reported "refresh your token" to the user, when the token was fine (maestro docs/postmortem-ci-6569-user-column.md).
-> 1. Active sprint: `curl -u "$(jira me):$JIRA_API_TOKEN" "https://aircall-product.atlassian.net/rest/agile/1.0/board/4795/sprint?state=active"` → sprint id (e.g. `21043`).
-> 2. `POST https://aircall-product.atlassian.net/rest/api/2/issue` with `fields`: `project.key="CI"`, `issuetype.id="10002"` (Task), `assignee.id="61623175d9820f0070f2d020"`, `customfield_10014`=epic key (Epic Link), `customfield_10020`=sprint id (int), `customfield_10028`=story points (the CI create-screen field, **not** `customfield_10016`), `description` in wiki markup (`h2.`, `{{code}}`).
-> 3. Verify: `GET /rest/api/2/issue/<KEY>?fields=summary,assignee,customfield_10014,customfield_10020,customfield_10028,status`.
-> 4. Dedup first: `jira issue list -q "project = CI AND summary ~ '<term>'"`. The `jira` CLI is still fine for **reading** (`jira issue view <KEY>`), just not for sprint-assigned creation.
-
-### 2. Worktree (create or reuse)
-
-**First, ask whether this ticket is already in flight - before creating anything.**
+Check for work in flight first:
 
 ```bash
-git worktree list | grep -i <TICKET>   # any worktree on this repo
-glab mr list --search <TICKET>         # any MR already open for it
+git worktree list | grep -i <TICKET>
+glab mr list --search <TICKET>
 ```
 
-A hit in either check means the ticket is already in flight.
-Find the MR's source branch and matching worktree, inspect `git status` and the MR's current review/pipeline state, and continue there.
-Do not create a new branch or worktree merely because an existing MR's branch is not checked out locally; reuse that branch.
-Pushing to it updates the open MR automatically.
-
-Only when both checks come back empty do you continue below.
-
-Then prefer, in this order:
-
-1. **A repo-local worktree-setup skill/script** if the repo has one (look for a skill named like `<repo>-worktree`, a `scripts/worktree*`/`scripts/new-worktree*`/`bin/wt*`, or a `Makefile`/`package.json` setup target). Use it - it handles env/install bootstrapping. **Check for this first, before reaching for native `git worktree add`.**
-2. **Reuse an existing worktree** if one already matches this ticket/MR (check `git worktree list` and `<repo>/.claude-worktrees/`). Branches follow `<area>/<TICKET>-<slug>` (e.g. `react-doctor/CI-5814-friendlypopup-transform`).
-3. **Native worktree** otherwise - create one named for the ticket, **then provision it explicitly** (see the ⚠️ box).
-
-> **⚠️ conversation-center-ext (dashboard-extensions/conversation-center-ext) - always provision, never bare.** This repo carries `scripts/new-worktree.sh` and `scripts/setup-worktree.sh`.
-> Provisioning copies gitignored-but-required files that `git worktree add` does **not** bring: `.env.local` (+ a unique `PORT`), `.claude/settings.local.json`, a `node_modules` symlink (or background `pnpm install` when lockfiles differ), and `src/graphql-env.d.ts` (gql-tada output - without it tsc/biome emit a flood of false `never` errors).
-> - **Create via the script:** `scripts/new-worktree.sh <name> [branch] [base]` (lands under `.claude/worktrees/<name>` and auto-provisions).
-> - **If a worktree was created any other way** - bare `git worktree add` or the Agent tool's `isolation: worktree` - run the provisioner on it explicitly, idempotently: `bash <repo>/scripts/setup-worktree.sh <worktree-path>`.
-> - **Why you can't rely on the hook:** `setup-worktree.sh` is wired as a PostToolUse hook in the *repo's* `.claude/settings.json`. It only fires for sessions whose project root **is** that repo. From any out-of-repo session the hook never loads - so provisioning must be run by hand. Symptom of skipping it: missing `.env.local`, or a wall of GraphQL `never`-type errors.
-
-Then make that worktree the working directory for everything below.
+A hit: continue on that MR's branch, in its worktree (create the worktree from that branch if it is missing), after reading `git status` and the MR's state.
+No hit: create the worktree with the repository's own script or skill when it has one (`scripts/new-worktree.sh` in conversation-center-ext, which also provisions `.env.local`, `PORT`, `node_modules` and `src/graphql-env.d.ts`; run `scripts/setup-worktree.sh <path>` on a worktree made any other way).
+Otherwise `git worktree add` from the up-to-date default branch.
+Branches follow `<area>/<TICKET>-<slug>`.
 
 ### 3. Implement
 
-Do the actual work in the worktree.
-Read the ticket + any linked spec; if there's an MR already, read **Cursor's bot comments** and the failing checks.
-This is normal agent work - no sub-skill.
+- Read the ticket, linked specs and the repository's `AGENTS.md`.
+- While iterating, run checks on the changed files only (the file's lint, its focused tests).
+- When the change has UI impact, verify it on the surface that ships, not a playground or storybook rendering of it: reach the real route, and find the data or query string that makes the change visible.
+  The dev server and browser differ by machine: on the laptop, `portless run` in the background, `portless get <project>` for its stable `.localhost` URL, and the `agent-browser-aircall-local` skill; on an mvm machine, the Dev server section of `remote-lambda-microvm-machine`.
 
-- **Targeted validation only:** Never run workspace-wide lint/typecheck during development (`pnpm biome check ./src` and full `ts:check` are prohibited). Run `biome check <changed-file>` and `jest <target-test-file>` strictly on modified files. Full-workspace checks belong to CI.
+### 4. Local readiness
 
-### 4. Debug (when UI verification is needed)
+- Review your own diff (`git diff <default branch>...HEAD`): scope, leftovers, debug code, comments, tests for the behaviour.
+- Run every check the repository's `AGENTS.md` requires (dashboard-v4: `pnpm ts:check` after TypeScript changes) and fix every failure on this branch.
+- The `package.json` script named like `pre-mr` (slow in conversation-center-ext: it includes e2e) runs later, before the MR is marked ready, not before the draft.
+- If a review stop was requested, stop here: report changes, worktree, branch and check results.
 
-**Start the dev server with `portless`** - never a bare port.
-The proxy runs as a service (already `portless service install`-ed), so there's nothing to start first.
-From the worktree, run the repo's dev script through the proxy: portless gives each worktree a **stable `.localhost` URL** (the branch name becomes a subdomain, so parallel tickets never collide on ports or cookies).
+### 5. Draft MR
 
-```bash
-portless run                   # runs the repo's `dev` script through the proxy - run it in the background (long-lived)
-URL=$(portless get <project>)  # -> https://<branch>.<project>.localhost (worktree prefix auto-applied)
-```
+Commit (repository convention, ticket key), push, and open a **draft** MR with the `gitlab-create-merge-request` skill.
+Open it as soon as there is a coherent implementation worth reviewing: CI starts early, and the MR is the place later fixes land.
 
-`<project>` is portless's inferred name (the `package.json` name / repo dir); if unsure, `portless list` shows the active route.
-Wait until it's actually serving, then hand `$URL` to the **`agent-browser-aircall-local`** skill (it auto-authenticates; always `--session aircall-local`) to load it, snapshot, and verify the change renders/behaves correctly.
-Iterate against it until the behaviour is right.
+### 6. Drive the MR to ready for human review
 
-### 5. ⛔ GATE - "is it good?"
+Follow the `gitlab-mr-watch-and-fix` skill: it loops `mr_readiness_check.py --wait` inside your turn, fixes failed jobs and findings, requests Qodo with `/agentic_review` (Qodo skips drafts), marks the MR ready once the draft is clean, and waits for the review that triggers.
+Its final report is your final report.
+Do not report the MR as ready while the check's verdict is anything but `ready_for_human_review`.
 
-**STOP.** Summarise what changed and what you verified, then ask the user to confirm before shipping.
-Do not commit, push, or open an MR until they say go.
+### 7. Merge (only on explicit request)
 
-### 6. Ship (only after the gate clears)
-
-- Commit and push the branch.
-- Open the MR via the **`gitlab-create-merge-request`** skill (first commit message
-  becomes the title, targets `main`, `--fill -y`). Reference the ticket key.
-- Confirm the MR exists on the intended branch and report its URL.
-  Future sessions find it through GitLab and the registered Git worktree.
-
-### 7. Watch the pipeline (optional - only if the user asks to "spy on the pipeline")
-
-Run the bundled poller against the MR's branch:
-
-```bash
-~/.agents/skills/aircall-dev-flow/scripts/watch-pipeline.sh            # current branch
-~/.agents/skills/aircall-dev-flow/scripts/watch-pipeline.sh -b <branch> -R <owner/repo>
-```
-
-It polls `glab ci get` until the pipeline reaches a terminal state and prints failing jobs if it fails.
-See [scripts/watch-pipeline.sh](scripts/watch-pipeline.sh).
-
-### 8. Merge (handoff - only when the user asks to merge a batch)
-
-Use the MR URLs the user supplies, or inspect open MRs through GitLab to identify the requested batch.
-If the intended batch or approvals are unclear, ask before handing it off.
-Invoke the `aircall-merge-train` skill on exactly those URLs.
-It owns readiness checks, pipeline handling and supervised merging; never reimplement merging here.
-
-## Notes
-
-- Use the dedicated Jira, MR and browser skills rather than reinventing their steps.
-- The only bundled helper is `watch-pipeline.sh`, shared from `aircall-dev-flow` by both skills.
-- Git and GitLab provide branch, worktree and MR state.
-- The maestro variant additionally records ownership so future sessions can address the existing work.
+Hand the exact MR URLs to the `aircall-merge-train` skill.

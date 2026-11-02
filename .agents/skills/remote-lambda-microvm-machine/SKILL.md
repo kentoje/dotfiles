@@ -99,11 +99,36 @@ The laptop does not edit the checkout: the remote agent edits, tests, runs the d
 
 ## Working on a ticket
 
+The remote agent owns the task until its MR is ready for human review (`aircall-dev-flow`, through its readiness loop).
+The laptop dispatches; it does not supervise, and the user should not need to steer between the prompt and the final report.
+
+The dispatch prompt (`--prompt-file`) must:
+
+- Name the flow: "Follow the aircall-dev-flow skill through phase 6 (ready for human review)".
+- Give the repo, the ticket key and whether it already exists (so it is not created again), the scope and the explicit non-goals.
+- Give the machine's end time, `expiresAt` from `mvm ls --json`: the machine cannot read it, and the readiness loop stops 20 minutes before it.
+- Pass on the user's own constraints verbatim, and nothing stricter.
+  Never add "STOP at the readiness gate", "do not commit, push or open an MR" or "no babysitting / no pipeline watch" unless the user said so for this request.
+  Never add a mode the user or the repository did not ask for (poteto-mode).
+
+```markdown
+Follow the aircall-dev-flow skill through phase 6 (ready for human review) on this machine.
+Repo: ~/Documents/gitlab/aircall/clients/dashboard-v4. Ticket: CI-1234 (already created, do not create another).
+Scope: <what to change>. Non-goals: <what not to touch>.
+The machine ends at 2026-11-02T23:12Z.
+Do not merge or deploy.
+```
+
+Monitoring lives on the machine, inside the remote agent's turn, and only while its loop runs.
+Never tell the user the laptop is watching the MR.
+To check on it, read the remote screen (`capture-pane`, below) or run the read-only check once from the laptop: `python3 ~/.agents/skills/gitlab-mr-watch-and-fix/scripts/mr_readiness_check.py --project <encoded path> --iid <iid>`.
+
 - `conversation-center-ext` worktrees go through `scripts/new-worktree.sh` (shared pnpm store, own `.env.local` and `PORT`).
 - The GraphQL schema and `src/graphql-env.d.ts` are committed.
   When a change needs newer fields, run `pnpm graphql:download && pnpm graphql:generate` on the machine, and commit the result only with the change that needs it.
 - `pnpm dev` logs in to staging with the injected staging credentials and loads real staging data; use it, not `pnpm dev:mock`, when the proof needs real data.
 - `pnpm e2e:local` also needs `E2E_USER_PASSWORD` in `.env.local`, which machines do not have yet.
+- A new dashboard-v4 worktree needs `pnpm graphql:generate` and `pnpm module-federation:generate` before Jest and `pnpm ts:check` pass; both outputs are gitignored.
 
 ## Dev server
 

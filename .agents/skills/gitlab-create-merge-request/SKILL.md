@@ -1,38 +1,46 @@
 ---
 name: gitlab-create-merge-request
 description: >
-  Create a GitLab merge request using glab CLI with the first commit message
-  as the title. Before creating, run the repo's pre-MR command when package.json
-  defines one. Use when the user asks to open an MR for the current branch
-  targeting main, or after completing work that needs review.
+  Create a GitLab merge request (draft or ready) with the glab CLI, targeting the
+  project's default branch (main or master), with the first commit message as the
+  title and a verified Markdown description. Runs the repo's pre-MR command when
+  package.json defines one. Use when the user asks to open an MR for the current
+  branch, or after completing work that needs review.
 ---
 
 # Create Merge Request
 
-Create a GitLab merge request for the current branch targeting `main`.
+Create a GitLab merge request for the current branch, targeting the project's default branch.
+Never assume `main`: dashboard-v4's default branch is `master`.
 
+```bash
+TARGET=$(glab repo view -F json | python3 -c 'import json,sys; print(json.load(sys.stdin)["default_branch"])')
+```
 
-## Pre-MR check (mandatory)
+## Draft or ready
 
-Before pushing or creating the MR, look in the repo's `package.json` `scripts`
-for a command whose name contains `pre-mr` (this repo: `pnpm pre-mr`).
+- **Draft** (`--draft`) is the default inside `aircall-dev-flow`: open it early, then let `gitlab-mr-watch-and-fix` mark it ready.
+  Qodo does not review drafts, so the readiness loop requests its review with `/agentic_review` and marks the MR ready when it is clean.
+- **Ready** (no `--draft`) when the user asks for it, or the work is already fully checked.
 
-- If one exists, run it from the worktree and wait for it to exit 0. Do not
-  open the MR while it is failing. A failure is a code problem on this branch:
-  fix it here, do not skip the command, and do not open a second MR.
-- If none exists, say so and continue. Do not invent a stand-in check.
+## Pre-MR check (mandatory before the MR is ready)
 
-`pnpm pre-mr` in conversation-center-ext runs the feature-branch quality jobs
-(lint, unit coverage, typecheck, fallow, react-doctor, locale diff) and the
-seven hermetic e2e projects. It is slow. Run it once, on the commit you are
-about to ship.
+Look in the repo's `package.json` `scripts` for a command whose name contains `pre-mr` (conversation-center-ext: `pnpm pre-mr`).
+
+- If one exists, run it from the worktree and wait for it to exit 0: before creating a ready MR, or before marking a draft ready.
+  A failure is a code problem on this branch: fix it here, do not skip the command, and do not open a second MR.
+- If none exists, say so and run the checks the repository's `AGENTS.md` requires instead (dashboard-v4: `pnpm ts:check` after TypeScript changes).
+  Do not invent other stand-in checks.
+
+`pnpm pre-mr` in conversation-center-ext runs the feature-branch quality jobs (lint, unit coverage, typecheck, fallow, react-doctor, locale diff) and the seven hermetic e2e projects.
+It is slow: run it once, on the commit you are about to mark ready.
 
 ## Steps
 
-1. Get the first commit message of the current branch (compared to main):
+1. Get the first commit message of the current branch (compared to the default branch):
 
    ```bash
-   git log main..HEAD --reverse --format="%s" | head -n 1
+   git log "origin/$TARGET..HEAD" --reverse --format="%s" | head -n 1
    ```
 
 2. Build the description in a file containing REAL line breaks. **Never** put `\n` or `\\n` inside a quoted `-d` argument: the shell passes those characters literally, so GitLab renders them as `\n` instead of Markdown line breaks.
@@ -40,7 +48,7 @@ about to ship.
    Use the file tool or a quoted heredoc to create the body, then pass its contents:
 
    ```bash
-   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b main -y
+   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b "$TARGET" -y
    ```
 
    The body file must contain actual Markdown, for example:
@@ -57,11 +65,14 @@ about to ship.
 
    ```bash
    # A. Explicit title and body. Branch must already be pushed.
-   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b main -y
+   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b "$TARGET" -y
 
    # B. Derive title and body from commits. Pushes the branch.
-   glab mr create --fill --fill-commit-body -b main -y
+   glab mr create --fill --fill-commit-body -b "$TARGET" -y
    ```
+
+   Add `--draft` to either mode for a draft MR.
+   A draft is marked ready later with `glab mr update <MR_ID> --ready`.
 
 ## glab flag rules
 
@@ -106,7 +117,7 @@ uploaded to the project, which returns ready-to-paste markdown.
    file and pass its contents to `-d` - there is no `--description-file`:
 
    ```bash
-   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b main -y   # bash/zsh
+   glab mr create -t "<TITLE>" -d "$(cat /tmp/mr_body.md)" -b "$TARGET" -y   # bash/zsh
    ```
 
    In fish the substitution is `-d (cat /tmp/mr_body.md)`; simplest is to put the
