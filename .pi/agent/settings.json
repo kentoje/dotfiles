@@ -7,6 +7,7 @@
   "defaultModel": "xai/grok-4-7",
   "enabledModels": [
     "llmgateway/openai/gpt-6.1-sol",
+    "llmgateway/openai/gpt-6.1-terra",
     "llmgateway/anthropic/claude-opus-5-5",
     "llmgateway/xai/grok-4-7",
     "llmgateway/google-ai-studio/gemini-4-argon",

@@ -79,6 +79,29 @@ providers:
           cacheRead: 0.2
           cacheWrite: 2.5
 
+      - id: openai/gpt-6.1-terra
+        name: GPT-6.1 Terra
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh, max]
+          defaultLevel: xhigh
+          requiresEffort: true
+          effortMap:
+            minimal: low
+        input: [text, image]
+        contextWindow: 1050000
+        maxTokens: 128000
+        compat:
+          supportsReasoningEffort: true
+          reasoningEffortMap:
+            minimal: low
+        cost:
+          input: 1.0
+          output: 5.0
+          cacheRead: 0.05
+          cacheWrite: 1.25
+
       - id: azure/gpt-5.6-terra
         name: GPT-5.6 Terra
         reasoning: true
