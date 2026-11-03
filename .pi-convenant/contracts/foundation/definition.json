@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "foundation",
+  "kind": "development-contract",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Preserve standard Pi while adding the agreed tools and controls.",
+  "component": "foundation",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": []
+}

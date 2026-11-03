@@ -1,0 +1,9 @@
+contracts:
+  directory: contracts
+execution:
+  test_adapter: vitest
+  timeout_seconds: 120
+project:
+  language: typescript
+  name: .pi-convenant
+schema_version: 1

@@ -1,0 +1,219 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+- id: MR-STATUS-01
+  action: status
+  status: planned
+  given: No MR exists for the branch.
+  when: Read status.
+  then: Return ok/absent with null MR; create nothing.
+  obligations: &id001
+  - MR-001
+  - MR-002
+  - MR-003
+  - MR-004
+  - MR-005
+  - MR-006
+  - MR-007
+  - MR-008
+  - MR-009
+  - MR-010
+  - MR-011
+- id: MR-STATUS-02
+  action: status
+  status: planned
+  given: Two open branch MRs exist.
+  when: Read implicit status.
+  then: Return blocked with candidates rather than first-match selection.
+  obligations: *id001
+- id: MR-STATUS-03
+  action: status
+  status: planned
+  given: MR head is B and last green pipeline is A.
+  when: Read status.
+  then: pipeline_matches_head=false; no current-head readiness claim.
+  obligations: *id001
+- id: MR-THREAD-01
+  action: threads
+  status: planned
+  given: MR contains a general note and an inline discussion.
+  when: List threads.
+  then: General note location is null; inline location is retained.
+  obligations: *id001
+- id: MR-THREAD-02
+  action: threads
+  status: planned
+  given: Unresolved feedback lies on a later page.
+  when: Read first page.
+  then: complete=false; no zero-unresolved certification.
+  obligations: *id001
+- id: MR-REPLY-01
+  action: reply
+  status: planned
+  given: Thread T1 is open; T2 is unrelated.
+  when: Reply to T1 without resolve.
+  then: Only T1 gets a comment; no resolution write occurs.
+  obligations: *id001
+- id: MR-REPLY-02
+  action: reply
+  status: planned
+  given: Reply 91 posts but resolution is forbidden.
+  when: Reply with resolve=true.
+  then: Return partial, reply_id=91, resolution_state=failed; never duplicate comment 91.
+  obligations: *id001
+- id: MR-REPLY-03
+  action: reply
+  status: planned
+  given: Comment request times out after dispatch.
+  when: Reply.
+  then: Return unknown/indeterminate and do not send resolve.
+  obligations: *id001
+- id: MR-UPDATE-01
+  action: update
+  status: planned
+  given: MR has a manually edited description.
+  when: Update title only.
+  then: The description is preserved byte-for-byte at the tool boundary.
+  obligations: *id001
+- id: MR-UPDATE-02
+  action: update
+  status: planned
+  given: Requested title equals current title.
+  when: Update.
+  then: Return ok/no_change without a mutation.
+  obligations: *id001
+- id: MR-UPDATE-03
+  action: update
+  status: planned
+  given: No metadata fields were supplied.
+  when: Update.
+  then: Return invalid input before external mutation.
+  obligations: *id001
+- id: MR-001-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR status must identify the selected existing merge request and report its review and pipeline state
+    without creating one.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-001
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-002-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR discussion results must retain thread identity, author, body, resolution state and available code
+    location.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-002
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-003-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Replying to a merge request discussion must target the requested thread and must not resolve it unless
+    resolution was requested.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-003
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-004-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: An MR update must modify only the requested metadata of the selected existing merge request.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-004
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-005-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Inspecting an MR or encountering a pipeline or review blocker must not start background polling or
+    trigger another agent turn by default.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-005
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-006-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR selection without an IID must require exactly one open MR for the selected repository and source
+    branch.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-006
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-007-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR collection results must identify incomplete pagination and must distinguish general notes from resolvable
+    code discussions.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-007
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-008-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR reply must finish posting the requested comment before attempting a separately requested resolution.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-008
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-009-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: A successful MR reply followed by failed resolution must return partial completion with the created
+    reply ID.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-009
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-010-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR metadata update must reject an empty patch and must not regenerate unspecified metadata implicitly.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-010
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MR-011-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR status must associate pipeline observations with their SHA and identify a head mismatch.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MR-011
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.

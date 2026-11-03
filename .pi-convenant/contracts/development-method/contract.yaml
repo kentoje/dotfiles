@@ -1,0 +1,47 @@
+schema_version: 1
+component:
+  id: development-method
+  name: development-method
+  status: draft
+intent: ./intent.md
+obligations:
+- id: DEVELOPMENTMETHOD-001
+  status: draft
+  severity: high
+  kind: invariant
+  description: Each implemented harness feature must have behavioral obligations and
+    executable acceptance checks defined before its implementation is treated as complete.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: DEVELOPMENTMETHOD-002
+  status: draft
+  severity: high
+  kind: invariant
+  description: Starting or completing an ordinary product coding task must not require
+    running Covenant against that product.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: DEVELOPMENTMETHOD-003
+  status: draft
+  severity: high
+  kind: invariant
+  description: The harness must not add a Covenant-based runtime completion or shipping
+    gate by default.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+sources: []
+dependencies: []
+interfaces:
+- name: development-method-v1
+  language: typescript
+  module: architecture/modules/development-method.json
+  export: development-method-v1

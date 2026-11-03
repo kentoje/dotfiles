@@ -1,0 +1,29 @@
+schema_version: 1
+decisions:
+- id: tool-protocol-scope
+  status: accepted-user
+  decision: Preserve the agreed host and development boundaries.
+  drivers:
+  - Explicit session instructions.
+  alternatives:
+  - option: 'Replacing Pi or requiring Covenant in every project: rejected.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations:
+  - TOOLPROTOCOL-001
+  - TOOLPROTOCOL-002
+  - TOOLPROTOCOL-003
+  - TOOLPROTOCOL-004
+  - TOOLPROTOCOL-005
+  - TOOLPROTOCOL-006
+  - TOOLPROTOCOL-007
+  - TOOLPROTOCOL-008
+  - TOOLPROTOCOL-009
+  - TOOLPROTOCOL-010
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []

@@ -1,0 +1,138 @@
+schema_version: 1
+component:
+  id: mr
+  name: mr
+  status: draft
+intent: ./intent.md
+obligations:
+- id: MR-001
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR status must identify the selected existing merge request and report
+    its review and pipeline state without creating one.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-002
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR discussion results must retain thread identity, author, body, resolution
+    state and available code location.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-003
+  status: draft
+  severity: high
+  kind: invariant
+  description: Replying to a merge request discussion must target the requested thread
+    and must not resolve it unless resolution was requested.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-004
+  status: draft
+  severity: high
+  kind: invariant
+  description: An MR update must modify only the requested metadata of the selected
+    existing merge request.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-005
+  status: draft
+  severity: high
+  kind: invariant
+  description: Inspecting an MR or encountering a pipeline or review blocker must
+    not start background polling or trigger another agent turn by default.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-006
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR selection without an IID must require exactly one open MR for the
+    selected repository and source branch.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-007
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR collection results must identify incomplete pagination and must
+    distinguish general notes from resolvable code discussions.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-008
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR reply must finish posting the requested comment before attempting
+    a separately requested resolution.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-009
+  status: draft
+  severity: high
+  kind: invariant
+  description: A successful MR reply followed by failed resolution must return partial
+    completion with the created reply ID.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-010
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR metadata update must reject an empty patch and must not regenerate
+    unspecified metadata implicitly.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: MR-011
+  status: draft
+  severity: high
+  kind: invariant
+  description: MR status must associate pipeline observations with their SHA and identify
+    a head mismatch.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+sources: []
+dependencies:
+- tool-protocol
+- repository-context
+- gitlab
+interfaces:
+- name: mr-v1
+  language: typescript
+  module: architecture/modules/mr.json
+  export: mr-v1

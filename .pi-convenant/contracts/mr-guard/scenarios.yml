@@ -1,0 +1,101 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+- id: MG-ONE-01
+  action: check_creation
+  status: planned
+  given: Branch already has one open MR.
+  when: Preflight creation.
+  then: Return reuse_existing with its IID; no second creation.
+  obligations: &id001
+  - MRGUARD-001
+  - MRGUARD-002
+  - MRGUARD-003
+  - MRGUARD-004
+  - MRGUARD-005
+  - MRGUARD-006
+- id: MG-CWD-02
+  action: check_creation
+  status: planned
+  given: A supported direct command selects another cwd.
+  when: Preflight.
+  then: Use that repository, not session cwd.
+  obligations: *id001
+- id: MG-LOOKUP-03
+  action: check_creation
+  status: planned
+  given: GitLab lookup fails.
+  when: Preflight.
+  then: Block the creation without claiming no MR and without starting another turn.
+  obligations: *id001
+- id: MRGUARD-001-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: An MR creation guard must check the effective target repository and source branch of the requested
+    creation.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-001
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MRGUARD-002-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: An MR creation guard must surface an already existing matching MR before another MR is created.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-002
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MRGUARD-003-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: An MR creation guard must not require an MR at ordinary task completion or enqueue an automatic continuation
+    when creation is blocked.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-003
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MRGUARD-004-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: MR creation protection must distinguish zero, one and multiple existing branch MRs and treat lookup
+    failure as unresolved protection.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-004
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MRGUARD-005-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Repository-specific title and delivery checks must be enforced only when explicitly configured for
+    the selected repository.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-005
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: MRGUARD-006-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: The guard must declare which direct creation entrypoints it covers and must not claim to sandbox arbitrary
+    shell programs.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - MRGUARD-006
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.

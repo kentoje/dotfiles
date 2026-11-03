@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "development-method",
+  "kind": "development-contract",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Build harness behavior acceptance-first with Covenant, without imposing it on product sessions.",
+  "component": "development-method",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": []
+}

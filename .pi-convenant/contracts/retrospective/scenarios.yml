@@ -1,0 +1,123 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+- id: RT-REVIEW-01
+  action: review
+  status: planned
+  given: The session contains an MR reply that required three manual lookups.
+  when: Explicitly review.
+  then: Record a proposal citing that friction, without inventing frequency statistics.
+  obligations: &id001
+  - RETROSPECTIVE-001
+  - RETROSPECTIVE-002
+  - RETROSPECTIVE-003
+  - RETROSPECTIVE-004
+  - RETROSPECTIVE-005
+- id: RT-REVIEW-02
+  action: review
+  status: planned
+  given: The same normalized title already exists.
+  when: Review again.
+  then: Link the existing HBR item instead of appending another.
+  obligations: *id001
+- id: RT-REVIEW-03
+  action: review
+  status: planned
+  given: A session settles without an operator request.
+  when: Observe settlement.
+  then: No retrospective or follow-up model turn runs.
+  obligations: *id001
+- id: RT-LIST-01
+  action: list
+  status: planned
+  given: No backlog exists yet.
+  when: List.
+  then: Return an empty list without creating a file.
+  obligations: *id001
+- id: RT-LIST-02
+  action: list
+  status: planned
+  given: Existing backlog cannot be parsed.
+  when: List.
+  then: Report malformed content, preserving the file.
+  obligations: *id001
+- id: RT-RECORD-01
+  action: record
+  status: planned
+  given: Title differs from an existing item only by case and whitespace.
+  when: Record.
+  then: Return created=false and existing ID without a write.
+  obligations: *id001
+- id: RT-RECORD-02
+  action: record
+  status: planned
+  given: The target resolves outside harness docs.
+  when: Record.
+  then: Reject before any file mutation.
+  obligations: *id001
+- id: RT-RECORD-03
+  action: record
+  status: planned
+  given: Another recorder writes concurrently.
+  when: Record.
+  then: Preserve both distinct entries with unique IDs or return a retryable conflict.
+  obligations: *id001
+- id: RETROSPECTIVE-001-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: A user can explicitly request a retrospective of harness behavior and receive concrete improvement
+    proposals grounded in observed friction.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - RETROSPECTIVE-001
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: RETROSPECTIVE-002-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Completing a session must not automatically invoke a retrospective or start another agent turn for
+    one.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - RETROSPECTIVE-002
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: RETROSPECTIVE-003-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Retrospective recording must retain observed friction, proposed behavior and source references without
+    asserting a fabricated incident or measurement.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - RETROSPECTIVE-003
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: RETROSPECTIVE-004-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Retrospective recording must link a matching existing backlog item rather than append an exact normalized-title
+    duplicate.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - RETROSPECTIVE-004
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: RETROSPECTIVE-005-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Retrospectives must not implement proposed changes, modify product repositories or start shipping automatically.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - RETROSPECTIVE-005
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.

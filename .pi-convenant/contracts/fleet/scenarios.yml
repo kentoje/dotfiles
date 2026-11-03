@@ -1,0 +1,145 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+- id: FL-STATUS-01
+  action: status
+  status: planned
+  given: Repo A is clean, repo B is dirty and has no comparison ref.
+  when: Read both.
+  then: Return both identities; B has unknown counts and an explicit missing basis.
+  obligations: &id001
+  - FLEET-001
+  - FLEET-002
+  - FLEET-003
+  - FLEET-004
+  - FLEET-005
+  - FLEET-006
+  - FLEET-007
+  - FLEET-008
+- id: FL-STATUS-02
+  action: status
+  status: planned
+  given: B GitLab lookup fails while its local Git read succeeds.
+  when: Read status.
+  then: Keep B local facts and mark partial; do not assert no MR.
+  obligations: *id001
+- id: FL-STATUS-03
+  action: status
+  status: planned
+  given: Selection contains an unknown ID.
+  when: Read fleet.
+  then: Return invalid selection before silently adding all repositories.
+  obligations: *id001
+- id: FL-VER-01
+  action: versions
+  status: planned
+  given: A declares ui as ^2.3.0, B declares workspace:*, C has no declaration.
+  when: Compare ui.
+  then: Return those exact specs with path/section and explicit missing for C.
+  obligations: *id001
+- id: FL-VER-02
+  action: versions
+  status: planned
+  given: B package.json is malformed.
+  when: Compare versions.
+  then: B is error, not missing; A and C remain available.
+  obligations: *id001
+- id: FL-VER-03
+  action: versions
+  status: planned
+  given: Two workspaces declare different versions.
+  when: Compare a package.
+  then: Return both declarations rather than choosing one.
+  obligations: *id001
+- id: FLEET-001-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet v1 exposes repository status across the selected repositories.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-001
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-002-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet v1 reports the requested package version for each selected repository and explicitly identifies
+    missing declarations.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-002
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-003-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet status and versions must not mutate repository contents, Git refs or installed dependencies.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-003
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-004-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet v1 must not expose sync, install or prune as supported actions.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-004
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-005-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet selection must use explicit repository IDs or the configured repository set and reject unknown
+    selections before inspection.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-005
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-006-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet status must identify the comparison ref and must not fetch remote branches implicitly.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-006
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-007-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet versions must preserve manifest path, dependency section and declared specification without substituting
+    installed versions.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-007
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: FLEET-008-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Fleet must preserve per-repository failures, report partial results when some repositories succeed
+    and report failure when none succeed.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - FLEET-008
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.

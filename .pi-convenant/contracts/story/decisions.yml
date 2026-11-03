@@ -1,0 +1,41 @@
+schema_version: 1
+decisions:
+- id: story-storybook-placement
+  status: accepted-user
+  decision: Storybook actions are optional project CLI capabilities.
+  drivers:
+  - Not every project has or needs Storybook.
+  alternatives:
+  - option: 'Global always-present story tool: rejected.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations: &id001
+  - STORY-001
+  - STORY-002
+  - STORY-003
+  - STORY-004
+  - STORY-005
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []
+- id: story-stable-story-target
+  status: specified-default
+  decision: Use exact story IDs; resolve a selector only if it has one unambiguous match.
+  drivers:
+  - A screenshot of the wrong story is misleading.
+  alternatives:
+  - option: 'Choose the first fuzzy result: rejected.'
+    disposition: rejected
+  evidence:
+  - Authored design rationale; not user-approved execution evidence
+  related_obligations: *id001
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: null
+  execution_evidence: []

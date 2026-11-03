@@ -1,0 +1,113 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+- id: PV-URL-01
+  action: url
+  status: planned
+  given: Configured route is registered but no app is usable.
+  when: Read preview URL.
+  then: Return the route with ready=false and its cause, not a ready server.
+  obligations: &id001
+  - PREVIEW-001
+  - PREVIEW-002
+  - PREVIEW-003
+  - PREVIEW-004
+  - PREVIEW-005
+  - PREVIEW-006
+- id: PV-URL-02
+  action: url
+  status: planned
+  given: Another worktree owns a different route.
+  when: Read current project URL.
+  then: Never substitute the other worktree route.
+  obligations: *id001
+- id: PV-UP-01
+  action: up
+  status: planned
+  given: A matching ready preview already runs.
+  when: Start again.
+  then: Reuse it; no second process and no takeover of ownership.
+  obligations: *id001
+- id: PV-UP-02
+  action: up
+  status: planned
+  given: A wrong app answers on the configured port.
+  when: Start preview.
+  then: Report mismatch rather than ready or killing that process.
+  obligations: *id001
+- id: PV-UP-03
+  action: up
+  status: planned
+  given: New startup never reaches usable readiness.
+  when: Start.
+  then: Return timeout, stop owned process and retain diagnostics.
+  obligations: *id001
+- id: PREVIEW-001-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview lookup must report the URL and runtime state of the selected project or worktree.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-001
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: PREVIEW-002-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview startup must use the project-selected startup capability or command and must not duplicate
+    an already running instance.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-002
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: PREVIEW-003-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview results must report known authentication requirements without silently attempting browser login.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-003
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: PREVIEW-004-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview is an optional tailored project CLI capability and must not be registered as a universal harness
+    tool.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-004
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: PREVIEW-005-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview readiness must check the selected app identity and usable readiness signal, not merely an occupied
+    port.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-005
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.
+- id: PREVIEW-006-ACCEPTANCE
+  status: planned
+  given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating
+    the boundary.
+  when: Preview cleanup must stop only processes owned by the invocation or explicitly adopted for cleanup.
+  then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities
+    and effects in diagnostics.
+  obligations:
+  - PREVIEW-006
+  test_design_note: Derive an executable assertion from this obligation and the concrete action examples before
+    activation; this record is not an executable test.

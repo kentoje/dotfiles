@@ -1,0 +1,45 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {
+      "repository": "fixture",
+      "source_branch": "fixture",
+      "target_branch": "fixture",
+      "title": "fixture",
+      "description": "fixture",
+      "expected_head_sha": "fixture"
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "iid": 1,
+        "url": "fixture",
+        "head_sha": "fixture",
+        "draft": true
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

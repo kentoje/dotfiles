@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "modules": [
+    "tool-protocol",
+    "development-method",
+    "repository-context",
+    "gitlab",
+    "jira-preflight",
+    "jira",
+    "mr",
+    "mr-guard",
+    "worktree",
+    "fleet",
+    "project-cli",
+    "preview",
+    "story",
+    "retrospective",
+    "shipping",
+    "foundation"
+  ],
+  "shared_call_context": {
+    "required": [
+      "invocation_id",
+      "deadline",
+      "cancellation",
+      "authorization_provenance",
+      "resource_scope"
+    ],
+    "rules": [
+      "Provided by trusted host, not accepted from model tool arguments.",
+      "Deadline is inherited by dependent calls; never reset it.",
+      "Cancellation stops new effects, preserves committed/unknown writes and releases only owned resources.",
+      "Credentials stay in host transport; never return them in payloads."
+    ]
+  },
+  "compatibility": "v1 schemas are canonical. Changes to required fields, enums, nullability or effect semantics require explicit revision and all consumer fixture updates.",
+  "composition": "foundation injects service ports and registers public tools; features never import foundation or sibling internals. Optional drivers call a project-cli executor primitive; project-cli does not import preview/story, preventing cycles."
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "interface_id": "foundation-v1",
+  "owner": "foundation",
+  "implementation_root": "src/foundation/",
+  "test_root": "tests/foundation/",
+  "role": "Composition root only: Pi registration, dependency injection, trusted host services and user authorization provenance. Never imported by feature modules.",
+  "dependencies": [
+    "tool-protocol",
+    "repository-context",
+    "gitlab",
+    "jira",
+    "mr",
+    "mr-guard",
+    "worktree",
+    "fleet",
+    "project-cli",
+    "preview",
+    "story",
+    "retrospective",
+    "shipping"
+  ],
+  "operations": {},
+  "consumes": {
+    "tool-protocol": [
+      "validate_boundary"
+    ],
+    "repository-context": [
+      "resolve"
+    ],
+    "gitlab": [
+      "repository",
+      "pipelines",
+      "pipeline",
+      "jobs",
+      "job",
+      "logs",
+      "retry",
+      "cancel",
+      "lookup_open_mrs"
+    ],
+    "jira": [
+      "get",
+      "search",
+      "create",
+      "update",
+      "comment",
+      "transition"
+    ],
+    "mr": [
+      "status",
+      "threads",
+      "reply",
+      "update",
+      "create_draft",
+      "mark_ready"
+    ],
+    "mr-guard": [
+      "check_creation"
+    ],
+    "worktree": [
+      "new",
+      "verify",
+      "list",
+      "rm"
+    ],
+    "fleet": [
+      "status",
+      "versions"
+    ],
+    "project-cli": [
+      "inspect",
+      "propose",
+      "create",
+      "maintain",
+      "execute_capability"
+    ],
+    "preview": [
+      "url",
+      "up"
+    ],
+    "story": [
+      "list",
+      "show"
+    ],
+    "retrospective": [
+      "review",
+      "list",
+      "record"
+    ],
+    "shipping": [
+      "run"
+    ]
+  },
+  "host_capabilities": [
+    "Pi registration, trusted invocation context and cancellation"
+  ],
+  "state_ownership": [
+    "Immutable invocation facts and returned evidence; no implicit global mutable cache"
+  ]
+}
