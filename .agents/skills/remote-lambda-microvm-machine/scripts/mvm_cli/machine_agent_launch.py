@@ -11,7 +11,7 @@ import shlex
 import subprocess
 import time
 
-from mvm_cli.machine_registry import load_machine_record, ssh_host_for_machine
+from mvm_cli.machine_registry import ssh_host_for_machine
 from mvm_cli.mvm_errors import MvmError, log_mvm
 from mvm_cli.mvm_settings import (
     MACHINE_GITLAB_ROOT,
@@ -21,6 +21,7 @@ from mvm_cli.mvm_settings import (
     default_machine_agent,
     workspace_repo_paths,
 )
+from mvm_cli.shared_machine_registry import require_machine_record
 from mvm_cli.tuios_machine_session import start_machine_tuios_session, tuios_session_for_machine
 
 # Agent command lines typed into `main`: (without a prompt, with the prompt file {prompt}).
@@ -113,7 +114,7 @@ def read_machine_agent_prompt(args):
 
 def cmd_agent(args):
     """`mvm agent NAME [--agent claude|omp|pi] [--cwd DIR] [--prompt-file FILE | PROMPT...]`."""
-    load_machine_record(args.name)
+    require_machine_record(args.name)
     agent = args.agent or default_machine_agent()
     cwd = resolve_machine_agent_cwd(args.cwd)
     prompt = read_machine_agent_prompt(args)

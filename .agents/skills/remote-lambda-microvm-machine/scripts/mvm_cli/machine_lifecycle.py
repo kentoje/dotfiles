@@ -1,4 +1,8 @@
-"""Machine lifecycle commands: `mvm new` (start + herdr add + tuios session), `mvm rm` (terminate + remove both), `mvm ls`."""
+"""Machine lifecycle commands: `mvm new` (start + herdr add + tuios session), `mvm attach`, `mvm rm` (terminate + remove both), `mvm ls`.
+
+Every laptop set up with `mvm setup` shares the machines: names live in the shared machine
+registry, and every registered laptop key reaches every machine (laptop_ssh_keys).
+"""
 
 import datetime as dt
 import json
@@ -22,32 +26,42 @@ from mvm_cli.herdr_machine_sync import (
     herdr_label_for_machine,
     list_herdr_mvm_profiles,
 )
-from mvm_cli.machine_registry import (
-    find_machine_record,
-    forget_machine_host_key,
-    generate_machine_name,
-    list_machine_records,
-    machine_creation_lock,
-    machine_expires_at,
-    new_machine_record,
-    save_machine_record,
-    ssh_host_for_machine,
-    validate_machine_name,
-)
+from mvm_cli.laptop_ssh_keys import register_laptop_ssh_key
 from mvm_cli.machine_port_forwarding import (
     dev_server_ports_in_use,
     list_machine_forwarded_ports,
     pick_dev_server_port,
 )
+from mvm_cli.machine_registry import (
+    delete_machine_record,
+    forget_machine_host_key,
+    generate_machine_name,
+    is_machine_reservation,
+    list_machine_records,
+    machine_expires_at,
+    new_machine_record,
+    ssh_host_for_machine,
+    validate_machine_name,
+)
 from mvm_cli.mvm_errors import MvmError, log_mvm
 from mvm_cli.mvm_settings import (
     EGRESS_CONNECTORS,
     INGRESS_CONNECTORS,
+    LAPTOP_SSH_KEYS_PREFIX,
     MAX_LIFETIME_SECONDS,
     PNPM_STORE_CACHE_PREFIX,
     REGION,
 )
-from mvm_cli.ssh_access import read_mvm_ssh_public_key, wait_for_ssh
+from mvm_cli.shared_machine_registry import (
+    MachineNameTaken,
+    create_shared_machine_record,
+    delete_shared_machine_record,
+    refresh_machine_registry_mirror,
+    replace_shared_machine_record,
+    resolve_machine_record,
+    shared_machine_creation_lock,
+)
+from mvm_cli.ssh_access import wait_for_ssh
 from mvm_cli.tuios_machine_session import (
     list_tuios_machine_sessions,
     open_tuios_session_for_machine,
@@ -86,59 +100,118 @@ def wait_for_microvm_state(microvm_id, wanted, timeout=600):
     raise MvmError(f"{microvm_id} not {'/'.join(sorted(wanted))} after {timeout}s")
 
 
-def build_mvm_run_payload(name, ssh_public_key, stack_outputs, dev_server_port):
+def build_mvm_run_payload(name, stack_outputs, dev_server_port):
     """The run hook payload (MvmRunPayload) that /opt/mvm/bin/mvm-on-run reads inside the MicroVM.
 
+    sshKeysUri: the registered laptop keys, which mvm-authorized-keys reads at every ssh login.
     pnpmStoreCacheUri is where mvm-pnpm-store-cache keeps pnpm store snapshots (S3 pnpm store cache).
     devServerPort becomes PORT in cc-ext's .env.local (mvm-bootstrap-workspace).
     """
+    bucket = stack_outputs["ArtifactBucketName"]
     return {
         "name": name,
-        "sshAuthorizedKeys": [ssh_public_key],
+        "sshKeysUri": f"s3://{bucket}/{LAPTOP_SSH_KEYS_PREFIX}",
         "envSecretId": stack_outputs["EnvSecretArn"],
         "envSecretRegion": REGION,
         "bootstrapWorkspace": True,
-        "pnpmStoreCacheUri": f"s3://{stack_outputs['ArtifactBucketName']}/{PNPM_STORE_CACHE_PREFIX}",
+        "pnpmStoreCacheUri": f"s3://{bucket}/{PNPM_STORE_CACHE_PREFIX}",
         "devServerPort": dev_server_port,
     }
 
 
-def reserve_and_start_microvm(requested_name, ssh_public_key, stack_outputs, ttl_seconds):
-    """Choose the machine's name and dev server port, start its MicroVM, save its record; returns the record.
+def reserve_machine_name_and_port(requested_name, ttl_seconds):
+    """Reserve a name and a devServerPort that no laptop's machine has; returns (record, etag) of the shared record.
 
-    Hold machine_creation_lock() around it: the name and port are only reserved once the record is saved.
+    Runs under the cross-laptop creation lock, on a freshly refreshed mirror. The record is a
+    reservation (no microvmId) until start_reserved_microvm fills it in.
     """
-    taken_names = {record["name"] for record in list_machine_records()}
-    name = requested_name or generate_machine_name(taken_names)
-    if name in taken_names:
-        raise MvmError(f"{name} already exists (see `mvm ls`, or `mvm rm {name}`)")
-    dev_server_port = pick_dev_server_port(dev_server_ports_in_use())
-    payload = build_mvm_run_payload(name, ssh_public_key, stack_outputs, dev_server_port)
-    result = run_aws_cli(
-        [
-            "lambda-microvms",
-            "run-microvm",
-            "--image-identifier",
-            image_arn(),
-            "--execution-role-arn",
-            stack_outputs["ExecutionRoleArn"],
-            "--ingress-network-connectors",
-            *INGRESS_CONNECTORS,
-            "--egress-network-connectors",
-            *EGRESS_CONNECTORS,
-            "--run-hook-payload",
-            json.dumps(payload),
-            "--maximum-duration-in-seconds",
-            str(ttl_seconds),
-            "--logging",
-            json.dumps(
-                {"cloudWatch": {"logGroup": stack_outputs["ImageLogGroupName"], "logStream": f"machine-{name}"}}
-            ),
-        ]
-    )
-    record = new_machine_record(name, result["microvmId"], result.get("endpoint"), ttl_seconds, dev_server_port)
-    save_machine_record(record)
-    return record
+    with shared_machine_creation_lock():
+        refresh_machine_registry_mirror()
+        taken_names = {record["name"] for record in list_machine_records()}
+        name = requested_name or generate_machine_name(taken_names)
+        if name in taken_names:
+            raise MachineNameTaken(
+                f"{name} already exists (see `mvm ls`, or `mvm rm {name}`)"
+            )
+        record = new_machine_record(
+            name, ttl_seconds, pick_dev_server_port(dev_server_ports_in_use())
+        )
+        etag = create_shared_machine_record(record)
+    return record, etag
+
+
+def start_reserved_microvm(record, etag, stack_outputs):
+    """Start the MicroVM for a reservation and record its id; returns (record, etag).
+
+    When run-microvm fails, the reservation is dropped so the name and port are free again.
+    """
+    name = record["name"]
+    payload = build_mvm_run_payload(name, stack_outputs, record["devServerPort"])
+    try:
+        result = run_aws_cli(
+            [
+                "lambda-microvms",
+                "run-microvm",
+                "--image-identifier",
+                image_arn(),
+                "--execution-role-arn",
+                stack_outputs["ExecutionRoleArn"],
+                "--ingress-network-connectors",
+                *INGRESS_CONNECTORS,
+                "--egress-network-connectors",
+                *EGRESS_CONNECTORS,
+                "--run-hook-payload",
+                json.dumps(payload),
+                "--maximum-duration-in-seconds",
+                str(record["ttlSeconds"]),
+                "--logging",
+                json.dumps(
+                    {
+                        "cloudWatch": {
+                            "logGroup": stack_outputs["ImageLogGroupName"],
+                            "logStream": f"machine-{name}",
+                        }
+                    }
+                ),
+            ]
+        )
+    except BaseException:
+        try:
+            delete_shared_machine_record(name, etag)
+            delete_machine_record(name)
+        except Exception as cleanup_error:
+            log_mvm(
+                f"{name}: could not drop the name reservation, `mvm ls` drops it later: {cleanup_error}"
+            )
+        raise
+    record = {
+        **record,
+        "microvmId": result["microvmId"],
+        "endpoint": result.get("endpoint"),
+    }
+    return record, replace_shared_machine_record(record, etag)
+
+
+def print_machine_summary(record, in_herdr, tuios_session, as_json):
+    """The result of `mvm new` and `mvm attach`: one line, or JSON with --json."""
+    name = record["name"]
+    summary = {
+        "name": name,
+        "ssh": f"ssh {ssh_host_for_machine(name)}",
+        "herdr": herdr_label_for_machine(name) if in_herdr else None,
+        "tuios": tuios_session,
+        "expiresAt": machine_expires_at(record).isoformat(),
+        "devServerPort": record.get("devServerPort"),
+        "createdOn": record.get("createdOn"),
+        "microvmId": record["microvmId"],
+    }
+    if as_json:
+        print(json.dumps(summary, indent=2))
+    else:
+        expires = machine_expires_at(record).astimezone().strftime("%H:%M")
+        print(
+            f"{name}  {summary['ssh']}  dev server port {summary['devServerPort']}  expires {expires}"
+        )
 
 
 def cmd_new(args):
@@ -151,38 +224,67 @@ def cmd_new(args):
         raise MvmError(f"--ttl must be between 1m and {MAX_LIFETIME_SECONDS // 3600}h")
     prune_ended_machines(list_image_microvms())
     outputs = read_stack_outputs()
-    ssh_public_key = read_mvm_ssh_public_key()
+    # Machines accept only registered keys: without this, a laptop set up before the keys were
+    # shared could not ssh into the machine it starts.
+    register_laptop_ssh_key()
     started = time.monotonic()
-    with machine_creation_lock():
-        record = reserve_and_start_microvm(args.name, ssh_public_key, outputs, ttl_seconds)
-    name, dev_server_port = record["name"], record["devServerPort"]
+    record, etag = reserve_machine_name_and_port(args.name, ttl_seconds)
+    record, etag = start_reserved_microvm(record, etag, outputs)
+    name = record["name"]
     forget_machine_host_key(name)
     log_mvm(f"{name}: starting {record['microvmId']}")
 
     info = wait_for_microvm_state(record["microvmId"], {"RUNNING"})
-    record["endpoint"] = info.get("endpoint") or record["endpoint"]
-    save_machine_record(record)
+    endpoint = info.get("endpoint") or record["endpoint"]
+    if endpoint != record["endpoint"]:
+        record = {**record, "endpoint": endpoint}
+        etag = replace_shared_machine_record(record, etag)
     wait_for_ssh(name)
     log_mvm(f"{name}: ssh ready in {int(time.monotonic() - started)}s; workspace setup continues (mvm logs {name} -f)")
     in_herdr = add_machine_to_herdr(name)
     if in_herdr:
         log_mvm(f"{name}: added to herdr as {herdr_label_for_machine(name)}")
     tuios_session = open_tuios_session_for_machine(name)
+    print_machine_summary(record, in_herdr, tuios_session, args.json)
 
-    summary = {
-        "name": name,
-        "ssh": f"ssh {ssh_host_for_machine(name)}",
-        "herdr": herdr_label_for_machine(name) if in_herdr else None,
-        "tuios": tuios_session,
-        "expiresAt": machine_expires_at(record).isoformat(),
-        "devServerPort": dev_server_port,
-        "microvmId": record["microvmId"],
-    }
-    if args.json:
-        print(json.dumps(summary, indent=2))
-    else:
-        expires = machine_expires_at(record).astimezone().strftime("%H:%M")
-        print(f"{name}  {summary['ssh']}  dev server port {dev_server_port}  expires {expires}")
+
+def require_running_machine_record(name):
+    """NAME's fresh shared record, once AWS says its MicroVM is RUNNING. Raises MvmError otherwise."""
+    record = resolve_machine_record(name, fresh=True)
+    if record is None:
+        raise MvmError(f"unknown machine {name!r} (see `mvm ls`)")
+    if is_machine_reservation(record):
+        raise MvmError(
+            f"{name} is still starting on {record.get('createdOn') or 'another laptop'}; retry in a minute"
+        )
+    state = get_microvm(record["microvmId"]).get("state")
+    if state in ENDED_MICROVM_STATES:
+        forget_ended_machine(name, record["microvmId"])
+        raise MvmError(f"{name} has ended ({state})")
+    if state != "RUNNING":
+        raise MvmError(f"{name} is {state}, not RUNNING")
+    return record
+
+
+def cmd_attach(args):
+    """Use a machine started on another laptop from this one: check ssh, add it to this laptop's herdr and tuios."""
+    reexec_under_aws_vault()
+    validate_machine_name(args.name)
+    record = require_running_machine_record(args.name)
+    name = record["name"]
+    register_laptop_ssh_key()
+    forget_machine_host_key(name)
+    wait_for_ssh(name)
+    target = ssh_host_for_machine(name)
+    in_herdr = any(
+        profile.get("target") == target for profile in list_herdr_mvm_profiles() or []
+    )
+    if not in_herdr:
+        in_herdr = add_machine_to_herdr(name)
+        if in_herdr:
+            log_mvm(f"{name}: added to herdr as {herdr_label_for_machine(name)}")
+    tuios_session = open_tuios_session_for_machine(name)
+    print_machine_summary(record, in_herdr, tuios_session, args.json)
 
 
 def write_skip_wip_marker(name):
@@ -216,9 +318,15 @@ def cmd_rm(args):
     failed = []
     herdr_profiles = list_herdr_mvm_profiles()
     for name in args.names:
-        record = find_machine_record(name)
+        record = resolve_machine_record(name, fresh=True)
         if record is None:
             log_mvm(f"{name}: unknown machine (see `mvm ls`)")
+            failed.append(name)
+            continue
+        if is_machine_reservation(record):
+            log_mvm(
+                f"{name}: still starting on {record.get('createdOn') or 'another laptop'}; retry in a minute"
+            )
             failed.append(name)
             continue
         if args.discard:
@@ -237,14 +345,20 @@ def cmd_rm(args):
 
 
 def cmd_ls(args):
-    """List live machines: name, state, image version, age, time left, herdr label, tuios session, forwarded ports."""
+    """List every laptop's live machines: name, state, image version, age, time left, laptop, herdr label, tuios session, ports."""
     reexec_under_aws_vault()
     listing = list_image_microvms()
     prune_ended_machines(listing)
-    names_by_id = {record["microvmId"]: record for record in list_machine_records()}
-    herdr_labels = {p["target"]: p.get("label") for p in (list_herdr_mvm_profiles() or [])}
+    names_by_id = {
+        record["microvmId"]: record
+        for record in list_machine_records()
+        if record.get("microvmId")
+    }
+    herdr_labels = {
+        p["target"]: p.get("label") for p in (list_herdr_mvm_profiles() or [])
+    }
     tuios_sessions = set(list_tuios_machine_sessions() or [])
-    now = dt.datetime.now(dt.timezone.utc)
+    now =dt.datetime.now(dt.timezone.utc)
     rows = []
     for microvm in listing:
         if microvm.get("state") in ENDED_MICROVM_STATES:
@@ -264,6 +378,7 @@ def cmd_ls(args):
                 "imageVersion": str(microvm.get("imageVersion", "")),
                 "startedAt": started.isoformat() if started else None,
                 "expiresAt": machine_expires_at(record).isoformat() if record else None,
+                "createdOn": record.get("createdOn") if record else None,
                 "herdr": herdr_labels.get(ssh_host_for_machine(name)) if name else None,
                 "tuios": tuios_session_for_machine(name)
                 if name and tuios_session_for_machine(name) in tuios_sessions
@@ -279,7 +394,7 @@ def cmd_ls(args):
     if not rows:
         print("no machines (start one with: mvm new)")
         return
-    table = [("NAME", "STATE", "IMAGE", "AGE", "LEFT", "HERDR", "TUIOS", "PORTS")]
+    table = [("NAME", "STATE", "IMAGE", "AGE", "LEFT", "LAPTOP", "HERDR", "TUIOS", "PORTS")]
     for row in rows:
         age = (
             format_duration_short((now - dt.datetime.fromisoformat(row["startedAt"])).total_seconds())
@@ -298,6 +413,7 @@ def cmd_ls(args):
                 row["imageVersion"],
                 age,
                 left,
+                row["createdOn"] or "-",
                 row["herdr"] or "-",
                 row["tuios"] or "-",
                 ",".join(map(str, row["forwardedPorts"])) or "-",

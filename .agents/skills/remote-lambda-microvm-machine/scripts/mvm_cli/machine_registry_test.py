@@ -1,6 +1,7 @@
-"""Tests for machine_registry: names, records, expiry. Run: python3 -m unittest discover -s mvm_cli -p '*_test.py' -t ."""
+"""Tests for machine_registry: names, the local mirror, expiry. Run: python3 -m unittest discover -s mvm_cli -p '*_test.py' -t ."""
 
 import datetime as dt
+import hashlib
 import random
 import tempfile
 import unittest
@@ -9,6 +10,24 @@ from unittest import mock
 
 from mvm_cli import machine_registry
 from mvm_cli.mvm_errors import MvmError
+
+
+def isolate_machine_mirror(test_case):
+    """Point the local mirror (machines/) and known_hosts_mvm at a temp dir for one test; returns the machines dir.
+
+    Keeps tests away from the real ~/.local/state/mvm.
+    """
+    tmp = tempfile.TemporaryDirectory()
+    test_case.addCleanup(tmp.cleanup)
+    machines_dir = Path(tmp.name) / "machines"
+    for name, value in (
+        ("MACHINES_DIR", machines_dir),
+        ("KNOWN_HOSTS", Path(tmp.name) / "known_hosts_mvm"),
+    ):
+        patcher = mock.patch.object(machine_registry, name, value)
+        patcher.start()
+        test_case.addCleanup(patcher.stop)
+    return machines_dir
 
 
 class MachineNameTest(unittest.TestCase):
@@ -37,18 +56,13 @@ class MachineNameTest(unittest.TestCase):
 
 class MachineRecordTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        patches = [
-            mock.patch.object(machine_registry, "MACHINES_DIR", Path(self.tmp.name) / "machines"),
-            mock.patch.object(machine_registry, "KNOWN_HOSTS", Path(self.tmp.name) / "known_hosts_mvm"),
-        ]
-        for patch in patches:
-            patch.start()
-            self.addCleanup(patch.stop)
-        self.addCleanup(self.tmp.cleanup)
+        isolate_machine_mirror(self)
 
     def test_save_find_list_delete(self):
-        record = machine_registry.new_machine_record("dev", "microvm-1", "e.on.aws", 3600, 3101)
+        record = {
+            **machine_registry.new_machine_record("dev", 3600, 3101),
+            "microvmId": "microvm-1",
+        }
         machine_registry.save_machine_record(record)
         self.assertEqual(machine_registry.find_machine_record("dev")["microvmId"], "microvm-1")
         # completions/mvm.fish reads the port with a regex on this exact formatting.
@@ -58,9 +72,26 @@ class MachineRecordTest(unittest.TestCase):
         self.assertIsNone(machine_registry.find_machine_record("dev"))
         machine_registry.delete_machine_record("dev")  # idempotent
 
-    def test_load_unknown_machine_raises(self):
-        with self.assertRaises(MvmError):
-            machine_registry.load_machine_record("ghost")
+    def test_new_record_is_a_reservation_until_it_has_a_microvm(self):
+        record = machine_registry.new_machine_record("dev", 3600, 3101)
+        self.assertTrue(machine_registry.is_machine_reservation(record))
+        self.assertEqual(record["createdOn"], machine_registry.LAPTOP_NAME)
+        self.assertFalse(
+            machine_registry.is_machine_reservation(
+                {**record, "microvmId": "microvm-1"}
+            )
+        )
+
+    def test_mirror_etag_is_the_md5_of_the_shared_bytes(self):
+        record = machine_registry.new_machine_record("dev", 3600, 3101)
+        machine_registry.save_machine_record(record)
+        expected = (
+            '"'
+            + hashlib.md5(machine_registry.machine_record_bytes(record)).hexdigest()
+            + '"'
+        )
+        self.assertEqual(machine_registry.mirrored_machine_record_etag("dev"), expected)
+        self.assertIsNone(machine_registry.mirrored_machine_record_etag("ghost"))
 
     def test_expiry_uses_ttl_and_defaults_to_eight_hours(self):
         created = dt.datetime(2026, 10, 13, 12, 0, tzinfo=dt.timezone.utc)

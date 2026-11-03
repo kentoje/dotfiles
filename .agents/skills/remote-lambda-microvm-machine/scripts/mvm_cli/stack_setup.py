@@ -1,10 +1,16 @@
-"""One-time and occasional setup: `mvm setup` (stack, ssh, ~/.local/bin/mvm, fish completion) and `mvm secrets push`."""
+"""One-time and occasional setup: `mvm setup` (stack, ssh key, ~/.local/bin/mvm, fish completion) and `mvm secrets push`."""
 
 import json
 import os
 import subprocess
 
-from mvm_cli.aws_cli_access import AwsCliError, read_stack_outputs, reexec_under_aws_vault, run_aws_cli
+from mvm_cli.aws_cli_access import (
+    AwsCliError,
+    read_stack_outputs,
+    reexec_under_aws_vault,
+    run_aws_cli,
+)
+from mvm_cli.laptop_ssh_keys import register_laptop_ssh_key
 from mvm_cli.mvm_errors import log_mvm
 from mvm_cli.mvm_settings import (
     AWS_CLI,
@@ -53,7 +59,10 @@ def install_mvm_fish_completion():
 
 
 def cmd_setup(args):
-    """Deploy the CloudFormation stack, create the ssh key and config block, put `mvm` on PATH, link fish completion."""
+    """Deploy the stack, create and register this laptop's ssh key, write the ssh config block, link `mvm` and fish completion.
+
+    Run once per laptop: registering the key is what lets this laptop reach every laptop's machines.
+    """
     reexec_under_aws_vault()
     email = owner_email()
     log_mvm(f"deploying stack {STACK_NAME} in {REGION}")
@@ -81,6 +90,9 @@ def cmd_setup(args):
         check=True,
     )
     ensure_mvm_ssh_key()
+    log_mvm(
+        f"registered this laptop's ssh key as {register_laptop_ssh_key()} (see `mvm keys`)"
+    )
     write_ssh_config_block()
     install_mvm_on_path()
     install_mvm_fish_completion()

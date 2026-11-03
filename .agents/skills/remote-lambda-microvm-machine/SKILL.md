@@ -16,8 +16,9 @@ The machine reaches staging (identity API, AppSync schema) on its own: no tunnel
 
 ```bash
 mvm new [NAME] [--ttl 8h] [--json]   # start a machine (random adjective-noun name if omitted), wait for ssh, add to herdr, open its tuios session
+mvm attach NAME [--json]             # use a machine started on another laptop: check ssh, add to this laptop's herdr, open its tuios session
 mvm rm NAME... [--discard]           # terminate (unpushed work is pushed first), remove from herdr and tuios
-mvm ls [--json]                      # machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
+mvm ls [--json]                      # every laptop's machines: state, image, age, time left, laptop, herdr label, tuios session, ports
 mvm ssh NAME [CMD...]                # same as ssh NAME.mvm [CMD...]
 mvm tuios NAME                       # open the machine's tuios session aws-NAME again (after a dropped connection)
 mvm agent NAME [--agent claude|omp|pi] [--cwd DIR] [--prompt-file FILE | PROMPT...]
@@ -28,17 +29,54 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 
 - Use `--json` to read results (`mvm new --json` gives `name` and `devServerPort`).
   No command prompts.
-- AWS access: the laptop settings' `awsAuthentication` selects a plain AWS CLI profile (today the AWS SSO profile `ConversationInteAdmin-886862221201`), and mvm calls `aws` with it.
-  aws-vault is not involved; `awsVaultProfile` in the settings is a legacy fallback used only when `awsAuthentication` is absent.
-  When the SSO session expires, mvm's error ends with `run: aws sso login --profile <profile>`: run exactly that yourself, without asking, then retry the failed command once it exits 0.
-  It opens the sign-in page in the laptop's browser, which completes on its own with the browser's existing access-portal sign-in: the user does nothing.
-  Only when the browser's portal sign-in is gone does the page wait for the user, and the login blocks for at most 10 minutes: run it in the background, and if it has not exited after a few seconds, ask the user to finish the sign-in in the page it opened.
-  Run one login even when several commands failed: one session covers them all.
+- Every AWS call goes straight through the AWS CLI with the SSO profile `awsAuthentication` names (see AWS sign-in): no command and no ssh connection prompts while that SSO session lasts.
+  Once it has ended, commands fail with `The SSO session associated with this profile has expired`: sign in again yourself (see "Renew an ended session" under AWS sign-in), never hand the login command to the user.
 - Create one machine per task.
   Parallel `mvm new` runs are safe.
 - A machine lives at most 8 hours (`--ttl`), then AWS terminates it.
   It keeps running while nothing is connected (laptop closed, herdr quit) and costs about $0.55/h until `mvm rm` or the cap.
 - Do not remove a machine another session created: check `mvm ls` and ask first.
+
+## Several laptops
+
+Every laptop set up with `mvm setup` shares the machines: `mvm ls` lists them all (`LAPTOP` column: where each was started), and `ssh`, `forward`, `logs` and `rm` work on any of them.
+
+- To use a machine started on another laptop in this laptop's herdr, run `mvm attach <name>`.
+- Names and dev server ports are unique across laptops; `mvm new` on two laptops at once is safe.
+- `mvm keys` lists the laptop ssh keys machines accept; `mvm keys remove <key id>` revokes a lost laptop.
+  A machine started before the removal still accepts that laptop until it ends.
+- A new laptop needs the dotfiles, the AWS CLI SSO profile (AWS sign-in), the settings file (Maintaining mvm), and `mvm setup` once.
+  It reaches running machines right away: their sshd asks S3 for keys registered after they started.
+
+## AWS sign-in
+
+`mvm` runs the AWS CLI directly with the profile `awsAuthentication` names; aws-vault is not involved.
+Define that profile in `~/.aws/config` in the `sso-session` format, never with `sso_start_url` inside the profile itself:
+
+```ini
+[sso-session <session>]
+sso_start_url = https://<id>.awsapps.com/start
+sso_region = <IAM Identity Center region>
+sso_registration_scopes = sso:account:access
+
+[profile <profile>]
+sso_session = <session>
+sso_account_id = <account id>
+sso_role_name = <role>
+```
+
+- `aws sso login --sso-session <session>` signs in through the browser without the "Confirm this code matches" page.
+  The legacy format (`sso_start_url` in the profile) uses the device-code flow, which shows that page at every login.
+- The login stores a refresh token: the CLI renews the one-hour access token silently, so `mvm`, ssh and herdr keep working until the SSO session itself ends.
+  Then sign in again.
+- Renew an ended session yourself, without asking: run `aws sso login --sso-session <session>` (`sso_session` of the `awsAuthentication` profile in `~/.aws/config`), then retry the failed command once it exits 0.
+  It opens the sign-in page in the laptop's browser, which completes on its own with the browser's existing access-portal sign-in: the user does nothing.
+  Only when the browser's portal sign-in is gone does the page wait for the user, and the login blocks for at most 10 minutes: run it in the background, and if it has not exited after a few seconds, ask the user to finish the sign-in in the page it opened.
+  Run one login even when several commands failed, since one session covers them all.
+- Several profiles can share one session, and one login covers them all.
+  Use the session name from hydra's aw-web README (`aws configure sso`), so its GraphQL schema download shares the same login.
+- Write the start URL without the `/#` the access portal appends.
+- Check the sign-in with `aws sts get-caller-identity --profile <profile>`.
 
 ## New machine
 
@@ -139,7 +177,7 @@ To check on it, read the remote screen (`capture-pane`, below) or run the read-o
 
 ## Dev server
 
-Each machine has its own dev server port, `devServerPort` (3101-3199), unique among the laptop's machines and never the laptop's own 3002.
+Each machine has its own dev server port, `devServerPort` (3101-3199), unique among all laptops' machines and never the laptop's own 3002.
 `mvm new` prints it, and `/etc/mvm/machine.json` on the machine has it.
 The main checkout's `.env.local` sets it as `export PORT=31xx`, so `pnpm dev` uses it.
 Keep the `export` form if you edit that file: with a plain `PORT=` line, new worktrees would inherit the machine's port instead of getting their own (20000-29999).
@@ -179,8 +217,9 @@ An agent running on the machine has no `mvm`: it reports the port, and the lapto
 ## Herdr
 
 Automatic: `mvm new` adds the machine as `aws-<name>` (an open herdr window connects on its own), `mvm rm` removes it, and a machine that hits its `--ttl` is removed by herdr's next reconnect or the next `mvm` command.
+Herdr is per laptop: `mvm attach <name>` adds a machine started on another laptop.
 Never run `herdr machine add|remove` for `.mvm` hosts by hand.
-Herdr reconnects need a valid AWS SSO session for the `awsAuthentication` profile (see Troubleshooting).
+Herdr reconnects need working AWS credentials: a live SSO session for the `awsAuthentication` profile (see Troubleshooting).
 
 ## tuios
 
@@ -282,21 +321,24 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 ## Troubleshooting
 
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
-- `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS credentials do not resolve.
-  Run `aws sts get-caller-identity --profile <profile>` with the `awsAuthentication` profile from `~/.config/mvm/settings.json`.
-  `Token has expired` or `SSO session ... expired`: run `aws sso login --profile <profile>` yourself as the AWS access rule at the top says, without involving the user.
-  Never suggest `aws-vault exec` while `awsAuthentication` is set: mvm does not read aws-vault sessions then.
+- `ssh <name>.mvm` or `mvm forward` hangs or times out, or a command fails with `The SSO session associated with this profile has expired`: the AWS credentials do not resolve.
+  Run `aws sts get-caller-identity --profile <profile>` (the `awsAuthentication` profile).
+  When the SSO session ended, renew it yourself as "Renew an ended session" under AWS sign-in says, without involving the user.
+  `Token for <session> does not exist` means this laptop never signed in with the `sso-session` format: same renewal.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
 - Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
 - gitlab.com web pages answer AWS IPs with 403; git over HTTPS and the API work.
-- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws --profile <profile> s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/`.
+- pnpm install is slow or broken right after a cache restore (`pnpm store cache:` line in `mvm logs`): ask before clearing the shared cache with `aws s3 rm --recursive s3://<ArtifactBucketName>/pnpm-store/ --profile <profile>`.
   The next machine installs cold and saves a fresh snapshot.
 - Host key warnings: each machine gets fresh host keys; `mvm` forgets old ones in `~/.ssh/known_hosts_mvm`.
+- `Permission denied (publickey)` from a laptop set up after the machine started: check that `mvm keys` lists the laptop, then look for `mvm-authorized-keys:` lines in `mvm logs <name>`.
+- `mvm new` waiting for `mvm new` on another laptop: the creation lock frees itself within a minute if that laptop crashed.
 
 ## Unattended AWS authentication: blocked
 
-Status on 2026-11-02: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) authenticates with the personal AWS SSO profile selected by `awsAuthentication`, so they stop when its session expires (renew with `aws sso login`).
-An attempt to make the laptop dispatcher (the dev-workflows support worker) authenticate unattended could not be completed.
+Status on 2026-11-02: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) authenticates with the personal SSO session through the AWS CLI (AWS sign-in).
+Its refresh token removes the prompts, but the session still ends and then needs a person to sign in in a browser.
+An attempt to make the laptop dispatcher (the dev-workflows support worker) authenticate with no sign-in at all could not be completed.
 Do not retry it until the access below exists.
 
 - Planned: a dedicated IAM user with a scoped inline policy and no console password.
@@ -310,7 +352,7 @@ Do not retry it until the access below exists.
 - It is an organization guardrail: do not work around it with another role, another user or edits to the SSO role.
   Unblocking needs the IAM Identity Center admins. They can grant a scoped exception (user and access-key actions only on the dispatcher's IAM path), or run the setup and every rotation themselves on the laptop.
 - Ready for that day:
-  - `awsAuthentication` support in mvm, inactive until set.
+  - `awsAuthentication` support in mvm, which the SSO profile already uses: point it at the dispatcher's profile.
   - The private dev-workflows helper `bun run aws:dispatcher setup|rotate-key|check`.
   - The policy, runbook, rotation and revocation steps in that repo's `docs/aws-workflow-authentication.md`.
 - Ruled out by the user: IAM Roles Anywhere, and moving the dispatcher to EC2/ECS.
@@ -329,7 +371,7 @@ Do not retry it until the access below exists.
 ## Maintaining mvm
 
 ```
-infra/dev-microvm-stack.yaml   CloudFormation: artifact bucket (image builds, pnpm store cache), roles, env secret, log group
+infra/dev-microvm-stack.yaml   CloudFormation: artifact bucket (image builds, pnpm cache, machine registry, laptop keys), roles, env secret, logs
 image/Dockerfile, image/rootfs the dev image (Ubuntu 24.04 arm64) and its files (/opt/mvm/bin hooks and helpers)
 scripts/mvm, scripts/mvm_cli/  laptop CLI (Python stdlib); tests are *_test.py next to each module
 scripts/completions/mvm.fish   fish completion, linked by `mvm setup`
@@ -340,25 +382,24 @@ Create it before `mvm setup`:
 
 ```json
 {
-  "awsVaultProfile": "<aws-vault profile of the AWS account>",
+  "awsAuthentication": {"kind": "profile", "profile": "<AWS CLI SSO profile>"},
   "ownerEmail": "<work email>",
   "gitUserName": "<name for git commits>",
-  "workspaceRepos": ["dashboard-extensions/conversation-center-ext", "<group>/<repo>"],
-  "awsAuthentication": {"kind": "profile", "profile": "<AWS CLI profile>"}
+  "workspaceRepos": ["dashboard-extensions/conversation-center-ext", "<group>/<repo>"]
 }
 ```
 
-- `awsAuthentication` (optional): how every AWS call authenticates, `mvm proxy` included.
-  `{"kind": "profile", "profile": NAME}` uses that AWS CLI profile (an SSO profile renewed with `aws sso login`, or a `credential_process` for unattended use) and drops inherited credentials, `AWS_VAULT` included; `{"kind": "default-chain"}` uses the AWS SDK chain (EC2/ECS role).
+- `awsAuthentication`: how every AWS call authenticates, `mvm proxy` included, so herdr, tuios and ssh reconnect without prompts.
+  `{"kind": "profile", "profile": NAME}` uses that AWS CLI profile (the SSO profile from AWS sign-in, or a `credential_process` profile for unattended use) and drops inherited credentials, `AWS_VAULT` included; `{"kind": "default-chain"}` uses the AWS SDK chain (EC2/ECS role).
   Either one never falls back to `awsVaultProfile`.
   `MVM_AWS_PROFILE=NAME` overrides it for one command.
-- `awsVaultProfile`: aws-vault SSO profile for every AWS call when `awsAuthentication` is absent (`MVM_AWS_VAULT_PROFILE` overrides it).
+- `awsVaultProfile` (legacy, only without `awsAuthentication`): `mvm` then re-runs itself under `aws-vault exec` with this profile (`MVM_AWS_VAULT_PROFILE` overrides it).
 - `ownerEmail`: owner tag on the stack and image, and git `user.email` on the machines, with `gitUserName` as `user.name`.
 - `workspaceRepos`: GitLab repos every new machine clones; keep `conversation-center-ext` first.
 - `mvm image build` bakes the git identity and the repo list into the image: rebuild after changing them.
 
 ```bash
-mvm setup           # deploy the stack, ssh key + ~/.ssh/config block, ~/.local/bin/mvm, fish completion
+mvm setup           # once per laptop: deploy the stack, ssh key (registered for every machine), ~/.ssh/config block, PATH, completion
 mvm secrets push    # copy the dev env vars from this shell into the machines' secret (rerun after rotating a token); vars absent from the shell keep their value
 mvm image build     # new image version from image/ (about 6 minutes); new machines use the latest successful one
 ```
@@ -379,7 +420,9 @@ Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then 
 - Keep the laptop's herdr on the image's `HERDR_VERSION` (Dockerfile): with a mismatch, `herdr machine add` may replace the remote server or stop being prompt-free.
 - The laptop's tuios and the image's `TUIOS_VERSION` may differ: the laptop's window only runs ssh, and the machine's own tuios client draws inside it.
   The window runs that client by its path, `/home/dev/.local/bin/tuios` (`TUIOS_REMOTE_BINARY` in `mvm_settings.py`): keep the image installing it there.
-- Machine names exist only on the laptop, in `~/.local/state/mvm/machines/<name>.json`.
-  Cleanup forgets a machine only after AWS confirms it ended.
+- Machine names live in the shared machine registry, `machines/<name>.json` in the artifact bucket (`scripts/mvm_cli/shared_machine_registry.py`); `~/.local/state/mvm/machines/` is each laptop's mirror of it.
+  Records are only created when absent and replaced or deleted in the version read (S3 conditional requests), and cleanup forgets a machine only after AWS confirms it ended.
+  `locks/new-machine.json` serializes `mvm new` across laptops; laptop keys are `ssh-keys/<key id>.pub`, read by `image/rootfs/opt/mvm/bin/mvm-authorized-keys`.
+- Unit tests never reach AWS: a real AWS call inside them fails, so use `install_fake_artifact_bucket` and `isolate_machine_mirror` (in the `*_test.py` files).
 - The pnpm store cache (`image/rootfs/opt/mvm/bin/mvm-pnpm-store-cache`) is shared and writable by every machine: a compromised machine could poison later installs, beyond what the lockfile checks.
 - Lambda MicroVM quirks: every process runs with `no_new_privs` (no sudo), `/etc/hosts` is read-only, image identifiers must be ARNs, `ALL_INGRESS` cannot be combined with other ingress connectors, and the `/run` hook must finish within 60 seconds.

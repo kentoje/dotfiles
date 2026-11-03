@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# sshd AuthorizedKeysCommand (sshd_config.d/mvm.conf), run as dev at every login: prints the
+# laptop ssh keys registered in S3 right now (ssh-keys/ in the artifact bucket, written by
+# `mvm setup`, `mvm new` and `mvm attach` on each laptop). They are the only keys sshd accepts, so
+# a laptop set up after the machine started gets in, and a revoked one (`mvm keys remove`) does not.
+#
+# Fails closed: when S3 cannot be read it prints no key, so a revoked laptop never gets in
+# through a stale copy. Errors go to stderr, which sshd logs (`mvm logs NAME`).
+#
+# Usage: mvm-authorized-keys USER
+set -uo pipefail
+export PATH=/usr/local/bin:/usr/bin:/bin
+
+[ "${1:-}" = dev ] || exit 0
+
+# sshd starts this with an empty environment. The dev env file has the execution role credential
+# pointers (AWS_CONTAINER_*) and AWS_REGION that the AWS CLI needs.
+# shellcheck source=/dev/null
+. /home/dev/.config/mvm/env.sh 2>/dev/null || { echo "mvm-authorized-keys: no dev env file" >&2; exit 0; }
+keys_uri=$(jq -r '.sshKeysUri // empty' /etc/mvm/machine.json 2>/dev/null)
+if [ -z "$keys_uri" ]; then
+  echo "mvm-authorized-keys: no sshKeysUri in /etc/mvm/machine.json (started by an older mvm)" >&2
+  exit 0
+fi
+
+keys_dir=$(mktemp -d)
+trap 'rm -rf "$keys_dir"' EXIT
+if ! timeout 20 aws s3 cp --recursive --quiet "$keys_uri" "$keys_dir" >&2; then
+  echo "mvm-authorized-keys: could not read $keys_uri" >&2
+  exit 0
+fi
+for key_file in "$keys_dir"/*.pub; do
+  [ -f "$key_file" ] && cat "$key_file"
+done
+exit 0

@@ -20,6 +20,11 @@ class AwsCredentialProviderTest(unittest.TestCase):
         patcher = mock.patch.dict(os.environ, env, clear=True)
         patcher.start()
         self.addCleanup(patcher.stop)
+        # These tests exercise run_aws_cli itself: they fake subprocess.run and os.execvp, or run the
+        # real CLI against a temp config whose credential_process is local, so no call reaches AWS.
+        guard = mock.patch.object(aws_cli_access, "refuse_real_aws_call_in_unit_tests")
+        guard.start()
+        self.addCleanup(guard.stop)
 
     def select_authentication(self, auth):
         self.settings_file.write_text(json.dumps({"awsAuthentication": auth}))

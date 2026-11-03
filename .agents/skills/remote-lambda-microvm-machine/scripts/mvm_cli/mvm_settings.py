@@ -10,6 +10,7 @@ minimal PATH where `env python3` resolves to it.
 import json
 import os
 import re
+import socket
 from pathlib import Path
 
 from mvm_cli.mvm_errors import MvmError
@@ -30,6 +31,25 @@ IMAGE_MEMORY_MIB = 8192
 # S3 pnpm store cache: key prefix in the artifact bucket. The stack grants the machines'
 # execution role read/write under exactly this prefix and expires it (dev-microvm-stack.yaml).
 PNPM_STORE_CACHE_PREFIX = "pnpm-store/"
+# Shared machine registry: one MachineRecord per machine at <prefix><name>.json in the artifact
+# bucket, so every laptop set up with `mvm setup` sees and reaches every machine.
+MACHINE_REGISTRY_PREFIX = "machines/"
+# Laptop ssh public keys (<prefix><key id>.pub), written by `mvm setup`. Machines authorize all of
+# them; the stack grants the machines' execution role read access under exactly this prefix.
+LAPTOP_SSH_KEYS_PREFIX = "ssh-keys/"
+# Lock object serializing `mvm new` across laptops while it picks a name and a dev server port.
+MACHINE_CREATION_LOCK_KEY = "locks/new-machine.json"
+# A creation lock older than this is left over from a crashed `mvm new` and may be taken over.
+# The locked section takes a few seconds; every AWS call in it is bounded well below this.
+MACHINE_CREATION_LOCK_STALE_SECONDS = 60
+# A name reservation that never got its MicroVM (run-microvm failed, laptop crashed) is dropped after this.
+ABANDONED_RESERVATION_SECONDS = 600
+# This laptop in shared records (createdOn) and in its ssh key id; MVM_LAPTOP_NAME overrides it.
+LAPTOP_NAME = re.sub(
+    r"[^A-Za-z0-9-]",
+    "-",
+    os.environ.get("MVM_LAPTOP_NAME") or socket.gethostname().split(".")[0],
+)
 HOOK_PORT = 9000
 SSH_BRIDGE_PORT = 2222
 # Each machine's dev server port (devServerPort), unique among this laptop's machines: `mvm

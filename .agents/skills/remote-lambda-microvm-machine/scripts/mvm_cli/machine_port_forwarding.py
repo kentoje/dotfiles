@@ -2,7 +2,7 @@
 
 cc-ext's dev page and HMR client use absolute http://localhost:PORT URLs, so a machine's dev server
 must be reached at the same port number on the laptop. `mvm new` therefore gives every machine its
-own devServerPort, which the machine writes as PORT into cc-ext's .env.local.
+own devServerPort, unique among all laptops' machines, which the machine writes as PORT into cc-ext's .env.local.
 
 `mvm forward NAME` keeps one background OpenSSH control master per machine (FORWARDS_DIR/NAME.sock)
 and adds each port to it with `ssh -O forward`. The forwarded ports are read back from the master's
@@ -20,12 +20,17 @@ import subprocess
 from mvm_cli.aws_cli_access import reexec_under_aws_vault
 from mvm_cli.machine_registry import (
     list_machine_records,
-    load_machine_record,
     ssh_host_for_machine,
     validate_machine_name,
 )
 from mvm_cli.mvm_errors import MvmError, log_mvm
-from mvm_cli.mvm_settings import DEV_SERVER_PORT_RANGE, FORWARDS_DIR, HOOK_PORT, SSH_BRIDGE_PORT
+from mvm_cli.mvm_settings import (
+    DEV_SERVER_PORT_RANGE,
+    FORWARDS_DIR,
+    HOOK_PORT,
+    SSH_BRIDGE_PORT,
+)
+from mvm_cli.shared_machine_registry import require_machine_record
 
 # Starting the master goes through `mvm proxy` (endpoint token) and ssh auth.
 FORWARD_MASTER_START_TIMEOUT_SECONDS = 90
@@ -59,8 +64,12 @@ def pick_dev_server_port(taken_ports, is_port_free=None):
 
 
 def dev_server_ports_in_use():
-    """devServerPort of every machine recorded on this laptop."""
-    return {record["devServerPort"] for record in list_machine_records() if record.get("devServerPort")}
+    """devServerPort of every machine in the mirror: all laptops', so any laptop can forward any machine's port."""
+    return {
+        record["devServerPort"]
+        for record in list_machine_records()
+        if record.get("devServerPort")
+    }
 
 
 def laptop_port_is_free(port):
@@ -271,8 +280,12 @@ def forward_machine_ports(name, requested_ports):
     if not ports:
         if started_master:
             stop_machine_port_forwards(name)
-        dev_server_port = load_machine_record(name).get("devServerPort")
-        hint = f"start the dev server (port {dev_server_port})" if dev_server_port else "start the dev server"
+        dev_server_port = require_machine_record(name).get("devServerPort")
+        hint = (
+            f"start the dev server (port {dev_server_port})"
+            if dev_server_port
+            else "start the dev server"
+        )
         raise MvmError(f"forward: nothing listens on {name} yet: {hint}, or pass PORT")
     forwarded, refused = [], []
     for port in ports:
@@ -307,7 +320,7 @@ def cmd_forward(args):
             else f"{args.name}: no forwards"
         )
         return
-    load_machine_record(args.name)
+    require_machine_record(args.name)
     # The master's `mvm proxy` mints the endpoint token: do any SSO prompt here, in the foreground.
     reexec_under_aws_vault()
     for port in forward_machine_ports(args.name, args.ports):

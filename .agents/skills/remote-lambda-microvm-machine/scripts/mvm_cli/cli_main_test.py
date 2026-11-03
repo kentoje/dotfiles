@@ -34,6 +34,13 @@ class MvmParserTest(unittest.TestCase):
         self.assertTrue(self.parser.parse_args(["forward", "dev", "--stop"]).stop)
         self.assertEqual(self.parser.parse_args(["proxy", "dev.mvm"]).host, "dev.mvm")
 
+    def test_parses_the_shared_machine_commands(self):
+        self.assertEqual(self.parser.parse_args(["attach", "dev"]).name, "dev")
+        self.assertTrue(self.parser.parse_args(["attach", "dev", "--json"]).json)
+        self.assertIsNone(self.parser.parse_args(["keys"]).keys_command)
+        removed = self.parser.parse_args(["keys", "remove", "laptop-0123456789ab"])
+        self.assertEqual((removed.keys_command, removed.key_id), ("remove", "laptop-0123456789ab"))
+
     def test_dropped_commands_are_gone(self):
         for command in ["exec", "cp", "get", "doctor", "bootstrap", "suspend", "resume"]:
             with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit, msg=command):

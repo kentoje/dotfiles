@@ -5,8 +5,9 @@ import os
 import sys
 
 from mvm_cli.image_build import cmd_image_build
+from mvm_cli.laptop_ssh_keys import cmd_keys
 from mvm_cli.machine_agent_launch import cmd_agent
-from mvm_cli.machine_lifecycle import cmd_ls, cmd_new, cmd_rm
+from mvm_cli.machine_lifecycle import cmd_attach, cmd_ls, cmd_new, cmd_rm
 from mvm_cli.machine_logs import cmd_logs
 from mvm_cli.machine_port_forwarding import cmd_forward
 from mvm_cli.mvm_errors import MvmError, log_mvm
@@ -18,10 +19,11 @@ from mvm_cli.tuios_machine_session import cmd_tuios
 MVM_HELP_DESCRIPTION = """\
 mvm - dev machines on AWS Lambda MicroVMs.
 
-Machines:
+Machines (shared by every laptop set up with `mvm setup`):
   new [NAME]          start a machine (random name if omitted), wait for ssh, add it to herdr, open its tuios session
+  attach NAME         use a machine started on another laptop: check ssh, add it to this laptop's herdr and tuios
   rm NAME...          terminate machines and remove them from herdr and tuios (unpushed work is pushed first)
-  ls                  list machines: state, image version, age, time left, herdr label, tuios session, forwarded ports
+  ls                  list machines: state, image version, age, time left, laptop, herdr label, tuios session, forwarded ports
   ssh NAME [CMD...]   same as `ssh NAME.mvm`
   tuios NAME          open the machine's tuios session aws-NAME again (after a dropped connection)
   agent NAME [PROMPT...]
@@ -31,7 +33,8 @@ Machines:
   logs NAME           the machine's logs: workspace setup, hooks, WIP saves
 
 Maintenance:
-  setup               one-time: AWS stack, ssh key and ~/.ssh/config block, ~/.local/bin/mvm, fish completion
+  setup               once per laptop: AWS stack, ssh key for all machines, ~/.ssh/config, PATH, completion
+  keys                list the laptop ssh keys every machine authorizes (`keys remove KEY_ID` revokes one)
   secrets push        copy your dev env vars from this shell into the machines' secret
   image build         rebuild the dev image after changing image/
 
@@ -71,6 +74,15 @@ def build_mvm_parser():
     new.add_argument("--json", action="store_true", help="print the result as JSON")
     new.set_defaults(func=cmd_new)
 
+    attach = sub.add_parser(
+        "attach",
+        description="Use a machine started on another laptop from this one: check ssh, add it to this laptop's herdr"
+        " and open its tuios session, both aws-NAME. `mvm ls` lists every laptop's machines.",
+    )
+    attach.add_argument("name")
+    attach.add_argument("--json", action="store_true", help="print the result as JSON")
+    attach.set_defaults(func=cmd_attach)
+
     rm = sub.add_parser(
         "rm",
         description="Terminate machines and remove them from herdr and tuios. Unpushed work is pushed to wip/mvm/NAME/<branch> first.",
@@ -82,7 +94,8 @@ def build_mvm_parser():
     ls = sub.add_parser(
         "ls",
         aliases=["list"],
-        description="List machines: state, image version, age, time left, herdr label, tuios session, forwarded ports.",
+        description="List every laptop's machines: state, image version, age, time left, laptop, herdr label,"
+        " tuios session, forwarded ports.",
     )
     ls.add_argument("--json", action="store_true")
     ls.set_defaults(func=cmd_ls)
@@ -139,13 +152,26 @@ def build_mvm_parser():
 
     sub.add_parser(
         "setup",
-        description="Deploy the AWS stack, create the ssh key and ~/.ssh/config block, link ~/.local/bin/mvm and"
-        " ~/.config/fish/completions/mvm.fish.",
+        description="Deploy the AWS stack, create this laptop's ssh key and register it for every machine, write the"
+        " ~/.ssh/config block, link ~/.local/bin/mvm and ~/.config/fish/completions/mvm.fish. Run once per laptop.",
     ).set_defaults(func=cmd_setup)
 
-    secrets = sub.add_parser("secrets", description="The env secret machines read at start.").add_subparsers(
-        dest="secrets_command", metavar="push"
+    keys = sub.add_parser(
+        "keys",
+        description="List the laptop ssh keys every machine authorizes (registered by `mvm setup` on each laptop).",
     )
+    keys.set_defaults(func=cmd_keys, keys_command=None)
+    keys_sub = keys.add_subparsers(dest="keys_command", metavar="remove")
+    keys_remove = keys_sub.add_parser(
+        "remove",
+        description="Revoke a laptop: delete its registered key. Every machine refuses it from the next login;"
+        " sessions already open stay open.",
+    )
+    keys_remove.add_argument("key_id", metavar="KEY_ID")
+
+    secrets = sub.add_parser(
+        "secrets", description="The env secret machines read at start."
+    ).add_subparsers(dest="secrets_command", metavar="push")
     secrets.required = True
     secrets.add_parser(
         "push", description="Copy the dev env vars from this shell into the secret (prints names, never values)."

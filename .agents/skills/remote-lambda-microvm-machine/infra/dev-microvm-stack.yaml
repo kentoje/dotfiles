@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  Personal dev MicroVM plumbing (Lambda MicroVMs): artifact bucket (image build zips and the
-  pnpm store cache), image build role, MicroVM execution role, the env secret the MicroVM reads
-  at /run, and log retention.
+  Personal dev MicroVM plumbing (Lambda MicroVMs): artifact bucket (image build zips, the pnpm
+  store cache, the machine registry and laptop ssh keys shared by the owner's laptops), image
+  build role, MicroVM execution role, the env secret the MicroVM reads at /run, and log retention.
   Deployed by `mvm setup` from the remote-lambda-microvm-machine skill.
 
 Parameters:
@@ -20,7 +20,9 @@ Parameters:
 
 Resources:
   # Build zips (Dockerfile + rootfs) uploaded by `mvm image build`, and pnpm store snapshots
-  # (pnpm-store/, written and read by mvm-pnpm-store-cache on the machines). Both expire.
+  # (pnpm-store/, written and read by mvm-pnpm-store-cache on the machines): both expire.
+  # Never expiring, written by the laptops only: the shared machine registry (machines/), the
+  # `mvm new` lock (locks/) and laptop ssh public keys (ssh-keys/, read by the machines).
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -111,7 +113,9 @@ Resources:
         - { Key: purpose, Value: dev-microvm }
 
   # Assumed by each running MicroVM: reads the env secret at /run, downloads AppSync
-  # introspection schemas, reads and writes the pnpm store cache, writes runtime logs.
+  # introspection schemas, reads and writes the pnpm store cache, reads laptop ssh keys, writes
+  # runtime logs. No access to machines/ or locks/, and read-only on ssh-keys/: a machine can
+  # never authorize a key itself.
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -145,14 +149,18 @@ Resources:
               - Effect: Allow
                 Action: [s3:GetObject, s3:PutObject, s3:AbortMultipartUpload]
                 Resource: !Sub "${ArtifactBucket.Arn}/pnpm-store/*"
+              # Laptop ssh keys (mvm-authorized-keys): sshd asks for keys registered after start.
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${ArtifactBucket.Arn}/ssh-keys/*"
               # Listing rights make a missing snapshot answer 404 instead of 403, so the machine's
-              # log tells "not cached yet" apart from a broken role.
+              # log tells "not cached yet" apart from a broken role. ssh-keys/ is listed to fetch all keys.
               - Effect: Allow
                 Action: s3:ListBucket
                 Resource: !GetAtt ArtifactBucket.Arn
                 Condition:
                   StringLike:
-                    s3:prefix: pnpm-store/*
+                    s3:prefix: [pnpm-store/*, ssh-keys/*]
       Tags:
         - { Key: owner, Value: !Ref OwnerEmail }
         - { Key: purpose, Value: dev-microvm }

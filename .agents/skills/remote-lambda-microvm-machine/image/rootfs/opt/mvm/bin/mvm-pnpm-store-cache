@@ -153,7 +153,7 @@ archive_pnpm_store_snapshot() {
 upload_pnpm_store_snapshot() {
   local archive key_name t0 err
   [ -n "$cache_uri" ] || return 0
-  archive=$(ls "$work_dir"/*.tar.zst 2>/dev/null | head -1)
+  archive=$(find "$work_dir" -maxdepth 1 -name '*.tar.zst' -print -quit 2>/dev/null)
   if [ -z "$archive" ]; then
     log "no archived snapshot to upload"
     return 0

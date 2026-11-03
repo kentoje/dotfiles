@@ -138,7 +138,7 @@ class TuiosMachineSessionTest(unittest.TestCase):
         daemon = FakeTuiosDaemon(sessions=["aws-dev"])
         args = mock.Mock(name="args")
         args.name = "dev"
-        with mock.patch.object(tuios_machine_session, "load_machine_record", return_value={"name": "dev"}):
+        with mock.patch.object(tuios_machine_session, "require_machine_record", return_value={"name": "dev"}):
             with mock.patch.object(tuios_machine_session, "call_tuios_verb", side_effect=daemon.call):
                 with mock.patch("builtins.print") as printed:
                     tuios_machine_session.cmd_tuios(args)
@@ -149,7 +149,7 @@ class TuiosMachineSessionTest(unittest.TestCase):
         args = mock.Mock(name="args")
         args.name = "nope"
         unknown = tuios_machine_session.MvmError("unknown machine 'nope' (see `mvm ls`)")
-        with mock.patch.object(tuios_machine_session, "load_machine_record", side_effect=unknown):
+        with mock.patch.object(tuios_machine_session, "require_machine_record", side_effect=unknown):
             with self.assertRaises(tuios_machine_session.MvmError):
                 tuios_machine_session.cmd_tuios(args)
 

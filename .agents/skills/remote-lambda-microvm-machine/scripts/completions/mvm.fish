@@ -5,10 +5,11 @@
 #   ln -sf (pwd)/mvm.fish ~/.config/fish/completions/
 #
 # Mirrors build_mvm_parser() in ../mvm_cli/cli_main.py; mvm_cli/fish_completion_test.py fails
-# when a command or flag is missing here. Machine names come from the local name records
-# (no AWS call), so tab stays instant. The hidden `proxy` command is not offered.
+# when a command or flag is missing here. Machine names come from the laptop's mirror of the
+# shared machine registry (no AWS call), so tab stays instant; `mvm ls` refreshes the mirror with
+# machines started on other laptops. The hidden `proxy` command is not offered.
 
-# Machine names known on this laptop: one JSON record per machine (see machine_registry.py).
+# Machine names in the mirror: one JSON record per machine, from every laptop (see machine_registry.py).
 function __mvm_machine_names
     set -l state_dir $HOME/.local/state/mvm
     set -q MVM_STATE_DIR; and set state_dir $MVM_STATE_DIR
@@ -41,7 +42,7 @@ function __mvm_dev_server_port
     string match -rg '"devServerPort": (\d+)' <$record
 end
 
-# True while the command line needs the NAME of `mvm ssh`, `mvm logs` or `mvm forward` (their first positional).
+# True while the command line needs the NAME of `mvm attach`, `ssh`, `logs` or `forward` (their first positional).
 function __mvm_needs_machine_name
     test (count (__mvm_positional_args)) -eq 0
 end
@@ -59,6 +60,7 @@ complete -c mvm -s h -l help -d 'Show help'
 
 # Commands (descriptions follow `mvm --help`; fish lists them alphabetically).
 complete -c mvm -n __fish_use_subcommand -a new -d 'Start a machine, wait for ssh, add it to herdr, open its tuios session'
+complete -c mvm -n __fish_use_subcommand -a attach -d "Use another laptop's machine here: ssh, herdr, tuios"
 complete -c mvm -n __fish_use_subcommand -a rm -d 'Terminate machines, remove them from herdr and tuios'
 complete -c mvm -n __fish_use_subcommand -a ls -d 'List machines: state, image, age, time left, herdr, tuios'
 complete -c mvm -n __fish_use_subcommand -a ssh -d 'Same as ssh NAME.mvm'
@@ -66,13 +68,18 @@ complete -c mvm -n __fish_use_subcommand -a tuios -d "Open the machine's tuios s
 complete -c mvm -n __fish_use_subcommand -a agent -d "Start claude, omp or pi in the machine's tuios session"
 complete -c mvm -n __fish_use_subcommand -a forward -d "Reach the machine's dev servers at localhost:PORT"
 complete -c mvm -n __fish_use_subcommand -a logs -d "The machine's logs: setup, hooks, WIP saves"
-complete -c mvm -n __fish_use_subcommand -a setup -d 'One-time: AWS stack, ssh config, PATH, completion'
+complete -c mvm -n __fish_use_subcommand -a setup -d 'Once per laptop: AWS stack, ssh key, PATH, completion'
+complete -c mvm -n __fish_use_subcommand -a keys -d 'Laptop ssh keys every machine authorizes'
 complete -c mvm -n __fish_use_subcommand -a secrets -d 'Copy dev env vars into the machines secret'
 complete -c mvm -n __fish_use_subcommand -a image -d 'Rebuild the dev image'
 
 # mvm new [NAME] [--ttl 8h] [--json]: NAME is a new name, so nothing to complete for it.
 complete -c mvm -n '__fish_seen_subcommand_from new' -l ttl -x -a '1h 2h 4h 8h' -d 'Lifetime before AWS terminates it (1m to 8h)'
 complete -c mvm -n '__fish_seen_subcommand_from new' -l json -d 'Print the result as JSON'
+
+# mvm attach NAME [--json]
+complete -c mvm -n '__fish_seen_subcommand_from attach; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
+complete -c mvm -n '__fish_seen_subcommand_from attach' -l json -d 'Print the result as JSON'
 
 # mvm rm NAME... [--discard]
 complete -c mvm -n '__fish_seen_subcommand_from rm' -a '(__mvm_names_not_yet_listed)' -d machine
@@ -102,6 +109,9 @@ complete -c mvm -n '__fish_seen_subcommand_from agent' -l cwd -x -d 'Directory o
 complete -c mvm -n '__fish_seen_subcommand_from logs; and __mvm_needs_machine_name' -a '(__mvm_machine_names)' -d machine
 complete -c mvm -n '__fish_seen_subcommand_from logs' -s f -l follow -d 'Keep printing new lines'
 complete -c mvm -n '__fish_seen_subcommand_from logs' -l since -x -a '10m 30m 1h 2h 8h' -d 'How far back (default 1h)'
+
+# mvm keys [remove KEY_ID]: key ids need an AWS call (`mvm keys` prints them), so they are not completed.
+complete -c mvm -n '__fish_seen_subcommand_from keys; and not __fish_seen_subcommand_from remove' -a remove -d 'Revoke a laptop key'
 
 # mvm secrets push
 complete -c mvm -n '__fish_seen_subcommand_from secrets; and not __fish_seen_subcommand_from push' -a push -d 'Copy the dev env vars from this shell (prints names only)'

@@ -6,8 +6,8 @@
 # Usage: mvm-on-run <run-request.json>
 #   run-request.json is Lambda's /run body: {"microvmId": "...", "runHookPayload": "<json>"}.
 #   runHookPayload is written by `mvm new` on the laptop (see MvmRunPayload there):
-#   {"name", "sshAuthorizedKeys": [...], "envSecretId", "envSecretRegion", "bootstrapWorkspace",
-#    "pnpmStoreCacheUri", "devServerPort"}
+#   {"name", "sshKeysUri", "envSecretId", "envSecretRegion",
+#    "bootstrapWorkspace", "pnpmStoreCacheUri", "devServerPort"}
 set -euo pipefail
 
 request_file=$1
@@ -20,18 +20,19 @@ machine_name=$(jq -r '.name // empty' <<<"$payload")
 env_secret_id=$(jq -r '.envSecretId // empty' <<<"$payload")
 env_secret_region=$(jq -r '.envSecretRegion // empty' <<<"$payload")
 pnpm_store_cache_uri=$(jq -r '.pnpmStoreCacheUri // empty' <<<"$payload")
+ssh_keys_uri=$(jq -r '.sshKeysUri // empty' <<<"$payload")
 dev_server_port=$(jq -r '.devServerPort // empty' <<<"$payload")
 # Not `// true`: jq's alternative operator treats an explicit false like null.
 bootstrap_workspace=$(jq -r 'if .bootstrapWorkspace == false then "false" else "true" end' <<<"$payload")
 log "microvm=$microvm_id name=${machine_name:-<none>}"
 
 # Identity of this machine, readable by the dev user and by `mvm` helpers on the machine
-# (mvm-pnpm-store-cache reads pnpmStoreCacheUri, mvm-bootstrap-workspace devServerPort; empty
-# or null when an older `mvm` started it).
+# (mvm-pnpm-store-cache reads pnpmStoreCacheUri, mvm-bootstrap-workspace devServerPort,
+# mvm-authorized-keys sshKeysUri; empty or null when an older `mvm` started it).
 install -d -m 755 /etc/mvm
 jq -n --arg id "$microvm_id" --arg name "$machine_name" --arg region "${AWS_REGION:-}" \
-  --arg cache "$pnpm_store_cache_uri" --arg port "$dev_server_port" \
-  '{microvmId: $id, name: $name, region: $region, pnpmStoreCacheUri: $cache,
+  --arg cache "$pnpm_store_cache_uri" --arg port "$dev_server_port" --arg keys "$ssh_keys_uri" \
+  '{microvmId: $id, name: $name, region: $region, pnpmStoreCacheUri: $cache, sshKeysUri: $keys,
     devServerPort: ($port | if . == "" then null else tonumber end)}' >/etc/mvm/machine.json
 chmod 644 /etc/mvm/machine.json
 
@@ -47,11 +48,14 @@ rm -f /etc/ssh/ssh_host_*
 ssh-keygen -A -q
 install -d -m 755 /run/sshd
 
+# No authorized_keys: sshd asks mvm-authorized-keys, which reads the registered laptop keys from
+# sshKeysUri at every login (sshd_config.d/mvm.conf).
 install -d -m 700 -o dev -g dev "$dev_home/.ssh"
-jq -r '.sshAuthorizedKeys // [] | .[]' <<<"$payload" >"$dev_home/.ssh/authorized_keys"
-chown dev:dev "$dev_home/.ssh/authorized_keys"
-chmod 600 "$dev_home/.ssh/authorized_keys"
-log "authorized keys: $(wc -l <"$dev_home/.ssh/authorized_keys")"
+if [ -n "$ssh_keys_uri" ]; then
+  log "ssh keys: read from $ssh_keys_uri at each login"
+else
+  log "WARNING: no sshKeysUri in the run payload (started by an older mvm): ssh logins will be refused"
+fi
 
 # Env vars for every dev shell (secrets plus the AWS credential pointers Lambda gives PID 1).
 /opt/mvm/bin/mvm-write-dev-env "$env_secret_id" "$env_secret_region" || log "WARNING: dev env incomplete, see above"
@@ -65,6 +69,7 @@ setsid -f bash -c '/opt/mvm/bin/mvm-network-doctor --write | jq -c "{mvmNetworkD
 if [ "$bootstrap_workspace" = "true" ] && [ -x /opt/mvm/bin/mvm-bootstrap-workspace ]; then
   install -d -m 755 -o dev -g dev "$dev_home/.local/state/mvm"
   # Also kept on the machine in ~/.local/state/mvm/bootstrap.log.
+  # shellcheck disable=SC2016 # "$1" is the inner bash's argument.
   setsid -f bash -c 'runuser -u dev -- bash -lc /opt/mvm/bin/mvm-bootstrap-workspace 2>&1 | tee -a "$1"' \
     _ "$dev_home/.local/state/mvm/bootstrap.log" </dev/null
   log "workspace bootstrap started"

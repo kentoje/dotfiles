@@ -78,7 +78,10 @@ class ForwardMachinePortsTest(unittest.TestCase):
             "describe_laptop_port_holder": lambda port: "node (pid 42)",
             "add_port_forward": lambda name, port: self.forwarded.append(port),
             "stop_machine_port_forwards": self.stop_master,
-            "load_machine_record": lambda name: {"name": name, "devServerPort": 3101},
+            "require_machine_record": lambda name: {
+                "name": name,
+                "devServerPort": 3101,
+            },
             "log_mvm": self.warnings.append,
         }
         for attribute, fake in fakes.items():

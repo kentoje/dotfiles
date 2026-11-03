@@ -32,6 +32,29 @@ class AwsCliError(MvmError):
         """True when AWS says the resource does not exist, as opposed to auth or network errors."""
         return "ResourceNotFoundException" in self.stderr
 
+    def is_precondition_failed(self):
+        """True when an S3 conditional write or delete (If-Match, If-None-Match) lost to another writer."""
+        return (
+            "PreconditionFailed" in self.stderr
+            or "ConditionalRequestConflict" in self.stderr
+        )
+
+    def is_no_such_key(self):
+        """True when the S3 object does not exist."""
+        return "NoSuchKey" in self.stderr or "(404)" in self.stderr
+
+
+def refuse_real_aws_call_in_unit_tests():
+    """Raise when the unit tests reach a real AWS call: they must patch it or use the fakes.
+
+    The tests import unittest.mock and the mvm CLI never does. A leaked call would read and write
+    the real bucket and MicroVMs with the developer's credentials.
+    """
+    if "unittest.mock" in sys.modules:
+        raise AssertionError(
+            "mvm unit test reached a real AWS call; patch it (artifact_bucket_access_test.install_fake_artifact_bucket)"
+        )
+
 
 def has_aws_credentials_in_env():
     return bool(os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_PROFILE"))
@@ -70,6 +93,7 @@ def configure_aws_authentication():
 
 def reexec_under_aws_vault():
     """Select persistent authentication, or re-exec under aws-vault for legacy interactive use."""
+    refuse_real_aws_call_in_unit_tests()
     if configure_aws_authentication() or has_aws_credentials_in_env():
         return
     if not shutil.which("aws-vault"):
@@ -99,6 +123,7 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     SSH's `mvm proxy` resolves the same persistent provider without a shell or Flue's .env.
     Explicit providers fail without falling back to an interactive aws-vault login.
     """
+    refuse_real_aws_call_in_unit_tests()
     explicit_auth = configure_aws_authentication()
     cmd = [AWS_CLI, *args, "--region", REGION]
     if parse_json:
@@ -134,11 +159,21 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     return json.loads(result.stdout) if result.stdout.strip() else {}
 
 
+_STACK_OUTPUTS_CACHE = []
+
+
 def read_stack_outputs():
-    """Return the CloudFormation outputs of the mvm stack (bucket, roles, secret, log group) as a dict."""
-    data = run_aws_cli(["cloudformation", "describe-stacks", "--stack-name", STACK_NAME])
-    outputs = data["Stacks"][0].get("Outputs", [])
-    return {o["OutputKey"]: o["OutputValue"] for o in outputs}
+    """Return the CloudFormation outputs of the mvm stack (bucket, roles, secret, log group) as a dict.
+
+    Read once per mvm process: the outputs only change with `mvm setup`.
+    """
+    if not _STACK_OUTPUTS_CACHE:
+        data = run_aws_cli(
+            ["cloudformation", "describe-stacks", "--stack-name", STACK_NAME]
+        )
+        outputs = data["Stacks"][0].get("Outputs", [])
+        _STACK_OUTPUTS_CACHE.append({o["OutputKey"]: o["OutputValue"] for o in outputs})
+    return dict(_STACK_OUTPUTS_CACHE[0])
 
 
 _ACCOUNT_ID_CACHE = []

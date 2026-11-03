@@ -1,7 +1,9 @@
 """SSH access to mvm machines: key, ~/.ssh/config block, the `mvm proxy` ProxyCommand, `mvm ssh`.
 
 `ssh <name>.mvm` runs `mvm proxy <name>.mvm`, which mints a 60-minute endpoint token and runs
-websocat to the MicroVM's WebSocket-to-sshd bridge. An open session outlives the token.
+websocat to the MicroVM's WebSocket-to-sshd bridge. An open session outlives the token. The proxy
+finds the machine in the local mirror of the shared registry, so a machine started on another
+laptop works here too (laptop_ssh_keys gets this laptop's key onto it).
 """
 
 import json
@@ -16,8 +18,7 @@ from mvm_cli.aws_cli_access import AwsCliError, microvm_has_ended, run_aws_cli
 from mvm_cli.ended_machine_cleanup import forget_ended_machine
 from mvm_cli.herdr_machine_sync import remove_machine_from_herdr
 from mvm_cli.machine_registry import (
-    find_machine_record,
-    load_machine_record,
+    is_machine_reservation,
     machine_name_from_ssh_host,
     ssh_host_for_machine,
 )
@@ -30,6 +31,10 @@ from mvm_cli.mvm_settings import (
     SSH_CONFIG,
     SSH_HOST_SUFFIX,
     SSH_KEY,
+)
+from mvm_cli.shared_machine_registry import (
+    require_machine_record,
+    resolve_machine_record,
 )
 
 SSH_CONFIG_BEGIN = "# BEGIN mvm (managed by `mvm setup`; do not edit between markers)"
@@ -130,11 +135,13 @@ def create_ssh_endpoint_token(microvm_id):
 def cmd_proxy(args):
     """ProxyCommand for `Host *.mvm`. Cleans up herdr and local state when the machine has ended."""
     name = machine_name_from_ssh_host(args.host)
-    record = find_machine_record(name)
+    record = resolve_machine_record(name)
     if record is None:
-        # A herdr entry without a local record can never connect: drop it so herdr stops retrying.
+        # No laptop knows the machine, so this herdr entry can never connect: drop it so herdr stops retrying.
         remove_machine_from_herdr(name)
         raise MvmError(f"proxy: unknown machine {name!r} (see `mvm ls`)")
+    if is_machine_reservation(record):
+        raise MvmError(f"proxy: {name} is still starting; retry in a minute")
     try:
         token = create_ssh_endpoint_token(record["microvmId"])
     except AwsCliError as error:
@@ -185,5 +192,5 @@ def run_websocat_bridge(websocat_argv):
 
 def cmd_ssh(args):
     """`mvm ssh NAME [CMD...]`: same as `ssh NAME.mvm [CMD...]`."""
-    load_machine_record(args.name)
+    require_machine_record(args.name)
     os.execvp("ssh", ["ssh", ssh_host_for_machine(args.name), *args.command])

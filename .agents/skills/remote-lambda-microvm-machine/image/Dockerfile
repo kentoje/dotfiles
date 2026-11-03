@@ -184,7 +184,10 @@ RUN export PATH="$HOME/.local/share/fnm/aliases/default/bin:$PATH" \
 # --- mvm runtime files ---------------------------------------------------------------------------
 USER root
 COPY rootfs/ /
-RUN chmod 755 /opt/mvm/bin/* \
+# sshd runs mvm-authorized-keys only when it and every parent directory are root-owned and not
+# group- or world-writable; the laptop-files COPY above may have created /opt/mvm as dev.
+RUN chown root:root /opt/mvm /opt/mvm/bin /opt/mvm/bin/* \
+ && chmod 755 /opt/mvm /opt/mvm/bin /opt/mvm/bin/* \
  && cat /opt/mvm/etc/dev-bashrc-prelude.sh /etc/skel/.bashrc >/home/dev/.bashrc \
  && chmod 755 /home/dev/.config/git/gitlab-credential.sh \
  && install -m 644 /opt/mvm/laptop-files/workspace-repos.txt /opt/mvm/etc/workspace-repos.txt \

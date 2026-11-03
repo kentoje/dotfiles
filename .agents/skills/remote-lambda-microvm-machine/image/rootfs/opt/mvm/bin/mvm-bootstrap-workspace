@@ -36,6 +36,7 @@ update_bootstrap_status() {
 }
 
 # record_bootstrap_step NAME STATUS SECONDS: merge one step result into the status file.
+# shellcheck disable=SC2016 # $name and friends are jq variables, not shell ones.
 record_bootstrap_step() {
   update_bootstrap_status --arg name "$1" --arg status "$2" --argjson seconds "$3" \
     '.steps[$name] = {status: $status, seconds: $seconds}'
@@ -76,6 +77,7 @@ clone_or_fetch_gitlab_repo() {
 export -f clone_or_fetch_gitlab_repo
 export gitlab_root clone_staging_root
 
+# shellcheck disable=SC2016 # "$1" is the inner bash's argument.
 clone_other_repos() {
   grep -v -E '^\s*(#|$)' "$repos_file" | tail -n +2 |
     xargs -P "$clone_parallelism" -I{} bash -c 'clone_or_fetch_gitlab_repo "$1" || echo "[mvm-bootstrap] clone failed: $1"' _ {}
@@ -149,6 +151,7 @@ cc_rc=$?
 
 phase=ready
 [ $cc_rc -eq 0 ] || phase=degraded
+# shellcheck disable=SC2016 # $phase and friends are jq variables, not shell ones.
 update_bootstrap_status --arg phase "$phase" --argjson seconds $(($(date +%s) - started_at)) --arg at "$(date -u +%FT%TZ)" \
   '.phase = $phase | .totalSeconds = $seconds | .finishedAt = $at'
 echo "[mvm-bootstrap] $(date -u +%T) done: $phase in $(($(date +%s) - started_at))s"

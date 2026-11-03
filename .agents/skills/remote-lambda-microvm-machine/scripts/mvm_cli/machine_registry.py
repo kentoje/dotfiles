@@ -1,12 +1,15 @@
-"""Local registry of mvm machine names: MicroVMs only have ids, so `<name> -> microvmId` lives here.
+"""Machine names and the local mirror of the shared machine registry. MicroVMs only have ids.
 
-One JSON file per machine in ~/.local/state/mvm/machines/<name>.json (a MachineRecord). It is the
-only name map: never delete a record unless AWS confirmed the MicroVM ended.
+A MachineRecord maps `<name>` to its MicroVM. The source of truth is the shared registry in the
+artifact bucket (shared_machine_registry), so every laptop sees every machine. This module keeps
+the laptop's mirror of it: one JSON file per machine in ~/.local/state/mvm/machines/<name>.json,
+read by `mvm proxy` and the fish completion without an AWS call. The mirror holds the exact bytes
+of the shared record, so its MD5 equals the S3 ETag. Never delete a record unless AWS confirmed the
+MicroVM ended.
 """
 
-import contextlib
 import datetime as dt
-import fcntl
+import hashlib
 import json
 import random
 import re
@@ -15,11 +18,11 @@ import subprocess
 from mvm_cli.mvm_errors import MvmError
 from mvm_cli.mvm_settings import (
     KNOWN_HOSTS,
+    LAPTOP_NAME,
     MACHINES_DIR,
     MAX_LIFETIME_SECONDS,
     REGION,
     SSH_HOST_SUFFIX,
-    STATE_DIR,
 )
 
 # Lowercase DNS-label style: it becomes a hostname, a herdr label, a log stream and a git ref path.
@@ -102,57 +105,71 @@ def machine_record_path(name):
     return MACHINES_DIR / f"{name}.json"
 
 
-def new_machine_record(name, microvm_id, endpoint, ttl_seconds, dev_server_port):
-    """A MachineRecord dict: name, microvmId, endpoint, region, createdAt (UTC ISO), ttlSeconds, devServerPort.
+def new_machine_record(name, ttl_seconds, dev_server_port):
+    """A name reservation: a MachineRecord whose microvmId and endpoint `mvm new` fills in once AWS started it.
 
-    devServerPort: the machine's own dev server port (see machine_port_forwarding); absent in
-    records written before `mvm forward` existed.
+    MachineRecord keys: name, microvmId, endpoint, region, createdAt (UTC ISO), createdOn (laptop
+    name), ttlSeconds, devServerPort (the machine's own dev server port, see machine_port_forwarding).
+    Records written before the shared registry have no createdOn, and before `mvm forward` no
+    devServerPort.
     """
     return {
         "name": name,
-        "microvmId": microvm_id,
-        "endpoint": endpoint,
+        "microvmId": None,
+        "endpoint": None,
         "region": REGION,
         "createdAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "createdOn": LAPTOP_NAME,
         "ttlSeconds": ttl_seconds,
         "devServerPort": dev_server_port,
     }
 
 
-@contextlib.contextmanager
-def machine_creation_lock():
-    """Serialize `mvm new` on this laptop, from choosing a name and dev server port to saving the record.
+def is_machine_reservation(record):
+    """True while `mvm new` (on any laptop) has reserved the name but not started the MicroVM yet."""
+    return not record.get("microvmId")
 
-    Without it, parallel `mvm new` runs read the same records and pick the same devServerPort.
+
+def machine_record_bytes(record):
+    """The one serialization of a MachineRecord, in the mirror and the shared registry alike.
+
+    Indented JSON: completions/mvm.fish reads `"devServerPort": 3101` with a regex.
     """
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    with open(STATE_DIR / "new-machine.lock", "w") as lock_file:
-        fcntl.flock(lock_file, fcntl.LOCK_EX)
-        yield
+    return (json.dumps(record, indent=2) + "\n").encode()
 
 
 def find_machine_record(name):
-    """The MachineRecord for NAME, or None when this laptop has no machine by that name."""
+    """NAME's MachineRecord in the local mirror, or None. See shared_machine_registry.resolve_machine_record."""
     path = machine_record_path(name)
     if not path.exists():
         return None
     return json.loads(path.read_text())
 
 
-def load_machine_record(name):
-    record = find_machine_record(name)
-    if record is None:
-        raise MvmError(f"unknown machine {name!r} (see `mvm ls`)")
-    return record
-
-
 def save_machine_record(record):
+    """Write RECORD to the local mirror only (shared_machine_registry writes the shared copy)."""
+    save_machine_record_bytes(record["name"], machine_record_bytes(record))
+
+
+def save_machine_record_bytes(name, data):
+    """Write NAME's mirror file with exactly DATA, the bytes of its shared record."""
     MACHINES_DIR.mkdir(parents=True, exist_ok=True)
-    machine_record_path(record["name"]).write_text(json.dumps(record, indent=2) + "\n")
+    machine_record_path(name).write_bytes(data)
+
+
+def mirrored_machine_record_etag(name):
+    """The S3-style ETag (quoted MD5) of NAME's mirror file, or None when this laptop has no record for NAME.
+
+    Equal to the shared record's ETag exactly when the mirror is up to date.
+    """
+    path = machine_record_path(name)
+    if not path.exists():
+        return None
+    return '"' + hashlib.md5(path.read_bytes()).hexdigest() + '"'
 
 
 def list_machine_records():
-    """All MachineRecords on this laptop, sorted by name."""
+    """Every MachineRecord in the local mirror (all laptops' machines as of the last refresh), sorted by name."""
     if not MACHINES_DIR.exists():
         return []
     return [json.loads(path.read_text()) for path in sorted(MACHINES_DIR.glob("*.json"))]
@@ -165,7 +182,7 @@ def machine_expires_at(record):
 
 
 def delete_machine_record(name):
-    """Forget NAME locally: its record and its ssh host key. Only for machines AWS confirmed ended."""
+    """Forget NAME on this laptop: its mirror record and its ssh host key. Only for machines AWS confirmed ended."""
     machine_record_path(name).unlink(missing_ok=True)
     forget_machine_host_key(name)
 

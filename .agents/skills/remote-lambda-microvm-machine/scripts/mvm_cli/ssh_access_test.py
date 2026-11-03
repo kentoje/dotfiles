@@ -15,11 +15,29 @@ class ProxyCleanupTest(unittest.TestCase):
         forget = mock.Mock(return_value=True)
         remove_from_herdr = mock.Mock(return_value=0)
         with ExitStack() as stack:
-            stack.enter_context(mock.patch.object(ssh_access, "find_machine_record", return_value=record))
-            stack.enter_context(mock.patch.object(ssh_access, "create_ssh_endpoint_token", side_effect=token_error))
-            stack.enter_context(mock.patch.object(ssh_access, "microvm_has_ended", return_value=has_ended))
-            stack.enter_context(mock.patch.object(ssh_access, "forget_ended_machine", forget))
-            stack.enter_context(mock.patch.object(ssh_access, "remove_machine_from_herdr", remove_from_herdr))
+            stack.enter_context(
+                mock.patch.object(
+                    ssh_access, "resolve_machine_record", return_value=record
+                )
+            )
+            stack.enter_context(
+                mock.patch.object(
+                    ssh_access, "create_ssh_endpoint_token", side_effect=token_error
+                )
+            )
+            stack.enter_context(
+                mock.patch.object(
+                    ssh_access, "microvm_has_ended", return_value=has_ended
+                )
+            )
+            stack.enter_context(
+                mock.patch.object(ssh_access, "forget_ended_machine", forget)
+            )
+            stack.enter_context(
+                mock.patch.object(
+                    ssh_access, "remove_machine_from_herdr", remove_from_herdr
+                )
+            )
             raised = stack.enter_context(self.assertRaises(MvmError))
             ssh_access.cmd_proxy(mock.Mock(host="dev.mvm"))
         return raised.exception, forget, remove_from_herdr
@@ -40,6 +58,14 @@ class ProxyCleanupTest(unittest.TestCase):
         remove.assert_called_once_with("dev")
         forget.assert_not_called()
 
+    def test_machine_still_starting_on_some_laptop_keeps_everything(self):
+        error, forget, remove = self.run_proxy(
+            {"microvmId": None, "createdOn": "other"}, None, False
+        )
+        self.assertIn("still starting", str(error))
+        forget.assert_not_called()
+        remove.assert_not_called()
+
 
 class ProxyBridgeFailureTest(unittest.TestCase):
     """Lambda mints tokens for terminated MicroVMs, so an ended machine shows up as a websocat failure."""
@@ -50,7 +76,9 @@ class ProxyBridgeFailureTest(unittest.TestCase):
         with ExitStack() as stack:
             stack.enter_context(
                 mock.patch.object(
-                    ssh_access, "find_machine_record", return_value={"microvmId": "m1", "endpoint": "e.example"}
+                    ssh_access,
+                    "resolve_machine_record",
+                    return_value={"microvmId": "m1", "endpoint": "e.example"},
                 )
             )
             stack.enter_context(mock.patch.object(ssh_access, "create_ssh_endpoint_token", return_value="tok"))

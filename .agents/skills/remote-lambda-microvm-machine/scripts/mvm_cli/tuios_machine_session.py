@@ -14,7 +14,7 @@ import shlex
 import shutil
 import subprocess
 
-from mvm_cli.machine_registry import load_machine_record, ssh_host_for_machine
+from mvm_cli.machine_registry import ssh_host_for_machine
 from mvm_cli.mvm_errors import MvmError, log_mvm
 from mvm_cli.mvm_settings import (
     MACHINE_TUIOS_SESSION,
@@ -22,6 +22,7 @@ from mvm_cli.mvm_settings import (
     TUIOS_REMOTE_BINARY,
     TUIOS_SESSION_PREFIX,
 )
+from mvm_cli.shared_machine_registry import require_machine_record
 
 # The machine's tuios config.d file: it hides its client's rail and dock, which the laptop's window would draw
 # inside its pane, and gives the machine its own color theme. A file, not set-option or set-config: a client
@@ -211,7 +212,7 @@ def machine_name_for_tuios_session(session):
 
 def cmd_tuios(args):
     """`mvm tuios NAME`: open NAME's tuios session `aws-<name>` again, e.g. after its ssh connection dropped."""
-    load_machine_record(args.name)
+    require_machine_record(args.name)
     if not shutil.which("tuios"):
         raise MvmError("tuios is not installed")
     session = open_tuios_session_for_machine(args.name)
