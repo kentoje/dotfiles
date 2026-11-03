@@ -30,7 +30,10 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
   No command prompts.
 - AWS access: the laptop settings' `awsAuthentication` selects a plain AWS CLI profile (today the AWS SSO profile `ConversationInteAdmin-886862221201`), and mvm calls `aws` with it.
   aws-vault is not involved; `awsVaultProfile` in the settings is a legacy fallback used only when `awsAuthentication` is absent.
-  When the SSO session expires, mvm's error ends with `run: aws sso login --profile <profile>`: ask the user to run exactly that and approve the browser prompt, then retry.
+  When the SSO session expires, mvm's error ends with `run: aws sso login --profile <profile>`: run exactly that yourself, without asking, then retry the failed command once it exits 0.
+  It opens the sign-in page in the laptop's browser, which completes on its own with the browser's existing access-portal sign-in: the user does nothing.
+  Only when the browser's portal sign-in is gone does the page wait for the user, and the login blocks for at most 10 minutes: run it in the background, and if it has not exited after a few seconds, ask the user to finish the sign-in in the page it opened.
+  Run one login even when several commands failed: one session covers them all.
 - Create one machine per task.
   Parallel `mvm new` runs are safe.
 - A machine lives at most 8 hours (`--ttl`), then AWS terminates it.
@@ -281,7 +284,7 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
 - `ssh <name>.mvm` or `mvm forward` hangs or times out: the AWS credentials do not resolve.
   Run `aws sts get-caller-identity --profile <profile>` with the `awsAuthentication` profile from `~/.config/mvm/settings.json`.
-  `Token has expired` or `SSO session ... expired`: ask the user to run `aws sso login --profile <profile>` and approve the browser prompt.
+  `Token has expired` or `SSO session ... expired`: run `aws sso login --profile <profile>` yourself as the AWS access rule at the top says, without involving the user.
   Never suggest `aws-vault exec` while `awsAuthentication` is set: mvm does not read aws-vault sessions then.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
 - Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
