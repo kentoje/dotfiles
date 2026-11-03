@@ -15,6 +15,7 @@ This process is captured in the image snapshot, so it must never hold secrets or
 
 import json
 import os
+import resource
 import subprocess
 import sys
 import threading
@@ -25,6 +26,11 @@ HOOK_PORT = 9000
 HOOK_PATH_PREFIX = "/aws/lambda-microvms/runtime/v1/"
 MVM_BIN = "/opt/mvm/bin"
 STATE_DIR = "/run/mvm"
+# Lambda starts the MicroVM with a 1024 open files limit (soft and hard). pnpm install opens
+# about 900 package.json files at once and fails with EMFILE under it. Everything on the machine
+# descends from this process: mvm-on-run, the workspace bootstrap, sshd and every ssh session
+# (sshd runs without PAM, so nothing lowers it again), and the machine's tuios session.
+OPEN_FILES_LIMIT = 1048576
 
 # Long-running services started after /run. Restarted with backoff when they exit.
 SUPERVISED_SERVICES = {
@@ -46,6 +52,21 @@ SUPERVISED_SERVICES = {
 def log_hook_event(message):
     """Write one line to stdout, which Lambda ships to the image's CloudWatch log group."""
     print(f"[mvm-hook-server] {message}", flush=True)
+
+
+def raise_open_files_limit(limit=OPEN_FILES_LIMIT):
+    """Raise the open files limit (RLIMIT_NOFILE, soft and hard) to at least LIMIT for this process
+    and all it starts. Never lowers it; a refusal only logs, so the hooks and sshd still start."""
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    target = max(limit, hard)
+    if soft >= target:
+        return
+    try:
+        resource.setrlimit(resource.RLIMIT_NOFILE, (target, target))
+    except (OSError, ValueError) as error:
+        log_hook_event(f"open files limit stays {soft}/{hard}: {error}")
+        return
+    log_hook_event(f"open files limit raised from {soft}/{hard} to {target}")
 
 
 def run_hook_script(script_name, args, timeout_seconds):
@@ -166,6 +187,7 @@ class HookHandler(BaseHTTPRequestHandler):
 
 
 def main():
+    raise_open_files_limit()
     server = ThreadingHTTPServer(("0.0.0.0", HOOK_PORT), HookHandler)
     log_hook_event(f"listening on :{HOOK_PORT}")
     try:

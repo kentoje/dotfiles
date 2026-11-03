@@ -99,6 +99,9 @@ On the machine:
   Git and npm read them at runtime: never write a token into `~/.gitconfig`, `~/.npmrc` or a repo.
 - The AWS CLI uses the machine's own role (env secret, logs, the pnpm cache, AppSync schema introspection).
   Never copy laptop AWS keys onto the machine.
+  That includes a repo's `.env.local` copied from the laptop: remove its `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` and `AWS_PROFILE` lines on the machine.
+  Scripts that export the whole file, such as assets-page's `pnpm graphql:download`, would otherwise call AWS with those laptop keys instead of the role and fail with `ExpiredTokenException` or `AccessDenied`.
+- The open files limit is 1048576 (`ulimit -n`): `mvm-hook-server` raises Lambda's default of 1024, under which `pnpm install` failed with EMFILE.
 
 ## Choosing the agent
 
