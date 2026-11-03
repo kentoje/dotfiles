@@ -1,0 +1,125 @@
+schema_version: 1
+component:
+  id: gitlab
+  name: gitlab
+  status: draft
+intent: ./intent.md
+obligations:
+- id: GITLAB-001
+  status: draft
+  severity: high
+  kind: invariant
+  description: GitLab lookup must resolve its repository and source branch from the
+    selected working context rather than an unrelated checkout.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-002
+  status: draft
+  severity: high
+  kind: invariant
+  description: GitLab lookup must distinguish an absent merge request from an unavailable
+    or malformed lookup result.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-003
+  status: draft
+  severity: high
+  kind: invariant
+  description: GitLab lookup must not create, update, merge or delete remote resources.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-004
+  status: draft
+  severity: high
+  kind: invariant
+  description: The GitLab tool must expose repository and CI operations separately
+    from MR discussion and metadata operations.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-005
+  status: draft
+  severity: high
+  kind: invariant
+  description: Pipeline and job reads must preserve pipeline ID, job ID, ref, SHA
+    and retried-attempt identity where available.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-006
+  status: draft
+  severity: high
+  kind: invariant
+  description: Job log results must state the returned byte window, truncation and
+    whether more bytes remain.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-007
+  status: draft
+  severity: high
+  kind: invariant
+  description: Pipeline retry must target an explicit repository and pipeline ID within
+    an authorized request.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-008
+  status: draft
+  severity: high
+  kind: invariant
+  description: Pipeline cancellation must target an explicit pipeline and report observed
+    state separately from request acceptance.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-009
+  status: draft
+  severity: high
+  kind: invariant
+  description: A pipeline with no retryable failed or canceled jobs must be reported
+    as an unchanged retry outcome.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: GITLAB-010
+  status: draft
+  severity: high
+  kind: invariant
+  description: GitLab operations must not delete pipelines, play deployment jobs or
+    create new pipelines in v1.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+sources: []
+dependencies:
+- tool-protocol
+- repository-context
+interfaces:
+- name: gitlab-v1
+  language: typescript
+  module: architecture/modules/gitlab.json
+  export: gitlab-v1

@@ -1,0 +1,48 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {
+      "title": "fixture",
+      "evidence": [],
+      "proposed_behavior": "fixture"
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "item": {
+          "id": "fixture",
+          "title": "fixture",
+          "evidence": [],
+          "proposed_behavior": "fixture",
+          "related_obligations": [],
+          "state": "proposed",
+          "duplicate_of": "fixture"
+        },
+        "created": false
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

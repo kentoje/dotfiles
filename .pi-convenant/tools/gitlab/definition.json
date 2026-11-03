@@ -1,0 +1,2412 @@
+{
+  "schema_version": 1,
+  "name": "gitlab",
+  "kind": "tool",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Give the agent structured repository and CI facts plus explicitly requested pipeline retry/cancel, while MR review operations stay in mr.",
+  "component": "gitlab",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": [
+    {
+      "name": "repository",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "identity": {
+                    "type": "object",
+                    "properties": {
+                      "host": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "repository": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "branch": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "head_sha": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "repository"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default_branch": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "web_url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "local_checkout": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "identity",
+                  "default_branch",
+                  "web_url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "identity": {
+                      "type": "object",
+                      "properties": {
+                        "host": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "repository": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "branch": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "head_sha": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "host",
+                        "repository"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "web_url": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "local_checkout": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "identity",
+                    "default_branch",
+                    "web_url"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve context",
+        "authenticate existing provider",
+        "read one project",
+        "return identity and observed facts"
+      ],
+      "rules": [
+        "Resolve explicit repository or cwd through repository-context. A missing GitLab remote blocks only GitLab operations, not ordinary Pi work.",
+        "Return the observed default branch; never hard-code main or master.",
+        "Do not fetch, checkout, modify remotes or create project resources."
+      ],
+      "failure_codes": [
+        "CONTEXT_UNAVAILABLE",
+        "AMBIGUOUS_REMOTE",
+        "AUTH_REQUIRED",
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "name": "pipelines",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque continuation token from the previous page."
+          },
+          "page_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "ref": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "url": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "ref",
+                        "sha",
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "complete": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "items",
+                  "next_cursor",
+                  "has_more",
+                  "complete"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "ref": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "sha": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "state": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "ref",
+                          "sha",
+                          "state"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "complete": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "next_cursor",
+                    "has_more",
+                    "complete"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve project",
+        "validate filters/cursor",
+        "fetch bounded page",
+        "return items and continuation"
+      ],
+      "rules": [
+        "Intersect supplied ref/SHA/state filters; do not silently widen them.",
+        "Order newest pipeline ID first within the returned page; preserve pipeline source and SHA.",
+        "A truncated page is not proof of no matching pipeline."
+      ],
+      "failure_codes": [
+        "INVALID_CURSOR",
+        "AUTH_REQUIRED",
+        "LOOKUP_FAILED"
+      ]
+    },
+    {
+      "name": "pipeline",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "pipeline_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pipeline_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "ref",
+                  "sha",
+                  "state"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "sha": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "ref",
+                    "sha",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve project",
+        "read requested pipeline",
+        "verify response ID",
+        "return observation"
+      ],
+      "rules": [
+        "Use the explicit project/pipeline pair; never substitute latest.",
+        "Preserve exact ref, SHA and observed state. Terminal and nonterminal states are data, not tool failure."
+      ],
+      "failure_codes": [
+        "NOT_FOUND",
+        "FORBIDDEN",
+        "TARGET_MISMATCH"
+      ]
+    },
+    {
+      "name": "jobs",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque continuation token from the previous page."
+          },
+          "page_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "pipeline_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "include_retried": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "pipeline_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "pipeline_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "pipeline_id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "stage": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "allow_failure": {
+                          "type": "boolean"
+                        },
+                        "retried": {
+                          "type": "boolean"
+                        },
+                        "sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "url": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "pipeline_id",
+                        "name",
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "next_cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "complete": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "pipeline_id",
+                  "items",
+                  "next_cursor",
+                  "has_more",
+                  "complete"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "pipeline_id": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "pipeline_id": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "stage": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "state": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "allow_failure": {
+                            "type": "boolean"
+                          },
+                          "retried": {
+                            "type": "boolean"
+                          },
+                          "sha": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "pipeline_id",
+                          "name",
+                          "state"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "complete": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "pipeline_id",
+                    "items",
+                    "next_cursor",
+                    "has_more",
+                    "complete"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve explicit pipeline",
+        "fetch job page",
+        "preserve attempt identities",
+        "return completeness"
+      ],
+      "rules": [
+        "Keep every returned job ID and attempt flag. Default excludes prior retried attempts; include_retried explicitly includes them.",
+        "Return allow_failure and state without promoting allowed failures into mandatory failures or vice versa.",
+        "Pagination remains explicit."
+      ],
+      "failure_codes": [
+        "NOT_FOUND",
+        "INVALID_CURSOR",
+        "LOOKUP_FAILED"
+      ]
+    },
+    {
+      "name": "job",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "job_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "pipeline_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "stage": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "allow_failure": {
+                    "type": "boolean"
+                  },
+                  "retried": {
+                    "type": "boolean"
+                  },
+                  "sha": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "pipeline_id",
+                  "name",
+                  "state"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "pipeline_id": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "stage": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "allow_failure": {
+                      "type": "boolean"
+                    },
+                    "retried": {
+                      "type": "boolean"
+                    },
+                    "sha": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "pipeline_id",
+                    "name",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve project",
+        "read exact job",
+        "verify job ID",
+        "return observation"
+      ],
+      "rules": [
+        "Read the explicitly selected job, including its parent pipeline.",
+        "A job from another SHA or pipeline must retain that identity; the caller decides relevance."
+      ],
+      "failure_codes": [
+        "NOT_FOUND",
+        "FORBIDDEN",
+        "TARGET_MISMATCH"
+      ]
+    },
+    {
+      "name": "logs",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "job_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "max_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1048576,
+            "default": 65536
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "job_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "next_offset": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "returned_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "truncated": {
+                    "type": "boolean"
+                  },
+                  "redacted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "job_id",
+                  "text",
+                  "offset",
+                  "next_offset",
+                  "returned_bytes",
+                  "truncated",
+                  "redacted"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "next_offset": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 0
+                    },
+                    "returned_bytes": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "truncated": {
+                      "type": "boolean"
+                    },
+                    "redacted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "job_id",
+                    "text",
+                    "offset",
+                    "next_offset",
+                    "returned_bytes",
+                    "truncated",
+                    "redacted"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "read exact job trace",
+        "apply byte window",
+        "redact known credentials",
+        "return text and continuation"
+      ],
+      "rules": [
+        "Offsets refer to the original trace byte stream; return a bounded UTF-8 decoded window and state if replacement decoding occurred in warnings.",
+        "Known credentials are redacted before model-visible output. Returned byte count describes decoded/redacted returned content; next_offset continues the original stream.",
+        "Do not write full unbounded logs into a product repository or claim redaction is exhaustive."
+      ],
+      "failure_codes": [
+        "LOG_UNAVAILABLE",
+        "NOT_FOUND",
+        "FORBIDDEN",
+        "OUTPUT_LIMIT"
+      ]
+    },
+    {
+      "name": "retry",
+      "effect": "remote-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "pipeline_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pipeline_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "pipeline": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sha": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "state": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "url": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "source": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "ref",
+                      "sha",
+                      "state"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "request_state": {
+                    "enum": [
+                      "accepted",
+                      "no_change"
+                    ]
+                  },
+                  "retryable_jobs_observed": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "pipeline",
+                  "request_state"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "pipeline": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "ref": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "url": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "ref",
+                        "sha",
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "request_state": {
+                      "enum": [
+                        "accepted",
+                        "no_change"
+                      ]
+                    },
+                    "retryable_jobs_observed": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "pipeline",
+                    "request_state"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve and authorize",
+        "read selected pipeline/jobs",
+        "send one retry request when eligible",
+        "return acknowledged/observed result"
+      ],
+      "rules": [
+        "Require explicit pipeline ID and authorization from the current user task; no approval boolean and no latest inference.",
+        "Read target first. Retry eligible failed/canceled jobs through the provider operation, not arbitrary deployment/manual jobs.",
+        "If the API confirms no eligible work or no change, report no_change. Return observed pending/running state without claiming eventual success.",
+        "Do not automatically repeat after conflict, rate limit or unknown write outcome."
+      ],
+      "failure_codes": [
+        "FORBIDDEN",
+        "RETRY_CONFLICT",
+        "RATE_LIMITED",
+        "REMOTE_STATE_UNKNOWN"
+      ]
+    },
+    {
+      "name": "cancel",
+      "effect": "remote-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "pipeline_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "pipeline_id"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "pipeline": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ref": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sha": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "state": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "url": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "source": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "ref",
+                      "sha",
+                      "state"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "request_state": {
+                    "enum": [
+                      "accepted",
+                      "no_change"
+                    ]
+                  },
+                  "cancellation_confirmed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "pipeline",
+                  "request_state",
+                  "cancellation_confirmed"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "pipeline": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "ref": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "url": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "ref",
+                        "sha",
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "request_state": {
+                      "enum": [
+                        "accepted",
+                        "no_change"
+                      ]
+                    },
+                    "cancellation_confirmed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "pipeline",
+                    "request_state",
+                    "cancellation_confirmed"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "GITLAB-001",
+        "GITLAB-002",
+        "GITLAB-003",
+        "GITLAB-004",
+        "GITLAB-005",
+        "GITLAB-006",
+        "GITLAB-007",
+        "GITLAB-008",
+        "GITLAB-009",
+        "GITLAB-010"
+      ],
+      "ordering": [
+        "resolve and authorize",
+        "observe target",
+        "send at most one cancellation request",
+        "return requested versus confirmed state"
+      ],
+      "rules": [
+        "Require explicit selected pipeline and authorized cancel request.",
+        "An accepted cancellation response is not proof of terminal canceled state; return observed state and confirmation separately.",
+        "An already terminal pipeline is an observed no-op when appropriate. Never cancel another pipeline or all project pipelines."
+      ],
+      "failure_codes": [
+        "FORBIDDEN",
+        "RATE_LIMITED",
+        "REMOTE_STATE_UNKNOWN"
+      ]
+    }
+  ]
+}

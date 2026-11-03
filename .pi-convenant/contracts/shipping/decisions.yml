@@ -1,0 +1,65 @@
+schema_version: 1
+decisions:
+- id: shipping-explicit-readiness-workflow
+  status: accepted-user
+  decision: /ship includes commit, push, MR create/update, review feedback and CI readiness.
+  drivers:
+  - The user selected the longer readiness workflow.
+  alternatives:
+  - option: 'Stop immediately after creating a draft MR: not the selected default.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations: &id001
+  - SHIPPING-001
+  - SHIPPING-002
+  - SHIPPING-003
+  - SHIPPING-004
+  - SHIPPING-005
+  - SHIPPING-006
+  - SHIPPING-007
+  - SHIPPING-008
+  - SHIPPING-009
+  - SHIPPING-010
+  - SHIPPING-011
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []
+- id: shipping-no-background-continuation
+  status: accepted-user
+  decision: Return blockers without scheduling a new agent turn.
+  drivers:
+  - The user explicitly rejected blocked-completion auto-turns.
+  alternatives:
+  - option: 'Settlement hooks that automatically resume the agent: rejected.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations: *id001
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []
+- id: shipping-bounded-shipping
+  status: specified-default
+  decision: Default 30-minute overall deadline, 3 repair rounds and 15-second polling, configurable before
+    the run.
+  drivers:
+  - Limits keep unavailable CI or repeated failures from becoming an endless autonomous loop.
+  alternatives:
+  - option: 'Unlimited retries or resetting the deadline after each poll: rejected.'
+    disposition: rejected
+  evidence:
+  - Authored design rationale; not user-approved execution evidence
+  related_obligations: *id001
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: null
+  execution_evidence: []

@@ -1,0 +1,990 @@
+{
+  "schema_version": 1,
+  "name": "harness-retro",
+  "kind": "user-command",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Use an explicit operator retrospective to improve the harness and maintain a deduplicated proposal backlog during early use.",
+  "component": "retrospective",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": [
+    {
+      "name": "review",
+      "effect": "local-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "focus": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "proposals": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "evidence": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "proposed_behavior": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "related_obligations": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "state": {
+                          "enum": [
+                            "proposed",
+                            "accepted",
+                            "discarded"
+                          ]
+                        },
+                        "duplicate_of": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "evidence",
+                        "proposed_behavior",
+                        "related_obligations",
+                        "state",
+                        "duplicate_of"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "backlog_path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "recorded_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "required": [
+                  "proposals",
+                  "backlog_path",
+                  "recorded_ids"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "proposals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "evidence": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "proposed_behavior": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "related_obligations": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "state": {
+                            "enum": [
+                              "proposed",
+                              "accepted",
+                              "discarded"
+                            ]
+                          },
+                          "duplicate_of": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "evidence",
+                          "proposed_behavior",
+                          "related_obligations",
+                          "state",
+                          "duplicate_of"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "backlog_path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "recorded_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "proposals",
+                    "backlog_path",
+                    "recorded_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "RETROSPECTIVE-001",
+        "RETROSPECTIVE-002",
+        "RETROSPECTIVE-003",
+        "RETROSPECTIVE-004",
+        "RETROSPECTIVE-005"
+      ],
+      "ordering": [
+        "resolve selected session/harness",
+        "read backlog and contract context",
+        "identify grounded friction",
+        "deduplicate and record draft items unless dry-run",
+        "report findings"
+      ],
+      "rules": [
+        "The user invocation authorizes review of the current or explicitly selected session and recording new draft harness proposals; dry_run prevents writes.",
+        "Read current contracts, decisions and backlog first. Link concrete friction to session entry references or observed operations; do not invent metrics or incidents.",
+        "Separate harness improvements from ordinary product work. Record proposed behavior and unresolved questions, not test implementation or a forced template.",
+        "Link deterministic duplicates; do not auto-accept or implement proposals. Return created and existing item IDs. No future model turn is scheduled when the command finishes."
+      ],
+      "failure_codes": [
+        "SESSION_UNAVAILABLE",
+        "BACKLOG_INVALID",
+        "BACKLOG_CONFLICT",
+        "OUT_OF_SCOPE_PATH"
+      ]
+    },
+    {
+      "name": "list",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "state": {
+            "enum": [
+              "proposed",
+              "accepted",
+              "discarded",
+              "all"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "evidence": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "proposed_behavior": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "related_obligations": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "state": {
+                          "enum": [
+                            "proposed",
+                            "accepted",
+                            "discarded"
+                          ]
+                        },
+                        "duplicate_of": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "evidence",
+                        "proposed_behavior",
+                        "related_obligations",
+                        "state",
+                        "duplicate_of"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "backlog_path": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "items",
+                  "backlog_path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "evidence": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "proposed_behavior": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "related_obligations": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "state": {
+                            "enum": [
+                              "proposed",
+                              "accepted",
+                              "discarded"
+                            ]
+                          },
+                          "duplicate_of": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "evidence",
+                          "proposed_behavior",
+                          "related_obligations",
+                          "state",
+                          "duplicate_of"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "backlog_path": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "backlog_path"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "RETROSPECTIVE-001",
+        "RETROSPECTIVE-002",
+        "RETROSPECTIVE-003",
+        "RETROSPECTIVE-004",
+        "RETROSPECTIVE-005"
+      ],
+      "ordering": [
+        "resolve harness backlog",
+        "parse supported format",
+        "filter and return stable order"
+      ],
+      "rules": [
+        "Read harness-owned backlog only. A missing backlog means no recorded proposals; malformed existing structure is an error, not empty.",
+        "Preserve IDs and requested state filter, with no side effects or repairs."
+      ],
+      "failure_codes": [
+        "BACKLOG_INVALID",
+        "OUT_OF_SCOPE_PATH"
+      ]
+    },
+    {
+      "name": "record",
+      "effect": "local-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "proposed_behavior": {
+            "type": "string",
+            "minLength": 1
+          },
+          "related_obligations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "title",
+          "evidence",
+          "proposed_behavior"
+        ],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "item": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "evidence": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "proposed_behavior": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "related_obligations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "state": {
+                        "enum": [
+                          "proposed",
+                          "accepted",
+                          "discarded"
+                        ]
+                      },
+                      "duplicate_of": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "evidence",
+                      "proposed_behavior",
+                      "related_obligations",
+                      "state",
+                      "duplicate_of"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "created": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "item",
+                  "created"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "evidence": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "proposed_behavior": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "related_obligations": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "state": {
+                          "enum": [
+                            "proposed",
+                            "accepted",
+                            "discarded"
+                          ]
+                        },
+                        "duplicate_of": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "evidence",
+                        "proposed_behavior",
+                        "related_obligations",
+                        "state",
+                        "duplicate_of"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "created": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "item",
+                    "created"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "RETROSPECTIVE-001",
+        "RETROSPECTIVE-002",
+        "RETROSPECTIVE-003",
+        "RETROSPECTIVE-004",
+        "RETROSPECTIVE-005"
+      ],
+      "ordering": [
+        "validate scope/content",
+        "lock and read current backlog",
+        "check duplicate",
+        "allocate ID and atomic append",
+        "report created/existing identity"
+      ],
+      "rules": [
+        "Accept only harness improvement proposals with nonempty evidence and behavior; reject arbitrary product task records.",
+        "Normalize title using Unicode normalization, trimming, whitespace collapse and case folding. An exact existing normalized match returns its ID without writing. Similar-but-not-exact matches are suggestions for review.",
+        "Allocate the next unique HBR identifier under a harness backlog write lock. Write an atomic patch preserving existing entries; concurrent changes are reconciled or reported, never overwritten.",
+        "Write only docs/backlog.md inside the new harness; preserve source references and proposed state, and do not add Covenant obligations automatically."
+      ],
+      "failure_codes": [
+        "RECORD_INVALID",
+        "OUT_OF_SCOPE_PATH",
+        "BACKLOG_CONFLICT"
+      ]
+    }
+  ]
+}

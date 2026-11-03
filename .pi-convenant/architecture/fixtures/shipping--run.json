@@ -1,0 +1,54 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {}
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "state": "ready_for_review",
+        "repository": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "merge_request": {
+          "iid": 1,
+          "source_branch": "fixture",
+          "head_sha": "fixture"
+        },
+        "commits_created": [],
+        "pushed_sha": "fixture",
+        "pipeline": {
+          "id": 1,
+          "ref": "fixture",
+          "sha": "fixture",
+          "state": "fixture"
+        },
+        "blockers": [],
+        "fix_rounds": 0,
+        "next_steps": []
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

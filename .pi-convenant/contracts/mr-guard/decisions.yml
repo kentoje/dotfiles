@@ -1,0 +1,43 @@
+schema_version: 1
+decisions:
+- id: mr-guard-creation-boundary
+  status: specified-default
+  decision: Run preflight inside /ship before creation; expose direct-command interception as an explicit host
+    setting.
+  drivers:
+  - Structured creation can be protected reliably; broad shell interception has known limits.
+  alternatives:
+  - option: 'Automatically require an MR on agent settlement: rejected by the user.'
+    disposition: rejected
+  evidence:
+  - Authored design rationale; not user-approved execution evidence
+  related_obligations: &id001
+  - MRGUARD-001
+  - MRGUARD-002
+  - MRGUARD-003
+  - MRGUARD-004
+  - MRGUARD-005
+  - MRGUARD-006
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: null
+  execution_evidence: []
+- id: mr-guard-configured-delivery
+  status: specified-default
+  decision: Apply title/changeset/conventional-commit checks only from selected project configuration.
+  drivers:
+  - Projects have different operating conventions.
+  alternatives:
+  - option: 'Use an Aircall-wide universal verification/shipping policy: rejected.'
+    disposition: rejected
+  evidence:
+  - Authored design rationale; not user-approved execution evidence
+  related_obligations: *id001
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: null
+  execution_evidence: []

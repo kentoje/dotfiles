@@ -1,0 +1,46 @@
+schema_version: 1
+decisions:
+- id: gitlab-separate-ci-surface
+  status: accepted-user
+  decision: Expose repository/pipeline/job/log operations separately from mr.
+  drivers:
+  - A single MR-centric tool hides useful CI diagnosis.
+  alternatives:
+  - option: 'Only a shared GitLab provider: rejected by the user.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations: &id001
+  - GITLAB-001
+  - GITLAB-002
+  - GITLAB-003
+  - GITLAB-004
+  - GITLAB-005
+  - GITLAB-006
+  - GITLAB-007
+  - GITLAB-008
+  - GITLAB-009
+  - GITLAB-010
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []
+- id: gitlab-pipeline-writes
+  status: accepted-user
+  decision: Include retry and cancel for explicitly identified pipelines.
+  drivers:
+  - The user explicitly selected these two mutations.
+  alternatives:
+  - option: 'Read-only CI surface: not the selected scope.'
+    disposition: rejected
+  evidence:
+  - Explicit user conversation decision
+  related_obligations: *id001
+  assumptions:
+  - Service permissions and project conventions must be discovered at invocation.
+  revisit_when:
+  - The user changes scope or implementation reveals incompatible service/project behavior.
+  approved_by: user (conversation scope only)
+  execution_evidence: []

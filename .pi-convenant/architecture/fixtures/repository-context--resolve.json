@@ -1,0 +1,46 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {}
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "project_root": "fixture",
+        "git_root": "fixture",
+        "worktree_root": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "repository_id": "fixture",
+        "gitlab_host": "fixture",
+        "default_branch": "fixture",
+        "project_cli_manifest": "fixture",
+        "available_capabilities": [],
+        "sources": [],
+        "unavailable": []
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

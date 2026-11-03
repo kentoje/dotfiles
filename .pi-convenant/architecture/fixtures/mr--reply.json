@@ -1,0 +1,47 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {
+      "thread_id": "fixture",
+      "body": "fixture"
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "merge_request": {
+          "iid": 1,
+          "source_branch": "fixture",
+          "head_sha": "fixture"
+        },
+        "thread_id": "fixture",
+        "reply_id": "fixture",
+        "reply_state": "committed",
+        "resolution_state": "not_requested",
+        "observed_resolved": false
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

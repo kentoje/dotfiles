@@ -1,0 +1,595 @@
+{
+  "schema_version": 1,
+  "interface_id": "shipping-v1",
+  "owner": "shipping",
+  "implementation_root": "src/shipping/",
+  "test_root": "tests/shipping/",
+  "role": "Thin bounded orchestration; owns task-scoped Git commit/push and delegates MR/CI/capability operations.",
+  "dependencies": [
+    "tool-protocol",
+    "repository-context",
+    "gitlab",
+    "mr",
+    "mr-guard",
+    "project-cli"
+  ],
+  "operations": {
+    "run": {
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_branch": {
+            "type": "string",
+            "minLength": 1
+          },
+          "task_paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "deadline_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120,
+            "default": 30
+          },
+          "max_fix_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "default": 3
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "ready_for_review",
+                      "blocked",
+                      "partial",
+                      "cancelled",
+                      "indeterminate"
+                    ]
+                  },
+                  "repository": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "branch": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "head_sha": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "merge_request": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "iid": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "source_branch": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "target_branch": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "head_sha": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "draft": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "iid",
+                          "source_branch",
+                          "head_sha"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "commits_created": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "pushed_sha": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "pipeline": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "ref": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "sha": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "state": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "ref",
+                          "sha",
+                          "state"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "blockers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "category": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "message": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "resource": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "category",
+                        "message",
+                        "resource"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "fix_rounds": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "next_steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "repository",
+                  "branch",
+                  "head_sha",
+                  "merge_request",
+                  "commits_created",
+                  "pushed_sha",
+                  "pipeline",
+                  "blockers",
+                  "fix_rounds",
+                  "next_steps"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "phase",
+                  "retryable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": [
+                    "committed",
+                    "unknown"
+                  ]
+                },
+                "reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "target",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "enum": [
+                        "ready_for_review",
+                        "blocked",
+                        "partial",
+                        "cancelled",
+                        "indeterminate"
+                      ]
+                    },
+                    "repository": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "branch": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "head_sha": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "merge_request": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "iid": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "url": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "title": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "source_branch": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "target_branch": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "head_sha": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "draft": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "iid",
+                            "source_branch",
+                            "head_sha"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "commits_created": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "pushed_sha": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "pipeline": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "ref": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "sha": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "state": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "url": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "source": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "ref",
+                            "sha",
+                            "state"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "blockers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "category": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "resource": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "category",
+                          "message",
+                          "resource"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "fix_rounds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "next_steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "repository",
+                    "branch",
+                    "head_sha",
+                    "merge_request",
+                    "commits_created",
+                    "pushed_sha",
+                    "pipeline",
+                    "blockers",
+                    "fix_rounds",
+                    "next_steps"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "effect": "remote-write",
+      "rules": [
+        "Only an explicit /ship or equivalent user shipping request enters this workflow. Narrower existing instructions still constrain commits, branches, paths and remote actions.",
+        "Resolve the current task branch/worktree and target branch. Default/detached branches, mixed ownership of changes or an unknown base require an actionable decision; do not silently make another branch.",
+        "Inspect task diff and run the agreed relevant project CLI capabilities/checks. Unrelated preexisting changes are not staged or committed. Missing project CLI can be reported or use an already agreed repository command; creation remains a separate proposal/request.",
+        "Apply only configured delivery/title requirements. Commit only authorized task paths, push normally, and reuse exactly one existing branch MR or create one draft MR after preflight. Never force-push automatically.",
+        "Read complete relevant review and current-head CI state. Evaluate feedback, repair within task scope, reply with concrete reasoning, and resolve only addressed or explicitly justified discussions. Human decisions, unavailable entitlements, product-scope ambiguity or approval requirements remain blockers.",
+        "For eligible CI failures, diagnose first; use explicitly authorized retry for a transient failure, not blind endless retries. Manual deployment jobs are not played as part of shipping.",
+        "After each repair/push, update head identity and invalidate prior readiness observations. At most the configured repair rounds occur within the original deadline. Waiting is owned by this invocation and stops on cancellation or expiry.",
+        "Ready requires relevant agreed local checks, required current-head CI checks, and no unaddressed blocking feedback under configured policy. Skipped/allowed-failure/manual states follow explicit project policy; unknown required state is not success.",
+        "Remove draft only when ready for human review and requested shipping scope permits. Never merge/deploy by default. On blocker/deadline/cancellation return exact completed effects and next steps, with no scheduled follow-up turn."
+      ]
+    }
+  },
+  "consumes": {
+    "tool-protocol": [
+      "validate_boundary"
+    ],
+    "repository-context": [
+      "resolve"
+    ],
+    "gitlab": [
+      "pipeline",
+      "jobs",
+      "logs",
+      "retry",
+      "cancel"
+    ],
+    "mr": [
+      "status",
+      "threads",
+      "reply",
+      "update",
+      "create_draft",
+      "mark_ready"
+    ],
+    "mr-guard": [
+      "check_creation"
+    ],
+    "project-cli": [
+      "execute_capability"
+    ]
+  },
+  "host_capabilities": [
+    "Task-scoped Git commit/push through host runner"
+  ],
+  "state_ownership": [
+    "Task commit/push effects and bounded invocation progress; no durable auto-wake state"
+  ]
+}

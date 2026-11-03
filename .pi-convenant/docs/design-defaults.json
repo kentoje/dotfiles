@@ -1,0 +1,12 @@
+{
+  "read_attempts": 2,
+  "read_deadline_seconds": 30,
+  "write_deadline_seconds": 60,
+  "page_size": 50,
+  "maximum_page_size": 100,
+  "log_window_bytes": 65536,
+  "maximum_log_window_bytes": 1048576,
+  "ship_deadline_minutes": 30,
+  "ship_max_fix_rounds": 3,
+  "ship_poll_seconds": 15
+}

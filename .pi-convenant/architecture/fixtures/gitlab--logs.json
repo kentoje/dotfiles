@@ -1,0 +1,43 @@
+[
+  {
+    "name": "valid shape",
+    "direction": "input_schema",
+    "valid": true,
+    "payload": {
+      "job_id": 1
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "valid": false,
+    "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "job_id": 1,
+        "text": "fixture",
+        "offset": 0,
+        "next_offset": 0,
+        "returned_bytes": 0,
+        "truncated": false,
+        "redacted": false
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "reject wrong boundary type",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": []
+  }
+]

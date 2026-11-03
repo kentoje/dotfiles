@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "tool-protocol",
+  "kind": "development-contract",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Provide consistent target resolution, bounded execution and truthful effects across all tools.",
+  "component": "tool-protocol",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": []
+}

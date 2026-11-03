@@ -1,0 +1,142 @@
+schema_version: 1
+component:
+  id: shipping
+  name: shipping
+  status: draft
+intent: ./intent.md
+obligations:
+- id: SHIPPING-001
+  status: draft
+  severity: high
+  kind: invariant
+  description: Completing an ordinary coding task must not require creating or updating
+    a merge request.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-002
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping actions must occur only within an explicit user request to
+    ship.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-003
+  status: draft
+  severity: high
+  kind: invariant
+  description: A blocked completion must report its blocker without automatically
+    enqueuing or triggering another agent turn.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-004
+  status: draft
+  severity: high
+  kind: invariant
+  description: An explicit ship command must operate on the selected task branch and
+    reuse an existing branch MR instead of creating a duplicate.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-005
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must commit only task-authorized changes and must not stage
+    unrelated user edits implicitly.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-006
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must push normally and must not force-push, merge or deploy
+    by default.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-007
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must drive review feedback and required CI readiness for the
+    latest pushed head within the current user-requested run.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-008
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must not claim readiness from a pipeline or review observation
+    belonging to an earlier head.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-009
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must bound polling and repair rounds and return unresolved
+    blockers without scheduling a new agent turn.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-010
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must mark an MR ready for human review only after the selected
+    project checks, required CI and addressed blocking feedback satisfy the readiness
+    policy.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+- id: SHIPPING-011
+  status: draft
+  severity: high
+  kind: invariant
+  description: Shipping must preserve rejected or unresolved review findings with
+    an explicit rationale rather than resolving every discussion indiscriminately.
+  verification: []
+  preconditions: []
+  postconditions: []
+  enforcement: null
+  applicability: null
+sources: []
+dependencies:
+- tool-protocol
+- repository-context
+- gitlab
+- mr
+- mr-guard
+- project-cli
+interfaces:
+- name: shipping-v1
+  language: typescript
+  module: architecture/modules/shipping.json
+  export: shipping-v1
