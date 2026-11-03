@@ -1,0 +1,799 @@
+{
+  "schema_version": 1,
+  "interface_id": "fleet-v1",
+  "owner": "fleet",
+  "implementation_root": "src/fleet/",
+  "test_root": "src/fleet/",
+  "role": "Read-only aggregation; never calls mutating dependency methods.",
+  "dependencies": ["tool-protocol", "repository-context", "gitlab", "mr"],
+  "operations": {
+    "status": {
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "repositories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "results": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "repository": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "status": {
+                          "enum": ["ok", "partial", "error"]
+                        },
+                        "data": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "branch": {
+                                  "type": ["string", "null"]
+                                },
+                                "head_sha": {
+                                  "type": "string"
+                                },
+                                "dirty_tracked": {
+                                  "type": "boolean"
+                                },
+                                "untracked_count": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "comparison_ref": {
+                                  "type": ["string", "null"]
+                                },
+                                "ahead": {
+                                  "type": ["integer", "null"],
+                                  "minimum": 0
+                                },
+                                "behind": {
+                                  "type": ["integer", "null"],
+                                  "minimum": 0
+                                },
+                                "comparison_unavailable_reason": {
+                                  "type": ["string", "null"]
+                                },
+                                "observed_at": {
+                                  "type": "string"
+                                },
+                                "merge_requests": {
+                                  "type": ["array", "null"],
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "iid": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      },
+                                      "head_sha": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": ["iid", "url", "head_sha"],
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "required": [
+                                "branch",
+                                "head_sha",
+                                "dirty_tracked",
+                                "untracked_count",
+                                "comparison_ref",
+                                "ahead",
+                                "behind",
+                                "comparison_unavailable_reason",
+                                "observed_at",
+                                "merge_requests"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "message": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["code", "message"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["repository", "status", "data", "errors"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "selected_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "succeeded_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "failed_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "results",
+                  "selected_count",
+                  "succeeded_count",
+                  "failed_count"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "repository": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "status": {
+                            "enum": ["ok", "partial", "error"]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "branch": {
+                                    "type": ["string", "null"]
+                                  },
+                                  "head_sha": {
+                                    "type": "string"
+                                  },
+                                  "dirty_tracked": {
+                                    "type": "boolean"
+                                  },
+                                  "untracked_count": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "comparison_ref": {
+                                    "type": ["string", "null"]
+                                  },
+                                  "ahead": {
+                                    "type": ["integer", "null"],
+                                    "minimum": 0
+                                  },
+                                  "behind": {
+                                    "type": ["integer", "null"],
+                                    "minimum": 0
+                                  },
+                                  "comparison_unavailable_reason": {
+                                    "type": ["string", "null"]
+                                  },
+                                  "observed_at": {
+                                    "type": "string"
+                                  },
+                                  "merge_requests": {
+                                    "type": ["array", "null"],
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "iid": {
+                                          "type": "integer",
+                                          "minimum": 1
+                                        },
+                                        "url": {
+                                          "type": "string"
+                                        },
+                                        "head_sha": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": ["iid", "url", "head_sha"],
+                                      "additionalProperties": false
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "branch",
+                                  "head_sha",
+                                  "dirty_tracked",
+                                  "untracked_count",
+                                  "comparison_ref",
+                                  "ahead",
+                                  "behind",
+                                  "comparison_unavailable_reason",
+                                  "observed_at",
+                                  "merge_requests"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": ["code", "message"],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": ["repository", "status", "data", "errors"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "selected_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "succeeded_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "failed_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "results",
+                    "selected_count",
+                    "succeeded_count",
+                    "failed_count"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "effect": "read-only",
+      "rules": [
+        "Omitted repositories selects all configured fleet IDs in configured order; explicit unknown IDs block before lookups, and duplicates are deduplicated preserving first occurrence.",
+        "For each repository return branch/null detached state, HEAD, dirty tracked/untracked observations and ahead/behind with the named local comparison ref. Never fetch implicitly. Unknown comparison is null with a reason, not zero.",
+        "Read open branch MR state once when a GitLab context exists. Remote failure preserves local facts as a partial repository result, never no MR.",
+        "Continue independent repositories after one failure. Top-level ok requires all requested observations; partial means at least one success and an incomplete repository; all failures is error."
+      ]
+    },
+    "versions": {
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "repositories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "package": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["package"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "package": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "results": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "repository": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "status": {
+                          "enum": ["ok", "partial", "error"]
+                        },
+                        "data": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "missing": {
+                                  "type": "boolean"
+                                },
+                                "manifests_read": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "declarations": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "manifest": {
+                                        "type": "string"
+                                      },
+                                      "section": {
+                                        "type": "string"
+                                      },
+                                      "spec": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": ["manifest", "section", "spec"],
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "required": [
+                                "missing",
+                                "manifests_read",
+                                "declarations"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "message": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["code", "message"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["repository", "status", "data", "errors"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "selected_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "succeeded_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "failed_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "package",
+                  "results",
+                  "selected_count",
+                  "succeeded_count",
+                  "failed_count"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "package": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "repository": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "status": {
+                            "enum": ["ok", "partial", "error"]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "missing": {
+                                    "type": "boolean"
+                                  },
+                                  "manifests_read": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "declarations": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "manifest": {
+                                          "type": "string"
+                                        },
+                                        "section": {
+                                          "type": "string"
+                                        },
+                                        "spec": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "manifest",
+                                        "section",
+                                        "spec"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "missing",
+                                  "manifests_read",
+                                  "declarations"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": ["code", "message"],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": ["repository", "status", "data", "errors"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "selected_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "succeeded_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "failed_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "package",
+                    "results",
+                    "selected_count",
+                    "succeeded_count",
+                    "failed_count"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "effect": "read-only",
+      "rules": [
+        "Use the same explicit fleet selection rules.",
+        "Read configured manifest locations; for Node projects use the root and declared workspace manifests. Do not crawl unrelated node_modules or home state. Unsupported manifest readers are explicit per-repository errors.",
+        "For every declaration preserve manifest-relative path, section and exact spec (including workspace/catalog/alias syntax). Mark missing only after all selected supported manifests were read successfully.",
+        "Do not install, resolve remote versions, rewrite manifests or equate a declared range with a lockfile/installed version. Multiple declarations remain multiple records.",
+        "Malformed manifest means repository error, not missing package; independent repositories continue."
+      ]
+    }
+  },
+  "consumes": {
+    "tool-protocol": ["validate_boundary"],
+    "repository-context": ["resolve"],
+    "gitlab": ["repository"],
+    "mr": ["status"]
+  },
+  "host_capabilities": ["Configured repository Git/manifest reads"],
+  "state_ownership": [
+    "Immutable invocation facts and returned evidence; no implicit global mutable cache"
+  ],
+  "test_pattern": "**/*.test.ts"
+}

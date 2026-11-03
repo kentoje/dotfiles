@@ -1,0 +1,42 @@
+schema_version: 1
+decisions:
+  - id: preview-preview-placement
+    status: accepted-user
+    decision: Preview is a per-project selected CLI capability.
+    drivers:
+      - Keeps project operation choices local.
+    alternatives:
+      - option: "Always registered preview tool: rejected."
+        disposition: rejected
+    evidence:
+      - Explicit user conversation decision
+    related_obligations: &id001
+      - PREVIEW-001
+      - PREVIEW-002
+      - PREVIEW-003
+      - PREVIEW-004
+      - PREVIEW-005
+      - PREVIEW-006
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: user (conversation scope only)
+    execution_evidence: []
+  - id: preview-owned-instance
+    status: specified-default
+    decision: Reuse matching instances without claiming ownership; terminate only owned or explicitly adopted resources.
+    drivers:
+      - Cleanup must not kill a user development server.
+    alternatives:
+      - option: "Kill by process name or port alone: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: *id001
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []

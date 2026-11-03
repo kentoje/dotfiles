@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "isolatedModules": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "vitest.config.ts",
+    "oxlint.config.ts",
+    "oxfmt.config.ts"
+  ]
+}

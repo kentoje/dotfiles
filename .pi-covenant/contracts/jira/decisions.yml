@@ -1,0 +1,48 @@
+schema_version: 1
+decisions:
+  - id: jira-six-jira-actions
+    status: accepted-user
+    decision: Ship get, search, create, update, comment and transition.
+    drivers:
+      - The user selected all six rather than a read-only subset.
+    alternatives:
+      - option: "Read-only get/search: rejected as the initial scope."
+        disposition: rejected
+    evidence:
+      - Explicit user conversation decision
+    related_obligations: &id001
+      - JIRA-001
+      - JIRA-002
+      - JIRA-003
+      - JIRA-004
+      - JIRA-005
+      - JIRA-006
+      - JIRA-007
+      - JIRA-008
+      - JIRA-009
+      - JIRA-010
+      - JIRA-011
+      - JIRA-012
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: user (conversation scope only)
+    execution_evidence: []
+  - id: jira-metadata-before-mutation
+    status: specified-default
+    decision: Resolve names and required fields through current selected project metadata.
+    drivers:
+      - Display names and custom fields vary.
+    alternatives:
+      - option: "Hard-coded customfield IDs across all projects: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: *id001
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []

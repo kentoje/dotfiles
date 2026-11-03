@@ -1,0 +1,27 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+  - id: FOUNDATION-001-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: The harness runs as extensions and configuration of standard Pi rather than replacing its standard interaction model.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - FOUNDATION-001
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: FOUNDATION-002-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Harness implementation must not copy, import or depend on implementation code from /Users/kento/dotfiles/.pi-custom-harness.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - FOUNDATION-002
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: FOUNDATION-003-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: The harness preserves standard Pi capabilities unless the user explicitly agrees to a capability change.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - FOUNDATION-003
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.

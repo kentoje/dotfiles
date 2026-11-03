@@ -1,0 +1,991 @@
+{
+  "schema_version": 1,
+  "name": "worktree",
+  "kind": "tool",
+  "design_status": "implemented-module-awaiting-pi-registration",
+  "description": "Create and maintain usable task worktrees without duplicating repository setup logic or losing user work.",
+  "component": "worktree",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": [
+    {
+      "name": "new",
+      "effect": "local-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "task": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$"
+          },
+          "base": {
+            "type": "string",
+            "minLength": 1
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["task"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "branch": {
+                    "type": ["string", "null"]
+                  },
+                  "head_sha": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "readiness": {
+                    "enum": [
+                      "ready",
+                      "setup_failed",
+                      "not_configured",
+                      "unavailable"
+                    ]
+                  },
+                  "setup_completed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["path", "branch", "head_sha", "readiness"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "branch": {
+                      "type": ["string", "null"]
+                    },
+                    "head_sha": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "readiness": {
+                      "enum": [
+                        "ready",
+                        "setup_failed",
+                        "not_configured",
+                        "unavailable"
+                      ]
+                    },
+                    "setup_completed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["path", "branch", "head_sha", "readiness"],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "WORKTREE-001",
+        "WORKTREE-002",
+        "WORKTREE-003",
+        "WORKTREE-004",
+        "WORKTREE-005",
+        "WORKTREE-006",
+        "WORKTREE-007",
+        "WORKTREE-008",
+        "WORKTREE-009",
+        "WORKTREE-010"
+      ],
+      "ordering": [
+        "resolve context/base/root",
+        "validate and lock target",
+        "check existing registered worktree",
+        "create or delegate",
+        "perform configured setup",
+        "read readiness",
+        "return exact state"
+      ],
+      "rules": [
+        "Resolve root and names; reject absolute paths, path separators, traversal and a destination escaping through a symlink. Validate explicit Git branch names independently.",
+        "Use configured branch naming or task as branch. Resolve base from explicit base, project default, or locally known remote default; unknown base blocks rather than fetches implicitly.",
+        "If the same registered path/task/branch already exists, return it without rerunning setup; conflicting paths/branches block.",
+        "Delegate to the repository-owned setup mechanism and avoid running native creation twice if that mechanism creates the worktree itself. Fallback is native git worktree creation only; absent setup is reported, not fabricated.",
+        "Do not copy environment files from developer home by assumption, install extra packages outside setup scope, start a universal check, or create an MR.",
+        "On setup failure/cancellation after creation, return partial with exact path, branch, completed steps and setup failure; stop owned processes and keep the checkout for recovery."
+      ],
+      "failure_codes": [
+        "UNSAFE_TASK",
+        "PATH_CONFLICT",
+        "BRANCH_CONFLICT",
+        "BASE_UNAVAILABLE",
+        "SETUP_FAILED",
+        "CANCELLED"
+      ]
+    },
+    {
+      "name": "verify",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "worktree": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "branch": {
+                        "type": ["string", "null"]
+                      },
+                      "head_sha": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "readiness": {
+                        "enum": [
+                          "ready",
+                          "setup_failed",
+                          "not_configured",
+                          "unavailable"
+                        ]
+                      },
+                      "setup_completed": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["path", "branch", "head_sha", "readiness"],
+                    "additionalProperties": false
+                  },
+                  "checks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "enum": ["ready", "missing", "unknown"]
+                        },
+                        "reason": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["name", "state", "reason"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": ["worktree", "checks"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "worktree": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "branch": {
+                          "type": ["string", "null"]
+                        },
+                        "head_sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "readiness": {
+                          "enum": [
+                            "ready",
+                            "setup_failed",
+                            "not_configured",
+                            "unavailable"
+                          ]
+                        },
+                        "setup_completed": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["path", "branch", "head_sha", "readiness"],
+                      "additionalProperties": false
+                    },
+                    "checks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "state": {
+                            "enum": ["ready", "missing", "unknown"]
+                          },
+                          "reason": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["name", "state", "reason"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["worktree", "checks"],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "WORKTREE-001",
+        "WORKTREE-002",
+        "WORKTREE-003",
+        "WORKTREE-004",
+        "WORKTREE-005",
+        "WORKTREE-006",
+        "WORKTREE-007",
+        "WORKTREE-008",
+        "WORKTREE-009",
+        "WORKTREE-010"
+      ],
+      "ordering": [
+        "resolve requested worktree",
+        "read Git registration and path",
+        "inspect declared prerequisites",
+        "return readiness checks"
+      ],
+      "rules": [
+        "Inspect the requested registered worktree, branch and declared setup artifacts. Do not read arbitrary developer-home state or run package test/check scripts.",
+        "Readiness is operational worktree setup readiness, not a claim that the app or task is correct. Optional preview/CLI locations may be reported if configured."
+      ],
+      "failure_codes": ["UNMANAGED_PATH", "NOT_FOUND", "LOOKUP_FAILED"]
+    },
+    {
+      "name": "list",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "worktrees": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "branch": {
+                          "type": ["string", "null"]
+                        },
+                        "head_sha": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "readiness": {
+                          "enum": [
+                            "ready",
+                            "setup_failed",
+                            "not_configured",
+                            "unavailable"
+                          ]
+                        },
+                        "setup_completed": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["path", "branch", "head_sha", "readiness"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": ["root", "worktrees"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "root": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "worktrees": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "branch": {
+                            "type": ["string", "null"]
+                          },
+                          "head_sha": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "readiness": {
+                            "enum": [
+                              "ready",
+                              "setup_failed",
+                              "not_configured",
+                              "unavailable"
+                            ]
+                          },
+                          "setup_completed": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": ["path", "branch", "head_sha", "readiness"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["root", "worktrees"],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "WORKTREE-001",
+        "WORKTREE-002",
+        "WORKTREE-003",
+        "WORKTREE-004",
+        "WORKTREE-005",
+        "WORKTREE-006",
+        "WORKTREE-007",
+        "WORKTREE-008",
+        "WORKTREE-009",
+        "WORKTREE-010"
+      ],
+      "ordering": [
+        "resolve repository/root",
+        "read Git worktree records",
+        "filter contained records",
+        "return deterministic path ordering"
+      ],
+      "rules": [
+        "List Git-registered worktrees under the resolved configured task root. Include locked/prunable observations in warnings rather than treating arbitrary directories as managed.",
+        "Do not discover unrelated repositories by scanning the entire home directory."
+      ],
+      "failure_codes": ["CONTEXT_UNAVAILABLE", "LOOKUP_FAILED"]
+    },
+    {
+      "name": "rm",
+      "effect": "local-write",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["path"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "branch_deleted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["path", "removed", "branch_deleted"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "removed": {
+                      "type": "boolean"
+                    },
+                    "branch_deleted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["path", "removed", "branch_deleted"],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "WORKTREE-001",
+        "WORKTREE-002",
+        "WORKTREE-003",
+        "WORKTREE-004",
+        "WORKTREE-005",
+        "WORKTREE-006",
+        "WORKTREE-007",
+        "WORKTREE-008",
+        "WORKTREE-009",
+        "WORKTREE-010"
+      ],
+      "ordering": [
+        "resolve/lock requested path",
+        "validate registration and safety",
+        "inspect work and ahead state",
+        "stop owned resources if eligible",
+        "remove through Git",
+        "report final state"
+      ],
+      "rules": [
+        "Resolve canonical path, root containment and Git registration before deletion. Refuse the primary checkout, the session current worktree, locked entries or unrelated paths.",
+        "Read tracked/untracked changes and commits ahead of the declared base/tracking ref. Refuse dirty, uniquely ahead or unknown comparison state; v1 has no force action.",
+        "Use Git worktree removal, not recursive deletion of arbitrary directories. Stop only harness-owned resources associated with that path after eligibility is established.",
+        "Keep the task branch by default. Repeated removal of an already absent, previously identified target returns removed=false; it must not delete a replacement unrelated directory."
+      ],
+      "failure_codes": [
+        "UNSAFE_PATH",
+        "CURRENT_WORKTREE",
+        "DIRTY_WORKTREE",
+        "AHEAD_COMMITS",
+        "LOCKED_WORKTREE",
+        "STATE_UNKNOWN",
+        "REMOVE_FAILED"
+      ]
+    }
+  ]
+}

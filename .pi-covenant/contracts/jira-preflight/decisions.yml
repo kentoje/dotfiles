@@ -1,0 +1,41 @@
+schema_version: 1
+decisions:
+  - id: jira-preflight-exact-match-baseline
+    status: specified-default
+    decision: Search the selected project and compare summaries after Unicode normalization, trim, whitespace collapse and case folding.
+    drivers:
+      - Gives a deterministic reproducible duplicate baseline.
+    alternatives:
+      - option: "Treat fuzzy semantic similarity as exact duplicate identity: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: &id001
+      - JIRAPREFLIGHT-001
+      - JIRAPREFLIGHT-002
+      - JIRAPREFLIGHT-003
+      - JIRAPREFLIGHT-004
+      - JIRAPREFLIGHT-005
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []
+  - id: jira-preflight-bound-confirmation
+    status: specified-default
+    decision: A duplicate decision binds site/project/type/summary and presented candidate identities.
+    drivers:
+      - Changed proposals must not reuse stale authorization.
+    alternatives:
+      - option: "A generic approved=true input: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: *id001
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []

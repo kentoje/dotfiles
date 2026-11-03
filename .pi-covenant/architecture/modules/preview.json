@@ -1,0 +1,440 @@
+{
+  "schema_version": 1,
+  "interface_id": "preview-v1",
+  "owner": "preview",
+  "implementation_root": "src/preview/",
+  "test_root": "src/preview/",
+  "role": "Optional capability driver for preview semantics, registered only for selected projects.",
+  "dependencies": ["tool-protocol", "project-cli"],
+  "operations": {
+    "url": {
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "running": {
+                    "type": "boolean"
+                  },
+                  "ready": {
+                    "type": "boolean"
+                  },
+                  "instance_id": {
+                    "type": ["string", "null"]
+                  },
+                  "ownership": {
+                    "enum": ["owned", "borrowed", "none"]
+                  },
+                  "auth_mode": {
+                    "enum": ["none", "dev-plugin", "browser-login", "unknown"]
+                  },
+                  "mode": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "required": [
+                  "url",
+                  "running",
+                  "ready",
+                  "instance_id",
+                  "ownership",
+                  "auth_mode",
+                  "mode"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "running": {
+                      "type": "boolean"
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "instance_id": {
+                      "type": ["string", "null"]
+                    },
+                    "ownership": {
+                      "enum": ["owned", "borrowed", "none"]
+                    },
+                    "auth_mode": {
+                      "enum": ["none", "dev-plugin", "browser-login", "unknown"]
+                    },
+                    "mode": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "running",
+                    "ready",
+                    "instance_id",
+                    "ownership",
+                    "auth_mode",
+                    "mode"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "effect": "read-only",
+      "rules": [
+        "Use the invoking project CLI context and configured route. No startup or login occurs.",
+        "Report running separately from ready and include known instance/build identity in context. Unknown auth is unknown, not none."
+      ]
+    },
+    "up": {
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "running": {
+                    "type": "boolean"
+                  },
+                  "ready": {
+                    "type": "boolean"
+                  },
+                  "instance_id": {
+                    "type": ["string", "null"]
+                  },
+                  "ownership": {
+                    "enum": ["owned", "borrowed", "none"]
+                  },
+                  "auth_mode": {
+                    "enum": ["none", "dev-plugin", "browser-login", "unknown"]
+                  },
+                  "mode": {
+                    "type": ["string", "null"]
+                  }
+                },
+                "required": [
+                  "url",
+                  "running",
+                  "ready",
+                  "instance_id",
+                  "ownership",
+                  "auth_mode",
+                  "mode"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "running": {
+                      "type": "boolean"
+                    },
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "instance_id": {
+                      "type": ["string", "null"]
+                    },
+                    "ownership": {
+                      "enum": ["owned", "borrowed", "none"]
+                    },
+                    "auth_mode": {
+                      "enum": ["none", "dev-plugin", "browser-login", "unknown"]
+                    },
+                    "mode": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "running",
+                    "ready",
+                    "instance_id",
+                    "ownership",
+                    "auth_mode",
+                    "mode"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "effect": "process",
+      "rules": [
+        "Validate selected mode and exact project-owned startup command. Reuse an already ready matching instance with ownership=borrowed.",
+        "If startup is needed, track its PID/process group and unique instance token, wait only to the configured bounded usable-readiness signal, and verify project/build identity.",
+        "Report browser-login as a prerequisite rather than silently navigating. On timeout/cancellation clean up only newly owned startup resources and preserve captured evidence.",
+        "Long-lived owned servers remain registered for explicit project CLI cleanup/session cleanup policy; borrowed servers survive cleanup."
+      ]
+    }
+  },
+  "consumes": {
+    "tool-protocol": ["validate_boundary"],
+    "project-cli": ["execute_capability"]
+  },
+  "host_capabilities": [
+    "Owned preview processes through selected capability driver"
+  ],
+  "state_ownership": ["Only preview resources started by this invocation"],
+  "test_pattern": "**/*.test.ts"
+}

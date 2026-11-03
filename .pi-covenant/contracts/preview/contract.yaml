@@ -1,0 +1,76 @@
+schema_version: 1
+component:
+  id: preview
+  name: preview
+  status: draft
+intent: ./intent.md
+obligations:
+  - id: PREVIEW-001
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview lookup must report the URL and runtime state of the selected project or worktree.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PREVIEW-002
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview startup must use the project-selected startup capability or command and must not duplicate an already running instance.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PREVIEW-003
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview results must report known authentication requirements without silently attempting browser login.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PREVIEW-004
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview is an optional tailored project CLI capability and must not be registered as a universal harness tool.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PREVIEW-005
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview readiness must check the selected app identity and usable readiness signal, not merely an occupied port.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PREVIEW-006
+    status: draft
+    severity: high
+    kind: invariant
+    description: Preview cleanup must stop only processes owned by the invocation or explicitly adopted for cleanup.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources: []
+dependencies:
+  - tool-protocol
+  - project-cli
+interfaces:
+  - name: preview-v1
+    language: typescript
+    module: architecture/modules/preview.json
+    export: preview-v1

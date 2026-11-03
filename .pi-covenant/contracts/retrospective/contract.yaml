@@ -1,0 +1,65 @@
+schema_version: 1
+component:
+  id: retrospective
+  name: retrospective
+  status: draft
+intent: ./intent.md
+obligations:
+  - id: RETROSPECTIVE-001
+    status: draft
+    severity: high
+    kind: invariant
+    description: A user can explicitly request a retrospective of harness behavior and receive concrete improvement proposals grounded in observed friction.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: RETROSPECTIVE-002
+    status: draft
+    severity: high
+    kind: invariant
+    description: Completing a session must not automatically invoke a retrospective or start another agent turn for one.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: RETROSPECTIVE-003
+    status: draft
+    severity: high
+    kind: invariant
+    description: Retrospective recording must retain observed friction, proposed behavior and source references without asserting a fabricated incident or measurement.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: RETROSPECTIVE-004
+    status: draft
+    severity: high
+    kind: invariant
+    description: Retrospective recording must link a matching existing backlog item rather than append an exact normalized-title duplicate.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: RETROSPECTIVE-005
+    status: draft
+    severity: high
+    kind: invariant
+    description: Retrospectives must not implement proposed changes, modify product repositories or start shipping automatically.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources: []
+dependencies:
+  - tool-protocol
+interfaces:
+  - name: retrospective-v1
+    language: typescript
+    module: architecture/modules/retrospective.json
+    export: retrospective-v1

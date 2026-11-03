@@ -1,0 +1,83 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+  - id: TOOLPROTOCOL-001-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Validate the complete action input and resolve its target before any external mutation.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-001
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-002-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Every result must preserve the resolved repository or project identity and explicit operation target.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-002
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-003-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Existing task authorization must determine allowed mutations; a model-supplied approval boolean must not grant authority.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-003
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-004-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: A remote write with an unknown commit outcome must report indeterminate state and must not be automatically repeated.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-004
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-005-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Read retries must be bounded by the call deadline and mutations must not receive an automatic generic retry.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-005
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-006-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Cancellation must stop scheduling new work and report already completed effects without claiming rollback.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-006
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-007-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Collection responses must expose pagination or truncation rather than claiming an incomplete list is complete.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-007
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-008-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Output and diagnostics must be bounded and redact known credentials without claiming exhaustive secret detection.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-008
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-009-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: A failed or blocked tool result must not schedule a new agent turn automatically.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-009
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: TOOLPROTOCOL-010-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Concurrent conflicting writes to the same resource must be serialized or rejected before a second mutation starts.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - TOOLPROTOCOL-010
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.

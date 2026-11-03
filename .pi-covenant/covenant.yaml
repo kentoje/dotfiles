@@ -1,0 +1,10 @@
+contracts:
+  directory: contracts
+execution:
+  test_adapter: vitest
+  timeout_seconds: 120
+  package_manager: npm
+project:
+  language: typescript
+  name: .pi-covenant
+schema_version: 1

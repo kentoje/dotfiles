@@ -1,0 +1,75 @@
+schema_version: 1
+component:
+  id: repository-context
+  name: repository-context
+  status: draft
+intent: ./intent.md
+obligations:
+  - id: REPOSITORYCONTEXT-001
+    status: draft
+    severity: high
+    kind: invariant
+    description: Repository context must identify the selected repository and worktree rather than rely on a fixed developer-home path.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: REPOSITORYCONTEXT-002
+    status: draft
+    severity: high
+    kind: invariant
+    description: Repository context must preserve explicit project choices for available commands, setup, preview and CLI capabilities.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: REPOSITORYCONTEXT-003
+    status: draft
+    severity: high
+    kind: invariant
+    description: Unavailable or conflicting repository configuration must be reported explicitly instead of guessed as a verified fact.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: REPOSITORYCONTEXT-004
+    status: draft
+    severity: high
+    kind: invariant
+    description: Explicit invocation context must override project and host defaults without silently switching the selected repository.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: REPOSITORYCONTEXT-005
+    status: draft
+    severity: high
+    kind: invariant
+    description: A non-Git project must remain discoverable for project CLI proposals while Git-dependent operations report a missing Git prerequisite.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: REPOSITORYCONTEXT-006
+    status: draft
+    severity: high
+    kind: invariant
+    description: Repository facts must include their source and unavailable values instead of fabricated command, route, auth or policy defaults.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources: []
+dependencies:
+  - tool-protocol
+interfaces:
+  - name: repository-context-v1
+    language: typescript
+    module: architecture/modules/repository-context.json
+    export: repository-context-v1

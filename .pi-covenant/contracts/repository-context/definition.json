@@ -1,0 +1,359 @@
+{
+  "schema_version": 1,
+  "name": "repository-context",
+  "kind": "shared-component",
+  "design_status": "specified-awaiting-implementation",
+  "description": "Resolve explicit project/repository/worktree identity and project-owned operating facts consistently for every tool.",
+  "component": "repository-context",
+  "shared_protocol": "docs/tool-protocol.md",
+  "actions": [
+    {
+      "name": "resolve",
+      "effect": "read-only",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional session-relative working path."
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional explicitly selected repository ID or configured host/path."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "partial",
+              "blocked",
+              "error",
+              "cancelled",
+              "indeterminate"
+            ]
+          },
+          "context": {
+            "type": "object",
+            "description": "Resolved identities and target IDs, retaining known values on failure."
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "project_root": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "git_root": {
+                    "type": ["string", "null"]
+                  },
+                  "worktree_root": {
+                    "type": ["string", "null"]
+                  },
+                  "branch": {
+                    "type": ["string", "null"]
+                  },
+                  "head_sha": {
+                    "type": ["string", "null"]
+                  },
+                  "repository_id": {
+                    "type": ["string", "null"]
+                  },
+                  "gitlab_host": {
+                    "type": ["string", "null"]
+                  },
+                  "default_branch": {
+                    "type": ["string", "null"]
+                  },
+                  "project_cli_manifest": {
+                    "type": ["string", "null"]
+                  },
+                  "available_capabilities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "sources": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fact": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["fact", "source"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "unavailable": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fact": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["fact", "reason"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "project_root",
+                  "git_root",
+                  "worktree_root",
+                  "branch",
+                  "head_sha",
+                  "repository_id",
+                  "gitlab_host",
+                  "default_branch",
+                  "project_cli_manifest",
+                  "available_capabilities",
+                  "sources",
+                  "unavailable"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  },
+                  "details": {
+                    "type": "object"
+                  }
+                },
+                "required": ["code", "message", "phase", "retryable"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completed_effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outcome": {
+                  "enum": ["committed", "unknown"]
+                },
+                "reference": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["phase", "target", "outcome"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "status",
+          "context",
+          "data",
+          "error",
+          "warnings",
+          "completed_effects"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "ok"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "project_root": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "git_root": {
+                      "type": ["string", "null"]
+                    },
+                    "worktree_root": {
+                      "type": ["string", "null"]
+                    },
+                    "branch": {
+                      "type": ["string", "null"]
+                    },
+                    "head_sha": {
+                      "type": ["string", "null"]
+                    },
+                    "repository_id": {
+                      "type": ["string", "null"]
+                    },
+                    "gitlab_host": {
+                      "type": ["string", "null"]
+                    },
+                    "default_branch": {
+                      "type": ["string", "null"]
+                    },
+                    "project_cli_manifest": {
+                      "type": ["string", "null"]
+                    },
+                    "available_capabilities": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fact": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "source": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["fact", "source"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "unavailable": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fact": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "reason": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["fact", "reason"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "project_root",
+                    "git_root",
+                    "worktree_root",
+                    "branch",
+                    "head_sha",
+                    "repository_id",
+                    "gitlab_host",
+                    "default_branch",
+                    "project_cli_manifest",
+                    "available_capabilities",
+                    "sources",
+                    "unavailable"
+                  ],
+                  "additionalProperties": false
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "obligations": [
+        "REPOSITORYCONTEXT-001",
+        "REPOSITORYCONTEXT-002",
+        "REPOSITORYCONTEXT-003",
+        "REPOSITORYCONTEXT-004",
+        "REPOSITORYCONTEXT-005",
+        "REPOSITORYCONTEXT-006"
+      ],
+      "ordering": [
+        "apply explicit scope",
+        "resolve canonical project/Git identity",
+        "read trusted declarations",
+        "reconcile explicit facts",
+        "return values with provenance"
+      ],
+      "rules": [
+        "Resolve cwd against the session path and canonicalize existing roots. Conflicting explicit cwd/repository choices block rather than silently override each other.",
+        "Read only trusted host configuration and selected project declarations/metadata. No home-directory scan, arbitrary script evaluation, fetch or install.",
+        "Resolve per-project configured worktree roots/setup/delivery/title/route/auth/capability facts with provenance. Missing facts stay unavailable; malformed facts are errors.",
+        "For a non-Git project return project identity and available authoring facts, with Git fields null. Git operations consume that as a missing prerequisite.",
+        "Do not independently infer a verification suite when an agreed project CLI exists; its manifest owns selected capabilities."
+      ],
+      "failure_codes": [
+        "CONTEXT_CONFLICT",
+        "PATH_UNAVAILABLE",
+        "CONFIG_INVALID",
+        "REMOTE_AMBIGUOUS"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+schema_version: 1
+bindings:
+  - id: worktree-safe-creation
+    obligation: WORKTREE-001
+    adapter: vitest
+    tests:
+      - worktree.safe-creation
+  - id: worktree-repository-setup
+    obligation: WORKTREE-002
+    adapter: vitest
+    tests:
+      - worktree.repository-setup
+  - id: worktree-reuses-existing
+    obligation: WORKTREE-006
+    adapter: vitest
+    tests:
+      - worktree.reuses-existing
+  - id: worktree-retains-partial-setup
+    obligation: WORKTREE-007
+    adapter: vitest
+    tests:
+      - worktree.retains-partial-setup
+  - id: worktree-readiness-only
+    obligation: WORKTREE-003
+    adapter: vitest
+    tests:
+      - worktree.readiness-only
+  - id: worktree-lists-managed-only
+    obligation: WORKTREE-004
+    adapter: vitest
+    tests:
+      - worktree.lists-managed-only
+  - id: worktree-safe-removal
+    obligation: WORKTREE-005
+    adapter: vitest
+    tests:
+      - worktree.safe-removal
+  - id: worktree-protects-ahead-and-unknown
+    obligation: WORKTREE-009
+    adapter: vitest
+    tests:
+      - worktree.protects-ahead-and-unknown
+  - id: worktree-delegates-creation
+    obligation: WORKTREE-002
+    adapter: vitest
+    tests:
+      - worktree.delegates-creation
+  - id: worktree-preserves-other-checkouts
+    obligation: WORKTREE-008
+    adapter: vitest
+    tests:
+      - worktree.preserves-other-checkouts
+  - id: worktree-cancels-owned-setup
+    obligation: WORKTREE-010
+    adapter: vitest
+    tests:
+      - worktree.cancels-owned-setup
+  - id: worktree-repeat-removal-and-replacement
+    obligation: WORKTREE-005
+    adapter: vitest
+    tests:
+      - worktree.repeat-removal-and-replacement
+  - id: worktree-serializes-mutations
+    obligation: WORKTREE-006
+    adapter: vitest
+    tests:
+      - worktree.serializes-mutations
+  - id: worktree-rejects-symlink-and-conflicting-target
+    obligation: WORKTREE-001
+    adapter: vitest
+    tests:
+      - worktree.rejects-symlink-and-conflicting-target
+  - id: worktree-protects-locked-and-current
+    obligation: WORKTREE-005
+    adapter: vitest
+    tests:
+      - worktree.protects-locked-and-current
+  - id: worktree-honors-cancellation-and-deadline
+    obligation: WORKTREE-010
+    adapter: vitest
+    tests:
+      - worktree.honors-cancellation-and-deadline
+  - id: worktree-reuses-without-setup
+    obligation: WORKTREE-006
+    adapter: vitest
+    tests:
+      - worktree.reuses-without-setup
+  - id: worktree-result-schemas
+    obligation: WORKTREE-003
+    adapter: vitest
+    tests:
+      - worktree.result-schemas
+  - id: worktree-setup-launch-and-readback-failure
+    obligation: WORKTREE-007
+    adapter: vitest
+    tests:
+      - worktree.setup-launch-and-readback-failure
+  - id: worktree-ignores-ambient-git-target
+    obligation: WORKTREE-008
+    adapter: vitest
+    tests:
+      - worktree.ignores-ambient-git-target
+  - id: worktree-cancellation-retains-removal-effect
+    obligation: WORKTREE-010
+    adapter: vitest
+    tests:
+      - worktree.cancellation-retains-removal-effect
+  - id: worktree-reports-lock-cleanup-failure
+    obligation: WORKTREE-010
+    adapter: vitest
+    tests:
+      - worktree.reports-lock-cleanup-failure

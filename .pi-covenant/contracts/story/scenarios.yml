@@ -1,0 +1,83 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+  - id: ST-LIST-01
+    action: list
+    status: planned
+    given: No story matches a valid query.
+    when: List.
+    then: Return ok with an empty list.
+    obligations: &id001
+      - STORY-001
+      - STORY-002
+      - STORY-003
+      - STORY-004
+      - STORY-005
+  - id: ST-LIST-02
+    action: list
+    status: planned
+    given: The index cannot be read.
+    when: List.
+    then: Return error, not the same empty response.
+    obligations: *id001
+  - id: ST-SHOW-01
+    action: show
+    status: planned
+    given: Story button--primary exists with dark theme.
+    when: Render at 800x600.
+    then: Capture that iframe/theme/viewport and return the exact ID and evidence paths.
+    obligations: *id001
+  - id: ST-SHOW-02
+    action: show
+    status: planned
+    given: A selector matches two stories or requests an unsupported theme.
+    when: Render.
+    then: Reject before opening an unrelated page.
+    obligations: *id001
+  - id: ST-SHOW-03
+    action: show
+    status: planned
+    given: Render fails after browser context creation.
+    when: Render.
+    then: Close the owned context and retain failure artifacts.
+    obligations: *id001
+  - id: STORY-001-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Story discovery must return the matching stable story identities from the selected project.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - STORY-001
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: STORY-002-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Story rendering must target the requested preview iframe and preserve requested supported theme and viewport options.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - STORY-002
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: STORY-003-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Story rendering must return observable render evidence or a structured failure and clean up resources it owns.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - STORY-003
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: STORY-004-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Storybook support must be selected per project and must not be installed or exposed universally.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - STORY-004
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: STORY-005-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Story rendering must reject ambiguous selectors, unsupported options and unavailable instances without substituting another story.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - STORY-005
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.

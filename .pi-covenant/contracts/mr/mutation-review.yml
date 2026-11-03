@@ -1,0 +1,10 @@
+status: not_run
+survivors: []
+planned_mutations:
+  - Remove target disambiguation
+  - Treat failed or truncated lookup as empty
+  - Repeat an uncertain remote mutation
+  - Drop committed effects on failure
+  - Bypass an explicit scope boundary
+decision_holes: []
+note: Planned review categories only; no mutation run or incident is claimed.

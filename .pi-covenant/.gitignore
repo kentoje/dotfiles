@@ -1,0 +1,5 @@
+/node_modules/
+/.covenant/
+/dist/
+
+/scripts/__pycache__/

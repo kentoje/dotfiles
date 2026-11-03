@@ -1,0 +1,66 @@
+schema_version: 1
+component:
+  id: story
+  name: story
+  status: draft
+intent: ./intent.md
+obligations:
+  - id: STORY-001
+    status: draft
+    severity: high
+    kind: invariant
+    description: Story discovery must return the matching stable story identities from the selected project.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: STORY-002
+    status: draft
+    severity: high
+    kind: invariant
+    description: Story rendering must target the requested preview iframe and preserve requested supported theme and viewport options.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: STORY-003
+    status: draft
+    severity: high
+    kind: invariant
+    description: Story rendering must return observable render evidence or a structured failure and clean up resources it owns.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: STORY-004
+    status: draft
+    severity: high
+    kind: invariant
+    description: Storybook support must be selected per project and must not be installed or exposed universally.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: STORY-005
+    status: draft
+    severity: high
+    kind: invariant
+    description: Story rendering must reject ambiguous selectors, unsupported options and unavailable instances without substituting another story.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources: []
+dependencies:
+  - tool-protocol
+  - project-cli
+interfaces:
+  - name: story-v1
+    language: typescript
+    module: architecture/modules/story.json
+    export: story-v1

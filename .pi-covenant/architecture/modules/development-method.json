@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "interface_id": "development-method-v1",
+  "owner": "development-method",
+  "implementation_root": "src/development-method/",
+  "test_root": "src/development-method/",
+  "role": "Development-only contract checks. No runtime imports or product gating.",
+  "dependencies": [],
+  "operations": {},
+  "consumes": {},
+  "host_capabilities": [],
+  "state_ownership": [
+    "Immutable invocation facts and returned evidence; no implicit global mutable cache"
+  ],
+  "test_pattern": "**/*.test.ts"
+}

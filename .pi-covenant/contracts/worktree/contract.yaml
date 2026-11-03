@@ -1,0 +1,143 @@
+schema_version: 1
+component:
+  id: worktree
+  name: worktree
+  status: active
+intent: ./intent.md
+obligations:
+  - id: WORKTREE-001
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree creation must constrain the new path to the configured worktree root and reject unsafe task paths.
+    verification:
+      - worktree-safe-creation
+      - worktree-rejects-symlink-and-conflicting-target
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-002
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree setup must use the selected repository-owned setup mechanism when one is configured and report setup failures.
+    verification:
+      - worktree-repository-setup
+      - worktree-delegates-creation
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-003
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree readiness must describe the requested worktree without automatically running a universal repository verification suite.
+    verification:
+      - worktree-readiness-only
+      - worktree-result-schemas
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-004
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree listing must distinguish registered task worktrees within the selected configured root.
+    verification:
+      - worktree-lists-managed-only
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-005
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree removal must refuse unrelated paths and must not discard uncommitted changes through an implicit force operation.
+    verification:
+      - worktree-safe-removal
+      - worktree-repeat-removal-and-replacement
+      - worktree-protects-locked-and-current
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-006
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree creation must return an existing matching registered task worktree without repeating setup, or report an explicit conflict.
+    verification:
+      - worktree-reuses-existing
+      - worktree-serializes-mutations
+      - worktree-reuses-without-setup
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-007
+    status: active
+    severity: high
+    kind: invariant
+    description: A setup failure after worktree creation must retain and identify the created path and branch as partial completion.
+    verification:
+      - worktree-retains-partial-setup
+      - worktree-setup-launch-and-readback-failure
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-008
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree operations must not fetch, reset, clean or change another checkout implicitly.
+    verification:
+      - worktree-preserves-other-checkouts
+      - worktree-ignores-ambient-git-target
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-009
+    status: active
+    severity: high
+    kind: invariant
+    description: Removal must identify untracked files, uncommitted changes and ahead commits before destructive removal.
+    verification:
+      - worktree-protects-ahead-and-unknown
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: WORKTREE-010
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree cancellation must terminate owned setup work without deleting preexisting or concurrently modified user state.
+    verification:
+      - worktree-cancels-owned-setup
+      - worktree-honors-cancellation-and-deadline
+      - worktree-cancellation-retains-removal-effect
+      - worktree-reports-lock-cleanup-failure
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources:
+  - src/worktree/
+dependencies:
+  - tool-protocol
+  - repository-context
+interfaces:
+  - name: worktree-v1
+    language: typescript
+    module: architecture/modules/worktree.json
+    export: worktree-v1
+  - name: worktree-runtime
+    language: typescript
+    module: src/worktree/module-port.ts
+    export: makeWorktreeModule

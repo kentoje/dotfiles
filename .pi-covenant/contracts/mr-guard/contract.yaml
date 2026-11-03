@@ -1,0 +1,77 @@
+schema_version: 1
+component:
+  id: mr-guard
+  name: mr-guard
+  status: draft
+intent: ./intent.md
+obligations:
+  - id: MRGUARD-001
+    status: draft
+    severity: high
+    kind: invariant
+    description: An MR creation guard must check the effective target repository and source branch of the requested creation.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: MRGUARD-002
+    status: draft
+    severity: high
+    kind: invariant
+    description: An MR creation guard must surface an already existing matching MR before another MR is created.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: MRGUARD-003
+    status: draft
+    severity: high
+    kind: invariant
+    description: An MR creation guard must not require an MR at ordinary task completion or enqueue an automatic continuation when creation is blocked.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: MRGUARD-004
+    status: draft
+    severity: high
+    kind: invariant
+    description: MR creation protection must distinguish zero, one and multiple existing branch MRs and treat lookup failure as unresolved protection.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: MRGUARD-005
+    status: draft
+    severity: high
+    kind: invariant
+    description: Repository-specific title and delivery checks must be enforced only when explicitly configured for the selected repository.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: MRGUARD-006
+    status: draft
+    severity: high
+    kind: invariant
+    description: The guard must declare which direct creation entrypoints it covers and must not claim to sandbox arbitrary shell programs.
+    verification: []
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources: []
+dependencies:
+  - tool-protocol
+  - repository-context
+  - mr
+interfaces:
+  - name: mr-guard-v1
+    language: typescript
+    module: architecture/modules/mr-guard.json
+    export: mr-guard-v1

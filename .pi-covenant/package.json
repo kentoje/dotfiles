@@ -1,0 +1,36 @@
+{
+  "name": "pi-covenant",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify": "scripts/verify-bootstrap.sh",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "fallow": "fallow dead-code",
+    "fallow:report": "fallow"
+  },
+  "dependencies": {
+    "@effect/platform-node": "^4.1.2",
+    "effect": "^4.1.2"
+  },
+  "devDependencies": {
+    "@covenant/vitest": "file:vendor/covenant-vitest-0.1.0.tgz",
+    "@types/node": "^24.19.2",
+    "ajv": "^8.20.0",
+    "fallow": "^3.38.1",
+    "fast-check": "^4.10.2",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "typescript": "~5.9.3",
+    "ultracite": "8.1.1",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  }
+}

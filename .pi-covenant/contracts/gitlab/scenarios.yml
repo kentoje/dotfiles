@@ -1,0 +1,212 @@
+schema_version: 1
+status: planned-not-executed
+scenarios:
+  - id: GL-REPO-01
+    action: repository
+    status: planned
+    given: A checkout maps to team/app with default branch develop.
+    when: Read repository.
+    then: Return team/app and develop with no local or remote mutation.
+    obligations: &id001
+      - GITLAB-001
+      - GITLAB-002
+      - GITLAB-003
+      - GITLAB-004
+      - GITLAB-005
+      - GITLAB-006
+      - GITLAB-007
+      - GITLAB-008
+      - GITLAB-009
+      - GITLAB-010
+  - id: GL-REPO-02
+    action: repository
+    status: planned
+    given: Two eligible remotes exist and no selection resolves them.
+    when: Read repository.
+    then: Return blocked AMBIGUOUS_REMOTE; do not choose the first remote.
+    obligations: *id001
+  - id: GL-LIST-01
+    action: pipelines
+    status: planned
+    given: Two pipeline pages match the branch.
+    when: Read first page.
+    then: Return newest first, has_more=true and next cursor; complete=false.
+    obligations: *id001
+  - id: GL-LIST-02
+    action: pipelines
+    status: planned
+    given: The provider lookup fails.
+    when: List pipelines.
+    then: Return error, not an empty successful list.
+    obligations: *id001
+  - id: GL-PIPE-01
+    action: pipeline
+    status: planned
+    given: Pipeline 41 is green for old SHA A; pipeline 42 is running for B.
+    when: Read pipeline 42.
+    then: Return B/running, never A/success.
+    obligations: *id001
+  - id: GL-PIPE-02
+    action: pipeline
+    status: planned
+    given: Pipeline ID exists in another project only.
+    when: Read in selected project.
+    then: Return not found; do not cross-project search or substitution.
+    obligations: *id001
+  - id: GL-JOBS-01
+    action: jobs
+    status: planned
+    given: A failed job was retried under a new job ID.
+    when: Read with and without include_retried.
+    then: Default returns current attempts; explicit history retains both distinct IDs.
+    obligations: *id001
+  - id: GL-JOBS-02
+    action: jobs
+    status: planned
+    given: Only the first job page is available.
+    when: Read jobs.
+    then: complete=false; no pipeline readiness assertion.
+    obligations: *id001
+  - id: GL-JOB-01
+    action: job
+    status: planned
+    given: A retry changed job ID from 8 to 9.
+    when: Read 8.
+    then: Return the old attempt as old; do not replace it with 9.
+    obligations: *id001
+  - id: GL-JOB-02
+    action: job
+    status: planned
+    given: Job lookup times out.
+    when: Read job.
+    then: Return bounded failure after eligible read retry, not success or absence.
+    obligations: *id001
+  - id: GL-LOG-01
+    action: logs
+    status: planned
+    given: A trace exceeds the requested window.
+    when: Read logs with max_bytes=1024.
+    then: Return a bounded window, truncated=true and a valid continuation offset.
+    obligations: *id001
+  - id: GL-LOG-02
+    action: logs
+    status: planned
+    given: The trace contains a known configured token.
+    when: Read logs.
+    then: Token is redacted; original credential never appears in diagnostics.
+    obligations: *id001
+  - id: GL-RETRY-01
+    action: retry
+    status: planned
+    given: Explicit pipeline 42 has failed jobs.
+    when: Request authorized retry of 42.
+    then: One retry request targets 42; return its observed state without claiming green CI.
+    obligations: *id001
+  - id: GL-RETRY-02
+    action: retry
+    status: planned
+    given: The request times out after dispatch.
+    when: Retry pipeline.
+    then: Return indeterminate; do not issue a second retry.
+    obligations: *id001
+  - id: GL-RETRY-03
+    action: retry
+    status: planned
+    given: No failed or canceled jobs are eligible.
+    when: Retry pipeline.
+    then: Return ok/no_change rather than inventing a new pipeline.
+    obligations: *id001
+  - id: GL-CANCEL-01
+    action: cancel
+    status: planned
+    given: Cancel request is accepted but jobs still stop asynchronously.
+    when: Cancel pipeline 42.
+    then: accepted with cancellation_confirmed=false and actual observed state.
+    obligations: *id001
+  - id: GL-CANCEL-02
+    action: cancel
+    status: planned
+    given: Pipeline is already terminal and unchanged.
+    when: Cancel it.
+    then: Return no_change; do not claim it transitioned to canceled.
+    obligations: *id001
+  - id: GITLAB-001-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: GitLab lookup must resolve its repository and source branch from the selected working context rather than an unrelated checkout.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-001
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-002-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: GitLab lookup must distinguish an absent merge request from an unavailable or malformed lookup result.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-002
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-003-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: GitLab lookup must not create, update, merge or delete remote resources.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-003
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-004-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: The GitLab tool must expose repository and CI operations separately from MR discussion and metadata operations.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-004
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-005-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Pipeline and job reads must preserve pipeline ID, job ID, ref, SHA and retried-attempt identity where available.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-005
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-006-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Job log results must state the returned byte window, truncation and whether more bytes remain.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-006
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-007-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Pipeline retry must target an explicit repository and pipeline ID within an authorized request.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-007
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-008-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: Pipeline cancellation must target an explicit pipeline and report observed state separately from request acceptance.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-008
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-009-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: A pipeline with no retryable failed or canceled jobs must be reported as an unchanged retry outcome.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-009
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GITLAB-010-ACCEPTANCE
+    status: planned
+    given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
+    when: GitLab operations must not delete pipelines, play deployment jobs or create new pipelines in v1.
+    then: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+    obligations:
+      - GITLAB-010
+    test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.

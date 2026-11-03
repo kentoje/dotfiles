@@ -1,0 +1,42 @@
+schema_version: 1
+decisions:
+  - id: repository-context-context-precedence
+    status: specified-default
+    decision: Explicit invocation context overrides project declaration and trusted host configuration; session cwd is the final path default.
+    drivers:
+      - Makes task selection predictable.
+    alternatives:
+      - option: "Choose another repository based on a convenient package name: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: &id001
+      - REPOSITORYCONTEXT-001
+      - REPOSITORYCONTEXT-002
+      - REPOSITORYCONTEXT-003
+      - REPOSITORYCONTEXT-004
+      - REPOSITORYCONTEXT-005
+      - REPOSITORYCONTEXT-006
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []
+  - id: repository-context-unknown-not-none
+    status: specified-default
+    decision: Unavailable facts remain unknown; none is a deliberate policy value.
+    drivers:
+      - Missing metadata cannot silently waive a configured requirement.
+    alternatives:
+      - option: "Treat malformed metadata as a safe none policy: rejected."
+        disposition: rejected
+    evidence:
+      - Authored design rationale; not user-approved execution evidence
+    related_obligations: *id001
+    assumptions:
+      - Service permissions and project conventions must be discovered at invocation.
+    revisit_when:
+      - The user changes scope or implementation reveals incompatible service/project behavior.
+    approved_by: null
+    execution_evidence: []
