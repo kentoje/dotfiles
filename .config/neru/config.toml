@@ -57,11 +57,18 @@ text = "#FFF1F2"
 # See https://github.com/y3owk1n/neru/blob/main/docs/reference/configuration.md#hotkeys
 # See https://github.com/y3owk1n/neru/blob/main/docs/reference/cli.md
 [hotkeys]
-"Option+," = "hints --action left_click"
-"Primary+Shift+G" = "grid"
-"Primary+Option+Shift+," = "recursive_grid"
-"Primary+Shift+B" = "bisect"
+"Option+," = ["action save_cursor_pos", "hints --action left_click"]
 "Option+Shift+," = "scroll"
+
+# Glove80 sticky navigation layer: F, G, B, C, S, H, D, R.
+"F13" = ["action save_cursor_pos", "hints --action left_click"]
+"F14" = ["action save_cursor_pos", "grid"]
+"F15" = ["action save_cursor_pos", "bisect"]
+"F16" = ["action save_cursor_pos", "recursive_grid"]
+"F17" = "scroll"
+"F18" = ["action save_cursor_pos", "hints --action move_mouse"]
+"F19" = "action left_click --toggle --bare"
+"F20" = "action move_mouse --center"
 
 # Macros
 # See https://github.com/y3owk1n/neru/blob/main/docs/reference/configuration.md#macros
