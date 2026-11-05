@@ -75,6 +75,23 @@ text = "#FFF1F2"
 "Shift+F18" = "hints --action left_click --search" # /
 "Option+F14" = ["action save_cursor_pos", "recursive_grid"] # C
 "Option+F16" = ["action save_cursor_pos", "bisect"] # B
+"Option+F17" = "mode navigate --toggle" # N
+
+[modes.navigate]
+indicator = "Navigate · HJKL"
+
+[modes.navigate.hotkeys]
+"Up" = "action move_mouse_relative --dx=0 --dy=-10"
+"Down" = "action move_mouse_relative --dx=0 --dy=10"
+"Left" = "action move_mouse_relative --dx=-10 --dy=0"
+"Right" = "action move_mouse_relative --dx=10 --dy=0"
+"h" = "action snap --direction left"
+"j" = "action snap --direction down"
+"k" = "action snap --direction up"
+"l" = "action snap --direction right"
+"Tab" = "action snap"
+"Enter" = ["action left_click --bare", "idle"]
+"Escape" = "idle"
 
 # Macros
 # See https://github.com/y3owk1n/neru/blob/main/docs/reference/configuration.md#macros
@@ -498,6 +515,9 @@ invert_scroll = false
 [mode_indicator.scroll]
 enabled = true
 text = "Scroll"
+background_color = { light = "#F2EEF2FF", dark = "#F22B0B0E" }
+text_color = { light = "#17327A", dark = "#FFF1F2" }
+border_color = { light = "#465FBC", dark = "#F87171" }
 
 [mode_indicator.hints]
 enabled = false
@@ -520,6 +540,9 @@ enabled = false
 text = "Monitor Select"
 
 [mode_indicator.ui]
+background_color = "#22D3EE"
+text_color = "#083344"
+border_color = "#0891B2"
 font_size = 10
 font_family = ""
 border_width = 1
