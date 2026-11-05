@@ -62,7 +62,7 @@ text = "#FFF1F2"
 
 # Dedicated sticky navigation layer in my custom Glove80 firmware layout.
 # Physical keys emit the F-key chords below; trailing comments name their base-layer positions.
-"F13" = "hints --action left_click --capture-scope screen" # W
+"F13" = "hints --action left_click --strategy vision --capture-scope screen" # W
 "F15" = "hints --action right_click" # R
 "F16" = "hints --action left_click,left_click" # T
 "F17" = "scroll"
