@@ -60,15 +60,21 @@ text = "#FFF1F2"
 "Option+," = ["action save_cursor_pos", "hints --action left_click"]
 "Option+Shift+," = "scroll"
 
-# Glove80 sticky navigation layer: F, G, B, C, S, H, D, R.
-"F13" = ["action save_cursor_pos", "hints --action left_click"]
-"F14" = ["action save_cursor_pos", "grid"]
-"F15" = ["action save_cursor_pos", "bisect"]
-"F16" = ["action save_cursor_pos", "recursive_grid"]
+# Dedicated sticky navigation layer in my custom Glove80 firmware layout.
+# Physical keys emit the F-key chords below; trailing comments name their base-layer positions.
+"F13" = "hints --action left_click --capture-scope screen" # W
+"F15" = "hints --action right_click" # R
+"F16" = "hints --action left_click,left_click" # T
 "F17" = "scroll"
-"F18" = ["action save_cursor_pos", "hints --action move_mouse"]
-"F19" = "action left_click --toggle --bare"
-"F20" = "action move_mouse --center"
+"F18" = "action left_click --toggle --bare" # D
+"F19" = ["action save_cursor_pos", "hints --action left_click"] # F
+"F20" = ["action save_cursor_pos", "grid"] # G
+"Ctrl+F17" = ["action save_cursor_pos", "hints --action move_mouse"] # H
+"Ctrl+F18" = "action move_mouse --center" # J
+"Shift+F14" = "hints --action left_click --strategy vision" # A
+"Shift+F18" = "hints --action left_click --search" # /
+"Option+F14" = ["action save_cursor_pos", "recursive_grid"] # C
+"Option+F16" = ["action save_cursor_pos", "bisect"] # B
 
 # Macros
 # See https://github.com/y3owk1n/neru/blob/main/docs/reference/configuration.md#macros
