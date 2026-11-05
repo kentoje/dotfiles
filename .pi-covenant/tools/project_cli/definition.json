@@ -2,1766 +2,459 @@
   "schema_version": 1,
   "name": "project_cli",
   "kind": "tool",
-  "design_status": "specified-awaiting-implementation",
-  "description": "Discover, propose, create and maintain a repository-owned CLI whose capabilities match that project and its accepted scope.",
+  "design_status": "implemented-module-pi-registration-pending",
+  "description": "Discover repository check commands and evidence; run the selected mandatory local suite while reporting available checks separately.",
   "component": "project-cli",
   "shared_protocol": "docs/tool-protocol.md",
   "actions": [
     {
       "name": "inspect",
-      "effect": "read-only",
       "input_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
           "project": {
             "type": "string",
             "minLength": 1
+          },
+          "config": {
+            "type": "string",
+            "minLength": 1
           }
         },
-        "required": [],
         "additionalProperties": false
       },
       "output_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "status": {
-            "enum": [
-              "ok",
-              "partial",
-              "blocked",
-              "error",
-              "cancelled",
-              "indeterminate"
-            ]
+          "project": {
+            "type": "string",
+            "minLength": 1
           },
-          "context": {
-            "type": "object",
-            "description": "Resolved identities and target IDs, retaining known values on failure."
+          "source": {
+            "type": "string",
+            "minLength": 1
           },
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "project": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "proposal_id": {
-                    "type": ["string", "null"]
-                  },
-                  "manifest_path": {
-                    "type": ["string", "null"]
-                  },
-                  "entrypoint": {
-                    "type": ["string", "null"]
-                  },
-                  "capabilities": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "description": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "effect": {
-                          "enum": [
-                            "read-only",
-                            "local-write",
-                            "process",
-                            "remote-write"
-                          ]
-                        },
-                        "state": {
-                          "enum": ["proposed", "draft", "usable", "blocked"]
-                        },
-                        "entrypoint": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "args": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "prerequisites": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "last_result": {
-                          "enum": [
-                            "not_run",
-                            "pass",
-                            "fail",
-                            "blocked",
-                            "cancelled"
-                          ]
-                        },
-                        "evidence": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "minLength": 1
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "description",
-                        "effect",
-                        "state",
-                        "entrypoint",
-                        "args",
-                        "prerequisites",
-                        "last_result",
-                        "evidence"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "changes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "findings": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "state": {
-                    "enum": [
-                      "proposed",
-                      "draft",
-                      "usable",
-                      "partial",
-                      "blocked"
-                    ]
-                  }
-                },
-                "required": [
-                  "project",
-                  "proposal_id",
-                  "manifest_path",
-                  "entrypoint",
-                  "capabilities",
-                  "changes",
-                  "findings",
-                  "evidence",
-                  "state"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "message": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "phase": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "retryable": {
-                    "type": "boolean"
-                  },
-                  "details": {
-                    "type": "object"
-                  }
-                },
-                "required": ["code", "message", "phase", "retryable"],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "warnings": {
+          "checks": {
             "type": "array",
+            "minItems": 0,
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3600000
+                }
+              },
+              "required": ["id", "command", "args", "cwd", "timeout_ms"],
+              "additionalProperties": false
             }
           },
-          "completed_effects": {
+          "discovered": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "phase": {
+                "id": {
                   "type": "string",
                   "minLength": 1
                 },
-                "target": {
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "types",
+                      "lint",
+                      "format",
+                      "unit",
+                      "dead-code",
+                      "e2e",
+                      "build",
+                      "custom",
+                      "setup"
+                    ]
+                  }
+                },
+                "command": {
                   "type": "string",
                   "minLength": 1
                 },
-                "outcome": {
-                  "enum": ["committed", "unknown"]
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
-                "reference": {
-                  "type": ["string", "null"]
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "selection": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "selected"
+                        }
+                      },
+                      "required": ["state"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "covered"
+                        },
+                        "by": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "by"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "reason"],
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               },
-              "required": ["phase", "target", "outcome"],
+              "required": [
+                "id",
+                "categories",
+                "command",
+                "args",
+                "cwd",
+                "evidence",
+                "selection"
+              ],
               "additionalProperties": false
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         },
-        "required": [
-          "status",
-          "context",
-          "data",
-          "error",
-          "warnings",
-          "completed_effects"
-        ],
-        "additionalProperties": false,
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "status": {
-                  "const": "ok"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "project": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "proposal_id": {
-                      "type": ["string", "null"]
-                    },
-                    "manifest_path": {
-                      "type": ["string", "null"]
-                    },
-                    "entrypoint": {
-                      "type": ["string", "null"]
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "description": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "effect": {
-                            "enum": [
-                              "read-only",
-                              "local-write",
-                              "process",
-                              "remote-write"
-                            ]
-                          },
-                          "state": {
-                            "enum": ["proposed", "draft", "usable", "blocked"]
-                          },
-                          "entrypoint": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "args": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "prerequisites": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "last_result": {
-                            "enum": [
-                              "not_run",
-                              "pass",
-                              "fail",
-                              "blocked",
-                              "cancelled"
-                            ]
-                          },
-                          "evidence": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "description",
-                          "effect",
-                          "state",
-                          "entrypoint",
-                          "args",
-                          "prerequisites",
-                          "last_result",
-                          "evidence"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "changes": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "findings": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "evidence": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "state": {
-                      "enum": [
-                        "proposed",
-                        "draft",
-                        "usable",
-                        "partial",
-                        "blocked"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "project",
-                    "proposal_id",
-                    "manifest_path",
-                    "entrypoint",
-                    "capabilities",
-                    "changes",
-                    "findings",
-                    "evidence",
-                    "state"
-                  ],
-                  "additionalProperties": false
-                },
-                "error": {
-                  "type": "null"
-                }
-              }
-            }
-          }
-        ]
+        "required": ["project", "source", "checks", "discovered", "notes"],
+        "additionalProperties": false
       },
+      "effect": "read-only",
+      "rules": [
+        "Read project-checks.json or package scripts statically; do not execute checks during discovery.",
+        "Inventory detected check kinds, source evidence and selected/covered/available states; only the selected mandatory local suite can receive execution credit."
+      ],
       "obligations": [
-        "PROJECTCLI-001",
-        "PROJECTCLI-002",
-        "PROJECTCLI-003",
-        "PROJECTCLI-004",
-        "PROJECTCLI-005",
-        "PROJECTCLI-006",
-        "PROJECTCLI-007",
-        "PROJECTCLI-008",
-        "PROJECTCLI-009",
-        "PROJECTCLI-010",
-        "PROJECTCLI-011",
-        "PROJECTCLI-012",
-        "PROJECTCLI-013",
-        "PROJECTCLI-014",
-        "PROJECTCLI-015",
-        "PROJECTCLI-016",
-        "PROJECTCLI-017",
-        "PROJECTCLI-018"
+        "PROJECTCLI-019",
+        "PROJECTCLI-020",
+        "PROJECTCLI-021",
+        "PROJECTCLI-022",
+        "PROJECTCLI-023",
+        "PROJECTCLI-024",
+        "PROJECTCLI-025",
+        "PROJECTCLI-026",
+        "PROJECTCLI-027",
+        "PROJECTCLI-028",
+        "PROJECTCLI-029"
       ],
       "ordering": [
         "resolve project",
-        "read known configuration/docs",
-        "discover existing capability declarations",
-        "return observations with provenance"
+        "read configuration",
+        "return required checks"
       ],
-      "rules": [
-        "Resolve an explicit project or session cwd, including a non-Git directory. Discover existing CLI/manifest, docs, package/build commands, test suites and capability declarations statically.",
-        "Report evidence paths supporting observations. Do not execute repository scripts, install dependencies, launch apps or write generated artifacts.",
-        "An existing suitable CLI is a valid result; do not assume a new wrapper is necessary."
-      ],
-      "failure_codes": [
-        "PROJECT_UNAVAILABLE",
-        "MANIFEST_UNSUPPORTED",
-        "MANIFEST_INVALID"
-      ]
+      "failure_codes": ["PROJECT_CHECK_CONFIG", "PROJECT_CHECK_FAILED"]
     },
     {
-      "name": "propose",
-      "effect": "read-only",
+      "name": "check",
       "input_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
           "project": {
             "type": "string",
             "minLength": 1
           },
-          "requested_capabilities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            }
+          "config": {
+            "type": "string",
+            "minLength": 1
+          },
+          "keep_going": {
+            "type": "boolean"
           }
         },
-        "required": [],
         "additionalProperties": false
       },
       "output_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "status": {
-            "enum": [
-              "ok",
-              "partial",
-              "blocked",
-              "error",
-              "cancelled",
-              "indeterminate"
-            ]
+          "project": {
+            "type": "string"
           },
-          "context": {
-            "type": "object",
-            "description": "Resolved identities and target IDs, retaining known values on failure."
+          "outcome": {
+            "enum": ["pass", "fail", "blocked", "cancelled"]
           },
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "project": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "proposal_id": {
-                    "type": ["string", "null"]
-                  },
-                  "manifest_path": {
-                    "type": ["string", "null"]
-                  },
-                  "entrypoint": {
-                    "type": ["string", "null"]
-                  },
-                  "capabilities": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "description": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "effect": {
-                          "enum": [
-                            "read-only",
-                            "local-write",
-                            "process",
-                            "remote-write"
-                          ]
-                        },
-                        "state": {
-                          "enum": ["proposed", "draft", "usable", "blocked"]
-                        },
-                        "entrypoint": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "args": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "prerequisites": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "last_result": {
-                          "enum": [
-                            "not_run",
-                            "pass",
-                            "fail",
-                            "blocked",
-                            "cancelled"
-                          ]
-                        },
-                        "evidence": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "minLength": 1
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "description",
-                        "effect",
-                        "state",
-                        "entrypoint",
-                        "args",
-                        "prerequisites",
-                        "last_result",
-                        "evidence"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "changes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "findings": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "state": {
+          "exit_code": {
+            "enum": [0, 1, 2, 130]
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string"
+                },
+                "timeout_ms": {
+                  "type": "integer"
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "timed_out",
+                    "unavailable",
+                    "cancelled",
+                    "not_run"
+                  ]
+                },
+                "code": {
+                  "type": ["integer", "null"]
+                },
+                "stdout": {
+                  "type": "string"
+                },
+                "stderr": {
+                  "type": "string"
+                },
+                "truncated": {
+                  "type": "boolean"
+                },
+                "duration_ms": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "command",
+                "args",
+                "cwd",
+                "timeout_ms",
+                "status",
+                "code",
+                "stdout",
+                "stderr",
+                "truncated",
+                "duration_ms"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "diagnostic": {
+            "type": ["string", "null"]
+          },
+          "discovered": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
                     "enum": [
-                      "proposed",
-                      "draft",
-                      "usable",
-                      "partial",
-                      "blocked"
+                      "types",
+                      "lint",
+                      "format",
+                      "unit",
+                      "dead-code",
+                      "e2e",
+                      "build",
+                      "custom",
+                      "setup"
                     ]
                   }
                 },
-                "required": [
-                  "project",
-                  "proposal_id",
-                  "manifest_path",
-                  "entrypoint",
-                  "capabilities",
-                  "changes",
-                  "findings",
-                  "evidence",
-                  "state"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "message": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "phase": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "retryable": {
-                    "type": "boolean"
-                  },
-                  "details": {
-                    "type": "object"
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   }
                 },
-                "required": ["code", "message", "phase", "retryable"],
-                "additionalProperties": false
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "selection": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "selected"
+                        }
+                      },
+                      "required": ["state"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "covered"
+                        },
+                        "by": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "by"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "reason"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
               },
-              {
-                "type": "null"
-              }
-            ]
+              "required": [
+                "id",
+                "categories",
+                "command",
+                "args",
+                "cwd",
+                "evidence",
+                "selection"
+              ],
+              "additionalProperties": false
+            }
           },
-          "warnings": {
+          "notes": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "completed_effects": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "phase": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "target": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "outcome": {
-                  "enum": ["committed", "unknown"]
-                },
-                "reference": {
-                  "type": ["string", "null"]
-                }
-              },
-              "required": ["phase", "target", "outcome"],
-              "additionalProperties": false
-            }
+          "keep_going": {
+            "type": "boolean"
           }
         },
         "required": [
-          "status",
-          "context",
-          "data",
-          "error",
-          "warnings",
-          "completed_effects"
+          "project",
+          "outcome",
+          "exit_code",
+          "checks",
+          "diagnostic",
+          "discovered",
+          "notes",
+          "keep_going"
         ],
-        "additionalProperties": false,
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "status": {
-                  "const": "ok"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "project": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "proposal_id": {
-                      "type": ["string", "null"]
-                    },
-                    "manifest_path": {
-                      "type": ["string", "null"]
-                    },
-                    "entrypoint": {
-                      "type": ["string", "null"]
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "description": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "effect": {
-                            "enum": [
-                              "read-only",
-                              "local-write",
-                              "process",
-                              "remote-write"
-                            ]
-                          },
-                          "state": {
-                            "enum": ["proposed", "draft", "usable", "blocked"]
-                          },
-                          "entrypoint": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "args": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "prerequisites": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "last_result": {
-                            "enum": [
-                              "not_run",
-                              "pass",
-                              "fail",
-                              "blocked",
-                              "cancelled"
-                            ]
-                          },
-                          "evidence": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "description",
-                          "effect",
-                          "state",
-                          "entrypoint",
-                          "args",
-                          "prerequisites",
-                          "last_result",
-                          "evidence"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "changes": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "findings": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "evidence": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "state": {
-                      "enum": [
-                        "proposed",
-                        "draft",
-                        "usable",
-                        "partial",
-                        "blocked"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "project",
-                    "proposal_id",
-                    "manifest_path",
-                    "entrypoint",
-                    "capabilities",
-                    "changes",
-                    "findings",
-                    "evidence",
-                    "state"
-                  ],
-                  "additionalProperties": false
-                },
-                "error": {
-                  "type": "null"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "obligations": [
-        "PROJECTCLI-001",
-        "PROJECTCLI-002",
-        "PROJECTCLI-003",
-        "PROJECTCLI-004",
-        "PROJECTCLI-005",
-        "PROJECTCLI-006",
-        "PROJECTCLI-007",
-        "PROJECTCLI-008",
-        "PROJECTCLI-009",
-        "PROJECTCLI-010",
-        "PROJECTCLI-011",
-        "PROJECTCLI-012",
-        "PROJECTCLI-013",
-        "PROJECTCLI-014",
-        "PROJECTCLI-015",
-        "PROJECTCLI-016",
-        "PROJECTCLI-017",
-        "PROJECTCLI-018"
-      ],
-      "ordering": [
-        "inspect static project",
-        "resolve requested versus discoverable capabilities",
-        "construct explicit plan and proposal identity",
-        "present for acceptance"
-      ],
-      "rules": [
-        "Ground every proposed capability in repository evidence or an explicit user requirement. Distinguish existing commands, missing prerequisites and newly proposed helpers.",
-        "Identify artifact paths, effect types, prerequisites, command/result interpretation and how each capability can be exercised. Do not insert E2E/browser capabilities solely because the project has a UI.",
-        "Proposal identity binds the canonical project path, selected capability definitions and intended artifact/dependency changes. Present conflicts/uncertainties; no caller approval flag grants scope.",
-        "A proposal request may be suggested by the agent, but creates no project files and executes no scripts."
-      ],
-      "failure_codes": [
-        "CAPABILITY_UNKNOWN",
-        "CAPABILITY_AMBIGUOUS",
-        "PROJECT_UNAVAILABLE"
-      ]
-    },
-    {
-      "name": "create",
-      "effect": "local-write",
-      "input_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string",
-            "minLength": 1
-          },
-          "proposal_id": {
-            "type": "string",
-            "minLength": 1
-          },
-          "capabilities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "minItems": 1
-          }
-        },
-        "required": [],
-        "additionalProperties": false,
-        "anyOf": [
-          {
-            "required": ["proposal_id"]
-          },
-          {
-            "required": ["capabilities"]
-          }
-        ]
-      },
-      "output_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": {
-          "status": {
-            "enum": [
-              "ok",
-              "partial",
-              "blocked",
-              "error",
-              "cancelled",
-              "indeterminate"
-            ]
-          },
-          "context": {
-            "type": "object",
-            "description": "Resolved identities and target IDs, retaining known values on failure."
-          },
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "project": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "proposal_id": {
-                    "type": ["string", "null"]
-                  },
-                  "manifest_path": {
-                    "type": ["string", "null"]
-                  },
-                  "entrypoint": {
-                    "type": ["string", "null"]
-                  },
-                  "capabilities": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "description": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "effect": {
-                          "enum": [
-                            "read-only",
-                            "local-write",
-                            "process",
-                            "remote-write"
-                          ]
-                        },
-                        "state": {
-                          "enum": ["proposed", "draft", "usable", "blocked"]
-                        },
-                        "entrypoint": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "args": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "prerequisites": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "last_result": {
-                          "enum": [
-                            "not_run",
-                            "pass",
-                            "fail",
-                            "blocked",
-                            "cancelled"
-                          ]
-                        },
-                        "evidence": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "minLength": 1
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "description",
-                        "effect",
-                        "state",
-                        "entrypoint",
-                        "args",
-                        "prerequisites",
-                        "last_result",
-                        "evidence"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "changes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "findings": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "state": {
-                    "enum": [
-                      "proposed",
-                      "draft",
-                      "usable",
-                      "partial",
-                      "blocked"
-                    ]
-                  }
-                },
-                "required": [
-                  "project",
-                  "proposal_id",
-                  "manifest_path",
-                  "entrypoint",
-                  "capabilities",
-                  "changes",
-                  "findings",
-                  "evidence",
-                  "state"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "message": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "phase": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "retryable": {
-                    "type": "boolean"
-                  },
-                  "details": {
-                    "type": "object"
-                  }
-                },
-                "required": ["code", "message", "phase", "retryable"],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "warnings": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "completed_effects": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "phase": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "target": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "outcome": {
-                  "enum": ["committed", "unknown"]
-                },
-                "reference": {
-                  "type": ["string", "null"]
-                }
-              },
-              "required": ["phase", "target", "outcome"],
-              "additionalProperties": false
-            }
-          }
-        },
-        "required": [
-          "status",
-          "context",
-          "data",
-          "error",
-          "warnings",
-          "completed_effects"
-        ],
-        "additionalProperties": false,
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "status": {
-                  "const": "ok"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "project": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "proposal_id": {
-                      "type": ["string", "null"]
-                    },
-                    "manifest_path": {
-                      "type": ["string", "null"]
-                    },
-                    "entrypoint": {
-                      "type": ["string", "null"]
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "description": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "effect": {
-                            "enum": [
-                              "read-only",
-                              "local-write",
-                              "process",
-                              "remote-write"
-                            ]
-                          },
-                          "state": {
-                            "enum": ["proposed", "draft", "usable", "blocked"]
-                          },
-                          "entrypoint": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "args": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "prerequisites": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "last_result": {
-                            "enum": [
-                              "not_run",
-                              "pass",
-                              "fail",
-                              "blocked",
-                              "cancelled"
-                            ]
-                          },
-                          "evidence": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "description",
-                          "effect",
-                          "state",
-                          "entrypoint",
-                          "args",
-                          "prerequisites",
-                          "last_result",
-                          "evidence"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "changes": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "findings": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "evidence": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "state": {
-                      "enum": [
-                        "proposed",
-                        "draft",
-                        "usable",
-                        "partial",
-                        "blocked"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "project",
-                    "proposal_id",
-                    "manifest_path",
-                    "entrypoint",
-                    "capabilities",
-                    "changes",
-                    "findings",
-                    "evidence",
-                    "state"
-                  ],
-                  "additionalProperties": false
-                },
-                "error": {
-                  "type": "null"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "obligations": [
-        "PROJECTCLI-001",
-        "PROJECTCLI-002",
-        "PROJECTCLI-003",
-        "PROJECTCLI-004",
-        "PROJECTCLI-005",
-        "PROJECTCLI-006",
-        "PROJECTCLI-007",
-        "PROJECTCLI-008",
-        "PROJECTCLI-009",
-        "PROJECTCLI-010",
-        "PROJECTCLI-011",
-        "PROJECTCLI-012",
-        "PROJECTCLI-013",
-        "PROJECTCLI-014",
-        "PROJECTCLI-015",
-        "PROJECTCLI-016",
-        "PROJECTCLI-017",
-        "PROJECTCLI-018"
-      ],
-      "ordering": [
-        "match authorization/proposal",
-        "preflight artifacts and prerequisites",
-        "generate scoped staged changes",
-        "validate command definitions",
-        "exercise agreed capabilities",
-        "cleanup owned state",
-        "report per-capability proof and patches"
-      ],
-      "rules": [
-        "Require an accepted matching proposal or an explicit creation request with resolved project/capabilities; ask only about unresolved scope.",
-        "Use project-native scripts/tooling and a small CLI decision layer. The manifest records schema version, capability IDs, descriptions, executable/argument vectors, cwd, effects, prerequisites, exit/result semantics, evidence and owned cleanup.",
-        "Refuse conflicting existing files unless the accepted plan explicitly reconciles them. Stage generated artifacts, validate them and preserve original files if generation fails.",
-        "Do not silently alter product code, global configuration or capability scope to make a command work. Needed dependency changes/install steps must be part of the accepted plan.",
-        "Exercise each capability against its declared expected observations and a meaningful failure path where feasible. Record actual check outcomes faithfully; failing product tests are not a parser success mislabeled pass.",
-        "Capabilities not safely exercised remain draft/blocked with exact prerequisites. Cleanup every owned failed attempt and preserve evidence."
-      ],
-      "failure_codes": [
-        "PROPOSAL_NOT_ACCEPTED",
-        "PROPOSAL_CHANGED",
-        "ARTIFACT_CONFLICT",
-        "PREREQUISITE_MISSING",
-        "PROOF_BLOCKED",
-        "GENERATION_FAILED"
-      ]
-    },
-    {
-      "name": "maintain",
-      "effect": "local-write",
-      "input_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string",
-            "minLength": 1
-          },
-          "capabilities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            }
-          }
-        },
-        "required": [],
         "additionalProperties": false
       },
-      "output_schema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": {
-          "status": {
-            "enum": [
-              "ok",
-              "partial",
-              "blocked",
-              "error",
-              "cancelled",
-              "indeterminate"
-            ]
-          },
-          "context": {
-            "type": "object",
-            "description": "Resolved identities and target IDs, retaining known values on failure."
-          },
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "project": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "proposal_id": {
-                    "type": ["string", "null"]
-                  },
-                  "manifest_path": {
-                    "type": ["string", "null"]
-                  },
-                  "entrypoint": {
-                    "type": ["string", "null"]
-                  },
-                  "capabilities": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "description": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "effect": {
-                          "enum": [
-                            "read-only",
-                            "local-write",
-                            "process",
-                            "remote-write"
-                          ]
-                        },
-                        "state": {
-                          "enum": ["proposed", "draft", "usable", "blocked"]
-                        },
-                        "entrypoint": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "args": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "prerequisites": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "last_result": {
-                          "enum": [
-                            "not_run",
-                            "pass",
-                            "fail",
-                            "blocked",
-                            "cancelled"
-                          ]
-                        },
-                        "evidence": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "minLength": 1
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "description",
-                        "effect",
-                        "state",
-                        "entrypoint",
-                        "args",
-                        "prerequisites",
-                        "last_result",
-                        "evidence"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "changes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "findings": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "evidence": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "state": {
-                    "enum": [
-                      "proposed",
-                      "draft",
-                      "usable",
-                      "partial",
-                      "blocked"
-                    ]
-                  }
-                },
-                "required": [
-                  "project",
-                  "proposal_id",
-                  "manifest_path",
-                  "entrypoint",
-                  "capabilities",
-                  "changes",
-                  "findings",
-                  "evidence",
-                  "state"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "message": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "phase": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "retryable": {
-                    "type": "boolean"
-                  },
-                  "details": {
-                    "type": "object"
-                  }
-                },
-                "required": ["code", "message", "phase", "retryable"],
-                "additionalProperties": false
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "warnings": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "completed_effects": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "phase": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "target": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "outcome": {
-                  "enum": ["committed", "unknown"]
-                },
-                "reference": {
-                  "type": ["string", "null"]
-                }
-              },
-              "required": ["phase", "target", "outcome"],
-              "additionalProperties": false
-            }
-          }
-        },
-        "required": [
-          "status",
-          "context",
-          "data",
-          "error",
-          "warnings",
-          "completed_effects"
-        ],
-        "additionalProperties": false,
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "status": {
-                  "const": "ok"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "project": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "proposal_id": {
-                      "type": ["string", "null"]
-                    },
-                    "manifest_path": {
-                      "type": ["string", "null"]
-                    },
-                    "entrypoint": {
-                      "type": ["string", "null"]
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "description": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "effect": {
-                            "enum": [
-                              "read-only",
-                              "local-write",
-                              "process",
-                              "remote-write"
-                            ]
-                          },
-                          "state": {
-                            "enum": ["proposed", "draft", "usable", "blocked"]
-                          },
-                          "entrypoint": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "args": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "prerequisites": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "last_result": {
-                            "enum": [
-                              "not_run",
-                              "pass",
-                              "fail",
-                              "blocked",
-                              "cancelled"
-                            ]
-                          },
-                          "evidence": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "description",
-                          "effect",
-                          "state",
-                          "entrypoint",
-                          "args",
-                          "prerequisites",
-                          "last_result",
-                          "evidence"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "changes": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "findings": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "evidence": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "state": {
-                      "enum": [
-                        "proposed",
-                        "draft",
-                        "usable",
-                        "partial",
-                        "blocked"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "project",
-                    "proposal_id",
-                    "manifest_path",
-                    "entrypoint",
-                    "capabilities",
-                    "changes",
-                    "findings",
-                    "evidence",
-                    "state"
-                  ],
-                  "additionalProperties": false
-                },
-                "error": {
-                  "type": "null"
-                }
-              }
-            }
-          }
-        ]
-      },
+      "effect": "process",
+      "rules": [
+        "Execute checks sequentially, stopping on failure by default; optional keep_going attempts later checks without clearing failures. Cancellation and global deadline always stop dispatch.",
+        "Use explicit commands, working directories and timeouts; never repair, install, ship or add checks implicitly.",
+        "Inventory detected check kinds, source evidence and selected/covered/available states; only the selected mandatory local suite can receive execution credit."
+      ],
       "obligations": [
-        "PROJECTCLI-001",
-        "PROJECTCLI-002",
-        "PROJECTCLI-003",
-        "PROJECTCLI-004",
-        "PROJECTCLI-005",
-        "PROJECTCLI-006",
-        "PROJECTCLI-007",
-        "PROJECTCLI-008",
-        "PROJECTCLI-009",
-        "PROJECTCLI-010",
-        "PROJECTCLI-011",
-        "PROJECTCLI-012",
-        "PROJECTCLI-013",
-        "PROJECTCLI-014",
-        "PROJECTCLI-015",
-        "PROJECTCLI-016",
-        "PROJECTCLI-017",
-        "PROJECTCLI-018"
+        "PROJECTCLI-019",
+        "PROJECTCLI-020",
+        "PROJECTCLI-021",
+        "PROJECTCLI-022",
+        "PROJECTCLI-023",
+        "PROJECTCLI-024",
+        "PROJECTCLI-025",
+        "PROJECTCLI-026",
+        "PROJECTCLI-027",
+        "PROJECTCLI-028",
+        "PROJECTCLI-029",
+        "PROJECTCLI-030"
       ],
       "ordering": [
-        "resolve manifest",
-        "read source/command churn",
-        "classify drift and propose scope changes",
-        "repair agreed owned artifacts",
-        "re-exercise affected capabilities",
-        "cleanup and report"
+        "resolve and validate complete plan",
+        "run checks sequentially",
+        "report every required check"
       ],
-      "rules": [
-        "Locate the existing repository-owned CLI and accepted manifest; if none exists, report missing target and propose creation instead.",
-        "Compare command/config/source ownership and feature map with current project behavior. Classify findings as CLI/doc drift, product regression, capability addition/removal proposal or unmet prerequisite.",
-        "A maintenance request authorizes repairs inside CLI-owned artifacts for existing capabilities. Preserve manual edits via a reconciled patch; scope changes require user acceptance. Product fixes and shipping remain separate requests.",
-        "Use only the agreed capability interaction model: run existing E2E for E2E capabilities, do not demand a generic browser pass for every project.",
-        "Re-exercise every repaired capability and relevant unchanged capability impacted by the repair; report other coverage honestly. Doctor/recover owned instances after surprising failures. Evidence survives cleanup.",
-        "Return clean, changed or blocked with per-capability results; do not force a branch, commit or MR as part of maintenance."
-      ],
-      "failure_codes": [
-        "CLI_NOT_FOUND",
-        "MANIFEST_UNSUPPORTED",
-        "MANUAL_EDIT_CONFLICT",
-        "PRODUCT_REGRESSION",
-        "CAPABILITY_DECISION_REQUIRED",
-        "PROOF_BLOCKED"
-      ]
+      "failure_codes": ["PROJECT_CHECK_CONFIG", "PROJECT_CHECK_FAILED"]
     }
   ]
 }

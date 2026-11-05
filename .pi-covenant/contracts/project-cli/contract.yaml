@@ -2,7 +2,7 @@ schema_version: 1
 component:
   id: project-cli
   name: project-cli
-  status: draft
+  status: active
 intent: ./intent.md
 obligations:
   - id: PROJECTCLI-001
@@ -96,11 +96,12 @@ obligations:
     enforcement: null
     applicability: null
   - id: PROJECTCLI-010
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Project CLI inspection and unsolicited proposals must not execute repository scripts or write project files.
-    verification: []
+    verification:
+      - project-check-read-only
     preconditions: []
     postconditions: []
     enforcement: null
@@ -136,11 +137,12 @@ obligations:
     enforcement: null
     applicability: null
   - id: PROJECTCLI-014
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A project check failure must remain a project check failure even when the CLI transport and result parsing operate correctly.
-    verification: []
+    verification:
+      - project-check-product-failure
     preconditions: []
     postconditions: []
     enforcement: null
@@ -185,7 +187,93 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: PROJECTCLI-019
+    status: active
+    severity: high
+    kind: invariant
+    description: Discovery must prefer explicit project configuration or one existing aggregate check command before selecting available typecheck lint and test scripts without adding build or E2E implicitly.
+    verification:
+      - project-check-discovery
+  - id: PROJECTCLI-020
+    status: active
+    severity: high
+    kind: invariant
+    description: The complete nonempty mandatory check plan must validate unique IDs command arguments contained working directories and finite positive timeouts before any command starts.
+    verification:
+      - project-check-configuration
+  - id: PROJECTCLI-021
+    status: active
+    severity: high
+    kind: invariant
+    description: A project check run may pass only when every configured mandatory check completes successfully with exit zero and complete evidence.
+    verification:
+      - project-check-completion
+  - id: PROJECTCLI-022
+    status: active
+    severity: high
+    kind: invariant
+    description: Failed unavailable timed-out or unexecuted mandatory checks must produce a nonzero overall outcome and must not be retried or silently omitted. Diagnostic output must stay bounded with truncation reported separately from command completion.
+    verification:
+      - project-check-failures
+  - id: PROJECTCLI-023
+    status: active
+    severity: high
+    kind: invariant
+    description: Cancellation or deadline expiry must stop scheduling new checks and terminate owned child processes while preserving truthful completed and unexecuted results.
+    verification:
+      - project-check-cancellation
+  - id: PROJECTCLI-024
+    status: active
+    severity: high
+    kind: invariant
+    description: The project check command must report its resolved project required check identities individual outcomes and a truthful overall exit code without repairing or shipping the project.
+    verification:
+      - project-check-cli
+  - id: PROJECTCLI-025
+    status: active
+    severity: high
+    kind: invariant
+    description: Static discovery must inventory existing typechecking lint formatting unit E2E build and dead-code checks using script aliases and known commands and retain source evidence without executing or modifying the project.
+    verification:
+      - project-check-inventory
+  - id: PROJECTCLI-026
+    status: active
+    severity: high
+    kind: invariant
+    description: An inferred local suite must include every discovered ordinary check category not demonstrably covered by selected safe aggregate commands while preserving an explicit configured suite exactly.
+    verification:
+      - project-check-coverage
+  - id: PROJECTCLI-027
+    status: active
+    severity: high
+    kind: invariant
+    description: Inspection and run reports must show selected covered and available checks with reasons; detecting E2E or build must not universally add them to mandatory local execution.
+    verification:
+      - project-check-selection
+  - id: PROJECTCLI-028
+    status: active
+    severity: high
+    kind: invariant
+    description: Discovery must recognize Knip as dead-code analysis and distinguish browser installation or code-generation helpers from actual E2E test commands without auto-running setup.
+    verification:
+      - project-check-check-tools
+  - id: PROJECTCLI-029
+    status: active
+    severity: high
+    kind: invariant
+    description: Discovery must surface supported standalone check commands from local CI and repository instructions with provenance and literal argv while excluding unsafe shell context and preserving explicit suite precedence.
+    verification:
+      - project-check-standalone
+  - id: PROJECTCLI-030
+    status: active
+    severity: high
+    kind: invariant
+    description: Optional keep-going execution must retain every failure while attempting later mandatory checks; it must never turn partial success into pass or schedule new commands after cancellation or global deadline expiry.
+    verification:
+      - project-check-keep-going
+sources:
+  - src/project-cli/
+  - models/project-checks/
 dependencies:
   - tool-protocol
   - repository-context
@@ -194,3 +282,7 @@ interfaces:
     language: typescript
     module: architecture/modules/project-cli.json
     export: project-cli-v1
+  - name: project-check-runtime
+    language: typescript
+    module: src/project-cli/module-port.ts
+    export: runProjectChecks

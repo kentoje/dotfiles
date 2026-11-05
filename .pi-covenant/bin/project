@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+project_runner_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec "$project_runner_root/node_modules/.bin/tsx" "$project_runner_root/src/project-cli/cli.ts" "$@"

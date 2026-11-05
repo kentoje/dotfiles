@@ -1,2 +1,22 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: development-contract-consistency
+    obligation: DEVELOPMENTMETHOD-004
+    adapter: vitest
+    tests:
+      - development.contract-consistency
+  - id: development-command-failures
+    obligation: DEVELOPMENTMETHOD-005
+    adapter: vitest
+    tests:
+      - development.command-failures
+  - id: development-result-policy
+    obligation: DEVELOPMENTMETHOD-006
+    adapter: vitest
+    tests:
+      - development.result-policy
+  - id: development-fallow-boundaries
+    obligation: DEVELOPMENTMETHOD-007
+    adapter: vitest
+    tests:
+      - development.fallow-boundaries

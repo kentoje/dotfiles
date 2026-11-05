@@ -1,6 +1,6 @@
 # Harness behavior catalogue
 
-Definitions describe public surfaces; worktree has a module implementation but no Pi registration yet. Shared conventions: [tool protocol](tool-protocol.md).
+Definitions describe public surfaces; worktree and project checks have module implementations but no Pi registration yet. Shared conventions: [tool protocol](tool-protocol.md).
 
 | Surface | Kind | Actions | Contract |
 | --- | --- | --: | --- |
@@ -9,7 +9,7 @@ Definitions describe public surfaces; worktree has a module implementation but n
 | [mr](../tools/mr/definition.json) | tool | 4 | [mr](../contracts/mr/intent.md) |
 | [worktree](../tools/worktree/definition.json) | tool | 4 | [worktree](../contracts/worktree/intent.md) |
 | [fleet](../tools/fleet/definition.json) | tool | 2 | [fleet](../contracts/fleet/intent.md) |
-| [project_cli](../tools/project_cli/definition.json) | tool | 4 | [project-cli](../contracts/project-cli/intent.md) |
+| [project_cli](../tools/project_cli/definition.json) | tool | 2 | [project-cli](../contracts/project-cli/intent.md) |
 | [preview](../capabilities/preview/definition.json) | project-cli-capability | 2 | [preview](../contracts/preview/intent.md) |
 | [story](../capabilities/story/definition.json) | project-cli-capability | 2 | [story](../contracts/story/intent.md) |
 | [harness-retro](../commands/harness-retro/definition.json) | user-command | 3 | [retrospective](../contracts/retrospective/intent.md) |
@@ -21,4 +21,4 @@ Definitions describe public surfaces; worktree has a module implementation but n
 | [development-method](../contracts/development-method/definition.json) | development-contract | 0 | [development-method](../contracts/development-method/intent.md) |
 | [tool-protocol](../contracts/tool-protocol/definition.json) | development-contract | 0 | [tool-protocol](../contracts/tool-protocol/intent.md) |
 
-16 components; 10 active worktree obligations and 119 draft obligations; 39 specified actions; 236 planned acceptance records (including obligation review records). Worktree has executable checks; other component examples remain planned. See implemented-features.md.
+16 components; 28 active obligations (ten worktree, four development tooling and fourteen project checks) and 117 draft obligations; 37 specified actions; 236 planned acceptance records (including obligation review records). Worktree, development tooling and project checks have executable acceptance. Other component examples remain planned. See implemented-features.md.

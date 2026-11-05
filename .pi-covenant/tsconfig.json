@@ -16,6 +16,7 @@
     "src/**/*.ts",
     "vitest.config.ts",
     "oxlint.config.ts",
-    "oxfmt.config.ts"
+    "oxfmt.config.ts",
+    "scripts/**/*.ts"
   ]
 }

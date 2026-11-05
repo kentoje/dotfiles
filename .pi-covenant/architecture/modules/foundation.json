@@ -47,13 +47,7 @@
     "mr-guard": ["check_creation"],
     "worktree": ["new", "verify", "list", "rm"],
     "fleet": ["status", "versions"],
-    "project-cli": [
-      "inspect",
-      "propose",
-      "create",
-      "maintain",
-      "execute_capability"
-    ],
+    "project-cli": ["inspect", "check", "execute_capability"],
     "preview": ["url", "up"],
     "story": ["list", "show"],
     "retrospective": ["review", "list", "record"],

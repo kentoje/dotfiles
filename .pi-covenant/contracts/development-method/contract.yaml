@@ -35,7 +35,53 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: DEVELOPMENTMETHOD-004
+    status: active
+    severity: high
+    kind: invariant
+    description: Development contract validation must reject dependency cycles, undeclared or private module imports, inconsistent public schemas and missing acceptance fixtures.
+    verification:
+      - development-contract-consistency
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: DEVELOPMENTMETHOD-005
+    status: active
+    severity: high
+    kind: invariant
+    description: Required development commands must fail on nonzero exit, launch failure, cancellation or timeout while retaining bounded diagnostics.
+    verification:
+      - development-command-failures
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: DEVELOPMENTMETHOD-006
+    status: active
+    severity: high
+    kind: invariant
+    description: A complete local check must require all declared steps and current passing full-project Covenant evidence, and must reject missing, incomplete or scoped results.
+    verification:
+      - development-result-policy
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: DEVELOPMENTMETHOD-007
+    status: active
+    severity: high
+    kind: invariant
+    description: Fallow module boundary rules must match declared dependencies and reject forbidden imports without disabling dead-code checks.
+    verification:
+      - development-fallow-boundaries
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+sources:
+  - src/development-method/
+  - scripts/
 dependencies: []
 interfaces:
   - name: development-method-v1

@@ -3,7 +3,7 @@ contracts:
 execution:
   test_adapter: vitest
   timeout_seconds: 120
-  package_manager: npm
+  package_manager: pnpm
 project:
   language: typescript
   name: .pi-covenant

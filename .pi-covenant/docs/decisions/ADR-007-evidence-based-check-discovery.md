@@ -1,0 +1,11 @@
+# Evidence-based check discovery
+
+The real conversation-center-ext trial exposed a design error: package script check runs only Ultracite, so treating its name as a complete aggregate omitted ts:check, unit tests, Fallow and E2E visibility. The user requested stronger discovery. PROJECTCLI-019 keeps explicit-configuration precedence and aggregate preference; preference now means running the aggregate first and adding uncovered ordinary checks, never assuming its name establishes coverage. Its executable expectations change accordingly; read-only inspection and all existing completion/failure obligations remain intact.
+
+Inventory script aliases and known command bodies. Parse shell syntax without execution. Credit aggregate coverage only for understood failure-propagating conjunctions and local script references; echoed text, conditionals, opaque programs, pipelines and ignored failures are not proof of coverage. Resolve aliases transitively with cycle/depth bounds. Keep conservative uncertainty visible rather than claiming arbitrary shell analysis.
+
+Retain package/config/docs/local-CI evidence paths and line references. These sources support discovery, not unconditional execution of CI scripts or interpretation of branch rules, remote includes, staging credentials or prose as authority. Never run write/fix/watch/UI/setup commands by default.
+
+Default local selection covers discovered ordinary types/lint/format/unit/dead-code categories with minimal representative commands and known aggregate coverage. Existing aliases/coverage variants are alternatives, not duplicate mandatory runs. E2E and build remain visible available checks unless explicit configuration or a selected existing aggregate includes them. Reports show selection/coverage/exclusion reasons; local pass applies only to its selected suite and does not certify available E2E. An inspect CLI exposes this before effects. Explicit configured commands remain exact.
+
+Before implementation, Covenant checks a finite selection model with NoOmittedLocal, ExplicitWins and NoImplicitE2E, plus deliberate omissions, universal E2E and explicit-scope override faults. Static parsing and evidence collection remain executable-test responsibilities. No TLA+ or Covenant is added to tool runtime.

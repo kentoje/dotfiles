@@ -1,5 +1,19 @@
 schema_version: 1
 decisions:
+  - id: project-cli-minimal-check-runner
+    status: accepted-user
+    decision: First version is a small repository-specific mandatory check runner; broad authoring, maintenance, preview and Storybook workflows remain deferred.
+    evidence:
+      - User requested narrowing to critical repo checks and authorized implementation.
+    related_obligations:
+      - PROJECTCLI-010
+      - PROJECTCLI-014
+      - PROJECTCLI-019
+      - PROJECTCLI-020
+      - PROJECTCLI-021
+      - PROJECTCLI-022
+      - PROJECTCLI-023
+      - PROJECTCLI-024
   - id: project-cli-tailored-capabilities
     status: accepted-user
     decision: Discover and agree capabilities per project; existing E2E is one possible capability.
@@ -12,7 +26,7 @@ decisions:
         disposition: rejected
     evidence:
       - Explicit user conversation decision
-    related_obligations: &id001
+    related_obligations: &a1
       - PROJECTCLI-001
       - PROJECTCLI-002
       - PROJECTCLI-003
@@ -47,7 +61,7 @@ decisions:
         disposition: rejected
     evidence:
       - Explicit user conversation decision
-    related_obligations: *id001
+    related_obligations: *a1
     assumptions:
       - Service permissions and project conventions must be discovered at invocation.
     revisit_when:
@@ -64,7 +78,7 @@ decisions:
         disposition: rejected
     evidence:
       - Authored design rationale; not user-approved execution evidence
-    related_obligations: *id001
+    related_obligations: *a1
     assumptions:
       - Service permissions and project conventions must be discovered at invocation.
     revisit_when:
@@ -81,7 +95,7 @@ decisions:
         disposition: rejected
     evidence:
       - Authored design rationale; not user-approved execution evidence
-    related_obligations: *id001
+    related_obligations: *a1
     assumptions:
       - Service permissions and project conventions must be discovered at invocation.
     revisit_when:

@@ -7,7 +7,7 @@ scenarios:
     given: A service uses make test and a frontend uses pnpm test:e2e.
     when: Inspect both.
     then: Report their actual separate commands; no files or processes are created.
-    obligations: &id001
+    obligations: &a1
       - PROJECTCLI-001
       - PROJECTCLI-002
       - PROJECTCLI-003
@@ -32,84 +32,84 @@ scenarios:
     given: The project already has a suitable CLI.
     when: Inspect.
     then: Return it rather than proposing a redundant replacement by default.
-    obligations: *id001
+    obligations: *a1
   - id: PC-PROP-01
     action: propose
     status: planned
     given: A library has tests and build but no E2E.
     when: Propose CLI.
     then: Offer supported library operations without adding browser infrastructure.
-    obligations: *id001
+    obligations: *a1
   - id: PC-PROP-02
     action: propose
     status: planned
     given: A web project has E2E, but only build/lint were requested.
     when: Propose.
     then: Do not silently add E2E to the agreed scope.
-    obligations: *id001
+    obligations: *a1
   - id: PC-PROP-03
     action: propose
     status: planned
     given: Proposal targets project A.
     when: Accept then change invocation to B.
     then: Acceptance does not authorize B without a new matched scope.
-    obligations: *id001
+    obligations: *a1
   - id: PC-CREATE-01
     action: create
     status: planned
     given: Accepted scope contains types and an existing E2E script.
     when: Create and exercise.
     then: Only those capabilities are generated; E2E delegates to that script.
-    obligations: *id001
+    obligations: *a1
   - id: PC-CREATE-02
     action: create
     status: planned
     given: An existing user-owned entrypoint conflicts.
     when: Create.
     then: Refuse implicit overwrite and preserve content.
-    obligations: *id001
+    obligations: *a1
   - id: PC-CREATE-03
     action: create
     status: planned
     given: A command executes but product tests fail.
     when: Exercise.
     then: Report actual failed checks separately from CLI operation; do not rewrite product tests.
-    obligations: *id001
+    obligations: *a1
   - id: PC-CREATE-04
     action: create
     status: planned
     given: A safe live prerequisite is absent.
     when: Create.
     then: Keep that capability unproven; do not claim all capabilities usable.
-    obligations: *id001
+    obligations: *a1
   - id: PC-MAINT-01
     action: maintain
     status: planned
     given: An accepted test script was renamed.
     when: Maintain.
     then: Repair the owned invocation and exercise it; preserve the existing capability ID.
-    obligations: *id001
+    obligations: *a1
   - id: PC-MAINT-02
     action: maintain
     status: planned
     given: A new E2E suite appears outside the accepted capability set.
     when: Maintain.
     then: Propose adding it without silently modifying scope.
-    obligations: *id001
+    obligations: *a1
   - id: PC-MAINT-03
     action: maintain
     status: planned
     given: The CLI is correct and a real product journey regressed.
     when: Maintain.
     then: Report product regression; do not alter product code or weaken the feature map.
-    obligations: *id001
+    obligations: *a1
   - id: PC-MAINT-04
     action: maintain
     status: planned
     given: Everything agrees and exercises correctly.
     when: Maintain.
     then: Return clean without a manufactured patch or MR.
-    obligations: *id001
+    obligations: *a1
   - id: PROJECTCLI-001-ACCEPTANCE
     status: planned
     given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
@@ -254,3 +254,51 @@ scenarios:
     obligations:
       - PROJECTCLI-018
     test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: PROJECTCLI-019-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: Discovery must prefer explicit project configuration or one existing aggregate check command before selecting available typecheck lint and test scripts without adding build or E2E implicitly.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-019
+  - id: PROJECTCLI-020-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: The complete nonempty mandatory check plan must validate unique IDs command arguments contained working directories and finite positive timeouts before any command starts.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-020
+  - id: PROJECTCLI-021-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: A project check run may pass only when every configured mandatory check completes successfully with exit zero and complete evidence.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-021
+  - id: PROJECTCLI-022-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: Failed unavailable timed-out truncated or unexecuted mandatory checks must produce a nonzero overall outcome and must not be retried or silently omitted.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-022
+  - id: PROJECTCLI-023-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: Cancellation or deadline expiry must stop scheduling new checks and terminate owned child processes while preserving truthful completed and unexecuted results.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-023
+  - id: PROJECTCLI-024-RUNNER
+    action: check
+    status: implemented
+    given: An isolated project with required commands and deliberate failure cases
+    when: The project check command must report its resolved project required check identities individual outcomes and a truthful overall exit code without repairing or shipping the project.
+    then: Observe the bound executable acceptance check outcome
+    obligations:
+      - PROJECTCLI-024

@@ -1,0 +1,174 @@
+schema_version: 1
+applicability:
+  - obligation: PROJECTCLI-014
+    mode: model
+    rationale: Finite required-check completion and cancellation policy
+  - obligation: PROJECTCLI-021
+    mode: model
+    rationale: Finite required-check completion and cancellation policy
+  - obligation: PROJECTCLI-022
+    mode: model
+    rationale: Finite required-check completion and cancellation policy
+  - obligation: PROJECTCLI-023
+    mode: model
+    rationale: Finite required-check completion and cancellation policy
+  - obligation: PROJECTCLI-010
+    mode: not_applicable
+    rationale: Filesystem discovery schema/CLI parsing and reporting require executable integration checks
+  - obligation: PROJECTCLI-019
+    mode: not_applicable
+    rationale: Filesystem discovery schema/CLI parsing and reporting require executable integration checks
+  - obligation: PROJECTCLI-020
+    mode: not_applicable
+    rationale: Filesystem discovery schema/CLI parsing and reporting require executable integration checks
+  - obligation: PROJECTCLI-024
+    mode: not_applicable
+    rationale: Filesystem discovery schema/CLI parsing and reporting require executable integration checks
+  - obligation: PROJECTCLI-025
+    mode: not_applicable
+    rationale: Filesystem and script syntax recognition require executable fixtures rather than model abstraction
+  - obligation: PROJECTCLI-026
+    mode: model
+    rationale: Finite selection policy must preserve local coverage explicit scope and non-universal E2E
+  - obligation: PROJECTCLI-027
+    mode: model
+    rationale: Finite selection policy must preserve local coverage explicit scope and non-universal E2E
+  - obligation: PROJECTCLI-028
+    mode: not_applicable
+    rationale: Static command classification and source parsing need executable integration fixtures
+  - obligation: PROJECTCLI-029
+    mode: not_applicable
+    rationale: Static command classification and source parsing need executable integration fixtures
+  - obligation: PROJECTCLI-030
+    mode: model
+    rationale: Execution mode must preserve failure truthfulness cancellation and requested-suite completion
+models:
+  - id: project-checks
+    component: project-cli
+    source: models/project-checks/Checks.tla
+    configuration: models/project-checks/Checks.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - Two required checks stand for the completion policy; arbitrary list size is exercised by implementation checks, not formally proved by this finite model.
+      - Commands are trusted project code; the model represents reported completion outcomes, not correctness of the underlying repo or service.
+      - Cancellation is observed at dispatch boundaries; in-flight effects are not rolled back. No liveness or scheduling fairness claim.
+    bindings:
+      - obligation: PROJECTCLI-014
+        invariant: NoFalsePass
+      - obligation: PROJECTCLI-021
+        invariant: NoFalsePass
+      - obligation: PROJECTCLI-022
+        invariant: NoFalsePass
+      - obligation: PROJECTCLI-023
+        invariant: NoDispatchAfterCancel
+    conformance:
+      - obligation: PROJECTCLI-014
+        action: Finalize
+        observation: passed
+        binding: project-check-product-failure
+      - obligation: PROJECTCLI-021
+        action: Finalize
+        observation: passed
+        binding: project-check-completion
+      - obligation: PROJECTCLI-022
+        action: Complete
+        observation: states
+        binding: project-check-failures
+      - obligation: PROJECTCLI-023
+        action: Cancel
+        observation: cancelled
+        binding: project-check-cancellation
+    faults:
+      - id: premature-success
+        source: models/project-checks/ChecksPremature.tla
+        invariant: NoFalsePass
+      - id: dispatch-after-cancel
+        source: models/project-checks/ChecksCancel.tla
+        invariant: NoDispatchAfterCancel
+  - id: check-selection
+    component: project-cli
+    source: models/project-checks/Selection.tla
+    configuration: models/project-checks/Selection.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 10
+    assumptions:
+      - Three categories represent two ordinary checks and E2E; this finite model is not a proof over arbitrary inventories.
+      - Available and aggregate-covered categories abstract trusted static analysis; parser adequacy and command behavior are verified with executable tests.
+      - Explicit configuration is project-owned selection. E2E can be included by it or by an existing selected aggregate, not merely by detection.
+    bindings:
+      - obligation: PROJECTCLI-026
+        invariant: NoOmittedLocal
+      - obligation: PROJECTCLI-026
+        invariant: ExplicitWins
+      - obligation: PROJECTCLI-027
+        invariant: NoImplicitE2E
+    conformance:
+      - obligation: PROJECTCLI-026
+        action: Select
+        observation: selected
+        binding: project-check-coverage
+      - obligation: PROJECTCLI-027
+        action: Select
+        observation: selected
+        binding: project-check-selection
+    faults:
+      - id: aggregate-hides-checks
+        source: models/project-checks/SelectionOmission.tla
+        invariant: NoOmittedLocal
+      - id: universal-e2e
+        source: models/project-checks/SelectionE2E.tla
+        invariant: NoImplicitE2E
+      - id: override-explicit-plan
+        source: models/project-checks/SelectionOverride.tla
+        invariant: ExplicitWins
+  - id: check-modes
+    component: project-cli
+    source: models/project-checks/Modes.tla
+    configuration: models/project-checks/Modes.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - Two required checks and finite terminal outcomes represent fail-fast versus keep-going; arbitrary lists need executable tests, not a formal generalization claim.
+      - Cancellation and absolute deadline expiry are abstracted by a stop event; per-check timeout remains a terminal failed outcome.
+      - Only resolved validated command plans enter execution; commands are trusted project code and effects are not rolled back.
+    bindings:
+      - obligation: PROJECTCLI-030
+        invariant: TruthfulCompletion
+      - obligation: PROJECTCLI-030
+        invariant: NoDispatchAfterCancel
+      - obligation: PROJECTCLI-030
+        invariant: CompleteWhenContinuing
+    conformance:
+      - obligation: PROJECTCLI-030
+        action: Finalize
+        observation: states
+        binding: project-check-keep-going
+    faults:
+      - id: last-result-wins
+        source: models/project-checks/ModesLastWins.tla
+        invariant: TruthfulCompletion
+      - id: continue-after-stop
+        source: models/project-checks/ModesAfterStop.tla
+        invariant: NoDispatchAfterCancel
+      - id: stop-early-in-keep-going
+        source: models/project-checks/ModesEarly.tla
+        invariant: CompleteWhenContinuing

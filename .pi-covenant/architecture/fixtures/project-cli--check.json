@@ -1,0 +1,145 @@
+[
+  {
+    "direction": "input_schema",
+    "payload": {
+      "project": "/fixture"
+    },
+    "valid": true
+  },
+  {
+    "direction": "input_schema",
+    "payload": {
+      "unknown": true
+    },
+    "valid": false
+  },
+  {
+    "direction": "output_schema",
+    "payload": {
+      "project": "/fixture",
+      "outcome": "pass",
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000,
+          "status": "passed",
+          "code": 0,
+          "stdout": "",
+          "stderr": "",
+          "truncated": false,
+          "duration_ms": 1
+        }
+      ],
+      "diagnostic": null,
+      "discovered": [],
+      "notes": [],
+      "keep_going": false
+    },
+    "valid": true
+  },
+  {
+    "direction": "output_schema",
+    "payload": {},
+    "valid": false
+  },
+  {
+    "direction": "output_schema",
+    "payload": {
+      "project": "/fixture",
+      "outcome": "pass",
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000,
+          "status": "passed",
+          "code": 0,
+          "stdout": "",
+          "stderr": "",
+          "truncated": false,
+          "duration_ms": 1
+        }
+      ],
+      "diagnostic": null,
+      "discovered": [
+        {
+          "id": "e2e",
+          "categories": ["e2e"],
+          "command": "npm",
+          "args": ["run", "e2e"],
+          "cwd": "/fixture",
+          "evidence": ["package.json:scripts.e2e"],
+          "selection": {
+            "state": "available",
+            "reason": "Requires project selection"
+          }
+        }
+      ],
+      "notes": [],
+      "keep_going": false
+    },
+    "valid": true
+  },
+  {
+    "direction": "output_schema",
+    "payload": {
+      "project": "/fixture",
+      "outcome": "pass",
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000,
+          "status": "passed",
+          "code": 0,
+          "stdout": "",
+          "stderr": "",
+          "truncated": false,
+          "duration_ms": 1
+        }
+      ],
+      "diagnostic": null,
+      "discovered": [
+        {
+          "id": "e2e",
+          "categories": ["e2e"],
+          "command": "npm",
+          "args": ["run", "e2e"],
+          "cwd": "/fixture",
+          "evidence": ["package.json:scripts.e2e"],
+          "selection": {
+            "state": "available"
+          }
+        }
+      ],
+      "notes": [],
+      "keep_going": false
+    },
+    "valid": false
+  },
+  {
+    "direction": "input_schema",
+    "payload": {
+      "project": "/fixture",
+      "keep_going": true
+    },
+    "valid": true
+  },
+  {
+    "direction": "input_schema",
+    "payload": {
+      "keep_going": "true"
+    },
+    "valid": false
+  }
+]

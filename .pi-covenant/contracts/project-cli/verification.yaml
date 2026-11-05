@@ -1,2 +1,72 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: project-check-discovery
+    obligation: PROJECTCLI-019
+    adapter: vitest
+    tests:
+      - project-cli.discovery
+  - id: project-check-configuration
+    obligation: PROJECTCLI-020
+    adapter: vitest
+    tests:
+      - project-cli.configuration
+  - id: project-check-completion
+    obligation: PROJECTCLI-021
+    adapter: vitest
+    tests:
+      - project-cli.completion
+  - id: project-check-failures
+    obligation: PROJECTCLI-022
+    adapter: vitest
+    tests:
+      - project-cli.failures
+  - id: project-check-cancellation
+    obligation: PROJECTCLI-023
+    adapter: vitest
+    tests:
+      - project-cli.cancellation
+  - id: project-check-cli
+    obligation: PROJECTCLI-024
+    adapter: vitest
+    tests:
+      - project-cli.cli
+  - id: project-check-read-only
+    obligation: PROJECTCLI-010
+    adapter: vitest
+    tests:
+      - project-cli.discovery
+  - id: project-check-product-failure
+    obligation: PROJECTCLI-014
+    adapter: vitest
+    tests:
+      - project-cli.failures
+  - id: project-check-inventory
+    obligation: PROJECTCLI-025
+    adapter: vitest
+    tests:
+      - project-cli.inventory
+  - id: project-check-coverage
+    obligation: PROJECTCLI-026
+    adapter: vitest
+    tests:
+      - project-cli.coverage
+  - id: project-check-selection
+    obligation: PROJECTCLI-027
+    adapter: vitest
+    tests:
+      - project-cli.selection
+  - id: project-check-check-tools
+    obligation: PROJECTCLI-028
+    adapter: vitest
+    tests:
+      - project-cli.check-tools
+  - id: project-check-standalone
+    obligation: PROJECTCLI-029
+    adapter: vitest
+    tests:
+      - project-cli.standalone
+  - id: project-check-keep-going
+    obligation: PROJECTCLI-030
+    adapter: vitest
+    tests:
+      - project-cli.keep-going

@@ -5,15 +5,15 @@ The canonical [dependency graph](module-graph.json) and modules/_.json define al
 Run from the harness directory:
 
 ```sh
-uv run --with pyyaml --with jsonschema python scripts/check-module-contracts.py
-uv run --with pyyaml --with jsonschema python scripts/test-module-contracts.py
+pnpm check:contracts
+pnpm test
 ```
 
 The validator rejects graph cycles, missing components, native metadata drift, unknown ports, inconsistent ownership and schema fixture failures. Each operation has accepted and rejected request/result shape fixtures. The negative-check suite deliberately corrupts contracts and adds an illegal future import to demonstrate rejection.
 
-These checks enforce design consistency now. They do not prove provider behavior, user authorization, side-effect safety, or the adequacy of an implementation. Shape fixtures must be supplemented by executable behavioral tests for each obligation before activation. Python dependencies are explicit in the command; no global installation is needed.
+These checks enforce design consistency now. They do not prove provider behavior, user authorization, side-effect safety, or the adequacy of an implementation. Shape fixtures must be supplemented by executable behavioral tests for each obligation before activation. Validation and probes use TypeScript with locked dependencies.
 
-During implementation, modules expose only src/<component>/module-port.ts. Cross-module relative imports must target that entrypoint and a declared dependency. The scanner is a limited early check for literal relative JS/TS imports, not a complete language resolver: aliases, dynamic imports and package imports need compiler/linter enforcement when the implementation toolchain is chosen. Worktree now has a runtime source entrypoint and executable behavior tests; other modules remain design-only.
+During implementation, modules expose only src/<component>/module-port.ts. Cross-module relative imports must target that entrypoint and a declared dependency. The scanner uses TypeScript module resolution for literal imports, re-exports, require and dynamic imports; computed import paths are not statically analyzed. Fallow independently enforces declared module zones. Worktree and minimal project checks now have runtime module ports and executable behavior tests; other runtime modules remain design-only. Legacy project-cli authoring/executor ports stay declared for deferred consumers and are not implemented exports.
 
 The composition root injects trusted host ports; feature modules cannot import it. Invocation context carries the inherited deadline, cancellation, resource scope and host-derived authorization provenance. Feature modules never receive raw credentials. Pure modules receive no host capabilities. Consumers call only listed operations; read-only consumers cannot borrow write ports.
 

@@ -1,43 +1,103 @@
 [
   {
-    "name": "valid shape",
     "direction": "input_schema",
-    "valid": true,
-    "payload": {}
-  },
-  {
-    "name": "reject wrong boundary type",
-    "direction": "input_schema",
-    "valid": false,
-    "payload": []
-  },
-  {
-    "name": "valid shape",
-    "direction": "output_schema",
-    "valid": true,
     "payload": {
-      "status": "ok",
-      "context": {},
-      "data": {
-        "project": "fixture",
-        "proposal_id": "fixture",
-        "manifest_path": "fixture",
-        "entrypoint": "fixture",
-        "capabilities": [],
-        "changes": [],
-        "findings": [],
-        "evidence": [],
-        "state": "proposed"
-      },
-      "error": null,
-      "warnings": [],
-      "completed_effects": []
-    }
+      "project": "/fixture"
+    },
+    "valid": true
   },
   {
-    "name": "reject wrong boundary type",
+    "direction": "input_schema",
+    "payload": {
+      "unknown": true
+    },
+    "valid": false
+  },
+  {
     "direction": "output_schema",
-    "valid": false,
-    "payload": []
+    "payload": {
+      "project": "/fixture",
+      "source": "project-checks.json",
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000
+        }
+      ],
+      "discovered": [],
+      "notes": []
+    },
+    "valid": true
+  },
+  {
+    "direction": "output_schema",
+    "payload": {},
+    "valid": false
+  },
+  {
+    "direction": "output_schema",
+    "payload": {
+      "project": "/fixture",
+      "source": "project-checks.json",
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000
+        }
+      ],
+      "discovered": [
+        {
+          "id": "e2e",
+          "categories": ["e2e"],
+          "command": "npm",
+          "args": ["run", "e2e"],
+          "cwd": "/fixture",
+          "evidence": ["package.json:scripts.e2e"],
+          "selection": {
+            "state": "available",
+            "reason": "Requires project selection"
+          }
+        }
+      ],
+      "notes": []
+    },
+    "valid": true
+  },
+  {
+    "direction": "output_schema",
+    "payload": {
+      "project": "/fixture",
+      "source": "project-checks.json",
+      "checks": [
+        {
+          "id": "tests",
+          "command": "node",
+          "args": ["check.js"],
+          "cwd": "/fixture",
+          "timeout_ms": 1000
+        }
+      ],
+      "discovered": [
+        {
+          "id": "e2e",
+          "categories": ["e2e"],
+          "command": "npm",
+          "args": ["run", "e2e"],
+          "cwd": "/fixture",
+          "evidence": ["package.json:scripts.e2e"],
+          "selection": {
+            "state": "available"
+          }
+        }
+      ],
+      "notes": []
+    },
+    "valid": false
   }
 ]

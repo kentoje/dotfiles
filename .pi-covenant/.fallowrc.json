@@ -1,5 +1,176 @@
 {
   "$schema": "./node_modules/fallow/schema.json",
-  "entry": ["src/worktree/module-port.ts", "src/**/*.test.ts"],
-  "ignorePatterns": [".covenant/**", ".agents/**"]
+  "entry": [
+    "src/worktree/module-port.ts",
+    "src/**/*.test.ts",
+    "src/project-cli/module-port.ts"
+  ],
+  "ignorePatterns": [".covenant/**", ".agents/**"],
+  "boundaries": {
+    "zones": [
+      {
+        "name": "tool-protocol",
+        "patterns": ["src/tool-protocol/**"]
+      },
+      {
+        "name": "development-method",
+        "patterns": ["src/development-method/**"]
+      },
+      {
+        "name": "repository-context",
+        "patterns": ["src/repository-context/**"]
+      },
+      {
+        "name": "gitlab",
+        "patterns": ["src/gitlab/**"]
+      },
+      {
+        "name": "jira-preflight",
+        "patterns": ["src/jira-preflight/**"]
+      },
+      {
+        "name": "jira",
+        "patterns": ["src/jira/**"]
+      },
+      {
+        "name": "mr",
+        "patterns": ["src/mr/**"]
+      },
+      {
+        "name": "mr-guard",
+        "patterns": ["src/mr-guard/**"]
+      },
+      {
+        "name": "worktree",
+        "patterns": ["src/worktree/**"]
+      },
+      {
+        "name": "fleet",
+        "patterns": ["src/fleet/**"]
+      },
+      {
+        "name": "project-cli",
+        "patterns": ["src/project-cli/**"]
+      },
+      {
+        "name": "preview",
+        "patterns": ["src/preview/**"]
+      },
+      {
+        "name": "story",
+        "patterns": ["src/story/**"]
+      },
+      {
+        "name": "retrospective",
+        "patterns": ["src/retrospective/**"]
+      },
+      {
+        "name": "shipping",
+        "patterns": ["src/shipping/**"]
+      },
+      {
+        "name": "foundation",
+        "patterns": ["src/foundation/**"]
+      },
+      {
+        "name": "tooling",
+        "patterns": ["scripts/**", "*.config.ts"]
+      }
+    ],
+    "rules": [
+      {
+        "from": "tool-protocol",
+        "allow": []
+      },
+      {
+        "from": "development-method",
+        "allow": []
+      },
+      {
+        "from": "repository-context",
+        "allow": ["tool-protocol"]
+      },
+      {
+        "from": "gitlab",
+        "allow": ["tool-protocol", "repository-context"]
+      },
+      {
+        "from": "jira-preflight",
+        "allow": ["tool-protocol"]
+      },
+      {
+        "from": "jira",
+        "allow": ["tool-protocol", "jira-preflight"]
+      },
+      {
+        "from": "mr",
+        "allow": ["tool-protocol", "repository-context", "gitlab"]
+      },
+      {
+        "from": "mr-guard",
+        "allow": ["tool-protocol", "repository-context", "mr"]
+      },
+      {
+        "from": "worktree",
+        "allow": ["tool-protocol", "repository-context"]
+      },
+      {
+        "from": "fleet",
+        "allow": ["tool-protocol", "repository-context", "gitlab", "mr"]
+      },
+      {
+        "from": "project-cli",
+        "allow": ["tool-protocol", "repository-context"]
+      },
+      {
+        "from": "preview",
+        "allow": ["tool-protocol", "project-cli"]
+      },
+      {
+        "from": "story",
+        "allow": ["tool-protocol", "project-cli"]
+      },
+      {
+        "from": "retrospective",
+        "allow": ["tool-protocol"]
+      },
+      {
+        "from": "shipping",
+        "allow": [
+          "tool-protocol",
+          "repository-context",
+          "gitlab",
+          "mr",
+          "mr-guard",
+          "project-cli"
+        ]
+      },
+      {
+        "from": "foundation",
+        "allow": [
+          "tool-protocol",
+          "repository-context",
+          "gitlab",
+          "jira",
+          "mr",
+          "mr-guard",
+          "worktree",
+          "fleet",
+          "project-cli",
+          "preview",
+          "story",
+          "retrospective",
+          "shipping"
+        ]
+      },
+      {
+        "from": "tooling",
+        "allow": ["development-method"]
+      }
+    ],
+    "coverage": {
+      "requireAllFiles": true
+    }
+  },
+  "ignoreDependencies": ["@covenant/model-checker"]
 }
