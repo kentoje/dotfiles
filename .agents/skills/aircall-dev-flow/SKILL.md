@@ -67,7 +67,6 @@ Branches follow `<area>/<TICKET>-<slug>`.
 
 - Review your own diff (`git diff <default branch>...HEAD`): scope, leftovers, debug code, comments, tests for the behaviour.
 - Run every check the repository's `AGENTS.md` requires (dashboard-v4: `pnpm ts:check` after TypeScript changes) and fix every failure on this branch.
-- The `package.json` script named like `pre-mr` (slow in conversation-center-ext: it includes e2e) runs later, before the MR is marked ready, not before the draft.
 - If a review stop was requested, stop here: report changes, worktree, branch and check results.
 
 ### 5. Draft MR

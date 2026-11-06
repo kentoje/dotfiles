@@ -3,9 +3,8 @@ name: gitlab-create-merge-request
 description: >
   Create a GitLab merge request (draft or ready) with the glab CLI, targeting the
   project's default branch (main or master), with the first commit message as the
-  title and a verified Markdown description. Runs the repo's pre-MR command when
-  package.json defines one. Use when the user asks to open an MR for the current
-  branch, or after completing work that needs review.
+  title and a verified Markdown description. Use when the user asks to open an MR
+  for the current branch, or after completing work that needs review.
 ---
 
 # Create Merge Request
@@ -23,17 +22,11 @@ TARGET=$(glab repo view -F json | python3 -c 'import json,sys; print(json.load(s
   Qodo does not review drafts, so the readiness loop requests its review with `/agentic_review` and marks the MR ready when it is clean.
 - **Ready** (no `--draft`) when the user asks for it, or the work is already fully checked.
 
-## Pre-MR check (mandatory before the MR is ready)
+## Checks before the MR is ready
 
-Look in the repo's `package.json` `scripts` for a command whose name contains `pre-mr` (conversation-center-ext: `pnpm pre-mr`).
-
-- If one exists, run it from the worktree and wait for it to exit 0: before creating a ready MR, or before marking a draft ready.
-  A failure is a code problem on this branch: fix it here, do not skip the command, and do not open a second MR.
-- If none exists, say so and run the checks the repository's `AGENTS.md` requires instead (dashboard-v4: `pnpm ts:check` after TypeScript changes).
-  Do not invent other stand-in checks.
-
-`pnpm pre-mr` in conversation-center-ext runs the feature-branch quality jobs (lint, unit coverage, typecheck, fallow, react-doctor, locale diff) and the seven hermetic e2e projects.
-It is slow: run it once, on the commit you are about to mark ready.
+Before creating a ready MR, or before marking a draft ready, run the checks the repository's `AGENTS.md` requires (dashboard-v4: `pnpm ts:check` after TypeScript changes) and wait for them to pass.
+A failure is a code problem on this branch: fix it here, do not skip the check, and do not open a second MR.
+Do not invent other stand-in checks.
 
 ## Steps
 

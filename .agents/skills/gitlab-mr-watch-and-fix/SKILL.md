@@ -69,7 +69,7 @@ What it knows, so you do not re-derive it:
    | `reply_to_comments` | Read and answer each comment; fix first when it asks for a change. |
    | `fix_security_gate` | Read the newest Security Gate note and fix what it reports. |
    | `request_automated_review` | `glab api -X POST "projects/$P/merge_requests/$IID/notes" -f body=/agentic_review` (once per round of changes). |
-   | `mark_ready` | First, when `package.json` has a script named like `pre-mr` and it has not passed on the current HEAD, run it; fix, push and re-check on failure. Then `glab mr update "$IID" --ready`. This also triggers Qodo; the next check waits for it. |
+   | `mark_ready` | `glab mr update "$IID" --ready`. This also triggers Qodo; the next check waits for it. |
    | `report_blocker` | Stop the loop and report it (conflicts, blocking manual jobs, canceled pipelines). |
 
 4. After every push, confirm the remote SHA (`git ls-remote origin <branch>`) and go back to step 2.
