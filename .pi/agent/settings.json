@@ -25,13 +25,21 @@
     "npm:pi-open-tui",
     "git:git@github.com:kentoje/pi-copy-mode.git",
     "npm:@luan.sh/pi-xsettings",
-    "npm:@tifan/pi-inline-skills"
+    "npm:@tifan/pi-inline-skills",
+    "npm:@monotykamary/pi-retry@0.11.4"
   ],
   "extensions": [
     "~/dotfiles/.pi/agent/extensions/agent-gossips/index.ts"
   ],
   "subagents": {
     "disableBuiltins": true
+  },
+  "piRetry": {
+    "baseDelayMs": 5000,
+    "maxDelayMs": 60000,
+    "multiplier": 2,
+    "maxRetriesAtMaxDelay": 6,
+    "messageFreeRetries": true
   },
   "voice": {
     "version": 2,

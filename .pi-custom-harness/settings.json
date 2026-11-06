@@ -13,8 +13,16 @@
     "npm:@mrclrchtr/supi-ask-user",
     "npm:@mrclrchtr/supi-web",
     "npm:@mrclrchtr/supi-code-intelligence",
-    "npm:@juicesharp/rpiv-btw"
+    "npm:@juicesharp/rpiv-btw",
+    "npm:@monotykamary/pi-retry@0.11.4"
   ],
+  "piRetry": {
+    "baseDelayMs": 5000,
+    "maxDelayMs": 60000,
+    "multiplier": 2,
+    "maxRetriesAtMaxDelay": 6,
+    "messageFreeRetries": true
+  },
   "lastChangelogVersion": "0.85.1",
   "theme": "melange_dark"
 }
