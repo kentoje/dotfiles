@@ -378,6 +378,7 @@ infra/dev-microvm-stack.yaml   CloudFormation: artifact bucket (image builds, pn
 image/Dockerfile, image/rootfs the dev image (Ubuntu 24.04 arm64) and its files (/opt/mvm/bin hooks and helpers)
 scripts/mvm, scripts/mvm_cli/  laptop CLI (Python stdlib); tests are *_test.py next to each module
 scripts/completions/mvm.fish   fish completion, linked by `mvm setup`
+docs/                          maintenance guides (docs/image-tool-versions.md: bump a tool such as Claude Code in the image)
 ```
 
 Per-person values stay out of this public repo, in `~/.config/mvm/settings.json` on the laptop (`MVM_SETTINGS_FILE` overrides the path).
@@ -410,6 +411,8 @@ mvm image build     # new image version from image/ (about 6 minutes); new machi
 These three need administrator rights, which a scoped `awsAuthentication` profile does not have.
 Run them with an admin AWS CLI profile: `aws sso login --profile <admin>`, then `MVM_AWS_PROFILE=<admin> mvm image build`.
 `aws-vault exec <admin> -- mvm ...` does not work once `awsAuthentication` is set: the configured profile replaces inherited credentials.
+
+- Tool versions, Claude Code's included, are pinned `ARG`s in `image/Dockerfile`: to update one, follow `docs/image-tool-versions.md`.
 
 - Tests: `cd scripts && nix shell nixpkgs#zstd -c python3 -m unittest discover -s mvm_cli -p '*_test.py' -t .`, and again with `/usr/bin/python3` (3.9): ssh and herdr run `mvm proxy` with macOS's python.
 - A new command or flag needs `scripts/completions/mvm.fish` too: `fish_completion_test.py` fails until it matches.
