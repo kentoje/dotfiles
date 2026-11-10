@@ -25,6 +25,8 @@ ARG HERDR_VERSION=0.9.5
 # The laptop's `aws-<name>` tuios window runs this client over ssh (`tuios attach main`): no version link to the laptop's tuios.
 ARG TUIOS_VERSION=0.10.1
 ARG CODEX_VERSION=0.162.1
+# Claude Code auto-updates on running machines; pinning keeps that download out of every new machine.
+ARG CLAUDE_CODE_VERSION=2.1.322
 ARG JIRA_CLI_VERSION=1.7.0
 ARG NVIM_VERSION=0.12.6
 ARG LAZYGIT_VERSION=0.66.1
@@ -125,7 +127,7 @@ RUN set -e; cd /tmp; \
 # Claude Code, uv, and rust (for the herdr-vim-nav plugin).
 # Claude Code signs in with the subscription token CLAUDE_CODE_OAUTH_TOKEN from the env secret;
 # rootfs seeds ~/.claude.json (onboarding done, /home/dev trusted) and ~/.claude/settings.json (Opus 5.5).
-RUN curl -fsSL https://claude.ai/install.sh | bash \
+RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
  && curl -LsSf https://astral.sh/uv/install.sh | env UV_NO_MODIFY_PATH=1 sh \
  && curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path \
  && ~/.local/bin/claude --version && ~/.local/bin/uv --version && ~/.cargo/bin/cargo --version
