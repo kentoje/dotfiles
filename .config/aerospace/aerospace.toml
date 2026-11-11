@@ -132,26 +132,64 @@ alt-shift-quote = 'resize smart +50'
 alt-0 = 'workspace 0'
 # alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
 # alt-b = 'workspace B'
-alt-c = ['workspace C', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh C "Notion Calendar"']
-alt-d = ['workspace D', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh D DrawPen']
+alt-c = [
+  'workspace C',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh C "Notion Calendar"',
+]
+alt-d = [
+  'workspace D',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh D DrawPen',
+]
 # alt-e = 'workspace E'
-alt-f = ['workspace F', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh F Figma']
-alt-g = ['workspace G', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh G Helium']
+alt-f = [
+  'workspace F',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh F Figma',
+]
+alt-g = [
+  'workspace G',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh G Helium',
+]
 # alt-i = 'workspace I'
-alt-m = ['workspace M', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh M Spotify']
+# alt-m = [
+#   'workspace M',
+#   'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh M Spotify',
+# ]
+
+alt-m = [
+  'workspace M',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh M Tidal',
+]
 # alt-n = 'workspace N'
 # alt-o = 'workspace O'
 # alt-p = 'workspace P'
 # alt-q = 'workspace Q'
-alt-r = ['workspace R', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh R Telegram']
-alt-s = ['workspace S', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh S Slack']
-alt-t = ['workspace T', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh T Ghostty']
+alt-r = [
+  'workspace R',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh R Telegram',
+]
+alt-s = [
+  'workspace S',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh S Slack',
+]
+alt-t = [
+  'workspace T',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh T Ghostty',
+]
 # alt-u = 'workspace U'
-alt-v = ['workspace V', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh V Codex']
-alt-w = ['workspace W', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh W WhatsApp']
+alt-v = [
+  'workspace V',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh V Codex',
+]
+alt-w = [
+  'workspace W',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh W WhatsApp',
+]
 alt-x = 'exec-and-forget open -a Finder'
 # alt-y = 'workspace Y'
-alt-z = ['workspace Z', 'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh Z UTM']
+alt-z = [
+  'workspace Z',
+  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh Z UTM',
+]
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-shift-0 = 'move-node-to-workspace 0'
@@ -242,6 +280,11 @@ run = 'move-node-to-workspace G'
 [[on-window-detected]]
 if.app-id = 'com.spotify.client'
 run = 'move-node-to-workspace M'
+
+[[on-window-detected]]
+if.app-id = 'com.tidal.desktop'
+run = 'move-node-to-workspace M'
+
 
 [[on-window-detected]]
 if.app-id = 'com.tinyspeck.slackmacgap'
