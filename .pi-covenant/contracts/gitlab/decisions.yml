@@ -10,7 +10,7 @@ decisions:
         disposition: rejected
     evidence:
       - Explicit user conversation decision
-    related_obligations: &id001
+    related_obligations: &a1
       - GITLAB-001
       - GITLAB-002
       - GITLAB-003
@@ -37,10 +37,26 @@ decisions:
         disposition: rejected
     evidence:
       - Explicit user conversation decision
-    related_obligations: *id001
+    related_obligations: *a1
     assumptions:
       - Service permissions and project conventions must be discovered at invocation.
     revisit_when:
       - The user changes scope or implementation reveals incompatible service/project behavior.
     approved_by: user (conversation scope only)
+    execution_evidence: []
+  - id: gitlab-brick-transport-and-evidence
+    status: specified-default
+    decision: Credential-bearing host transport with bounded single-send HTTP, exact targets, complete collection evidence and no automatic mutation replay. Keep the glab bridge and server compatibility executable acceptance prerequisites.
+    evidence:
+      - ADR-010
+      - Public API and glab v1.111.0 source audit
+    related_obligations:
+      - GITLAB-006
+      - GITLAB-011
+      - GITLAB-012
+      - GITLAB-013
+      - GITLAB-014
+      - GITLAB-015
+      - GITLAB-016
+      - GITLAB-017
     execution_evidence: []

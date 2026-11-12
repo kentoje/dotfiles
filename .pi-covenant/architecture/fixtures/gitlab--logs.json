@@ -27,7 +27,9 @@
         "next_offset": 0,
         "returned_bytes": 0,
         "truncated": false,
-        "redacted": false
+        "redacted": false,
+        "has_more": true,
+        "source_bytes": 0
       },
       "error": null,
       "warnings": [],

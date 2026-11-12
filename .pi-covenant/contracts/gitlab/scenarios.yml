@@ -7,129 +7,135 @@ scenarios:
     given: A checkout maps to team/app with default branch develop.
     when: Read repository.
     then: Return team/app and develop with no local or remote mutation.
-    obligations: &id001
+    obligations: &a1
       - GITLAB-001
-      - GITLAB-002
-      - GITLAB-003
       - GITLAB-004
-      - GITLAB-005
-      - GITLAB-006
-      - GITLAB-007
-      - GITLAB-008
-      - GITLAB-009
-      - GITLAB-010
   - id: GL-REPO-02
     action: repository
     status: planned
     given: Two eligible remotes exist and no selection resolves them.
     when: Read repository.
     then: Return blocked AMBIGUOUS_REMOTE; do not choose the first remote.
-    obligations: *id001
+    obligations: *a1
   - id: GL-LIST-01
     action: pipelines
     status: planned
     given: Two pipeline pages match the branch.
     when: Read first page.
     then: Return newest first, has_more=true and next cursor; complete=false.
-    obligations: *id001
+    obligations: &a2
+      - GITLAB-005
+      - GITLAB-011
   - id: GL-LIST-02
     action: pipelines
     status: planned
     given: The provider lookup fails.
     when: List pipelines.
     then: Return error, not an empty successful list.
-    obligations: *id001
+    obligations: *a2
   - id: GL-PIPE-01
     action: pipeline
     status: planned
     given: Pipeline 41 is green for old SHA A; pipeline 42 is running for B.
     when: Read pipeline 42.
     then: Return B/running, never A/success.
-    obligations: *id001
+    obligations: &a3
+      - GITLAB-005
   - id: GL-PIPE-02
     action: pipeline
     status: planned
     given: Pipeline ID exists in another project only.
     when: Read in selected project.
     then: Return not found; do not cross-project search or substitution.
-    obligations: *id001
+    obligations: *a3
   - id: GL-JOBS-01
     action: jobs
     status: planned
     given: A failed job was retried under a new job ID.
     when: Read with and without include_retried.
     then: Default returns current attempts; explicit history retains both distinct IDs.
-    obligations: *id001
+    obligations: &a4
+      - GITLAB-005
+      - GITLAB-011
   - id: GL-JOBS-02
     action: jobs
     status: planned
     given: Only the first job page is available.
     when: Read jobs.
     then: complete=false; no pipeline readiness assertion.
-    obligations: *id001
+    obligations: *a4
   - id: GL-JOB-01
     action: job
     status: planned
     given: A retry changed job ID from 8 to 9.
     when: Read 8.
     then: Return the old attempt as old; do not replace it with 9.
-    obligations: *id001
+    obligations: &a5
+      - GITLAB-005
   - id: GL-JOB-02
     action: job
     status: planned
     given: Job lookup times out.
     when: Read job.
     then: Return bounded failure after eligible read retry, not success or absence.
-    obligations: *id001
+    obligations: *a5
   - id: GL-LOG-01
     action: logs
     status: planned
     given: A trace exceeds the requested window.
     when: Read logs with max_bytes=1024.
     then: Return a bounded window, truncated=true and a valid continuation offset.
-    obligations: *id001
+    obligations: &a6
+      - GITLAB-006
+      - GITLAB-015
+      - GITLAB-017
   - id: GL-LOG-02
     action: logs
     status: planned
     given: The trace contains a known configured token.
     when: Read logs.
     then: Token is redacted; original credential never appears in diagnostics.
-    obligations: *id001
+    obligations: *a6
   - id: GL-RETRY-01
     action: retry
     status: planned
     given: Explicit pipeline 42 has failed jobs.
     when: Request authorized retry of 42.
     then: One retry request targets 42; return its observed state without claiming green CI.
-    obligations: *id001
+    obligations: &a7
+      - GITLAB-007
+      - GITLAB-009
+      - GITLAB-012
   - id: GL-RETRY-02
     action: retry
     status: planned
     given: The request times out after dispatch.
     when: Retry pipeline.
     then: Return indeterminate; do not issue a second retry.
-    obligations: *id001
+    obligations: *a7
   - id: GL-RETRY-03
     action: retry
     status: planned
     given: No failed or canceled jobs are eligible.
     when: Retry pipeline.
     then: Return ok/no_change rather than inventing a new pipeline.
-    obligations: *id001
+    obligations: *a7
   - id: GL-CANCEL-01
     action: cancel
     status: planned
     given: Cancel request is accepted but jobs still stop asynchronously.
     when: Cancel pipeline 42.
     then: accepted with cancellation_confirmed=false and actual observed state.
-    obligations: *id001
+    obligations: &a8
+      - GITLAB-008
+      - GITLAB-012
   - id: GL-CANCEL-02
     action: cancel
     status: planned
     given: Pipeline is already terminal and unchanged.
     when: Cancel it.
     then: Return no_change; do not claim it transitioned to canceled.
-    obligations: *id001
+    obligations: *a8
   - id: GITLAB-001-ACCEPTANCE
     status: planned
     given: A controlled fixture satisfying the applicable preconditions, plus an adversarial fixture violating the boundary.
@@ -210,3 +216,144 @@ scenarios:
     obligations:
       - GITLAB-010
     test_design_note: Derive an executable assertion from this obligation and the concrete action examples before activation; this record is not an executable test.
+  - id: GL-TARGET-03
+    action: repository
+    status: planned
+    given: A linked checkout and two distinct GitLab fetch targets; explicit cwd conflicts with an explicit project.
+    when: Resolve the target.
+    then: Block without first-remote/origin preference or credential-bearing network request.
+    obligations:
+      - GITLAB-001
+      - GITLAB-014
+    test_id: gitlab.context
+  - id: GL-EMPTY-01
+    action: repository
+    status: planned
+    given: GitLab returns default_branch=null for an empty project.
+    when: Read repository.
+    then: Return null without guessing a branch or rejecting the valid project.
+    obligations:
+      - GITLAB-004
+    test_id: gitlab.surface
+  - id: GL-CURSOR-01
+    action: pipelines
+    status: planned
+    given: A cursor was issued for another host, project, pipeline, page size or filter.
+    when: Request continuation.
+    then: Reject INVALID_CURSOR before any provider request.
+    obligations:
+      - GITLAB-011
+    test_id: gitlab.pagination
+  - id: GL-PAGE-03
+    action: jobs
+    status: planned
+    given: A full page lacks reliable next-page metadata.
+    when: Read jobs.
+    then: Return incomplete/error evidence; do not claim no matching jobs or collection completeness.
+    obligations:
+      - GITLAB-011
+      - GITLAB-015
+    test_id: gitlab.pagination
+  - id: GL-RETRY-04
+    action: retry
+    status: planned
+    given: The first job page contains no failures but more pages remain and the deadline expires.
+    when: Request retry.
+    then: No POST and no no_change claim; return bounded incomplete preflight failure.
+    obligations:
+      - GITLAB-009
+      - GITLAB-011
+    test_id: gitlab.retry-no-change
+  - id: GL-AUTH-01
+    action: retry
+    status: planned
+    given: No host task authority exists, but tool arguments supply approval=true.
+    when: Invoke retry.
+    then: Reject input/authority before POST; model fields cannot grant permission.
+    obligations:
+      - GITLAB-007
+      - GITLAB-014
+    test_id: gitlab.authorization
+  - id: GL-STOP-01
+    action: cancel
+    status: planned
+    given: Cancellation arrives before dispatch, then separately after a POST with no response.
+    when: Cancel the invocation.
+    then: "Before send: cancelled/no remote effect; after send: indeterminate/unknown exact-target effect and no replay."
+    obligations:
+      - GITLAB-012
+      - GITLAB-013
+    test_id: gitlab.cancellation
+  - id: GL-WRITE-03
+    action: retry
+    status: planned
+    given: A matching request is sent, followed by 5xx or truncated/mismatched acknowledgement.
+    when: Classify the result.
+    then: Return indeterminate with the exact pipeline and unknown effect, not a safe-to-retry error.
+    obligations:
+      - GITLAB-005
+      - GITLAB-012
+    test_id: gitlab.uncertain-write
+  - id: GL-REDIRECT-01
+    action: retry
+    status: planned
+    given: A fixture returns 307 or 308 from the mutation endpoint.
+    when: Issue one authorized retry.
+    then: Count exactly one POST, follow no redirect and do not forward credentials to another origin.
+    obligations:
+      - GITLAB-012
+      - GITLAB-014
+      - GITLAB-017
+    test_id: gitlab.uncertain-write
+  - id: GL-LOCK-01
+    action: cancel
+    status: planned
+    given: A retry on the same canonical host/project/pipeline owns the host permit; another pipeline is independent.
+    when: Invoke cancellation and an independent operation concurrently.
+    then: Reject WRITE_CONFLICT for the same pipeline; the independent resource proceeds. Release owned permits on all exits.
+    obligations:
+      - GITLAB-016
+    test_id: gitlab.coordination
+  - id: GL-LOG-03
+    action: logs
+    status: planned
+    given: A known credential straddles stream chunks and a requested window boundary; multibyte UTF-8 straddles another boundary.
+    when: Read two bounded windows.
+    then: No credential fragment is exposed; original-byte offsets remain correct, returned_bytes is UTF-8 output size and decoding warnings are truthful.
+    obligations:
+      - GITLAB-006
+      - GITLAB-015
+      - GITLAB-017
+    test_id: gitlab.logs
+  - id: GL-BOUNDS-01
+    action: pipeline
+    status: planned
+    given: A provider streams oversized or incomplete JSON beyond the response budget.
+    when: Read the exact pipeline.
+    then: Terminate only the owned read, return failure and never decode a successful prefix or claim absence.
+    obligations:
+      - GITLAB-005
+      - GITLAB-015
+    test_id: gitlab.transport-bounds
+  - id: GL-MR-03
+    action: lookup_open_mrs
+    status: planned
+    given: An empty first MR page has continuation, then an authentication or parsing failure occurs.
+    when: Look up opened MRs for the exact source project/branch.
+    then: Preserve incomplete evidence; never report verified absence or enable MR creation.
+    obligations:
+      - GITLAB-002
+      - GITLAB-003
+      - GITLAB-011
+    test_id: gitlab.mr-lookup
+  - id: GL-FORBIDDEN-01
+    action: surface
+    status: planned
+    given: The caller requests pipeline create/delete, job play, merge, arbitrary API method or an unknown action.
+    when: Invoke the tool.
+    then: Reject before any mutation; only eight public actions register.
+    obligations:
+      - GITLAB-003
+      - GITLAB-004
+      - GITLAB-010
+    test_id: gitlab.forbidden-effects

@@ -11,3 +11,5 @@ Project-specific decisions remain intentionally deferred until discovery: reposi
 Fleet mutations, automatic retrospectives, autonomous blocked-turn continuation, and universal browser checks remain outside this version.
 
 Module interfaces, dependencies and ownership are now explicit in [architecture](../architecture/README.md). Run its validator and deliberate-violation suite before implementation and after interface changes. Worktree implementation is authorized and implemented; project checks are now implemented; Pi registration and local repository context are implemented; other runtime modules remain pending.
+
+GitLab now has an implementation-ready design proposal in contracts/gitlab/brick-design.md and ADR-010. Its host transport/auth bridge choices and numeric limits are authored defaults, not additional user preferences. Its models are checked in isolated native snapshots while implementation remains pending; the active harness manifest is not padded with fake conformance targets. GitLab is still absent from the Pi runtime.

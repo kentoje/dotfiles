@@ -36,5 +36,45 @@
     "direction": "output_schema",
     "valid": false,
     "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "identity": {
+          "host": "fixture",
+          "repository": "fixture"
+        },
+        "default_branch": null,
+        "web_url": "fixture"
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "identity": {
+          "host": "fixture",
+          "repository": "fixture"
+        },
+        "default_branch": "",
+        "web_url": "fixture"
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
   }
 ]

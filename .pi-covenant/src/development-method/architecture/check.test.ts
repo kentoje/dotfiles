@@ -11,7 +11,7 @@ describe("development contract verification", () => {
   contractTest("development.contract-consistency", async () => {
     const result = await checkModuleContracts(root);
     expect(result.modules).toBe(16);
-    expect(result.schemaFixtureChecks).toBe(186);
+    expect(result.schemaFixtureChecks).toBe(192);
     await expect(rejectContractMutations(root)).resolves.toBe(7);
   });
 });

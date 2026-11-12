@@ -378,3 +378,7 @@ Preserve obligation IDs and explicit user decisions. Implement one behavior slic
 ## Enforced module boundary
 
 See [module interface](../../architecture/modules/gitlab.json). Dependencies and operation allowlists are checked by the architecture validator. Interface changes require synchronized consumer updates and acceptance fixtures.
+
+## Implementation-ready design supplement
+
+See [brick-design.md](brick-design.md), [implementation-plan.yml](implementation-plan.yml) and ADR-010 for the tightened module/host boundary, target precedence, cursor semantics, log accounting, single-send mutation outcomes and implementation slices. GITLAB-011..017 add draft evidence/transport/authority obligations; original GITLAB-001..010 meanings are retained. The machine-readable public/module schemas are authoritative for refined DTO shape: default_branch can be null, jobs retain optional ref, and logs include has_more/source_bytes. Repository context's optional gitlab_target is planned and not yet emitted at runtime. No GitLab tool is registered in Pi by this design pass.

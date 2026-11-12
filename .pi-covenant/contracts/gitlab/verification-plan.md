@@ -1,33 +1,11 @@
-# Acceptance implementation plan
+# GitLab acceptance implementation plan
 
-No executable bindings exist. scenarios.yml contains planned examples, not passing evidence.
+All native obligations remain draft; verification.yaml intentionally has no executable bindings. See implementation-plan.yml for 17 exact reserved test IDs and colocated planned files, and brick-design.md for port/transport semantics. scenarios.yml provides concrete cases; generic prior obligation-review records remain planning aids, not executable evidence.
 
-Use deterministic adapter fixtures for service results, temporary Git repositories for filesystem behavior, controlled subprocesses for ownership/cancellation, and host-level integration checks for registration and commands. Each native obligation must gain a meaningful executable assertion before activation.
+Implement target/auth/transport first, then repository and CI reads, bounded logs/shared MR lookup, pipeline mutations, and Pi registration. Tests must observe actual request methods, paths, host/project/pipeline IDs, request counts, cancellation and output bounds against local service/process fixtures. Each obligation activates only after its own test binding exists and passes; do not reuse another module's green tests as GitLab evidence.
 
-- GL-REPO-01: Return team/app and develop with no local or remote mutation.
-- GL-REPO-02: Return blocked AMBIGUOUS_REMOTE; do not choose the first remote.
-- GL-LIST-01: Return newest first, has_more=true and next cursor; complete=false.
-- GL-LIST-02: Return error, not an empty successful list.
-- GL-PIPE-01: Return B/running, never A/success.
-- GL-PIPE-02: Return not found; do not cross-project search or substitution.
-- GL-JOBS-01: Default returns current attempts; explicit history retains both distinct IDs.
-- GL-JOBS-02: complete=false; no pipeline readiness assertion.
-- GL-JOB-01: Return the old attempt as old; do not replace it with 9.
-- GL-JOB-02: Return bounded failure after eligible read retry, not success or absence.
-- GL-LOG-01: Return a bounded window, truncated=true and a valid continuation offset.
-- GL-LOG-02: Token is redacted; original credential never appears in diagnostics.
-- GL-RETRY-01: One retry request targets 42; return its observed state without claiming green CI.
-- GL-RETRY-02: Return indeterminate; do not issue a second retry.
-- GL-RETRY-03: Return ok/no_change rather than inventing a new pipeline.
-- GL-CANCEL-01: accepted with cancellation_confirmed=false and actual observed state.
-- GL-CANCEL-02: Return no_change; do not claim it transitioned to canceled.
-- GITLAB-001-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-002-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-003-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-004-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-005-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-006-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-007-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-008-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-009-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
-- GITLAB-010-ACCEPTANCE: Observe the required behavior and prove the forbidden side effect did not occur; retain target identities and effects in diagnostics.
+Deliberately challenge changed/ambiguous targets; approval flags; unsafe redirects; unknown/malformed write responses; partial pagination; no-op from incomplete job scans; asynchronous cancellation; split credential/UTF-8 windows; oversized JSON; conflicting writes and all forbidden actions. The isolated real Pi SDK test must preserve built-ins and register only the implemented GitLab actions. Live auth/version probes may be read-only and explicitly reported; real retry/cancel requires a task asking for those exact effects.
+
+Before implementation, check models/gitlab/design-proposal.yaml in an isolated Covenant snapshot. Require complete exploration and every declared invariant by exact name; all eight deliberate faults must violate their declared invariant. Unknown, timeout, checker error, truncated and stale results never pass. Then demonstrate design conformance returns implementation pending because no active GitLab checks exist. Promotion into the active design.yaml happens with real conformance bindings, not invented test IDs.
+
+After implementation, run full pnpm check after the final input change, inspect exact obligation outcomes, and update the tracker with verified backend/server/credential scope. A model pass is neither a GitLab implementation nor proof of HTTP, parser, secret-redaction or distributed behavior.

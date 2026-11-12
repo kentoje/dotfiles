@@ -105,7 +105,50 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: GITLAB-011
+    status: draft
+    severity: high
+    kind: invariant
+    description: Pipeline job and merge-request collection evidence must retain query-bound pagination and must not infer absence or retry ineligibility from incomplete or failed reads.
+    verification: []
+  - id: GITLAB-012
+    status: draft
+    severity: high
+    kind: invariant
+    description: Each authorized pipeline mutation may be sent at most once per invocation; an unacknowledged dispatch must retain unknown effects and return indeterminate without an automatic replay.
+    verification: []
+  - id: GITLAB-013
+    status: draft
+    severity: high
+    kind: invariant
+    description: Cancellation or deadline expiry must prevent a new GitLab dispatch while preserving acknowledged or unknown effects of mutations already sent.
+    verification: []
+  - id: GITLAB-014
+    status: draft
+    severity: high
+    kind: invariant
+    description: Pipeline mutation authority must be supplied by the trusted host for the exact action host project and pipeline; tool arguments or changed targets must not grant or expand it.
+    verification: []
+  - id: GITLAB-015
+    status: draft
+    severity: high
+    kind: invariant
+    description: GitLab response and trace processing must enforce transport byte and time limits and expose incomplete output without interpreting a killed or oversized response as complete success.
+    verification: []
+  - id: GITLAB-016
+    status: draft
+    severity: high
+    kind: invariant
+    description: Conflicting retry and cancel operations on the same resolved pipeline must be rejected or serialized within the host coordinator before dispatch; independent resources must not share a global write lock.
+    verification: []
+  - id: GITLAB-017
+    status: draft
+    severity: high
+    kind: invariant
+    description: GitLab credentials and authentication headers must remain in the trusted host transport and configured redaction boundary rather than enter feature inputs outputs or diagnostic records.
+    verification: []
+sources:
+  - models/gitlab/
 dependencies:
   - tool-protocol
   - repository-context

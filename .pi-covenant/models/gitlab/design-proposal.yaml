@@ -1,0 +1,133 @@
+schema_version: 1
+applicability:
+  - obligation: GITLAB-001
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-002
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-003
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-004
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-005
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-006
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-007
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-008
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-009
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-010
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-011
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-012
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-013
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-014
+    mode: model
+    rationale: Finite remote mutation or collection-evidence lifecycle; implementation and correspondence remain pending.
+  - obligation: GITLAB-015
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-016
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: GITLAB-017
+    mode: not_applicable
+    rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+models:
+  - id: gitlab-mutations
+    component: gitlab
+    source: models/gitlab/Mutation.tla
+    configuration: models/gitlab/Mutation.cfg
+    modules: {}
+    checker: &a1
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 20
+    bounds:
+      max_states: 50000
+      max_depth: 50
+    assumptions:
+      - One selected project/pipeline and one other target represent target binding; one invocation and one write are bounded. This does not prove distributed locking or arbitrary concurrent clients.
+      - valid and authorized are trusted host facts, not agent arguments. Authentication, URL parsing, credentials and endpoint construction require executable acceptance.
+      - Stop abstracts cancellation/deadline observed before dispatch. Unknown POST completion cannot be deduced from a later unchanged pipeline status; no idempotency or exactly-once server processing is assumed.
+      - jobsComplete and eligible abstract a complete current-job scan for retry and a known actionable/terminal observation for cancellation. Underlying GitLab state can race the observations.
+      - Canceled observation is authoritative only for the exact selected pipeline. Request acceptance alone supplies no canceled observation. No liveness, eventual cancellation or green-pipeline claim.
+    bindings:
+      - obligation: GITLAB-007
+        invariant: BoundTarget
+      - obligation: GITLAB-008
+        invariant: HonestConfirmation
+      - obligation: GITLAB-009
+        invariant: EvidenceForNoChange
+      - obligation: GITLAB-012
+        invariant: SingleSend
+      - obligation: GITLAB-012
+        invariant: HonestUnknown
+      - obligation: GITLAB-013
+        invariant: StopDispatch
+      - obligation: GITLAB-014
+        invariant: BoundTarget
+    conformance: []
+    faults:
+      - id: wrong-target
+        source: models/gitlab/WrongTarget.tla
+        invariant: BoundTarget
+      - id: duplicate-write
+        source: models/gitlab/DuplicateWrite.tla
+        invariant: SingleSend
+      - id: after-stop
+        source: models/gitlab/AfterStop.tla
+        invariant: StopDispatch
+      - id: lost-write-success
+        source: models/gitlab/LostIsSuccess.tla
+        invariant: HonestUnknown
+      - id: acceptance-is-confirmation
+        source: models/gitlab/AcceptedIsConfirmed.tla
+        invariant: HonestConfirmation
+      - id: partial-retry-noop
+        source: models/gitlab/PartialNoChange.tla
+        invariant: EvidenceForNoChange
+  - id: gitlab-read-evidence
+    component: gitlab
+    source: models/gitlab/Reads.tla
+    configuration: models/gitlab/Reads.cfg
+    modules: {}
+    checker: *a1
+    bounds:
+      max_states: 50000
+      max_depth: 50
+    assumptions:
+      - Two pages represent complete versus partial collection evidence; additional pages require executable tests and do not follow from the finite model.
+      - more=false means verified end-of-collection evidence from a well-formed bounded response; missing headers, malformed JSON or deadline exhaustion never supply that observation.
+      - A scan is an observation across changing pages, not a transactional snapshot. Concurrent remote changes and private MR lookup filter correctness require executable acceptance.
+    bindings:
+      - obligation: GITLAB-002
+        invariant: HonestAbsence
+      - obligation: GITLAB-011
+        invariant: HonestAbsence
+    conformance: []
+    faults:
+      - id: partial-absence
+        source: models/gitlab/PartialAbsence.tla
+        invariant: HonestAbsence
+      - id: failure-absence
+        source: models/gitlab/FailureAbsence.tla
+        invariant: HonestAbsence

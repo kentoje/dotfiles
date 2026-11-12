@@ -4,7 +4,7 @@
   "owner": "gitlab",
   "implementation_root": "src/gitlab/",
   "test_root": "src/gitlab/",
-  "role": "Single GitLab transport owner, including shared repository/CI reads. MR-specific transport stays private to MR.",
+  "role": "Owner of typed GitLab repository/CI request and response contracts; foundation injects credential-bearing host transport. MR-specific operations stay private to MR.",
   "dependencies": ["tool-protocol", "repository-context"],
   "operations": {
     "repository": {
@@ -71,7 +71,7 @@
                     "additionalProperties": false
                   },
                   "default_branch": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "minLength": 1
                   },
                   "web_url": {
@@ -198,7 +198,7 @@
                       "additionalProperties": false
                     },
                     "default_branch": {
-                      "type": "string",
+                      "type": ["string", "null"],
                       "minLength": 1
                     },
                     "web_url": {
@@ -223,7 +223,7 @@
       "effect": "read-only",
       "rules": [
         "Resolve explicit repository or cwd through repository-context. A missing GitLab remote blocks only GitLab operations, not ordinary Pi work.",
-        "Return the observed default branch; never hard-code main or master.",
+        "Return the observed default branch, including null for an empty project; never hard-code main or master.",
         "Do not fetch, checkout, modify remotes or create project resources."
       ]
     },
@@ -489,7 +489,8 @@
       "rules": [
         "Intersect supplied ref/SHA/state filters; do not silently widen them.",
         "Order newest pipeline ID first within the returned page; preserve pipeline source and SHA.",
-        "A truncated page is not proof of no matching pipeline."
+        "A truncated page is not proof of no matching pipeline.",
+        "Bind cursors to resolved host/project/action/filter/page-size and pipeline identity; complete means the whole requested collection is present in this result, not merely that this page is well formed."
       ]
     },
     "pipeline": {
@@ -802,6 +803,10 @@
                         "url": {
                           "type": "string",
                           "minLength": 1
+                        },
+                        "ref": {
+                          "type": "string",
+                          "minLength": 1
                         }
                       },
                       "required": ["id", "pipeline_id", "name", "state"],
@@ -960,6 +965,10 @@
                           "url": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "ref": {
+                            "type": "string",
+                            "minLength": 1
                           }
                         },
                         "required": ["id", "pipeline_id", "name", "state"],
@@ -997,7 +1006,8 @@
       "rules": [
         "Keep every returned job ID and attempt flag. Default excludes prior retried attempts; include_retried explicitly includes them.",
         "Return allow_failure and state without promoting allowed failures into mandatory failures or vice versa.",
-        "Pagination remains explicit."
+        "Pagination remains explicit.",
+        "Bind cursors to resolved host/project/action/filter/page-size and pipeline identity; complete means the whole requested collection is present in this result, not merely that this page is well formed."
       ]
     },
     "job": {
@@ -1077,6 +1087,10 @@
                     "minLength": 1
                   },
                   "url": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ref": {
                     "type": "string",
                     "minLength": 1
                   }
@@ -1208,6 +1222,10 @@
                     "url": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1
                     }
                   },
                   "required": ["id", "pipeline_id", "name", "state"],
@@ -1308,6 +1326,13 @@
                   },
                   "redacted": {
                     "type": "boolean"
+                  },
+                  "has_more": {
+                    "type": "boolean"
+                  },
+                  "source_bytes": {
+                    "type": "integer",
+                    "minimum": 0
                   }
                 },
                 "required": [
@@ -1317,7 +1342,9 @@
                   "next_offset",
                   "returned_bytes",
                   "truncated",
-                  "redacted"
+                  "redacted",
+                  "has_more",
+                  "source_bytes"
                 ],
                 "additionalProperties": false
               },
@@ -1436,6 +1463,13 @@
                     },
                     "redacted": {
                       "type": "boolean"
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "source_bytes": {
+                      "type": "integer",
+                      "minimum": 0
                     }
                   },
                   "required": [
@@ -1445,7 +1479,9 @@
                     "next_offset",
                     "returned_bytes",
                     "truncated",
-                    "redacted"
+                    "redacted",
+                    "has_more",
+                    "source_bytes"
                   ],
                   "additionalProperties": false
                 },
@@ -1461,7 +1497,8 @@
       "rules": [
         "Offsets refer to the original trace byte stream; return a bounded UTF-8 decoded window and state if replacement decoding occurred in warnings.",
         "Known credentials are redacted before model-visible output. Returned byte count describes decoded/redacted returned content; next_offset continues the original stream.",
-        "Do not write full unbounded logs into a product repository or claim redaction is exhaustive."
+        "Do not write full unbounded logs into a product repository or claim redaction is exhaustive.",
+        "source_bytes counts consumed original trace bytes; has_more describes bytes known to remain at observation time. Redaction must cover secrets crossing window or chunk boundaries. Transport exhaustion is a failed/incomplete read, not a synthetic EOF."
       ]
     },
     "retry": {
@@ -1698,7 +1735,9 @@
         "Require explicit pipeline ID and authorization from the current user task; no approval boolean and no latest inference.",
         "Read target first. Retry eligible failed/canceled jobs through the provider operation, not arbitrary deployment/manual jobs.",
         "If the API confirms no eligible work or no change, report no_change. Return observed pending/running state without claiming eventual success.",
-        "Do not automatically repeat after conflict, rate limit or unknown write outcome."
+        "Do not automatically repeat after conflict, rate limit or unknown write outcome.",
+        "Trusted action/host/project/pipeline authority and a per-pipeline host permit precede the single send. Revalidate identity after acquiring the permit. No redirect replay, implicit retry, background poll or latest substitution. Unknown dispatch retains an unknown effect.",
+        "A complete current-job scan with zero failed/canceled jobs permits no_change without POST. Partial scans cannot establish zero. After sending, HTTP acceptance is accepted even if state has not changed; no_change is never inferred from equal status strings."
       ]
     },
     "cancel": {
@@ -1940,7 +1979,9 @@
       "rules": [
         "Require explicit selected pipeline and authorized cancel request.",
         "An accepted cancellation response is not proof of terminal canceled state; return observed state and confirmation separately.",
-        "An already terminal pipeline is an observed no-op when appropriate. Never cancel another pipeline or all project pipelines."
+        "An already terminal pipeline is an observed no-op when appropriate. Never cancel another pipeline or all project pipelines.",
+        "Trusted action/host/project/pipeline authority and a per-pipeline host permit precede the single send. Revalidate identity after acquiring the permit. No redirect replay, implicit retry, background poll or latest substitution. Unknown dispatch retains an unknown effect.",
+        "Only an observed canceled pipeline state confirms cancellation; HTTP 200 alone never does. Unrecognized provider states block terminal no-op classification."
       ]
     },
     "lookup_open_mrs": {
@@ -2149,7 +2190,9 @@
     "tool-protocol": ["validate_boundary"],
     "repository-context": ["resolve"]
   },
-  "host_capabilities": ["GitLab transport via trusted credentials"],
+  "host_capabilities": [
+    "Credential-free typed GitLab host callbacks, inherited cancellation/deadline, exact-target host authority and per-pipeline coordinator"
+  ],
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],

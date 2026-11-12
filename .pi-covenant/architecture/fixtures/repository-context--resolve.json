@@ -42,5 +42,134 @@
     "direction": "output_schema",
     "valid": false,
     "payload": []
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": true,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "project_root": "fixture",
+        "git_root": "fixture",
+        "worktree_root": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "repository_id": "fixture",
+        "gitlab_host": "fixture",
+        "default_branch": "fixture",
+        "project_cli_manifest": "fixture",
+        "available_capabilities": [],
+        "sources": [],
+        "unavailable": [],
+        "gitlab_target": {
+          "host": "gitlab.example:8443",
+          "project_path": "team/sub/app",
+          "remote_name": "origin",
+          "source": "selected Git remote origin"
+        }
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "project_root": "fixture",
+        "git_root": "fixture",
+        "worktree_root": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "repository_id": "fixture",
+        "gitlab_host": "fixture",
+        "default_branch": "fixture",
+        "project_cli_manifest": "fixture",
+        "available_capabilities": [],
+        "sources": [],
+        "unavailable": [],
+        "gitlab_target": {
+          "host": "token@gitlab.example",
+          "project_path": "team/sub/app",
+          "remote_name": "origin",
+          "source": "selected Git remote origin"
+        }
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "project_root": "fixture",
+        "git_root": "fixture",
+        "worktree_root": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "repository_id": "fixture",
+        "gitlab_host": "fixture",
+        "default_branch": "fixture",
+        "project_cli_manifest": "fixture",
+        "available_capabilities": [],
+        "sources": [],
+        "unavailable": [],
+        "gitlab_target": {
+          "host": "gitlab.example:8443",
+          "project_path": "https://gitlab.example/team/app",
+          "remote_name": "origin",
+          "source": "selected Git remote origin"
+        }
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
+  },
+  {
+    "name": "valid shape",
+    "direction": "output_schema",
+    "valid": false,
+    "payload": {
+      "status": "ok",
+      "context": {},
+      "data": {
+        "project_root": "fixture",
+        "git_root": "fixture",
+        "worktree_root": "fixture",
+        "branch": "fixture",
+        "head_sha": "fixture",
+        "repository_id": "fixture",
+        "gitlab_host": "fixture",
+        "default_branch": "fixture",
+        "project_cli_manifest": "fixture",
+        "available_capabilities": [],
+        "sources": [],
+        "unavailable": [],
+        "gitlab_target": {
+          "host": "gitlab.example:8443",
+          "project_path": "team/sub/app",
+          "remote_name": "origin",
+          "source": "selected Git remote origin",
+          "unrecognized": true
+        }
+      },
+      "error": null,
+      "warnings": [],
+      "completed_effects": []
+    }
   }
 ]

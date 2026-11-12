@@ -1,0 +1,121 @@
+schema_version: 1
+status: planned-not-implemented
+binding_policy: These are exact reserved Vitest IDs and planned files, not executable native verification bindings. Keep native obligations draft until real acceptance exists.
+slices:
+  - id: target-and-transport
+    files:
+      - src/gitlab/context/resolve.ts
+      - src/gitlab/transport/decode.ts
+      - src/foundation/gitlab/transport.ts
+      - src/repository-context/resolution/gitlab-target.ts
+    tests:
+      - gitlab.context
+      - gitlab.read-only
+      - gitlab.authorization
+      - gitlab.transport-bounds
+      - gitlab.credential-boundary
+  - id: repository-ci-reads
+    files:
+      - src/gitlab/repository/read.ts
+      - src/gitlab/pipelines/read.ts
+      - src/gitlab/jobs/read.ts
+      - src/gitlab/pagination/cursor.ts
+    tests:
+      - gitlab.identities
+      - gitlab.pagination
+      - gitlab.forbidden-effects
+  - id: logs-and-shared-mr-lookup
+    files:
+      - src/gitlab/logs/read.ts
+      - src/gitlab/merge-requests/lookup.ts
+    tests:
+      - gitlab.logs
+      - gitlab.mr-lookup
+  - id: pipeline-mutations
+    files:
+      - src/gitlab/pipelines/retry.ts
+      - src/gitlab/pipelines/cancel.ts
+      - src/gitlab/invocation/mutation.ts
+      - src/foundation/gitlab/coordination.ts
+    tests:
+      - gitlab.retry-target
+      - gitlab.cancel
+      - gitlab.retry-no-change
+      - gitlab.uncertain-write
+      - gitlab.cancellation
+      - gitlab.coordination
+  - id: pi-registration
+    files:
+      - src/gitlab/module-port.ts
+      - src/foundation/registration/gitlab-tool.ts
+    tests:
+      - gitlab.surface
+bindings:
+  - obligation: GITLAB-001
+    test_id: gitlab.context
+    adapter: vitest
+    planned_file: src/gitlab/context/resolve.test.ts
+  - obligation: GITLAB-002
+    test_id: gitlab.mr-lookup
+    adapter: vitest
+    planned_file: src/gitlab/merge-requests/lookup.test.ts
+  - obligation: GITLAB-003
+    test_id: gitlab.read-only
+    adapter: vitest
+    planned_file: src/gitlab/transport/decode.test.ts
+  - obligation: GITLAB-004
+    test_id: gitlab.surface
+    adapter: vitest
+    planned_file: src/foundation/registration/gitlab-tool.test.ts
+  - obligation: GITLAB-005
+    test_id: gitlab.identities
+    adapter: vitest
+    planned_file: src/gitlab/pipelines/read.test.ts
+  - obligation: GITLAB-006
+    test_id: gitlab.logs
+    adapter: vitest
+    planned_file: src/gitlab/logs/read.test.ts
+  - obligation: GITLAB-007
+    test_id: gitlab.retry-target
+    adapter: vitest
+    planned_file: src/gitlab/pipelines/retry.test.ts
+  - obligation: GITLAB-008
+    test_id: gitlab.cancel
+    adapter: vitest
+    planned_file: src/gitlab/pipelines/cancel.test.ts
+  - obligation: GITLAB-009
+    test_id: gitlab.retry-no-change
+    adapter: vitest
+    planned_file: src/gitlab/pipelines/retry.test.ts
+  - obligation: GITLAB-010
+    test_id: gitlab.forbidden-effects
+    adapter: vitest
+    planned_file: src/gitlab/module-port.test.ts
+  - obligation: GITLAB-011
+    test_id: gitlab.pagination
+    adapter: vitest
+    planned_file: src/gitlab/pagination/cursor.test.ts
+  - obligation: GITLAB-012
+    test_id: gitlab.uncertain-write
+    adapter: vitest
+    planned_file: src/gitlab/invocation/mutation.test.ts
+  - obligation: GITLAB-013
+    test_id: gitlab.cancellation
+    adapter: vitest
+    planned_file: src/gitlab/invocation/mutation.test.ts
+  - obligation: GITLAB-014
+    test_id: gitlab.authorization
+    adapter: vitest
+    planned_file: src/gitlab/invocation/authorize.test.ts
+  - obligation: GITLAB-015
+    test_id: gitlab.transport-bounds
+    adapter: vitest
+    planned_file: src/gitlab/transport/decode.test.ts
+  - obligation: GITLAB-016
+    test_id: gitlab.coordination
+    adapter: vitest
+    planned_file: src/foundation/gitlab/coordination.test.ts
+  - obligation: GITLAB-017
+    test_id: gitlab.credential-boundary
+    adapter: vitest
+    planned_file: src/foundation/gitlab/transport.test.ts

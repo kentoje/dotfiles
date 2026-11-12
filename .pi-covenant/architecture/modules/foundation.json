@@ -57,7 +57,8 @@
     "Pi registration, trusted invocation context and cancellation"
   ],
   "state_ownership": [
-    "Immutable invocation facts and returned evidence; no implicit global mutable cache"
+    "Immutable invocation facts and returned evidence; no implicit global mutable cache",
+    "Planned GitLab host transport credentials and runtime-scoped per-pipeline permits; never agent-provided authority"
   ],
   "test_pattern": "**/*.test.ts",
   "implementation_binding": {
