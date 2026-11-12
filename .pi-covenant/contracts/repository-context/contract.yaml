@@ -79,6 +79,13 @@ obligations:
     description: Non-Git local projects must retain their selected project root while Git facts remain unavailable; missing paths and conflicting repository selections must fail explicitly.
     verification:
       - repository-context.unavailable
+  - id: REPOSITORYCONTEXT-009
+    status: active
+    severity: high
+    kind: invariant
+    description: Opt-in GitLab target discovery must select an explicit or single distinct allowed fetch target with canonical host path and provenance; ambiguous remotes or conflicting explicit checkout and repository choices must block without executing Git config includes.
+    verification:
+      - repository-context.gitlab-target
 sources:
   - src/repository-context/
 dependencies:

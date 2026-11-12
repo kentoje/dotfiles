@@ -1,2 +1,23 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: gitlab.transport-bounds
+    obligation: GITLAB-018
+    adapter: vitest
+    tests:
+      - gitlab.transport-bounds
+  - id: gitlab.read-only
+    obligation: GITLAB-019
+    adapter: vitest
+    tests:
+      - gitlab.read-only
+  - id: gitlab.context.001
+    obligation: GITLAB-001
+    adapter: vitest
+    tests:
+      - gitlab.context
+  - id: gitlab.read-only.003
+    obligation: GITLAB-003
+    adapter: vitest
+    tests:
+      - gitlab.read-only
+      - gitlab.credential-boundary

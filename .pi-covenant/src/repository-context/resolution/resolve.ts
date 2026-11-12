@@ -3,6 +3,9 @@ import { resolve } from "node:path";
 
 import { Schema } from "effect";
 
+import { resolveGitlabTarget } from "./gitlab-target.js";
+import { GitlabTargetError, isGitlabSelector } from "./gitlab-url.js";
+import type { GitlabSelection } from "./gitlab-url.js";
 import {
   locateProjectRoots,
   readLocalGitFacts,
@@ -75,10 +78,33 @@ function contextData(
     worktree_root: facts.worktree_root,
   };
 }
+function requireLocalRepositoryChoice(
+  request: typeof contextRequest.Type,
+  git: LocalGitFacts | null,
+  project: string,
+  selection: GitlabSelection | undefined
+) {
+  const { repository } = request;
+  if (!repository) {
+    return;
+  }
+  if (selection && isGitlabSelector(repository)) {
+    return;
+  }
+  if (
+    ![git?.repository_id, git?.git_root, git?.worktree_root, project].includes(
+      repository
+    )
+  ) {
+    throw new Error(
+      "CONTEXT_CONFLICT: repository differs from selected canonical path"
+    );
+  }
+}
 /** Canonical local project facts retain nulls and provenance instead of inventing service policy. */
 export async function resolveProjectContext(
   input: unknown,
-  host: { sessionCwd: string }
+  host: { sessionCwd: string; gitlab?: GitlabSelection }
 ) {
   try {
     const request = Schema.decodeUnknownSync(contextRequest, {
@@ -93,19 +119,7 @@ export async function resolveProjectContext(
     }
     const roots = await locateProjectRoots(selected);
     const git = roots.worktree ? await readLocalGitFacts(roots.worktree) : null;
-    if (
-      request.repository &&
-      ![
-        git?.repository_id,
-        git?.git_root,
-        git?.worktree_root,
-        roots.project,
-      ].includes(request.repository)
-    ) {
-      throw new Error(
-        "CONTEXT_CONFLICT: repository differs from selected canonical path"
-      );
-    }
+    requireLocalRepositoryChoice(request, git, roots.project, host.gitlab);
     const manifest = await readContextMetadata(
       resolve(roots.project, "project-checks.json"),
       1_048_576
@@ -116,10 +130,39 @@ export async function resolveProjectContext(
       request.cwd ? "explicit cwd" : "Pi session cwd",
       manifest
     );
+    const target = host.gitlab
+      ? await resolveGitlabTarget({
+          commonDir: data.repository_id,
+          explicit:
+            request.repository && isGitlabSelector(request.repository)
+              ? request.repository
+              : undefined,
+          explicitCwd: request.cwd !== undefined,
+          gitDir: git?.source ?? null,
+          selection: host.gitlab,
+        })
+      : null;
+    const resolvedData = {
+      ...data,
+      ...(target
+        ? {
+            gitlab_host: target.host,
+            gitlab_target: target,
+            sources: [
+              ...data.sources,
+              { fact: "gitlab_target", source: target.source },
+              { fact: "gitlab_host", source: target.source },
+            ],
+            unavailable: data.unavailable.filter(
+              (fact) => fact.fact !== "gitlab_host"
+            ),
+          }
+        : {}),
+    };
     return {
       completed_effects: [],
       context: { project: roots.project, repository: data.repository_id },
-      data,
+      data: resolvedData,
       error: null,
       status: "ok",
       warnings: [],
@@ -130,7 +173,10 @@ export async function resolveProjectContext(
       context: {},
       data: null,
       error: {
-        code: "REPOSITORY_CONTEXT",
+        code:
+          error instanceof GitlabTargetError
+            ? error.code
+            : "REPOSITORY_CONTEXT",
         message:
           error instanceof Error ? error.message : "Unable to resolve project.",
         phase: "context",

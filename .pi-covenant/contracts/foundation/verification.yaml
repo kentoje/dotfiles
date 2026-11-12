@@ -32,3 +32,13 @@ bindings:
     tests:
       - foundation.registration
       - foundation.sdk
+  - id: gitlab.credential-boundary
+    obligation: FOUNDATION-008
+    adapter: vitest
+    tests:
+      - gitlab.credential-boundary
+  - id: gitlab.credential-reader
+    obligation: FOUNDATION-009
+    adapter: vitest
+    tests:
+      - gitlab.credential-reader

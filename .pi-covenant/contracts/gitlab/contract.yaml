@@ -6,11 +6,12 @@ component:
 intent: ./intent.md
 obligations:
   - id: GITLAB-001
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab lookup must resolve its repository and source branch from the selected working context rather than an unrelated checkout.
-    verification: []
+    verification:
+      - gitlab.context.001
     preconditions: []
     postconditions: []
     enforcement: null
@@ -26,11 +27,12 @@ obligations:
     enforcement: null
     applicability: null
   - id: GITLAB-003
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab lookup must not create, update, merge or delete remote resources.
-    verification: []
+    verification:
+      - gitlab.read-only.003
     preconditions: []
     postconditions: []
     enforcement: null
@@ -147,8 +149,24 @@ obligations:
     kind: invariant
     description: GitLab credentials and authentication headers must remain in the trusted host transport and configured redaction boundary rather than enter feature inputs outputs or diagnostic records.
     verification: []
+  - id: GITLAB-018
+    status: active
+    severity: high
+    kind: invariant
+    description: A repository GET must require an allowed resolved host and credential before dispatch, use at most two bounded read attempts within one deadline, and never dispatch after cancellation.
+    verification:
+      - gitlab.transport-bounds
+  - id: GITLAB-019
+    status: active
+    severity: high
+    kind: invariant
+    description: Repository reads must return success only from complete valid JSON matching the requested project identity; malformed unavailable mismatched or incomplete responses must remain failures.
+    verification:
+      - gitlab.read-only
 sources:
   - models/gitlab/
+  - models/gitlab-read/
+  - src/gitlab/
 dependencies:
   - tool-protocol
   - repository-context
@@ -157,3 +175,7 @@ interfaces:
     language: typescript
     module: architecture/modules/gitlab.json
     export: gitlab-v1
+  - name: gitlab-runtime
+    language: typescript
+    module: src/gitlab/module-port.ts
+    export: makeGitlabModule

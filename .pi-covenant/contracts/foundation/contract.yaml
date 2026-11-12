@@ -65,6 +65,20 @@ obligations:
     description: Worktree setup and locations must come from explicitly supplied bounded host configuration matched to the canonical repository; missing or malformed configuration must block worktree effects.
     verification:
       - foundation.configuration
+  - id: FOUNDATION-008
+    status: active
+    severity: high
+    kind: invariant
+    description: The GitLab repository transport must confine PAT or OAuth access tokens to the trusted host and redact configured credentials before any provider response or diagnostic crosses the feature boundary.
+    verification:
+      - gitlab.credential-boundary
+  - id: FOUNDATION-009
+    status: active
+    severity: high
+    kind: invariant
+    description: The explicit glab credential-file bridge must read only the selected host entry from bounded regular configuration and reject missing unsupported or malformed credentials without fallback to another host or project settings.
+    verification:
+      - gitlab.credential-reader
 sources:
   - src/foundation/
   - models/pi-invocation/

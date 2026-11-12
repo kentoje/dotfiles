@@ -10,3 +10,8 @@ bindings:
     adapter: vitest
     tests:
       - repository-context.unavailable
+  - id: repository-context.gitlab-target
+    obligation: REPOSITORYCONTEXT-009
+    adapter: vitest
+    tests:
+      - repository-context.gitlab-target

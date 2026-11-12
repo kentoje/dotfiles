@@ -66,6 +66,27 @@ applicability:
   - obligation: FOUNDATION-003
     mode: not_applicable
     rationale: Actual standard Pi loader and additive registration require SDK acceptance.
+  - obligation: GITLAB-001
+    mode: not_applicable
+    rationale: Real remote/config parsing, credential confinement and filesystem behavior require executable fixtures.
+  - obligation: GITLAB-003
+    mode: not_applicable
+    rationale: Real remote/config parsing, credential confinement and filesystem behavior require executable fixtures.
+  - obligation: GITLAB-018
+    mode: model
+    rationale: Finite allowed-host/credential dispatch, bounded reads and truthful validated completion; real HTTP and parsing need executable tests.
+  - obligation: GITLAB-019
+    mode: model
+    rationale: Finite allowed-host/credential dispatch, bounded reads and truthful validated completion; real HTTP and parsing need executable tests.
+  - obligation: FOUNDATION-008
+    mode: not_applicable
+    rationale: Real remote/config parsing, credential confinement and filesystem behavior require executable fixtures.
+  - obligation: FOUNDATION-009
+    mode: not_applicable
+    rationale: Real remote/config parsing, credential confinement and filesystem behavior require executable fixtures.
+  - obligation: REPOSITORYCONTEXT-009
+    mode: not_applicable
+    rationale: Real remote/config parsing, credential confinement and filesystem behavior require executable fixtures.
 models:
   - id: project-checks
     component: project-cli
@@ -242,3 +263,50 @@ models:
       - id: failed-result-success
         source: models/pi-invocation/InvocationFalseSuccess.tla
         invariant: TruthfulResult
+  - id: gitlab-repository-read
+    component: gitlab
+    source: models/gitlab-read/Read.tla
+    configuration: models/gitlab-read/Read.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One invocation with an allowed resolved host, a credential and at most two application read attempts; network-level packet retransmission is not modeled.
+      - valid denotes complete JSON and matching project identity; byte limits, auth and schema parsing are established only by executable acceptance.
+      - Stop abstracts cancellation or one absolute deadline. No liveness, remote API availability, pipeline mutation or arbitrary concurrent-client claim.
+    bindings:
+      - obligation: GITLAB-018
+        invariant: BoundedReads
+      - obligation: GITLAB-018
+        invariant: HostBeforeRead
+      - obligation: GITLAB-018
+        invariant: NoStoppedDispatch
+      - obligation: GITLAB-019
+        invariant: TruthfulRead
+    conformance:
+      - obligation: GITLAB-018
+        action: Send
+        observation: sends
+        binding: gitlab.transport-bounds
+      - obligation: GITLAB-019
+        action: Finish
+        observation: success
+        binding: gitlab.read-only
+    faults:
+      - id: third-read
+        source: models/gitlab-read/ThirdRead.tla
+        invariant: BoundedReads
+      - id: missing-host
+        source: models/gitlab-read/MissingHost.tla
+        invariant: HostBeforeRead
+      - id: after-stop
+        source: models/gitlab-read/AfterStop.tla
+        invariant: NoStoppedDispatch
+      - id: invalid-success
+        source: models/gitlab-read/InvalidSuccess.tla
+        invariant: TruthfulRead

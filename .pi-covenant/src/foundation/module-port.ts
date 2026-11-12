@@ -19,3 +19,8 @@ export function registerPiHarness(
   pi.registerTool(project);
   pi.registerTool(worktree);
 }
+
+/** Host-only composition capability for bounded authenticated GitLab repository GETs. */
+export { createGitlabReadTransport } from "./gitlab/transport.js";
+/** The explicit host credential file bridge does not inspect project-local configuration. */
+export { createGlabCredentialProvider } from "./gitlab/credential.js";

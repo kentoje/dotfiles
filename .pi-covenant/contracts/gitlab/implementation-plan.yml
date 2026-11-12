@@ -1,19 +1,27 @@
 schema_version: 1
-status: planned-not-implemented
-binding_policy: These are exact reserved Vitest IDs and planned files, not executable native verification bindings. Keep native obligations draft until real acceptance exists.
+status: repository-read-slice-implemented-ci-and-pi-pending
+binding_policy: Native verification.yaml contains only real executable bindings. Remaining reserved IDs are plans; mutation authorization is deferred, not inferred from the absence of a write port.
 slices:
   - id: target-and-transport
     files:
-      - src/gitlab/context/resolve.ts
+      - src/repository-context/resolution/gitlab-target.ts
+      - src/repository-context/resolution/gitlab-url.ts
+      - src/gitlab/module-port.ts
+      - src/gitlab/repository/read.ts
       - src/gitlab/transport/decode.ts
       - src/foundation/gitlab/transport.ts
-      - src/repository-context/resolution/gitlab-target.ts
+      - src/foundation/gitlab/request.ts
+      - src/foundation/gitlab/body.ts
+      - src/foundation/gitlab/deadline.ts
+      - src/foundation/gitlab/credential.ts
     tests:
       - gitlab.context
       - gitlab.read-only
-      - gitlab.authorization
       - gitlab.transport-bounds
       - gitlab.credential-boundary
+      - repository-context.gitlab-target
+      - gitlab.credential-reader
+    status: implemented-repository-read
   - id: repository-ci-reads
     files:
       - src/gitlab/repository/read.ts
@@ -44,6 +52,7 @@ slices:
       - gitlab.uncertain-write
       - gitlab.cancellation
       - gitlab.coordination
+      - gitlab.authorization
   - id: pi-registration
     files:
       - src/gitlab/module-port.ts
@@ -55,6 +64,7 @@ bindings:
     test_id: gitlab.context
     adapter: vitest
     planned_file: src/gitlab/context/resolve.test.ts
+    status: implemented
   - obligation: GITLAB-002
     test_id: gitlab.mr-lookup
     adapter: vitest
@@ -63,6 +73,7 @@ bindings:
     test_id: gitlab.read-only
     adapter: vitest
     planned_file: src/gitlab/transport/decode.test.ts
+    status: implemented
   - obligation: GITLAB-004
     test_id: gitlab.surface
     adapter: vitest
@@ -110,7 +121,8 @@ bindings:
   - obligation: GITLAB-015
     test_id: gitlab.transport-bounds
     adapter: vitest
-    planned_file: src/gitlab/transport/decode.test.ts
+    planned_file: src/foundation/gitlab/transport.test.ts
+    status: repository-only-check-exists-broader-obligation-draft
   - obligation: GITLAB-016
     test_id: gitlab.coordination
     adapter: vitest
@@ -119,3 +131,29 @@ bindings:
     test_id: gitlab.credential-boundary
     adapter: vitest
     planned_file: src/foundation/gitlab/transport.test.ts
+    status: repository-only-check-exists-broader-obligation-draft
+  - obligation: GITLAB-018
+    test_id: gitlab.transport-bounds
+    adapter: vitest
+    planned_file: src/foundation/gitlab/transport.test.ts
+    status: implemented
+  - obligation: GITLAB-019
+    test_id: gitlab.read-only
+    adapter: vitest
+    planned_file: src/gitlab/transport/decode.test.ts
+    status: implemented
+  - obligation: FOUNDATION-008
+    test_id: gitlab.credential-boundary
+    adapter: vitest
+    planned_file: src/foundation/gitlab/transport.test.ts
+    status: implemented
+  - obligation: FOUNDATION-009
+    test_id: gitlab.credential-reader
+    adapter: vitest
+    planned_file: src/foundation/gitlab/credential.test.ts
+    status: implemented
+  - obligation: REPOSITORYCONTEXT-009
+    test_id: repository-context.gitlab-target
+    adapter: vitest
+    planned_file: src/repository-context/resolution/gitlab-target.test.ts
+    status: implemented

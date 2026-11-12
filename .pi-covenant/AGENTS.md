@@ -19,7 +19,7 @@ Read README.md, docs/open-decisions.md and the relevant contracts before working
 
 This repository uses the Effect TypeScript library. Before writing Effect code, read `node_modules/effect/AGENTS.md` completely and follow its required links. Search `node_modules/effect/src` for uncovered APIs. Pin dependency versions through pnpm-lock.yaml. Keep pure policy separate from scoped effects.
 
-Worktree, the project check runner, Pi foundation integration and local repository context are authorized. Other runtime modules remain design-only until requested. Run `scripts/verify-bootstrap.sh` after changes; it typechecks, checks module boundaries and runs all active Covenant obligations.
+Worktree, the project check runner, Pi foundation integration local repository context and GitLab target/authenticated repository reads are authorized. Other runtime modules remain design-only until requested. Run `scripts/verify-bootstrap.sh` after changes; it typechecks, checks module boundaries and runs all active Covenant obligations.
 
 # Quality tooling
 

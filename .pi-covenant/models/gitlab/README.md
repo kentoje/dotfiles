@@ -1,6 +1,6 @@
 # GitLab candidate design
 
-Implementation is pending. These models are declared in design-proposal.yaml and deliberately absent from the active harness design.yaml until real conformance bindings exist. The existing CLI rejects mixed complete/pending implementation conformance; it must not be made green with invented GitLab tests. This limitation is recorded in ADR-010.
+CI/mutation implementation is pending; the independent repository-read slice is implemented and modeled under models/gitlab-read. These models are declared in design-proposal.yaml and deliberately absent from the active harness design.yaml until real conformance bindings exist. The existing CLI rejects mixed complete/pending implementation conformance; it must not be made green with invented GitLab tests. This limitation is recorded in ADR-010.
 
 Mutation.tla explores target/authority binding, one mutation send, stop-before-send, unknown delivery, canceled-state observation and complete-evidence no-op. Reads.tla explores absence from complete collection evidence. Bounds and assumptions are explicit in the manifest. Eight fault models challenge wrong target, duplicate write, dispatch after stop, lost write reported as success, acceptance treated as confirmation, partial-scan no-op, partial-scan absence and failed-scan absence. No liveness, distributed coordination, arbitrary page counts, HTTP authentication, byte-parser or redaction proof is claimed.
 

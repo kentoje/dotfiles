@@ -1,6 +1,6 @@
 # Acceptance implementation plan
 
-No executable bindings exist. scenarios.yml contains planned examples, not passing evidence.
+Executable bindings for implemented scope are recorded in verification.yaml. Remaining scenarios.yml examples are plans, not passing evidence.
 
 Use deterministic adapter fixtures for service results, temporary Git repositories for filesystem behavior, controlled subprocesses for ownership/cancellation, and host-level integration checks for registration and commands. Each native obligation must gain a meaningful executable assertion before activation.
 

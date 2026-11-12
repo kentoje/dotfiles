@@ -1,6 +1,6 @@
 # gitlab: behavior contract
 
-Status: specified design; all obligations draft. Kind: tool. Implementation and executable acceptance checks are pending.
+Status: repository-read module and host transport implemented; CI/mutations and Pi registration pending. Kind: tool. Exact active scope is recorded in contract.yaml and the implementation tracker.
 
 ## Purpose
 
@@ -36,7 +36,7 @@ Must: GitLab lookup must resolve its repository and source branch from the selec
 
 Why: The user chose a separate GitLab tool, then explicitly included pipeline retry and cancel. The old lookup provider was too narrow to describe that surface.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active for the implemented repository-read scope. Exact executable bindings are in verification.yaml; broader action verification remains pending.
 
 ### GITLAB-002
 
@@ -56,7 +56,7 @@ Must: GitLab lookup must not create, update, merge or delete remote resources.
 
 Why: The user chose a separate GitLab tool, then explicitly included pipeline retry and cancel. The old lookup provider was too narrow to describe that surface.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active for the implemented repository-read scope. Exact executable bindings are in verification.yaml; broader action verification remains pending.
 
 ### GITLAB-004
 
@@ -381,4 +381,4 @@ See [module interface](../../architecture/modules/gitlab.json). Dependencies and
 
 ## Implementation-ready design supplement
 
-See [brick-design.md](brick-design.md), [implementation-plan.yml](implementation-plan.yml) and ADR-010 for the tightened module/host boundary, target precedence, cursor semantics, log accounting, single-send mutation outcomes and implementation slices. GITLAB-011..017 add draft evidence/transport/authority obligations; original GITLAB-001..010 meanings are retained. The machine-readable public/module schemas are authoritative for refined DTO shape: default_branch can be null, jobs retain optional ref, and logs include has_more/source_bytes. Repository context's optional gitlab_target is planned and not yet emitted at runtime. No GitLab tool is registered in Pi by this design pass.
+See [brick-design.md](brick-design.md), [implementation-plan.yml](implementation-plan.yml) and ADR-010 for the tightened module/host boundary, target precedence, cursor semantics, log accounting, single-send mutation outcomes and implementation slices. GITLAB-011..017 add draft evidence/transport/authority obligations; original GITLAB-001..010 meanings are retained. The machine-readable public/module schemas are authoritative for refined DTO shape: default_branch can be null, jobs retain optional ref, and logs include has_more/source_bytes. Repository context emits gitlab_target only when GitLab discovery is explicitly configured. No GitLab tool is registered in Pi by this design pass.

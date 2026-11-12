@@ -1,6 +1,6 @@
 # GitLab brick
 
-Status: specified and modeled proposal, implementation pending. Public action schemas are tools/gitlab/definition.json; module ownership and consumer allowlists are architecture/modules/gitlab.json. implementation-plan.yml reserves exact test IDs and paths without pretending they execute. Existing active worktree, project-check and Pi integration contracts keep their meanings.
+Status: repository-read slice implemented; CI/mutations and Pi registration remain pending. Public action schemas are tools/gitlab/definition.json; module ownership and consumer allowlists are architecture/modules/gitlab.json. implementation-plan.yml reserves exact test IDs and paths without pretending they execute. Existing active worktree, project-check and Pi integration contracts keep their meanings.
 
 ## Public behavior
 
@@ -21,7 +21,7 @@ lookup_open_mrs(repository, source_branch) is a private read port for MR. It fil
 
 ## Responsibilities and planned interfaces
 
-- repository-context.resolve retains local roots/HEAD and optionally supplies gitlab_target: host authority, project path, selected remote and provenance. It reads metadata only, never authenticates or performs service lookup. The optional field is designed but not emitted by today's resolver.
+- repository-context.resolve retains local roots/HEAD and optionally supplies gitlab_target: host authority, project path, selected remote and provenance. It reads metadata only, never authenticates or performs service lookup. The optional field is emitted only when host GitLab discovery is explicitly configured.
 - foundation resolves configured API origin/credential association and calls makeGitlabModule with immutable context plus narrow host callbacks. Hosts may map SSH aliases/API prefixes; the model cannot submit a token, arbitrary URL/method, approval flag or endpoint.
 - GitLab owns action validation, response DTOs, allowed endpoint selection, query fingerprints, complete-scan evidence and outcome classification. Only src/gitlab/module-port.ts will be public. Consumers remain MR: lookup_open_mrs/pipeline; fleet: repository; shipping: pipeline/jobs/logs/retry/cancel.
 - Host transport operations are readProject, readPipelinesPage, readPipeline, readJobsPage, readJob, readTraceWindow, readOpenMrsPage and mutatePipeline(retry|cancel). Inputs use resolved host/project numeric IDs after project lookup; no unvalidated URL forwarding. The API mapping is specified below. Credential material never crosses this port.
@@ -63,10 +63,10 @@ Logs default to 64 KiB/max 1 MiB of model-visible UTF-8 text. Streaming retains 
 
 ## Acceptance and scope
 
-implementation-plan.yml lists 17 reserved contract-test identities. scenarios.yml adds concrete boundary cases; verification.yaml remains empty and all GitLab obligations remain draft. Real implementation checks must use a local HTTP fixture that counts requests, temporary Git remotes, controlled process ownership and isolated Pi sessions. No live credentials, real retry/cancel or existing private harness code are required.
+implementation-plan.yml lists 17 reserved contract-test identities. scenarios.yml adds concrete boundary cases; verification.yaml now binds only actual repository-read checks; broader CI/mutation obligations remain draft. Real implementation checks must use a local HTTP fixture that counts requests, temporary Git remotes, controlled process ownership and isolated Pi sessions. No live credentials, real retry/cancel or existing private harness code are required.
 
 TLA+ checks abstract target/authority binding, single send, stop boundaries, uncertain delivery, confirmation, no-op and absence evidence. It does not prove URL parsers, TLS/auth, credential redaction, bounded bytes, distributed coordination or actual GitLab/transport behavior. models/gitlab/design-proposal.yaml declares bounds and assumptions; its conformance list stays empty until executable implementation exists. Future conformance bindings must connect Send/sends to retry-target and uncertain-write, Stop/stopped to cancellation, Confirm/confirmed to cancel, NoChange/outcome to retry-no-change, Finish/absent to mr-lookup and pagination.
 
-The active harness manifest is unchanged. Native proposal evidence is created in an isolated snapshot under .covenant/design-proposals/gitlab; model checks/fault detection and an expected implementation-pending conformance rejection are separate from the harness's full existing implementation run. Recheck proposal inputs whenever model, contract, schema, configuration or checker changes.
+The active harness manifest now includes the repository-read model and its real test-bound conformance; CI/mutation models remain candidate designs. Native proposal evidence is created in an isolated snapshot under .covenant/design-proposals/gitlab; model checks/fault detection and an expected implementation-pending conformance rejection are separate from the harness's full existing implementation run. Recheck proposal inputs whenever model, contract, schema, configuration or checker changes.
 
 API behavior references: [pipelines](https://docs.gitlab.com/api/pipelines/), [jobs](https://docs.gitlab.com/api/jobs/), [glab API](https://docs.gitlab.com/cli/api/). Audited glab source at v1.111.0: [request](https://gitlab.com/gitlab-org/cli/-/raw/v1.111.0/internal/commands/api/http.go), [streaming output](https://gitlab.com/gitlab-org/cli/-/raw/v1.111.0/internal/commands/api/api.go), [HTTP client](https://gitlab.com/gitlab-org/cli/-/raw/v1.111.0/internal/api/client.go). Target GitLab server versions and credential bridges remain implementation-time compatibility checks.

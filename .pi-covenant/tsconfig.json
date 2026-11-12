@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "lib": ["ES2024", "DOM"]
   },
   "include": [
     "src/**/*.ts",
