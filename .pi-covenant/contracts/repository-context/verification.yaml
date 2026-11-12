@@ -1,2 +1,12 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: repository-context.local
+    obligation: REPOSITORYCONTEXT-007
+    adapter: vitest
+    tests:
+      - repository-context.local
+  - id: repository-context.unavailable
+    obligation: REPOSITORYCONTEXT-008
+    adapter: vitest
+    tests:
+      - repository-context.unavailable

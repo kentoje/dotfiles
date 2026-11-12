@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "project_cli",
   "kind": "tool",
-  "design_status": "implemented-module-pi-registration-pending",
+  "design_status": "implemented-pi-extension",
   "description": "Discover repository check commands and evidence; run the selected mandatory local suite while reporting available checks separately.",
   "component": "project-cli",
   "shared_protocol": "docs/tool-protocol.md",

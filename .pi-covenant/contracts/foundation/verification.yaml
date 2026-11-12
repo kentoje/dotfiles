@@ -1,2 +1,34 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: foundation.boundary
+    obligation: FOUNDATION-004
+    adapter: vitest
+    tests:
+      - foundation.boundary
+  - id: foundation.lifecycle
+    obligation: FOUNDATION-005
+    adapter: vitest
+    tests:
+      - foundation.lifecycle
+  - id: foundation.results
+    obligation: FOUNDATION-006
+    adapter: vitest
+    tests:
+      - foundation.results
+  - id: foundation.configuration
+    obligation: FOUNDATION-007
+    adapter: vitest
+    tests:
+      - foundation.configuration
+  - id: foundation.registration.FOUNDATION-001
+    obligation: FOUNDATION-001
+    adapter: vitest
+    tests:
+      - foundation.registration
+      - foundation.sdk
+  - id: foundation.registration.FOUNDATION-003
+    obligation: FOUNDATION-003
+    adapter: vitest
+    tests:
+      - foundation.registration
+      - foundation.sdk

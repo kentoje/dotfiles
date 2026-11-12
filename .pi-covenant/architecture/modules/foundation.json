@@ -59,5 +59,11 @@
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "foundation-runtime",
+    "language": "typescript",
+    "module": "src/foundation/module-port.ts",
+    "export": "registerPiHarness"
+  }
 }

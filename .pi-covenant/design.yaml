@@ -42,6 +42,30 @@ applicability:
   - obligation: PROJECTCLI-030
     mode: model
     rationale: Execution mode must preserve failure truthfulness cancellation and requested-suite completion
+  - obligation: FOUNDATION-004
+    mode: model
+    rationale: Finite validated-dispatch stop and outcome propagation policy; actual Pi and process behavior require executable checks.
+  - obligation: FOUNDATION-005
+    mode: model
+    rationale: Finite validated-dispatch stop and outcome propagation policy; actual Pi and process behavior require executable checks.
+  - obligation: FOUNDATION-006
+    mode: model
+    rationale: Finite validated-dispatch stop and outcome propagation policy; actual Pi and process behavior require executable checks.
+  - obligation: FOUNDATION-007
+    mode: not_applicable
+    rationale: SDK registration, filesystem/config parsing and provenance are exercised through executable checks.
+  - obligation: REPOSITORYCONTEXT-007
+    mode: not_applicable
+    rationale: SDK registration, filesystem/config parsing and provenance are exercised through executable checks.
+  - obligation: REPOSITORYCONTEXT-008
+    mode: not_applicable
+    rationale: SDK registration, filesystem/config parsing and provenance are exercised through executable checks.
+  - obligation: FOUNDATION-001
+    mode: not_applicable
+    rationale: Actual standard Pi loader and additive registration require SDK acceptance.
+  - obligation: FOUNDATION-003
+    mode: not_applicable
+    rationale: Actual standard Pi loader and additive registration require SDK acceptance.
 models:
   - id: project-checks
     component: project-cli
@@ -172,3 +196,49 @@ models:
       - id: stop-early-in-keep-going
         source: models/project-checks/ModesEarly.tla
         invariant: CompleteWhenContinuing
+  - id: pi-invocation
+    component: foundation
+    source: models/pi-invocation/Invocation.tla
+    configuration: models/pi-invocation/Invocation.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One invocation represents validation, target resolution, dispatch and terminal reporting; independent concurrent calls do not share invocation state.
+      - Stop abstracts host cancellation or absolute deadline observed before dispatch; cancellation during module execution is delegated to module ownership and tested with real processes.
+      - A successful module outcome means successful selected operation, not project correctness; partial effects remain in the executable result, not modeled resource semantics.
+    bindings:
+      - obligation: FOUNDATION-004
+        invariant: ValidatedDispatch
+      - obligation: FOUNDATION-005
+        invariant: NoDispatchAfterStop
+      - obligation: FOUNDATION-006
+        invariant: TruthfulResult
+    conformance:
+      - obligation: FOUNDATION-004
+        action: Dispatch
+        observation: dispatched
+        binding: foundation.boundary
+      - obligation: FOUNDATION-005
+        action: Stop
+        observation: stopped
+        binding: foundation.lifecycle
+      - obligation: FOUNDATION-006
+        action: Report
+        observation: success
+        binding: foundation.results
+    faults:
+      - id: unvalidated-dispatch
+        source: models/pi-invocation/InvocationUnvalidated.tla
+        invariant: ValidatedDispatch
+      - id: dispatch-after-stop
+        source: models/pi-invocation/InvocationAfterStop.tla
+        invariant: NoDispatchAfterStop
+      - id: failed-result-success
+        source: models/pi-invocation/InvocationFalseSuccess.tla
+        invariant: TruthfulResult

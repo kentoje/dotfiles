@@ -3,7 +3,8 @@
   "entry": [
     "src/worktree/module-port.ts",
     "src/**/*.test.ts",
-    "src/project-cli/module-port.ts"
+    "src/project-cli/module-port.ts",
+    "src/foundation/extension.ts"
   ],
   "ignorePatterns": [".covenant/**", ".agents/**"],
   "boundaries": {

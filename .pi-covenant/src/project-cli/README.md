@@ -42,7 +42,7 @@ Commands run sequentially. Failed/unavailable/timed-out checks stop execution by
 
 ## Development verification
 
-The public module port exports inspectProjectChecks and runProjectChecks. Standard Pi registration is pending. Legacy authoring/maintenance and execute_capability ports remain deferred.
+The public module port exports inspectProjectChecks and runProjectChecks. Standard Pi registration is implemented; see [Pi setup](../../docs/pi-integration.md). Legacy authoring/maintenance and execute_capability ports remain deferred.
 
 Covenant/TLA+ are development-only. The completion model checks two mandatory checks; the selection model checks representative ordinary/E2E categories, explicit precedence and omitted coverage. Real filesystem/process/CLI tests verify the implementation and parser cases. These finite models and explicit test-bound correspondence do not prove arbitrary-list/category equivalence, underlying project correctness, shell-program semantics, continuous isolation or termination. The actual runner does not load models or Covenant.
 

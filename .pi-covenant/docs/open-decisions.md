@@ -10,4 +10,4 @@ Project-specific decisions remain intentionally deferred until discovery: reposi
 
 Fleet mutations, automatic retrospectives, autonomous blocked-turn continuation, and universal browser checks remain outside this version.
 
-Module interfaces, dependencies and ownership are now explicit in [architecture](../architecture/README.md). Run its validator and deliberate-violation suite before implementation and after interface changes. Worktree implementation is authorized and implemented; project checks are now implemented; other runtime modules remain pending.
+Module interfaces, dependencies and ownership are now explicit in [architecture](../architecture/README.md). Run its validator and deliberate-violation suite before implementation and after interface changes. Worktree implementation is authorized and implemented; project checks are now implemented; Pi registration and local repository context are implemented; other runtime modules remain pending.

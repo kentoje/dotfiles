@@ -1,0 +1,13 @@
+# Standard Pi integration and local context
+
+Register only the implemented worktree and project_cli tools through a thin foundation composition root. Preserve built-in Pi tools, prompts and session behavior; do not install runtime Covenant gates, automatic retries, completion turns or shipping. The extension is loaded explicitly using Pi -e or package configuration; no user-wide settings are changed by implementation.
+
+Resolve local canonical project/worktree identity from each invocation's current Pi cwd or explicit target, with immutable source/unavailable facts and no remote discovery or subprocess execution. Git directory/file metadata, linked worktrees and non-Git package projects are supported; unavailable branch/HEAD facts stay null. Existing broader repository contracts stay draft until their full service/config facts are implemented.
+
+Only an explicit PI_COVENANT_CONFIG absolute host file may supply worktree root, setup argv, base and required artifacts, keyed by canonical repository root. Never discover executable setup from a project file or accept setup/approval flags as tool arguments. No host configuration means project checks remain usable and worktree operations block with instructions. Config parsing is bounded and strict. Invocation flags do not create global policy or credentials.
+
+Model validation/resolution/dispatch, stop-before-dispatch and truthful outcome propagation before implementation. Finite safety evidence does not prove arbitrary Pi scheduling or resource cleanup. Real SDK loading, temporary repositories, cancellation, partial effects and invalid arguments supply implementation evidence. Existing modules own mutation locks, command timeouts and child cleanup; adapters preserve their structured results. Progress reports invocation stages, without inventing per-command progress. One host deadline is computed once per invocation and passed down; known module completion remains authoritative even if cancellation races delivery.
+
+Pin the SDK used for development/smoke tests to locally installed standard Pi 1.5.0. Import SDK types only in the runtime adapter; TypeBox supplies Pi parameter schemas and Effect validates data again at module boundaries. Do not activate unimplemented services.
+
+Pre-implementation evidence: design run 1794490938920072000-50005 exhausted 32 invocation states, all three invariants passed; fault run 1794490942520238000-50002 detected all three deliberate specification violations. Subsequent final runs provide fresh evidence for the completed tracked inputs. Configured safe project IDs supply worktree namespaces; local Git common-directory identity remains a separate repository observation. Git service identity is not guessed from a directory name.

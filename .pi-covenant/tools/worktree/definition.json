@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "worktree",
   "kind": "tool",
-  "design_status": "implemented-module-awaiting-pi-registration",
+  "design_status": "implemented-pi-extension",
   "description": "Create and maintain usable task worktrees without duplicating repository setup logic or losing user work.",
   "component": "worktree",
   "shared_protocol": "docs/tool-protocol.md",

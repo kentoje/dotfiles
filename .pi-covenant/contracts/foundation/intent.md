@@ -1,6 +1,6 @@
 # foundation: behavior contract
 
-Status: specified design; all obligations draft. Kind: development-contract. Implementation and executable acceptance checks are pending.
+Status: implemented integration slice with executable acceptance; broader obligations remain draft. Kind: development-contract. See docs/pi-integration.md and the implementation tracker for exact verified scope.
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # Harness behavior catalogue
 
-Definitions describe public surfaces; worktree and project checks have module implementations but no Pi registration yet. Shared conventions: [tool protocol](tool-protocol.md).
+Definitions describe public surfaces; worktree and project checks are registered through the standard Pi extension. Shared conventions: [tool protocol](tool-protocol.md).
 
 | Surface | Kind | Actions | Contract |
 | --- | --- | --: | --- |
@@ -21,4 +21,4 @@ Definitions describe public surfaces; worktree and project checks have module im
 | [development-method](../contracts/development-method/definition.json) | development-contract | 0 | [development-method](../contracts/development-method/intent.md) |
 | [tool-protocol](../contracts/tool-protocol/definition.json) | development-contract | 0 | [tool-protocol](../contracts/tool-protocol/intent.md) |
 
-16 components; 28 active obligations (ten worktree, four development tooling and fourteen project checks) and 117 draft obligations; 37 specified actions; 236 planned acceptance records (including obligation review records). Worktree, development tooling and project checks have executable acceptance. Other component examples remain planned. See implemented-features.md.
+16 components; 36 active obligations (ten worktree, four development tooling, fourteen project checks, six foundation and two local context) and 115 draft obligations; 37 specified actions; 236 planned acceptance records (including obligation review records). Worktree, development tooling and project checks have executable acceptance. Other component examples remain planned. See implemented-features.md.

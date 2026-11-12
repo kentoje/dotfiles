@@ -6,11 +6,12 @@ component:
 intent: ./intent.md
 obligations:
   - id: FOUNDATION-001
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: The harness runs as extensions and configuration of standard Pi rather than replacing its standard interaction model.
-    verification: []
+    verification:
+      - foundation.registration.FOUNDATION-001
     preconditions: []
     postconditions: []
     enforcement: null
@@ -26,16 +27,47 @@ obligations:
     enforcement: null
     applicability: null
   - id: FOUNDATION-003
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: The harness preserves standard Pi capabilities unless the user explicitly agrees to a capability change.
-    verification: []
+    verification:
+      - foundation.registration.FOUNDATION-003
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: FOUNDATION-004
+    status: active
+    severity: high
+    kind: invariant
+    description: Validate complete Pi tool arguments and resolve the selected project before dispatching an implemented module.
+    verification:
+      - foundation.boundary
+  - id: FOUNDATION-005
+    status: active
+    severity: high
+    kind: invariant
+    description: A stopped or expired Pi invocation must not dispatch a module; in-flight module cancellation must retain its terminal failure and completed effects.
+    verification:
+      - foundation.lifecycle
+  - id: FOUNDATION-006
+    status: active
+    severity: high
+    kind: invariant
+    description: Pi tool results must preserve module outcomes and structured details; failures and partial completion must never be rendered as success or trigger another turn.
+    verification:
+      - foundation.results
+  - id: FOUNDATION-007
+    status: active
+    severity: high
+    kind: invariant
+    description: Worktree setup and locations must come from explicitly supplied bounded host configuration matched to the canonical repository; missing or malformed configuration must block worktree effects.
+    verification:
+      - foundation.configuration
+sources:
+  - src/foundation/
+  - models/pi-invocation/
 dependencies:
   - tool-protocol
   - repository-context
@@ -55,3 +87,7 @@ interfaces:
     language: typescript
     module: architecture/modules/foundation.json
     export: foundation-v1
+  - name: foundation-runtime
+    language: typescript
+    module: src/foundation/module-port.ts
+    export: registerPiHarness

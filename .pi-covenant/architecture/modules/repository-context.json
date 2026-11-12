@@ -341,5 +341,11 @@
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "repository-context-runtime",
+    "language": "typescript",
+    "module": "src/repository-context/module-port.ts",
+    "export": "resolveProjectContext"
+  }
 }

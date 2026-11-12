@@ -65,7 +65,22 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: REPOSITORYCONTEXT-007
+    status: active
+    severity: high
+    kind: invariant
+    description: Local context resolution must canonicalize the selected project and Git worktree from the current session or explicit path without a fixed home path, subprocess execution or remote lookup.
+    verification:
+      - repository-context.local
+  - id: REPOSITORYCONTEXT-008
+    status: active
+    severity: high
+    kind: invariant
+    description: Non-Git local projects must retain their selected project root while Git facts remain unavailable; missing paths and conflicting repository selections must fail explicitly.
+    verification:
+      - repository-context.unavailable
+sources:
+  - src/repository-context/
 dependencies:
   - tool-protocol
 interfaces:
@@ -73,3 +88,7 @@ interfaces:
     language: typescript
     module: architecture/modules/repository-context.json
     export: repository-context-v1
+  - name: repository-context-runtime
+    language: typescript
+    module: src/repository-context/module-port.ts
+    export: resolveProjectContext

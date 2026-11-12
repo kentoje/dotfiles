@@ -1,6 +1,6 @@
 # repository-context: behavior contract
 
-Status: specified design; all obligations draft. Kind: shared-component. Implementation and executable acceptance checks are pending.
+Status: implemented integration slice with executable acceptance; broader obligations remain draft. Kind: shared-component. See docs/pi-integration.md and the implementation tracker for exact verified scope.
 
 ## Purpose
 
