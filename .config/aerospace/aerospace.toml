@@ -126,38 +126,38 @@ alt-shift-semicolon = 'resize smart -50'
 alt-shift-quote = 'resize smart +50'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-# Switch workspaces natively before spawning the app-launch check.
-# Shell startup must not delay focus when the app already has a window.
+# Switch workspaces natively, then focus the assigned app or open it if needed.
+# Shell startup must not delay the workspace switch.
 # Replaces the alt hotkeys previously bound in Hammerspoon.
 alt-0 = 'workspace 0'
 # alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
 # alt-b = 'workspace B'
 alt-c = [
   'workspace C',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh C "Notion Calendar"',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh C com.cron.electron',
 ]
 alt-d = [
   'workspace D',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh D DrawPen',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh D dmytro.vasin.drawpen',
 ]
 # alt-e = 'workspace E'
 alt-f = [
   'workspace F',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh F Figma',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh F com.figma.Desktop',
 ]
 alt-g = [
   'workspace G',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh G Helium',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh G net.imput.helium',
 ]
 # alt-i = 'workspace I'
 # alt-m = [
 #   'workspace M',
-#   'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh M Spotify',
+#   'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh M com.spotify.client',
 # ]
 
 alt-m = [
   'workspace M',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh M Tidal',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh M com.tidal.desktop',
 ]
 # alt-n = 'workspace N'
 # alt-o = 'workspace O'
@@ -165,30 +165,30 @@ alt-m = [
 # alt-q = 'workspace Q'
 alt-r = [
   'workspace R',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh R Telegram',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh R ru.keepcoder.Telegram',
 ]
 alt-s = [
   'workspace S',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh S Slack',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh S com.tinyspeck.slackmacgap',
 ]
 alt-t = [
   'workspace T',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh T Ghostty',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh T com.mitchellh.ghostty',
 ]
 # alt-u = 'workspace U'
 alt-v = [
   'workspace V',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh V Codex',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh V com.openai.codex',
 ]
 alt-w = [
   'workspace W',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh W WhatsApp',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh W net.whatsapp.WhatsApp',
 ]
 alt-x = 'exec-and-forget open -a Finder'
 # alt-y = 'workspace Y'
 alt-z = [
   'workspace Z',
-  'exec-and-forget ~/.config/aerospace/launch-if-workspace-empty.sh Z UTM',
+  'exec-and-forget ~/.config/aerospace/focus-workspace-app.sh Z com.utmapp.UTM',
 ]
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
