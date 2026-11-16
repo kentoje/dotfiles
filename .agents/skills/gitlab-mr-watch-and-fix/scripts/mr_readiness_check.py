@@ -46,9 +46,13 @@ PIPELINE_RUNNING_STATES = {
 # Bot accounts on gitlab.com: group/project access tokens and service accounts.
 GITLAB_BOT_USERNAME_PATTERN = re.compile(r"^(service_account_|group_\d+_bot_|project_\d+_bot_)")
 QODO_REVIEW_MARKER = "by Qodo"
+# Qodo posts this placeholder when a review starts; the real review comes in later notes.
+QODO_BUSY_MARKER = "<h3>Qodo is busy working</h3>"
 # Aircall's Qodo service account (same in every aircall/* project); other accounts are learned from notes.
 KNOWN_QODO_USERNAMES = frozenset({"service_account_group_8284447_d8d407ec69bdba6023f9557765ec3488"})
 AGENTIC_REVIEW_COMMAND_PATTERN = re.compile(r"^\s*/agentic_review\b")
+# GitLab quick actions and bot commands (`/agentic_review`, `/approve`, ...) are commands, not comments to answer.
+QUICK_ACTION_COMMENT_PATTERN = re.compile(r"^\s*/[a-z_]+\b[^\n]*$")
 MARKED_READY_SYSTEM_NOTE = "marked this merge request as **ready**"
 SECURITY_GATE_PREFIX = "# Security Gate"
 
@@ -139,13 +143,21 @@ def summarize_unresolved_threads(
     return threads
 
 
-def find_unanswered_human_comments(mr: dict[str, Any], notes: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Plain (non-thread) comments from other humans posted after the MR author's last note."""
-    mr_author = note_author_username(mr)
+def find_unanswered_human_comments(
+    mr: dict[str, Any], notes: list[dict[str, Any]], operator: str | None = None
+) -> list[dict[str, Any]]:
+    """Plain (non-thread) comments from other humans posted after the last note of the people driving the MR.
+
+    The drivers are the MR author and `operator`, the account running this check: on an MR a bot opened
+    (Renovate), the operator answers comments, and its own notes are not comments awaiting a reply.
+    """
+    drivers = {note_author_username(mr)} | ({operator} if operator else set())
     author_note_times = [
         parse_gitlab_time(note["created_at"])
         for note in notes
-        if not note.get("system") and note_author_username(note) == mr_author
+        if not note.get("system")
+        and note_author_username(note) in drivers
+        and not QUICK_ACTION_COMMENT_PATTERN.match(note.get("body") or "")
     ]
     last_author_note = max(author_note_times) if author_note_times else None
     unanswered = []
@@ -154,8 +166,9 @@ def find_unanswered_human_comments(mr: dict[str, Any], notes: list[dict[str, Any
         if (
             note.get("system")
             or note.get("resolvable")
-            or username == mr_author
+            or username in drivers
             or is_gitlab_bot_username(username)
+            or QUICK_ACTION_COMMENT_PATTERN.match(note.get("body") or "")
         ):
             continue
         created = parse_gitlab_time(note["created_at"])
@@ -187,7 +200,7 @@ def evaluate_mr_readiness(
     """Turns one MR snapshot into a verdict: ready_for_human_review, action_required, or pending.
 
     `snapshot` holds `mr`, `notes`, `discussions`, `pipeline_jobs` (head pipeline jobs, or None),
-    `head_pipeline_parent_shas` (parents of a merged-results pipeline's commit) and `approvals`. Pure: no API calls, so the rules are unit tested on fixtures.
+    `head_pipeline_parent_shas` (parents of a merged-results pipeline's commit), `approvals`, and optionally `operator` (the glab user running the check). Pure: no API calls, so the rules are unit tested on fixtures.
     """
     mr = snapshot["mr"]
     notes = snapshot["notes"]
@@ -279,7 +292,7 @@ def evaluate_mr_readiness(
             f"{len(awaiting_reviewer)} human thread(s) answered, waiting on the reviewer to resolve"
         )
 
-    unanswered_comments = find_unanswered_human_comments(mr, notes)
+    unanswered_comments = find_unanswered_human_comments(mr, notes, snapshot.get("operator"))
     if unanswered_comments:
         actions.append({"action": "reply_to_comments", "comments": unanswered_comments})
 
@@ -309,7 +322,9 @@ def evaluate_mr_readiness(
     reviewed_times = [
         parse_gitlab_time(note["created_at"])
         for note in notes
-        if not note.get("system") and note_author_username(note) in qodo_usernames
+        if not note.get("system")
+        and note_author_username(note) in qodo_usernames
+        and QODO_BUSY_MARKER not in (note.get("body") or "")
     ]
     last_code_change = latest_code_change_time(mr, notes)
     if review_requested_at is not None:
@@ -431,6 +446,7 @@ def fetch_mr_readiness_snapshot(project: str, iid: str) -> dict[str, Any]:
         "discussions": glab_api_all_pages(f"{base}/discussions"),
         "pipeline_jobs": pipeline_jobs,
         "approvals": glab_api_json(f"{base}/approvals"),
+        "operator": glab_api_json("user").get("username"),
     }
 
 

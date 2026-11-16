@@ -134,6 +134,21 @@ class FeedbackRulesTest(unittest.TestCase):
         notes = [qodo_review(3), note(AUTHOR, "Fixed in abc", 4), note("reviewer.one", "Why this?", 6)]
         self.assertEqual(action_names(evaluate(snapshot(notes=notes))), ["reply_to_comments"])
 
+    def test_review_command_is_not_a_comment_to_answer(self) -> None:
+        notes = [note("reviewer.one", "/agentic_review", 2), qodo_review(3)]
+        self.assertEqual(evaluate(snapshot(notes=notes))["verdict"], "ready_for_human_review")
+
+    def test_operator_drives_a_bot_opened_mr(self) -> None:
+        notes = [qodo_review(3), note("renovate.bot.like", "update", 1), note("kento", "/agentic_review", 2), note("kento", "Rebased and fixed e2e", 4)]
+        snap = snapshot(notes=notes, author={"username": "renovate.bot.like"})
+        self.assertEqual(evaluate({**snap, "operator": "kento"})["verdict"], "ready_for_human_review")
+        self.assertEqual(action_names(evaluate(snap)), ["reply_to_comments"], "Without the operator, its notes look like another human's.")
+
+    def test_reviewer_comment_after_the_operator_still_needs_a_reply(self) -> None:
+        notes = [qodo_review(3), note("kento", "Rebased", 4), note("reviewer.one", "Why this?", 6)]
+        snap = snapshot(notes=notes, author={"username": "renovate.bot.like"})
+        self.assertEqual(action_names(evaluate({**snap, "operator": "kento"})), ["reply_to_comments"])
+
     def test_answered_human_comment_does_not_block(self) -> None:
         notes = [qodo_review(3), note("reviewer.one", "Why this?", 6), note(AUTHOR, "Because ...", 7)]
         self.assertEqual(evaluate(snapshot(notes=notes))["verdict"], "ready_for_human_review")
@@ -243,6 +258,23 @@ class AutomatedReviewRulesTest(unittest.TestCase):
         self.assertEqual(
             evaluate(snapshot(notes=notes), minutes_now=24)["automated_review"]["state"], "reviewed"
         )
+
+    def test_qodo_busy_placeholder_is_not_a_finished_review(self) -> None:
+        notes = [
+            note(AUTHOR, "/agentic_review", 20),
+            note(QODO, "\n<h3>Qodo is busy working</h3>\n\nCheck back in a few minutes.", 21),
+        ]
+        result = evaluate(snapshot(notes=notes), minutes_now=25)
+        self.assertEqual(result["verdict"], "pending")
+        self.assertEqual(result["automated_review"]["state"], "waiting")
+
+    def test_review_posted_after_the_busy_placeholder_counts(self) -> None:
+        notes = [
+            note(AUTHOR, "/agentic_review", 20),
+            note(QODO, "<h3>Qodo is busy working</h3>", 21),
+            qodo_review(24),
+        ]
+        self.assertEqual(evaluate(snapshot(notes=notes), minutes_now=25)["verdict"], "ready_for_human_review")
 
     def test_badge_only_findings_without_a_summary_count_as_the_review(self) -> None:
         notes = [
