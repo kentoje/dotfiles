@@ -41,7 +41,6 @@ abbr :wq exit
 abbr op opencode
 abbr dro droid
 abbr wm workmux
-abbr cmra claude-mr-approver
 abbr pt portless
 abbr fab fabric
 abbr btop sudo btop
