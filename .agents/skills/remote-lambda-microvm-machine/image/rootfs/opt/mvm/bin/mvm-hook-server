@@ -30,6 +30,8 @@ STATE_DIR = "/run/mvm"
 # about 900 package.json files at once and fails with EMFILE under it. Everything on the machine
 # descends from this process: mvm-on-run, the workspace bootstrap, sshd and every ssh session
 # (sshd runs without PAM, so nothing lowers it again), and the machine's tuios session.
+# PAM sessions (runuser, su) reset limits from PID 1's, so /etc/security/limits.d/mvm-open-files.conf
+# declares the same value for them.
 OPEN_FILES_LIMIT = 1048576
 
 # Long-running services started after /run. Restarted with backoff when they exit.

@@ -12,6 +12,7 @@ from unittest import mock
 from mvm_cli.mvm_settings import IMAGE_DIR
 
 MVM_HOOK_SERVER_SCRIPT = IMAGE_DIR / "rootfs/opt/mvm/bin/mvm-hook-server"
+PAM_OPEN_FILES_LIMITS = IMAGE_DIR / "rootfs/etc/security/limits.d/mvm-open-files.conf"
 
 
 def load_mvm_hook_server():
@@ -67,6 +68,20 @@ class RaiseOpenFilesLimitTest(unittest.TestCase):
         self.hook_server.ThreadingHTTPServer = mock.Mock(return_value=server)
         self.hook_server.main()
         self.assertEqual(order, ["raise_open_files_limit", "serve_forever"])
+
+
+class PamOpenFilesLimitTest(unittest.TestCase):
+    """runuser and su go through pam_limits, which resets unnamed limits to PID 1's (1024): the bootstrap's pnpm install failed with EMFILE."""
+
+    def test_pam_sessions_get_the_hook_server_limit_for_every_user(self):
+        entries = set()
+        for line in PAM_OPEN_FILES_LIMITS.read_text().splitlines():
+            fields = line.split("#", 1)[0].split()
+            if fields:
+                entries.add(tuple(fields))
+        limit = str(load_mvm_hook_server().OPEN_FILES_LIMIT)
+        expected = {(domain, kind, "nofile", limit) for domain in ("*", "root") for kind in ("soft", "hard")}
+        self.assertEqual(entries, expected)
 
 
 if __name__ == "__main__":
