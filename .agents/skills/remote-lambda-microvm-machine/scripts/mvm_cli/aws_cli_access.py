@@ -6,6 +6,11 @@ import shutil
 import subprocess
 import sys
 
+from mvm_cli.aws_sso_authentication import (
+    aws_sso_login_command,
+    aws_sso_manual_login_hint,
+    renew_aws_sso_session,
+)
 from mvm_cli.mvm_errors import MvmError
 from mvm_cli.mvm_settings import (
     AWS_CLI,
@@ -102,26 +107,12 @@ def reexec_under_aws_vault():
     os.execvp(argv[0], argv)
 
 
-def aws_sso_login_hint(stderr):
-    """The command that renews an expired AWS SSO session for the configured profile, or None.
-
-    With `awsAuthentication` set to an SSO profile, mvm calls the plain AWS CLI, so the renewal
-    is `aws sso login`, never `aws-vault exec`.
-    """
-    auth = aws_authentication()
-    if not auth or auth["kind"] != "profile":
-        return None
-    lowered = stderr.lower()
-    if "sso" not in lowered or not ("expired" in lowered or "invalid" in lowered):
-        return None
-    return f"AWS SSO session expired, run: aws sso login --profile {auth['profile']}"
-
-
 def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     """Run `aws <args>` in REGION and return parsed JSON (or text). Raises AwsCliError on failure.
 
     SSH's `mvm proxy` resolves the same persistent provider without a shell or Flue's .env.
-    Explicit providers fail without falling back to an interactive aws-vault login.
+    An expired/missing SSO session gets one bounded browser login and one retry. Other
+    providers fail without falling back to a personal SSO or interactive aws-vault login.
     """
     refuse_real_aws_call_in_unit_tests()
     explicit_auth = configure_aws_authentication()
@@ -131,29 +122,39 @@ def run_aws_cli(args, parse_json=True, stdin_text=None, timeout=300):
     using_vault = not explicit_auth and not has_aws_credentials_in_env()
     if using_vault:
         cmd = ["aws-vault", "exec", aws_vault_profile(), "--", *cmd]
-    try:
-        result = subprocess.run(
-            cmd,
-            input=stdin_text,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            env={**os.environ, "AWS_PAGER": ""},
-            stdin=None if stdin_text is not None else subprocess.DEVNULL,
-        )
-    except subprocess.TimeoutExpired:
-        recovery = (
-            f"if AWS SSO expired, run: aws-vault exec {aws_vault_profile()} -- true"
-            if using_vault else "check the configured AWS credential provider and network"
-        )
-        raise AwsCliError(
-            f"aws {' '.join(args[:2])} timed out after {timeout}s; {recovery}",
-            stderr="timeout",
-        ) from None
-    if result.returncode != 0:
+    for attempt in range(2):
+        try:
+            result = subprocess.run(
+                cmd,
+                input=stdin_text,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env={**os.environ, "AWS_PAGER": ""},
+                stdin=None if stdin_text is not None else subprocess.DEVNULL,
+            )
+        except subprocess.TimeoutExpired:
+            recovery = (
+                f"if AWS SSO expired, run: aws-vault exec {aws_vault_profile()} -- true"
+                if using_vault else "check the configured AWS credential provider and network"
+            )
+            raise AwsCliError(
+                f"aws {' '.join(args[:2])} timed out after {timeout}s; {recovery}",
+                stderr="timeout",
+            ) from None
+        if result.returncode == 0:
+            break
         message = f"aws {' '.join(args[:2])} failed: {result.stderr.strip()[-600:]}"
-        login_hint = aws_sso_login_hint(result.stderr)
-        raise AwsCliError(f"{message}; {login_hint}" if login_hint else message, stderr=result.stderr)
+        login_command = aws_sso_login_command(result.stderr)
+        if login_command and attempt == 0:
+            try:
+                renew_aws_sso_session(login_command, timeout=timeout)
+            except MvmError as error:
+                raise AwsCliError(f"{message}; {error}", stderr=result.stderr) from None
+            continue
+        if login_command:
+            message += f"; AWS SSO credentials still failed after automatic login; {aws_sso_manual_login_hint(login_command)}"
+        raise AwsCliError(message, stderr=result.stderr)
     if not parse_json:
         return result.stdout
     return json.loads(result.stdout) if result.stdout.strip() else {}

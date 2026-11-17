@@ -90,6 +90,7 @@ SECRET_ENV_LAPTOP_NAMES = {
 # they hold a token or password are refused; secrets only travel through Secrets Manager.
 LAPTOP_CONFIG_FILES = {
     "jira-config.yml": Path.home() / ".config/.jira/.config.yml",
+    "ccstatusline-settings.json": Path.home() / ".config/ccstatusline/settings.json",
 }
 # Private laptop git checkouts baked into the image as git bundles (zip name -> checkout), since
 # the build has no GitHub credentials. The current branch at HEAD is bundled, not the work tree.

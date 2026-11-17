@@ -20,6 +20,7 @@ ARG NODE_VERSION=24.22.2
 ARG BUN_VERSION=1.4.3
 ARG PI_VERSION=1.2.0
 ARG PORTLESS_VERSION=0.15.7
+ARG CCSTATUSLINE_VERSION=2.2.33
 ARG OMP_VERSION=18.10.3
 ARG HERDR_VERSION=0.9.5
 # The laptop's `aws-<name>` tuios window runs this client over ssh (`tuios attach main`): no version link to the laptop's tuios.
@@ -99,10 +100,10 @@ RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/
  && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare pnpm@latest --activate \
  && node --version && pnpm --version
 
-# bun (omp needs >= 1.3.14), then pi and portless as bun globals, like on boxd.
+# bun (omp needs >= 1.3.14), then pi, portless and Claude's status line as bun globals.
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}" \
  && export PATH="$HOME/.bun/bin:$HOME/.local/share/fnm/aliases/default/bin:$PATH" \
- && bun add -g "@earendil-works/pi-coding-agent@${PI_VERSION}" "portless@${PORTLESS_VERSION}" \
+ && bun add -g "@earendil-works/pi-coding-agent@${PI_VERSION}" "portless@${PORTLESS_VERSION}" "ccstatusline@${CCSTATUSLINE_VERSION}" \
  && pi --version && portless --version
 
 # Single-binary tools into ~/.local/bin.
@@ -196,9 +197,19 @@ RUN chown root:root /opt/mvm /opt/mvm/bin /opt/mvm/bin/* \
  && install -m 644 /opt/mvm/laptop-files/git-identity.gitconfig /home/dev/.config/git/config \
  && if [ -f /opt/mvm/laptop-files/jira-config.yml ]; then \
       install -D -m 600 /opt/mvm/laptop-files/jira-config.yml /home/dev/.config/.jira/.config.yml; fi \
+ && if [ -f /opt/mvm/laptop-files/ccstatusline-settings.json ]; then \
+      install -D -m 600 /opt/mvm/laptop-files/ccstatusline-settings.json /home/dev/.config/ccstatusline/settings.json; \
+    else \
+      install -D -m 600 /home/dev/dotfiles/.config/ccstatusline/settings.json /home/dev/.config/ccstatusline/settings.json; fi \
  && chown -R dev:dev /home/dev \
  && du -sh /home/dev /usr /opt 2>/dev/null; df -h / | tail -1
 
+# Verify the installed status line as its runtime user, with no package download at startup.
+USER dev
+RUN printf '%s\n' '{"model":{"display_name":"MVM status line check"},"workspace":{"current_dir":"/home/dev"}}' \
+    | /home/dev/.bun/bin/bun /home/dev/.bun/bin/ccstatusline
+
+USER root
 WORKDIR /
 ENV HOME=/root
 EXPOSE 2222 9000

@@ -30,7 +30,8 @@ mvm logs NAME [-f] [--since 1h]      # the machine's logs: workspace setup, hook
 - Use `--json` to read results (`mvm new --json` gives `name` and `devServerPort`).
   No command prompts.
 - Every AWS call goes straight through the AWS CLI with the SSO profile `awsAuthentication` names (see AWS sign-in): no command and no ssh connection prompts while that SSO session lasts.
-  Once it has ended, commands fail with `The SSO session associated with this profile has expired`: sign in again yourself (see "Renew an ended session" under AWS sign-in), never hand the login command to the user.
+  If its token expires or is missing, MVM runs SSO login itself and retries the failed AWS call once, including for ssh, herdr and tuios reconnects.
+  Let MVM attempt recovery before asking the user to sign in. Only if automatic recovery fails, give the user the exact login command from the error, then retry after they finish.
 - Create one machine per task.
   Parallel `mvm new` runs are safe.
 - A machine lives at most 8 hours (`--ttl`), then AWS terminates it.
@@ -69,10 +70,13 @@ sso_role_name = <role>
   The legacy format (`sso_start_url` in the profile) uses the device-code flow, which shows that page at every login.
 - The login stores a refresh token: the CLI renews the one-hour access token silently, so `mvm`, ssh and herdr keep working until the SSO session itself ends.
   Then sign in again.
-- Renew an ended session yourself, without asking: run `aws sso login --sso-session <session>` (`sso_session` of the `awsAuthentication` profile in `~/.aws/config`), then retry the failed command once it exits 0.
-  It opens the sign-in page in the laptop's browser, which completes on its own with the browser's existing access-portal sign-in: the user does nothing.
-  Only when the browser's portal sign-in is gone does the page wait for the user, and the login blocks for at most 10 minutes: run it in the background, and if it has not exited after a few seconds, ask the user to finish the sign-in in the page it opened.
-  Run one login even when several commands failed, since one session covers them all.
+- MVM automatically renews an expired or missing SSO token with `aws sso login --sso-session <session>` (`sso_session` of the configured profile); legacy SSO profiles use `--profile <profile>`.
+  It opens the laptop's browser, where an existing access-portal sign-in normally completes the login without user input.
+  Recovery waits at most 30 seconds (less for an AWS call with a shorter timeout), then MVM retries the failed AWS call once.
+  Concurrent MVM commands share one login attempt per session. A 60-second cooldown prevents failed logins from repeatedly opening the browser; a manual login takes effect immediately.
+- If automatic renewal fails or times out, MVM prints the exact command to run on the laptop. Give that command to the user so they can complete any browser sign-in, then retry the original MVM/SSH command after they finish.
+  Do not keep launching login commands or switch to aws-vault.
+- If a direct AWS CLI command outside MVM reports expired or missing SSO tokens, run `aws sso login --sso-session <session>` yourself and retry once after success; only ask the user if that login fails or requires browser interaction.
 - Several profiles can share one session, and one login covers them all.
   Use the session name from hydra's aw-web README (`aws configure sso`), so its GraphQL schema download shares the same login.
 - Write the start URL without the `/#` the access portal appends.
@@ -117,6 +121,8 @@ Three agents run on a machine; the user picks one per request, e.g. "/remote-lam
 - Unlisted agents (`codex`) are installed but have no sign-in on the machines.
 - Claude on a machine runs with `bypassPermissions`, like on the laptop, and never shows onboarding or the folder trust question under `/home/dev`.
   It has the dotfiles skills (`~/.claude/skills`) but not the laptop's `CLAUDE.md`, hooks or MCP servers.
+  Its ccstatusline status bar uses the laptop's `~/.config/ccstatusline/settings.json` captured at image build
+  (the dotfiles copy is the fallback when absent). Rebuild the image to apply laptop layout changes to new machines.
 
 ### Live, in the user's tuios window (default)
 
@@ -150,6 +156,11 @@ The laptop does not edit the checkout: the remote agent edits, tests, runs the d
 The remote agent owns the task until its MR is ready for human review (`aircall-dev-flow`, through its readiness loop).
 The laptop dispatches; it does not supervise, and the user should not need to steer between the prompt and the final report.
 
+For `dashboard-extensions/conversation-center-ext` and `clients/assets-page`, use the repository's **poteto-mode** for remote tasks, including exploration and implementation.
+Start the native agent prompt with `/skill:Poteto Mode` and tell it to read and apply `.agents/skills/poteto-mode/SKILL.md` in that checkout or worktree.
+The skills are committed in each repository and arrive with the clone; enabling the mode does not require an image rebuild.
+Keep any exploration read-only and preserve the user's requested delivery scope.
+
 The dispatch prompt (`--prompt-file`) must:
 
 - Name the flow: "Follow the aircall-dev-flow skill through phase 6 (ready for human review)".
@@ -157,7 +168,7 @@ The dispatch prompt (`--prompt-file`) must:
 - Give the machine's end time, `expiresAt` from `mvm ls --json`: the machine cannot read it, and the readiness loop stops 20 minutes before it.
 - Pass on the user's own constraints verbatim, and nothing stricter.
   Never add "STOP at the readiness gate", "do not commit, push or open an MR" or "no babysitting / no pipeline watch" unless the user said so for this request.
-  Never add a mode the user or the repository did not ask for (poteto-mode).
+  Use poteto-mode for the two repositories above; for other repositories, add a mode only when the user or repository asks for it.
 
 ```markdown
 Follow the aircall-dev-flow skill through phase 6 (ready for human review) on this machine.
@@ -325,9 +336,9 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 
 - `mvm logs <name>` (also after `mvm rm`): workspace setup, lifecycle hooks, network doctor, WIP saves.
 - `ssh <name>.mvm` or `mvm forward` hangs or times out, or a command fails with `The SSO session associated with this profile has expired`: the AWS credentials do not resolve.
-  Run `aws sts get-caller-identity --profile <profile>` (the `awsAuthentication` profile).
-  When the SSO session ended, renew it yourself as "Renew an ended session" under AWS sign-in says, without involving the user.
-  `Token for <session> does not exist` means this laptop never signed in with the `sso-session` format: same renewal.
+  MVM attempts automatic SSO renewal for expired, invalid or missing tokens before failing.
+  If it reports `AWS SSO automatic login failed`, give the user the printed laptop login command, then retry after they finish (see AWS sign-in).
+  For diagnosis, `aws sts get-caller-identity --profile <profile>` checks the `awsAuthentication` profile; direct AWS CLI commands do not use MVM's recovery.
 - `mvm forward` says `could not connect`: the reason is in `~/.local/state/mvm/forwards/<name>.log`.
 - Staging login fails on the machine: the network doctor's `identityApiStatus` in `mvm logs <name>` should be 400 (the request reached the auth app); anything else means the machine cannot log in to staging.
 - gitlab.com web pages answer AWS IPs with 403; git over HTTPS and the API work.
@@ -336,40 +347,6 @@ Each is one snapshot commit on top of HEAD (message with `[CI-0000]`, pushed wit
 - Host key warnings: each machine gets fresh host keys; `mvm` forgets old ones in `~/.ssh/known_hosts_mvm`.
 - `Permission denied (publickey)` from a laptop set up after the machine started: check that `mvm keys` lists the laptop, then look for `mvm-authorized-keys:` lines in `mvm logs <name>`.
 - `mvm new` waiting for `mvm new` on another laptop: the creation lock frees itself within a minute if that laptop crashed.
-
-## Unattended AWS authentication: blocked
-
-Status on 2026-11-02: every `mvm` command and every `mvm proxy` (ssh, herdr, tuios) authenticates with the personal SSO session through the AWS CLI (AWS sign-in).
-Its refresh token removes the prompts, but the session still ends and then needs a person to sign in in a browser.
-An attempt to make the laptop dispatcher (the dev-workflows support worker) authenticate with no sign-in at all could not be completed.
-Do not retry it until the access below exists.
-
-- Planned: a dedicated IAM user with a scoped inline policy and no console password.
-  Its access key would live in the macOS login keychain through aws-vault.
-  An AWS CLI profile would use `credential_process = aws-vault export --format=json`, with one-hour GetSessionToken sessions renewed from the keychain.
-  `awsAuthentication` would select that profile.
-- Why it failed: the admin SSO permission set has an inline policy that explicitly denies `iam:CreateUser` and `iam:CreateAccessKey` on every resource.
-  An explicit deny overrides its AdministratorAccess: `AccessDenied ... with an explicit deny in an identity-based policy`.
-  No existing IAM user can receive a key either, and every future key rotation would hit the same deny.
-  Nothing was created in AWS.
-- It is an organization guardrail: do not work around it with another role, another user or edits to the SSO role.
-  Unblocking needs the IAM Identity Center admins. They can grant a scoped exception (user and access-key actions only on the dispatcher's IAM path), or run the setup and every rotation themselves on the laptop.
-- Ready for that day:
-  - `awsAuthentication` support in mvm, which the SSO profile already uses: point it at the dispatcher's profile.
-  - The private dev-workflows helper `bun run aws:dispatcher setup|rotate-key|check`.
-  - The policy, runbook, rotation and revocation steps in that repo's `docs/aws-workflow-authentication.md`.
-- Ruled out by the user: IAM Roles Anywhere, and moving the dispatcher to EC2/ECS.
-  The deny does not cover role creation, but whether an SCP blocks Roles Anywhere was not tested.
-- Notes for the retry:
-  - MicroVM IAM actions use the `lambda:` prefix.
-    `RunMicrovm`, `GetMicrovm`, `TerminateMicrovm` and `CreateMicrovmAuthToken` scope to the image ARN; `ListMicrovms` needs `*`.
-  - Still unverified:
-    - whether `RunMicrovm` needs `lambda:PassNetworkConnector`;
-    - the `iam:PassedToService` value Lambda uses;
-    - whether `sts:GetCallerIdentity` (mvm builds the image ARN from it) and `iam:PassRole` work with GetSessionToken credentials.
-  - Homebrew's aws-vault is ad-hoc signed, so the keychain item trusts that exact binary.
-    An upgrade makes the next access show a keychain dialog that nobody can answer unattended.
-    `brew pin aws-vault` before storing the key.
 
 ## Maintaining mvm
 

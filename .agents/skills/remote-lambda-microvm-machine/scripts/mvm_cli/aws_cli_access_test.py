@@ -10,6 +10,7 @@ from unittest import mock
 
 from mvm_cli import aws_cli_access
 from mvm_cli.aws_cli_access import AwsCliError
+from mvm_cli.mvm_errors import MvmError
 from mvm_cli.mvm_settings_test import isolate_mvm_laptop_settings
 
 
@@ -20,6 +21,9 @@ class AwsCredentialProviderTest(unittest.TestCase):
         patcher = mock.patch.dict(os.environ, env, clear=True)
         patcher.start()
         self.addCleanup(patcher.stop)
+        self.aws_config = self.settings_file.parent / "aws-config"
+        self.aws_config.write_text("")
+        os.environ["AWS_CONFIG_FILE"] = str(self.aws_config)
         # These tests exercise run_aws_cli itself: they fake subprocess.run and os.execvp, or run the
         # real CLI against a temp config whose credential_process is local, so no call reaches AWS.
         guard = mock.patch.object(aws_cli_access, "refuse_real_aws_call_in_unit_tests")
@@ -83,12 +87,57 @@ class AwsCredentialProviderTest(unittest.TestCase):
         run.assert_called_once()
         self.assertEqual(run.call_args.args[0][0], aws_cli_access.AWS_CLI)
 
-    def test_expired_sso_profile_asks_for_aws_sso_login_not_aws_vault(self):
+    def select_sso_authentication(self):
         self.select_authentication({"kind": "profile", "profile": "machine"})
+        self.aws_config.write_text("[profile machine]\nsso_session = shared\n")
+
+    def test_expired_sso_renews_and_retries_the_original_call_once(self):
+        self.select_sso_authentication()
         stderr = "aws: [ERROR]: Error when retrieving token from sso: Token has expired and refresh failed"
-        with self.assertRaisesRegex(AwsCliError, "run: aws sso login --profile machine") as raised:
-            self.run_fake_cli(subprocess.CompletedProcess([], 255, "", stderr))
+        results = [subprocess.CompletedProcess([], 255, "", stderr),
+                   subprocess.CompletedProcess([], 0, '{"Account":"test"}', "")]
+        with mock.patch.object(aws_cli_access.subprocess, "run", side_effect=results) as run, \
+                mock.patch.object(aws_cli_access, "renew_aws_sso_session") as renew:
+            output = aws_cli_access.run_aws_cli(["s3api", "put-object"], stdin_text="payload", timeout=12)
+        self.assertEqual(output, {"Account": "test"})
+        renew.assert_called_once_with([aws_cli_access.AWS_CLI, "sso", "login", "--sso-session", "shared"], timeout=12)
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(run.call_args_list[0], run.call_args_list[1])
+        self.assertEqual(run.call_args.kwargs["input"], "payload")
+
+    def test_failed_automatic_login_preserves_aws_error_and_does_not_retry(self):
+        self.select_sso_authentication()
+        stderr = "The SSO session associated with this profile has expired"
+        failure = MvmError("AWS SSO automatic login failed; run on the laptop: aws sso login --sso-session shared")
+        with mock.patch.object(aws_cli_access.subprocess, "run", return_value=subprocess.CompletedProcess([], 255, "", stderr)) as run, \
+                mock.patch.object(aws_cli_access, "renew_aws_sso_session", side_effect=failure) as renew:
+            with self.assertRaisesRegex(AwsCliError, "run on the laptop: aws sso login") as raised:
+                aws_cli_access.run_aws_cli(["sts", "get-caller-identity"])
+        self.assertEqual(raised.exception.stderr, stderr)
         self.assertNotIn("aws-vault", str(raised.exception))
+        run.assert_called_once()
+        renew.assert_called_once()
+
+    def test_sso_failure_after_retry_shows_manual_command_without_another_login(self):
+        self.select_sso_authentication()
+        stderr = "Error loading SSO Token: Token for shared does not exist"
+        with mock.patch.object(aws_cli_access.subprocess, "run", return_value=subprocess.CompletedProcess([], 255, "", stderr)) as run, \
+                mock.patch.object(aws_cli_access, "renew_aws_sso_session") as renew:
+            with self.assertRaisesRegex(AwsCliError, "still failed after automatic login; run on the laptop: .* --sso-session shared"):
+                aws_cli_access.run_aws_cli(["sts", "get-caller-identity"])
+        self.assertEqual(run.call_count, 2)
+        renew.assert_called_once()
+
+    def test_non_sso_failures_never_launch_a_browser_or_retry(self):
+        self.select_sso_authentication()
+        for stderr in ["AccessDenied", "ExpiredTokenException", "Unable to locate credentials", "network error"]:
+            with self.subTest(stderr=stderr), \
+                    mock.patch.object(aws_cli_access.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, "", stderr)) as run, \
+                    mock.patch.object(aws_cli_access, "renew_aws_sso_session") as renew:
+                with self.assertRaises(AwsCliError):
+                    aws_cli_access.run_aws_cli(["sts", "get-caller-identity"])
+            run.assert_called_once()
+            renew.assert_not_called()
 
     def test_workload_timeout_does_not_request_a_personal_sso_login(self):
         self.select_authentication({"kind": "default-chain"})

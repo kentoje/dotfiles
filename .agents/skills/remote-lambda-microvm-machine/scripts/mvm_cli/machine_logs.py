@@ -16,6 +16,8 @@ def cmd_logs(args):
     """`mvm logs NAME [-f] [--since 1h]`: the machine's CloudWatch stream."""
     validate_machine_name(args.name)
     reexec_under_aws_vault()
+    # The streaming CLI replaces this process; renew SSO before handing over to it.
+    run_aws_cli(["configure", "export-credentials", "--format", "process"], timeout=30)
     argv = [
         AWS_CLI,
         "logs",
