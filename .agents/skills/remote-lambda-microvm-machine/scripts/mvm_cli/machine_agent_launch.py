@@ -11,6 +11,10 @@ import shlex
 import subprocess
 import time
 
+from mvm_cli.claude_managed_settings_approval import (
+    read_laptop_claude_managed_settings_approval,
+    render_claude_managed_settings_approval_script,
+)
 from mvm_cli.machine_registry import ssh_host_for_machine
 from mvm_cli.mvm_errors import MvmError, log_mvm
 from mvm_cli.mvm_settings import (
@@ -66,9 +70,11 @@ def resolve_machine_agent_cwd(cwd):
     return f"{MACHINE_HOME_DIR}/{cwd}"
 
 
-def render_machine_agent_launch_script(agent, cwd, prompt_path=None):
+def render_machine_agent_launch_script(agent, cwd, prompt_path=None, claude_managed_settings_approval=None):
     """Bash run over ssh: save the prompt from stdin, wait for the workspace setup, type the agent into `main`.
 
+    For claude, CLAUDE_MANAGED_SETTINGS_APPROVAL (the laptop's files, see claude_managed_settings_approval) are written first,
+    so claude does not stop on the organization's managed-settings approval dialog.
     Fails with one `mvm agent: ...` line on stderr when `main` is busy or CWD does not exist.
     """
     line = f"cd {shlex.quote(cwd)} && {machine_agent_command_line(agent, prompt_path)}\n"
@@ -90,6 +96,11 @@ def render_machine_agent_launch_script(agent, cwd, prompt_path=None):
         f"cwd={shlex.quote(cwd)}",
         f'[ -d "$cwd" ] || fail {shlex.quote(f"no directory {cwd} on the machine")}',
         *([MACHINE_CLAUDE_TRUST_DIRECTORY_SCRIPT] if agent == "claude" else []),
+        *(
+            [render_claude_managed_settings_approval_script(claude_managed_settings_approval)]
+            if agent == "claude" and claude_managed_settings_approval
+            else []
+        ),
         f"busy=$($T list-windows -s {MACHINE_TUIOS_SESSION} --json 2>/dev/null"
         " | jq -r '.windows[]? | select(.focused) | .foreground_cmd // \"\"')",
         f"case \"$busy\" in {'|'.join(MACHINE_IDLE_SHELL_COMMANDS)}|'') ;;"
@@ -130,7 +141,12 @@ def cmd_agent(args):
                 "-o",
                 "ConnectTimeout=15",
                 ssh_host_for_machine(args.name),
-                render_machine_agent_launch_script(agent, cwd, prompt_path),
+                render_machine_agent_launch_script(
+                    agent,
+                    cwd,
+                    prompt_path,
+                    read_laptop_claude_managed_settings_approval() if agent == "claude" else None,
+                ),
             ],
             input=prompt or "",
             capture_output=True,

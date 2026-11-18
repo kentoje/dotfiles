@@ -43,6 +43,10 @@ ssh <name>.mvm 'ls -l --time-style=long-iso ~/.local/share/claude/versions/; rea
 
 The file dated at the image build is the baked version; a later file is an auto-update, and `~/.local/bin/claude` points at the one in use.
 
+After a bump, check that claude still starts without a question: `mvm new`, `mvm agent <name> --agent claude`, then `ssh <name>.mvm /home/dev/.local/bin/tuios capture-pane -s main` must show the input box, not a dialog.
+A dialog there stalls every `mvm agent` dispatch silently.
+2.1.327 added "Managed settings require approval" for the organization's plugin mods; `claude_managed_settings_approval.py` copies the laptop's approval to machines (see its docstring).
+
 ## History
 
 | Date | Change | Image version |
@@ -50,3 +54,4 @@ The file dated at the image build is the baked version; a later file is an auto-
 | 2026-11-10 | Claude Code pinned at 2.1.322 (image 25.0 had 2.1.318, unpinned) | 26.0 |
 | 2026-11-18 | Claude Code 2.1.322 to 2.1.327; omp 18.10.3 to 18.22.2 (its new first-run update screen is skipped by `setupVersion: 3` in `omp-machine-config-overlay.yml`) | 33.0 |
 | 2026-11-18 | pi 1.2.0 to 1.5.2, the version the laptop runs | 34.0 |
+| 2026-11-18 | No image change: 2.1.327's managed-settings approval dialog stalled claude on 33.0 and 34.0; `mvm new`, `mvm attach` and `mvm agent` now copy the laptop's approval | - |

@@ -82,8 +82,8 @@ class MachineAgentLaunchScriptTest(unittest.TestCase):
         )
         self.fake_tuios.chmod(0o755)
 
-    def run_script(self, agent, prompt_path=None, prompt=""):
-        script = machine_agent_launch.render_machine_agent_launch_script(agent, str(self.cwd), prompt_path)
+    def run_script(self, agent, prompt_path=None, prompt="", approval=None):
+        script = machine_agent_launch.render_machine_agent_launch_script(agent, str(self.cwd), prompt_path, approval)
         script = script.replace(f"T={TUIOS_REMOTE_BINARY}", f"T={self.fake_tuios}")
         return subprocess.run(
             ["bash", "-c", script],
@@ -111,8 +111,24 @@ class MachineAgentLaunchScriptTest(unittest.TestCase):
         self.assertEqual(sorted(claude_state["projects"]), ["/a", str(self.cwd)])
 
     def test_other_agents_leave_claude_state_alone(self):
-        self.assertEqual(self.run_script("omp").returncode, 0)
+        self.assertEqual(self.run_script("omp", approval={"remote-settings.json": b"{}"}).returncode, 0)
         self.assertFalse((self.home / ".claude.json").exists())
+        self.assertFalse((self.home / ".claude").exists())
+
+    def test_claude_gets_the_laptop_managed_settings_approval(self):
+        # Claude 2.1.327+ would otherwise stop on the organization's managed-settings approval dialog.
+        stale = self.home / ".claude/remote-settings-helper-consent"
+        stale.parent.mkdir()
+        stale.write_text("0" * 64)
+        approval = {"remote-settings.json": b'{"a": "it\'s"}\n', "remote-settings-helper-consent": b"b" * 64}
+        self.assertEqual(self.run_script("claude", approval=approval).returncode, 0)
+        for name, content in approval.items():
+            self.assertEqual((self.home / ".claude" / name).read_bytes(), content)
+            self.assertEqual((self.home / ".claude" / name).stat().st_mode & 0o777, 0o600)
+
+    def test_claude_without_laptop_approval_leaves_the_machine_alone(self):
+        self.assertEqual(self.run_script("claude").returncode, 0)
+        self.assertFalse((self.home / ".claude").exists())
 
     def test_refuses_a_busy_main_and_a_missing_directory(self):
         self.foreground("omp")

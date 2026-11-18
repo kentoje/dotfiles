@@ -20,6 +20,7 @@ from mvm_cli.aws_cli_access import (
     run_aws_cli,
     terminate_microvm,
 )
+from mvm_cli.claude_managed_settings_approval import copy_claude_managed_settings_approval_to_machine
 from mvm_cli.ended_machine_cleanup import forget_ended_machine, prune_ended_machines
 from mvm_cli.herdr_machine_sync import (
     add_machine_to_herdr,
@@ -241,6 +242,7 @@ def cmd_new(args):
         etag = replace_shared_machine_record(record, etag)
     wait_for_ssh(name)
     log_mvm(f"{name}: ssh ready in {int(time.monotonic() - started)}s; workspace setup continues (mvm logs {name} -f)")
+    copy_claude_managed_settings_approval_to_machine(name)
     in_herdr = add_machine_to_herdr(name)
     if in_herdr:
         log_mvm(f"{name}: added to herdr as {herdr_label_for_machine(name)}")
@@ -275,6 +277,7 @@ def cmd_attach(args):
     register_laptop_ssh_key()
     forget_machine_host_key(name)
     wait_for_ssh(name)
+    copy_claude_managed_settings_approval_to_machine(name)
     target = ssh_host_for_machine(name)
     in_herdr = any(
         profile.get("target") == target for profile in list_herdr_mvm_profiles() or []

@@ -124,6 +124,8 @@ Three agents run on a machine; the user picks one per request, e.g. "/remote-lam
   Both list only `aircall-personal-tools`: the laptop's other servers run from macOS paths or need a browser OAuth login per machine.
 - No agent-gossips status reporting on a machine (its server runs on the laptop): omp's `extensions` setting is emptied by `/opt/mvm/etc/omp-machine-config-overlay.yml` (`PI_CONFIG_FILES` in every bash), and the image does not link pi's `extensions/` directory.
 - Claude on a machine runs with `bypassPermissions`, like on the laptop, and never shows onboarding or the folder trust question under `/home/dev`.
+  It does not ask to approve the organization's managed settings either: `mvm new`, `mvm attach` and `mvm agent --agent claude` copy the laptop's approval (`~/.claude/remote-settings*`, `scripts/mvm_cli/claude_managed_settings_approval.py`).
+  When the organization changes its settings, approve once in claude on the laptop, then the next `mvm agent` carries it over; until then claude on a machine stops at "Managed settings require approval", which only the user can answer.
   It has the dotfiles skills (`~/.claude/skills`) but not the laptop's `CLAUDE.md`, hooks or MCP servers.
   Its ccstatusline status bar uses the laptop's `~/.config/ccstatusline/settings.json` captured at image build
   (the dotfiles copy is the fallback when absent). Rebuild the image to apply laptop layout changes to new machines.
@@ -161,7 +163,9 @@ The remote agent owns the task until its MR is ready for human review (`aircall-
 The laptop dispatches; it does not supervise, and the user should not need to steer between the prompt and the final report.
 
 For `dashboard-extensions/conversation-center-ext` and `clients/assets-page`, use the repository's **poteto-mode** for remote tasks, including exploration and implementation.
-Start the native agent prompt with `/skill:Poteto Mode` and tell it to read and apply `.agents/skills/poteto-mode/SKILL.md` in that checkout or worktree.
+Tell it to read and apply `.agents/skills/poteto-mode/SKILL.md` in that checkout or worktree.
+pi and omp also accept `/skill:Poteto Mode` as the first line; never start a claude prompt with `/`: claude takes the first message as a slash command and drops the whole prompt, so the agent sits idle.
+After `mvm agent`, read the screen within a minute (`capture-pane`, below) to confirm the agent is working and not stopped on a question.
 The skills are committed in each repository and arrive with the clone; enabling the mode does not require an image rebuild.
 Keep any exploration read-only and preserve the user's requested delivery scope.
 
