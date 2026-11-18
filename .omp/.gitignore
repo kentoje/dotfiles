@@ -5,6 +5,8 @@
 agent.db*
 history.db*
 models.db*
+skill-descriptions.db*
+secret-placeholder.key
 sessions/
 terminal-sessions/
 blobs/
