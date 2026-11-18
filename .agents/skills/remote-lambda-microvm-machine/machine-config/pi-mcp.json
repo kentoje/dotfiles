@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "aircall-personal-tools": {
+      "command": "/home/dev/.bun/bin/bun",
+      "args": [
+        "run",
+        "/home/dev/dotfiles/.claude/mcp-servers/aircall-personal-tools/server.ts"
+      ],
+      "requestTimeoutMs": 240000,
+      "lifecycle": "lazy"
+    }
+  }
+}

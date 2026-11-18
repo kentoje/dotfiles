@@ -120,6 +120,8 @@ Three agents run on a machine; the user picks one per request, e.g. "/remote-lam
 
 - No agent named: `defaultAgent` in the laptop settings, else `pi`.
 - Unlisted agents (`codex`) are installed but have no sign-in on the machines.
+- MCP servers on a machine: omp reads `.omp/agent/mcp.json` (a machine-only file; the laptop's omp has its own) and pi reads `machine-config/pi-mcp.json` in this skill (the image links it as `~/.pi/agent/mcp.json`).
+  Both list only `aircall-personal-tools`: the laptop's other servers run from macOS paths or need a browser OAuth login per machine.
 - Claude on a machine runs with `bypassPermissions`, like on the laptop, and never shows onboarding or the folder trust question under `/home/dev`.
   It has the dotfiles skills (`~/.claude/skills`) but not the laptop's `CLAUDE.md`, hooks or MCP servers.
   Its ccstatusline status bar uses the laptop's `~/.config/ccstatusline/settings.json` captured at image build
