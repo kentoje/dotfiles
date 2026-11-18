@@ -48,3 +48,4 @@ The file dated at the image build is the baked version; a later file is an auto-
 | Date | Change | Image version |
 | --- | --- | --- |
 | 2026-11-10 | Claude Code pinned at 2.1.322 (image 25.0 had 2.1.318, unpinned) | 26.0 |
+| 2026-11-18 | Claude Code 2.1.322 to 2.1.327; omp 18.10.3 to 18.22.2 (its new first-run update screen is skipped by `setupVersion: 3` in `omp-machine-config-overlay.yml`) | 33.0 |

@@ -21,13 +21,13 @@ ARG BUN_VERSION=1.4.3
 ARG PI_VERSION=1.2.0
 ARG PORTLESS_VERSION=0.15.7
 ARG CCSTATUSLINE_VERSION=2.2.33
-ARG OMP_VERSION=18.10.3
+ARG OMP_VERSION=18.22.2
 ARG HERDR_VERSION=0.9.5
 # The laptop's `aws-<name>` tuios window runs this client over ssh (`tuios attach main`): no version link to the laptop's tuios.
 ARG TUIOS_VERSION=0.10.1
 ARG CODEX_VERSION=0.162.1
 # Claude Code auto-updates on running machines; pinning keeps that download out of every new machine.
-ARG CLAUDE_CODE_VERSION=2.1.322
+ARG CLAUDE_CODE_VERSION=2.1.327
 ARG JIRA_CLI_VERSION=1.7.0
 ARG NVIM_VERSION=0.12.6
 ARG LAZYGIT_VERSION=0.66.1

@@ -3,3 +3,8 @@
 # No agent-gossips extension: its config.yml path exists only on the laptop, and the gossip
 # server it reports to runs only there. Auto-discovered ~/.omp/agent/extensions/*.ts still load.
 extensions: []
+# setupVersion 3 skips omp's first-run "Keep omp up to date" screen, which would otherwise
+# hold the prompt `mvm agent` types. The image pins OMP_VERSION, so omp never updates itself here.
+setupVersion: 3
+update:
+  auto: false
