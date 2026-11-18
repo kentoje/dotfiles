@@ -71,7 +71,9 @@ $ ./setup/macos/setup_pi_harness_deps.sh
 
 ### Pi agent status
 
-Pi's settings load `.pi/agent/extensions/agent-gossips/index.ts` for agent-gossip and SketchyBar.
+Pi discovers `.pi/agent/extensions/agent-gossips/index.ts` (stowed into `~/.pi/agent/extensions/`) for agent-gossip and SketchyBar.
+It is not listed in `settings.json`: pi deduplicates by unresolved path, so a listed copy loaded twice.
+mvm machines do not link `extensions/`, so it never runs there.
 It reports interactive sessions only, keeps working status until `agent_settled`, and refreshes every 15 seconds so idle agents reappear after the gossip server restarts.
 Namespaced startup events preserve multiple live agents in the same directory.
 

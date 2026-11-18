@@ -10,6 +10,8 @@ export FNM_COREPACK_ENABLED=true
 export EDITOR=nvim
 # agent-browser cannot find Playwright's arm64 Chromium by itself; this launcher finds the newest one.
 export AGENT_BROWSER_EXECUTABLE_PATH=/opt/mvm/bin/mvm-playwright-chromium
+# omp's machine-only settings (no laptop agent-gossips extension), layered over the dotfiles config.yml.
+export PI_CONFIG_FILES=/opt/mvm/etc/omp-machine-config-overlay.yml
 # Interactive shells switch Node to the directory's .nvmrc / .node-version / engines on cd,
 # installing a missing version without asking: fnm's own --use-on-cd hook prompts [y/N],
 # which blocks `mvm agent` (it types `cd <repo> && <agent>` into the shell).

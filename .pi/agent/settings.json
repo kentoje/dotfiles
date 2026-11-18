@@ -30,9 +30,6 @@
     "npm:@tifan/pi-inline-skills",
     "npm:@monotykamary/pi-retry@0.11.4"
   ],
-  "extensions": [
-    "~/dotfiles/.pi/agent/extensions/agent-gossips/index.ts"
-  ],
   "subagents": {
     "disableBuiltins": true
   },

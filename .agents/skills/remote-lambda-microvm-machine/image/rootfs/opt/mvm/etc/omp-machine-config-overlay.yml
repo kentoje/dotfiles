@@ -1,0 +1,5 @@
+# omp config overlay for mvm machines, merged over ~/dotfiles/.omp/agent/config.yml.
+# dev-bashrc-prelude.sh points PI_CONFIG_FILES here (omp reads it; pi does not).
+# No agent-gossips extension: its config.yml path exists only on the laptop, and the gossip
+# server it reports to runs only there. Auto-discovered ~/.omp/agent/extensions/*.ts still load.
+extensions: []

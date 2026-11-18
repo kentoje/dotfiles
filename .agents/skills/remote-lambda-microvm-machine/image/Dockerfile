@@ -137,11 +137,12 @@ RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
 # Dotfiles (public) and the same links boxd's aircall-dev snapshot has.
 # Pi's MCP servers come from machine-config/pi-mcp.json, not the laptop's .pi/agent/mcp.json:
 # the laptop's servers use macOS paths and browser OAuth logins that do not work on a machine.
+# Pi's extensions/ is not linked: its only extension, agent-gossips, reports to a server that runs on the laptop.
 RUN git clone --filter=blob:none https://github.com/kentoje/dotfiles.git ~/dotfiles \
  && ln -s ~/dotfiles/.agents ~/.agents \
  && mkdir -p ~/.pi/agent ~/.omp ~/.config/herdr ~/.claude \
  && ln -s ~/dotfiles/.claude/skills ~/.claude/skills \
- && for f in AGENTS.md extensions keybindings.json models.json settings.json themes; do \
+ && for f in AGENTS.md keybindings.json models.json settings.json themes; do \
       if [ -e ~/dotfiles/.pi/agent/$f ]; then ln -s ~/dotfiles/.pi/agent/$f ~/.pi/agent/$f; fi; done \
  && ln -s ~/dotfiles/.agents/skills/remote-lambda-microvm-machine/machine-config/pi-mcp.json ~/.pi/agent/mcp.json \
  && ln -s ~/dotfiles/.omp/agent ~/.omp/agent \
