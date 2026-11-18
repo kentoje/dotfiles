@@ -1,6 +1,6 @@
 {
   "defaultProvider": "llmgateway",
-  "defaultModel": "openai/gpt-6.1-sol",
+  "defaultModel": "openai/gpt-6.2-sol",
   "defaultThinkingLevel": "max",
   "defaultProjectTrust": "never",
   "extensions": ["./extensions"],

@@ -1,10 +1,10 @@
 modelRoles:
   smol: llmgateway/deepinfra/deepseek-v4.1-flash-1017:xhigh
-  slow: llmgateway/openai/gpt-6-sol:xhigh
-  plan: openai/gpt-6-sol:xhigh
+  slow: llmgateway/openai/gpt-6.2-sol:xhigh
+  plan: llmgateway/openai/gpt-6.2-sol:xhigh
   commit: openai/gpt-6-luna
-  advisor: llmgateway/azure/gpt-5.6-terra:xhigh
-  task: llmgateway/xai/grok-4-7:high
+  advisor: llmgateway/openai/gpt-6.1-terra:xhigh
+  task: llmgateway/openai/gpt-6-luna:xhigh
   default: llmgateway/anthropic/claude-opus-5-5:xhigh
 symbolPreset: nerd
 theme:

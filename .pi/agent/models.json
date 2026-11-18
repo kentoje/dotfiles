@@ -11,8 +11,8 @@
       },
       "models": [
         {
-          "id": "openai/gpt-6-astra",
-          "name": "GPT-6 Astra",
+          "id": "openai/gpt-6.2-astra",
+          "name": "GPT-6.2 Astra",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -30,41 +30,15 @@
             "max": "max"
           },
           "cost": {
-            "input": 10.0,
-            "output": 50.0,
-            "cacheRead": 1.0,
-            "cacheWrite": 12.5
+            "input": 8.0,
+            "output": 40.0,
+            "cacheRead": 0.4,
+            "cacheWrite": 10.0
           }
         },
         {
-          "id": "openai/gpt-6-sol",
-          "name": "GPT-6 Sol",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1050000,
-          "maxTokens": 128000,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 2.0,
-            "output": 10.0,
-            "cacheRead": 0.2,
-            "cacheWrite": 2.5
-          }
-        },
-        {
-          "id": "openai/gpt-6.1-sol",
-          "name": "GPT-6.1 Sol",
+          "id": "openai/gpt-6.2-sol",
+          "name": "GPT-6.2 Sol",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1050000,
@@ -115,32 +89,6 @@
           }
         },
         {
-          "id": "azure/gpt-5.6-terra",
-          "name": "GPT-5.6 Terra",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1050000,
-          "maxTokens": 128000,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 2.0,
-            "output": 12.0,
-            "cacheRead": 0.2,
-            "cacheWrite": 2.5
-          }
-        },
-        {
           "id": "openai/gpt-6-luna",
           "name": "GPT-6 Luna",
           "reasoning": true,
@@ -167,8 +115,8 @@
           }
         },
         {
-          "id": "google-ai-studio/gemini-4-argon",
-          "name": "Gemini 4 Argon",
+          "id": "google-ai-studio/gemini-4-carbon",
+          "name": "Gemini 4 Carbon",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
@@ -177,10 +125,10 @@
             "supportsReasoningEffort": true
           },
           "thinkingLevelMap": {
-            "off": "high",
-            "minimal": "high",
-            "low": "high",
-            "medium": "high",
+            "off": "medium",
+            "minimal": "medium",
+            "low": "medium",
+            "medium": "medium",
             "high": "high",
             "xhigh": "high",
             "max": "high"
@@ -190,58 +138,6 @@
             "output": 20.0,
             "cacheRead": 0.2,
             "cacheWrite": 0.375
-          }
-        },
-        {
-          "id": "google-vertex/gemini-3.8-flash",
-          "name": "Gemini 3.8 Flash",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 65536,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "minimal",
-            "minimal": "minimal",
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "high",
-            "max": "high"
-          },
-          "cost": {
-            "input": 0.75,
-            "output": 3.75,
-            "cacheRead": 0.075,
-            "cacheWrite": 0.08333
-          }
-        },
-        {
-          "id": "aws-bedrock/grok-4-6",
-          "name": "Grok 4.6 (Bedrock)",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 500000,
-          "maxTokens": 131072,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": "minimal",
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 2.0,
-            "output": 6.0,
-            "cacheRead": 0.5,
-            "cacheWrite": 0
           }
         },
         {

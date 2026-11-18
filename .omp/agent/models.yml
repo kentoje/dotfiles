@@ -10,8 +10,8 @@ providers:
       supportsDeveloperRole: false
       supportsReasoningEffort: false
     models:
-      - id: openai/gpt-6-astra
-        name: GPT-6 Astra
+      - id: openai/gpt-6.2-astra
+        name: GPT-6.2 Astra
         reasoning: true
         thinking:
           mode: effort
@@ -28,13 +28,13 @@ providers:
           reasoningEffortMap:
             minimal: low
         cost:
-          input: 10.0
-          output: 50.0
-          cacheRead: 1.0
-          cacheWrite: 12.5
+          input: 8.0
+          output: 40.0
+          cacheRead: 0.4
+          cacheWrite: 10.0
 
-      - id: openai/gpt-6-sol
-        name: GPT-6 Sol
+      - id: openai/gpt-6.2-sol
+        name: GPT-6.2 Sol
         reasoning: true
         thinking:
           mode: effort
@@ -53,30 +53,7 @@ providers:
         cost:
           input: 2.0
           output: 10.0
-          cacheRead: 0.2
-          cacheWrite: 2.5
-
-      - id: openai/gpt-6.1-sol
-        name: GPT-6.1 Sol
-        reasoning: true
-        thinking:
-          mode: effort
-          efforts: [low, medium, high, xhigh, max]
-          defaultLevel: xhigh
-          requiresEffort: true
-          effortMap:
-            minimal: low
-        input: [text, image]
-        contextWindow: 1050000
-        maxTokens: 128000
-        compat:
-          supportsReasoningEffort: true
-          reasoningEffortMap:
-            minimal: low
-        cost:
-          input: 2.0
-          output: 10.0
-          cacheRead: 0.2
+          cacheRead: 0.1
           cacheWrite: 2.5
 
       - id: openai/gpt-6.1-terra
@@ -102,20 +79,6 @@ providers:
           cacheRead: 0.05
           cacheWrite: 1.25
 
-      - id: azure/gpt-5.6-terra
-        name: GPT-5.6 Terra
-        reasoning: true
-        input: [text, image]
-        contextWindow: 1050000
-        maxTokens: 128000
-        compat:
-          supportsReasoningEffort: true
-        cost:
-          input: 2.0
-          output: 12.0
-          cacheRead: 0.2
-          cacheWrite: 2.5
-
       - id: openai/gpt-6-luna
         name: GPT-6 Luna
         reasoning: true
@@ -139,8 +102,8 @@ providers:
           cacheRead: 0.01
           cacheWrite: 0.125
 
-      - id: google-ai-studio/gemini-4-argon
-        name: Gemini 4 Argon
+      - id: google-ai-studio/gemini-4-carbon
+        name: Gemini 4 Carbon
         reasoning: true
         input: [text, image]
         contextWindow: 1048576
@@ -148,12 +111,12 @@ providers:
         maxTokens: 1048576
         compat:
           supportsReasoningEffort: true
-          # /v1/models lists only "high" for google-ai-studio/gemini-4-argon.
-          # Other tiers 400, so every Pi/omp level collapses to high.
+          # /v1/models lists only "medium" and "high" for google-ai-studio/gemini-4-carbon.
+          # Other tiers 400, so lower levels collapse to medium and higher levels to high.
           reasoningEffortMap:
-            minimal: high
-            low: high
-            medium: high
+            minimal: medium
+            low: medium
+            medium: medium
             high: high
             xhigh: high
             max: high
@@ -163,52 +126,13 @@ providers:
           cacheRead: 0.2
           cacheWrite: 0.375
 
-      - id: google-vertex/gemini-3.8-flash
-        name: Gemini 3.8 Flash
-        reasoning: true
-        input: [text, image]
-        contextWindow: 1048576
-        maxTokens: 65536
-        compat:
-          supportsReasoningEffort: true
-          # Vertex only accepts minimal|low|medium|high here - sending xhigh/max
-          # makes it 400 with "thinking_budget is out of range".
-          reasoningEffortMap:
-            minimal: minimal
-            low: low
-            medium: medium
-            high: high
-            xhigh: high
-            max: high
-        cost:
-          input: 0.75
-          output: 3.75
-          cacheRead: 0.075
-          cacheWrite: 0.08333
-
-      - id: aws-bedrock/grok-4-6
-        name: Grok 4.6 (Bedrock)
-        reasoning: true
-        input: [text, image]
-        contextWindow: 500000
-        # The gateway reports no max_output for grok-4-6 on any route, so this is
-        # a chosen cap (same as the bedrock grok-4.3 entry), not a published limit.
-        maxTokens: 131072
-        compat:
-          supportsReasoningEffort: true
-        cost:
-          input: 2.0
-          output: 6.0
-          cacheRead: 0.5
-          cacheWrite: 0
-
       - id: xai/grok-4-7
         name: Grok 4.7
         reasoning: true
         input: [text, image]
         contextWindow: 500000
         # The gateway reports no max_output for grok-4-7 on any route, so this is
-        # a chosen cap (same as the grok-4-6 entry), not a published limit.
+        # a chosen cap, not a published limit.
         maxTokens: 131072
         compat:
           supportsReasoningEffort: true

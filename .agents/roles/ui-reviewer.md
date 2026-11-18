@@ -1,7 +1,7 @@
 ---
 name: ui-reviewer
 description: Opens the real UI and checks the render against what was asked for
-model: llmgateway/azure/gpt-5.6-terra
+model: llmgateway/openai/gpt-6.1-terra
 thinking: high
 skills:
   - agent-browser

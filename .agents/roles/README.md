@@ -76,7 +76,7 @@ one that runs unattended. `pi-role` adapts it to pi flags.
 ---
 name: ui-reviewer
 description: One line, shown when an agent or a human lists roles
-model: llmgateway/azure/gpt-5.6-terra
+model: llmgateway/openai/gpt-6.1-terra
 thinking: high
 skills:
   - agent-browser

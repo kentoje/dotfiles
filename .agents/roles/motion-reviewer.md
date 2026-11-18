@@ -1,7 +1,7 @@
 ---
 name: motion-reviewer
 description: Judges how the interface moves - easing, timing, interruption, physicality
-model: llmgateway/azure/gpt-5.6-terra
+model: llmgateway/openai/gpt-6.1-terra
 thinking: high
 skills:
   - agent-browser

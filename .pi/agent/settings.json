@@ -6,13 +6,15 @@
   "defaultProvider": "llmgateway",
   "defaultModel": "xai/grok-4-7",
   "enabledModels": [
-    "llmgateway/openai/gpt-6.1-sol",
+    "llmgateway/openai/gpt-6.2-astra",
+    "llmgateway/openai/gpt-6.2-sol",
     "llmgateway/openai/gpt-6.1-terra",
     "llmgateway/anthropic/claude-opus-5-5",
     "llmgateway/xai/grok-4-7",
-    "llmgateway/google-ai-studio/gemini-4-argon",
+    "llmgateway/google-ai-studio/gemini-4-carbon",
     "llmgateway/deepinfra/deepseek-v4.1-flash-1017"
   ],
+  "npmCommand": ["npm", "--registry=https://registry.npmjs.org/"],
   "packages": [
     "npm:pi-subagents",
     "npm:@juicesharp/rpiv-todo",
