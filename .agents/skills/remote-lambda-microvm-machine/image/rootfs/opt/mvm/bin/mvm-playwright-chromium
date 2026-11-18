@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Launches the newest Playwright Chromium on the machine, for agent-browser.
+#
+# agent-browser looks for Playwright's Chromium only at chrome-linux/chrome and chrome-linux64/chrome,
+# but Playwright's arm64 builds live in chrome-linux-arm64/, so on its own it reports "Chrome not found".
+# The Chromium version follows each repo's Playwright (the workspace setup installs it after the image
+# is built, and Playwright then deletes the image's older build), so no fixed path stays valid.
+# dev-bashrc-prelude.sh points AGENT_BROWSER_EXECUTABLE_PATH here; the lookup runs at every launch.
+set -euo pipefail
+
+browsers_dir=${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}
+
+# chromium-<build number>, newest build first; chromium_headless_shell-* does not match the glob.
+while IFS= read -r chromium_dir; do
+  for chrome in "$chromium_dir"/chrome-linux*/chrome; do
+    if [ -x "$chrome" ]; then
+      exec "$chrome" "$@"
+    fi
+  done
+done < <(ls -d "$browsers_dir"/chromium-[0-9]* 2>/dev/null | sort -Vr)
+
+echo "mvm-playwright-chromium: no Playwright Chromium under $browsers_dir (run: npx playwright install chromium)" >&2
+exit 1

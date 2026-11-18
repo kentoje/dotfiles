@@ -71,7 +71,8 @@ RUN curl -fsSL -o /tmp/glab.deb \
       "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_arm64.deb" \
  && apt-get install -y /tmp/glab.deb && rm -f /tmp/glab.deb
 
-# agent-browser (native binary; finds the Playwright Chromium installed below).
+# agent-browser (native binary). It launches Playwright's Chromium through /opt/mvm/bin/mvm-playwright-chromium
+# (AGENT_BROWSER_EXECUTABLE_PATH in dev-bashrc-prelude.sh): its own lookup misses the arm64 chrome-linux-arm64/ layout.
 RUN curl -fsSL -o /usr/local/bin/agent-browser \
       "https://github.com/vercel-labs/agent-browser/releases/download/v${AGENT_BROWSER_VERSION}/agent-browser-linux-arm64" \
  && chmod 755 /usr/local/bin/agent-browser

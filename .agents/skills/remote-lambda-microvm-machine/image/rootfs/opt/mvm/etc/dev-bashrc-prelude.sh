@@ -8,6 +8,8 @@ export PATH="$HOME/.local/bin:$HOME/.bun/bin:$HOME/.local/share/fnm/aliases/defa
 export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 export FNM_COREPACK_ENABLED=true
 export EDITOR=nvim
+# agent-browser cannot find Playwright's arm64 Chromium by itself; this launcher finds the newest one.
+export AGENT_BROWSER_EXECUTABLE_PATH=/opt/mvm/bin/mvm-playwright-chromium
 # Interactive shells switch Node to the directory's .nvmrc / .node-version / engines on cd,
 # installing a missing version without asking: fnm's own --use-on-cd hook prompts [y/N],
 # which blocks `mvm agent` (it types `cd <repo> && <agent>` into the shell).

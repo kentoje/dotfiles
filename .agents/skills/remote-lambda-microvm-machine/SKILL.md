@@ -99,6 +99,7 @@ On the machine:
   An interactive shell switches to the directory's `.nvmrc`, `.node-version` or `engines` on `cd`, and installs a missing version without asking (`mvm_use_node_for_cwd` in `image/rootfs/opt/mvm/etc/dev-bashrc-prelude.sh`), so a repo's Node bump never needs a new image.
   Non-interactive `ssh <name>.mvm 'cmd'` runs the default version: use `fnm exec --using=<repo dir> -- <cmd>` there.
 - Tools: pnpm, bun, `pi`, `omp`, `claude`, `codex`, `herdr`, `tuios`, `nvim`, `lazygit`, `glab`, `gh`, `jira`, `uv`, rust, AWS CLI, `agent-browser` with Chromium.
+  agent-browser launches the newest Playwright Chromium through `AGENT_BROWSER_EXECUTABLE_PATH=/opt/mvm/bin/mvm-playwright-chromium`: on its own it misses Playwright's arm64 layout and reports "Chrome not found".
 - Every bash, including `ssh <name>.mvm 'cmd'`, has the secrets (`GITLAB_TOKEN`, `GEMFURY_AUTH`, `LLM_GATEWAY_KEY`, `AIRCALL_STAGING_EMAIL`, `AIRCALL_STAGING_PASSWORD`, ...) from `~/.config/mvm/env.sh`.
   Git and npm read them at runtime: never write a token into `~/.gitconfig`, `~/.npmrc` or a repo.
 - The AWS CLI uses the machine's own role (env secret, logs, the pnpm cache, AppSync schema introspection).
