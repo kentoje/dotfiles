@@ -37,7 +37,7 @@ class FzfUrlNavigationTest(unittest.TestCase):
             fixture = root / "fixture.py"
             fixture.write_text(f'''import os, tty
 tty.setraw(0)
-print("https://one.example\\r\\nhttps://two.example\\r\\nhttps://three.example", flush=True)
+print("https://one.example\\r\\nhttps://two.example\\r\\nhttps://two.example.,\\r\\nhttps://three.example.", flush=True)
 while True:
     with open({str(root / "keys")!r}, "ab", buffering=0) as log:
         log.write(os.read(0, 1))

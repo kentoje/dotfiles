@@ -35,7 +35,8 @@ else
     )
 end
 
-set -l urls (string join \n $text | grep -oE "$url_re" | tac | awk '!seen[$0]++')
+# Trim trailing prose punctuation before deduplicating URLs.
+set -l urls (string join \n $text | grep -oE "$url_re" | string replace -r '[.,]+$' '' | tac | awk '!seen[$0]++')
 
 test -z "$urls"; and exit 0
 
