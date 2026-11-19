@@ -1,14 +1,14 @@
 /** Transport limits are errors, not permission to decode a truncated JSON prefix. */
-export class GitlabTransportError extends Error {
+export class HttpTransportError extends Error {
   readonly code: string;
   constructor(code: string) {
     super(code);
     this.code = code;
-    this.name = "GitlabTransportError";
+    this.name = "HttpTransportError";
   }
 }
 /** Read complete decompressed response bytes under the host cap, cancelling the owned stream on every exit. */
-export async function readGitlabJsonBody(
+export async function readBoundedJsonBody(
   response: Response,
   maxBytes: number
 ): Promise<unknown> {
@@ -19,11 +19,11 @@ export async function readGitlabJsonBody(
     Number(advertised) > maxBytes
   ) {
     await response.body?.cancel();
-    throw new GitlabTransportError("OUTPUT_LIMIT");
+    throw new HttpTransportError("OUTPUT_LIMIT");
   }
   const reader = response.body?.getReader();
   if (!reader) {
-    throw new GitlabTransportError("MALFORMED_RESPONSE");
+    throw new HttpTransportError("MALFORMED_RESPONSE");
   }
   let count = 0;
   const chunks: Uint8Array[] = [];
@@ -36,7 +36,7 @@ export async function readGitlabJsonBody(
       }
       count += chunk.value.byteLength;
       if (count > maxBytes) {
-        throw new GitlabTransportError("OUTPUT_LIMIT");
+        throw new HttpTransportError("OUTPUT_LIMIT");
       }
       chunks.push(chunk.value);
     }
@@ -47,13 +47,13 @@ export async function readGitlabJsonBody(
       const value: unknown = JSON.parse(text);
       return value;
     } catch {
-      throw new GitlabTransportError("MALFORMED_RESPONSE");
+      throw new HttpTransportError("MALFORMED_RESPONSE");
     }
   } catch (error) {
-    if (error instanceof GitlabTransportError) {
+    if (error instanceof HttpTransportError) {
       throw error;
     }
-    throw new GitlabTransportError("MALFORMED_RESPONSE");
+    throw new HttpTransportError("MALFORMED_RESPONSE");
   } finally {
     await reader.cancel().catch(() => {
       // Preserve the original decoding error; the invocation scope also aborts this owned request.
@@ -76,27 +76,27 @@ function redactString(value: string, secrets: readonly string[]) {
   return value.replaceAll(new RegExp(pattern, "gu"), "[REDACTED]");
 }
 /** Sanitize decoded string values and keys before unknown service JSON crosses the feature boundary. */
-export function redactGitlabJson(
+export function redactHttpJson(
   value: unknown,
   secrets: readonly string[],
   depth = 0
 ): unknown {
   if (depth > 64) {
-    throw new GitlabTransportError("OUTPUT_LIMIT");
+    throw new HttpTransportError("OUTPUT_LIMIT");
   }
   if (typeof value === "string") {
     return redactString(value, secrets);
   }
   if (Array.isArray(value)) {
     return value.map((item: unknown) =>
-      redactGitlabJson(item, secrets, depth + 1)
+      redactHttpJson(item, secrets, depth + 1)
     );
   }
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
         redactString(key, secrets),
-        redactGitlabJson(item, secrets, depth + 1),
+        redactHttpJson(item, secrets, depth + 1),
       ])
     );
   }

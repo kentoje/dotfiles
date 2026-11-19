@@ -7,9 +7,9 @@ import { expect } from "vitest";
 
 import { makeGitlabModule } from "../../gitlab/module-port.js";
 import { createGitlabReadTransport } from "../module-port.js";
-import { installGitlabHttpFixtures } from "./http-fixture.js";
+import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 
-const fixture = installGitlabHttpFixtures();
+const fixture = installLoopbackHttpFixtures();
 const target = {
   host: "gitlab.example",
   project_path: "team/app",

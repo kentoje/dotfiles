@@ -1,2 +1,65 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: jira-001-acceptance
+    obligation: JIRA-001
+    adapter: vitest
+    tests:
+      - jira.reads
+      - jira.http
+      - foundation.sdk
+  - id: jira-002-acceptance
+    obligation: JIRA-002
+    adapter: vitest
+    tests:
+      - jira.reads
+  - id: jira-003-acceptance
+    obligation: JIRA-003
+    adapter: vitest
+    tests:
+      - jira.authorization
+      - jira.http
+  - id: jira-004-acceptance
+    obligation: JIRA-004
+    adapter: vitest
+    tests:
+      - jira.duplicates
+  - id: jira-005-acceptance
+    obligation: JIRA-005
+    adapter: vitest
+    tests:
+      - jira.outcomes
+  - id: jira-006-acceptance
+    obligation: JIRA-006
+    adapter: vitest
+    tests:
+      - jira.search
+  - id: jira-007-acceptance
+    obligation: JIRA-007
+    adapter: vitest
+    tests:
+      - jira.metadata
+  - id: jira-008-acceptance
+    obligation: JIRA-008
+    adapter: vitest
+    tests:
+      - jira.metadata
+  - id: jira-009-acceptance
+    obligation: JIRA-009
+    adapter: vitest
+    tests:
+      - jira.update
+  - id: jira-010-acceptance
+    obligation: JIRA-010
+    adapter: vitest
+    tests:
+      - jira.comment
+  - id: jira-011-acceptance
+    obligation: JIRA-011
+    adapter: vitest
+    tests:
+      - jira.transition
+  - id: jira-012-acceptance
+    obligation: JIRA-012
+    adapter: vitest
+    tests:
+      - jira.outcomes

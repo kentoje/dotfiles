@@ -1,6 +1,6 @@
 # jira-preflight: behavior contract
 
-Status: specified design; all obligations draft. Kind: preflight. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Must: Jira duplicate preflight must evaluate the proposed issue in its selected 
 
 Why: The user wants Jira operations; the old documented guard usefully prevented accidental duplicate creation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRAPREFLIGHT-002
 
@@ -41,7 +41,7 @@ Must: A potential duplicate Jira creation must wait for the duplicate decision b
 
 Why: The user wants Jira operations; the old documented guard usefully prevented accidental duplicate creation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRAPREFLIGHT-003
 
@@ -51,7 +51,7 @@ Must: A failed duplicate lookup must be reported as an unresolved preflight rath
 
 Why: The user wants Jira operations; the old documented guard usefully prevented accidental duplicate creation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRAPREFLIGHT-004
 
@@ -61,7 +61,7 @@ Must: Duplicate Jira lookup must use a documented normalization rule and disting
 
 Why: A similarity guess should not masquerade as exact identity.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRAPREFLIGHT-005
 
@@ -71,7 +71,7 @@ Must: A duplicate confirmation must bind the selected project, summary and prese
 
 Why: An earlier duplicate decision cannot authorize a different create request.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `check_creation`
 

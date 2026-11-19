@@ -5,10 +5,10 @@ import { expect } from "vitest";
 import type { GitlabMutationTarget } from "../../gitlab/module-port.js";
 import { makeGitlabModule } from "../../gitlab/module-port.js";
 import { createGitlabReadTransport } from "../module-port.js";
+import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 import { createGitlabMutationCoordinator } from "./coordination.js";
-import { installGitlabHttpFixtures } from "./http-fixture.js";
 
-const fixture = installGitlabHttpFixtures();
+const fixture = installLoopbackHttpFixtures();
 const repository = "https://gitlab.example/team/app";
 const input = { pipeline_id: 42, repository };
 const token = "fixture-secret-token";

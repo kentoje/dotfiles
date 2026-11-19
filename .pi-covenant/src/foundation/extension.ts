@@ -6,7 +6,19 @@ export default function piCovenantExtension(pi: ExtensionAPI) {
   const configPath = process.env.PI_COVENANT_CONFIG;
   const host = process.env.PI_COVENANT_GITLAB_HOST;
   const credentialFile = process.env.PI_COVENANT_GITLAB_CREDENTIAL_FILE;
+  const jiraSite = process.env.PI_COVENANT_JIRA_SITE;
+  const jiraEmail = process.env.PI_COVENANT_JIRA_EMAIL;
+  const jiraCredentialFile = process.env.PI_COVENANT_JIRA_CREDENTIAL_FILE;
   registerPiHarness(pi, {
+    ...(jiraSite && jiraEmail && jiraCredentialFile
+      ? {
+          jira: {
+            credentialFile: jiraCredentialFile,
+            email: jiraEmail,
+            site: jiraSite,
+          },
+        }
+      : {}),
     ...(configPath ? { configPath } : {}),
     ...(host && credentialFile
       ? {

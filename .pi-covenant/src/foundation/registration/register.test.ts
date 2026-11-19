@@ -16,7 +16,7 @@ contractTest("foundation.registration", () => {
     },
   };
   registerPiHarness(host);
-  expect(names).toStrictEqual(["project_cli", "worktree", "gitlab"]);
+  expect(names).toStrictEqual(["project_cli", "worktree", "gitlab", "jira"]);
   expect(snippets.every((snippet) => snippet.length > 0)).toBeTruthy();
 });
 contractTest("foundation.boundary", async () => {

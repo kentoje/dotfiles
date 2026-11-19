@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 
 import { afterEach } from "vitest";
 /** Loopback HTTP service records actual requests without live credentials or remote effects. */
-export function installGitlabHttpFixtures() {
+export function installLoopbackHttpFixtures() {
   const servers: ReturnType<typeof createServer>[] = [];
   afterEach(async () => {
     await Promise.all(
@@ -39,7 +39,7 @@ export function installGitlabHttpFixtures() {
     await listening;
     const address = server.address();
     if (!address || typeof address === "string") {
-      throw new Error("GITLAB_FIXTURE: no loopback address");
+      throw new Error("HTTP_FIXTURE: no loopback address");
     }
     return { origin: `http://127.0.0.1:${address.port}`, requests };
   };

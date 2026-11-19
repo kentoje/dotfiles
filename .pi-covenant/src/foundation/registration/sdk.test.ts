@@ -13,11 +13,11 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { expect, vi } from "vitest";
 
-import { installGitlabHttpFixtures } from "../gitlab/http-fixture.js";
 import { installPiFixtures } from "../testing/fixture.js";
+import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 
 const fixture = installPiFixtures();
-const gitlabFixture = installGitlabHttpFixtures();
+const gitlabFixture = installLoopbackHttpFixtures();
 contractTest("foundation.sdk", async () => {
   const f = await fixture();
   const service = await gitlabFixture((req, res) => {
@@ -48,6 +48,20 @@ contractTest("foundation.sdk", async () => {
       })
     );
   });
+  const jiraService = await gitlabFixture((_req, res) =>
+    res.end(
+      JSON.stringify({
+        fields: { status: { name: "Open" }, summary: "SDK issue" },
+        id: "12",
+        key: "APP-1",
+      })
+    )
+  );
+  const jiraCredentials = join(f.temp, "jira-token");
+  await writeFile(jiraCredentials, "jira-sdk-token", { mode: 0o600 });
+  vi.stubEnv("PI_COVENANT_JIRA_SITE", jiraService.origin);
+  vi.stubEnv("PI_COVENANT_JIRA_EMAIL", "sdk@example.test");
+  vi.stubEnv("PI_COVENANT_JIRA_CREDENTIAL_FILE", jiraCredentials);
   const credentials = join(f.temp, "gitlab.yml");
   await writeFile(
     credentials,
@@ -71,6 +85,7 @@ contractTest("foundation.sdk", async () => {
     "project_cli",
     "worktree",
     "gitlab",
+    "jira",
   ]);
   expect(extension.handlers.size).toBe(0);
   const runtime = await ModelRuntime.create({
@@ -111,6 +126,7 @@ contractTest("foundation.sdk", async () => {
         "project_cli",
         "worktree",
         "gitlab",
+        "jira",
       ])
     );
     const gitlab = extension.tools.get("gitlab");
@@ -162,6 +178,29 @@ contractTest("foundation.sdk", async () => {
         (req) => req.method === "GET" && req.privateToken === "sdk-secret-token"
       )
     ).toBeTruthy();
+    const jira = extension.tools.get("jira");
+    if (!jira) {
+      throw new Error("PI_SDK_TEST: Jira tool missing");
+    }
+    const jiraTool = wrapRegisteredTool(jira, session.extensionRunner);
+    await expect(
+      jiraTool.execute("jira-get", { action: "get", key: "APP-1" }, undefined)
+    ).resolves.toMatchObject({
+      details: { data: { key: "APP-1", summary: "SDK issue" }, status: "ok" },
+    });
+    await expect(
+      jiraTool.execute(
+        "jira-headless",
+        { action: "comment", body: "Write", key: "APP-1" },
+        undefined
+      )
+    ).resolves.toMatchObject({
+      details: { error: { code: "AUTHORIZATION_REQUIRED" }, status: "blocked" },
+    });
+    expect(jiraService.requests.map(({ method }) => method)).toStrictEqual([
+      "GET",
+      "GET",
+    ]);
     const project = extension.tools.get("project_cli");
     if (!project) {
       throw new Error("PI_SDK_TEST: project tool missing");

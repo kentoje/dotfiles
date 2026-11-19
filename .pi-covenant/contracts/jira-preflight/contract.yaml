@@ -2,60 +2,67 @@ schema_version: 1
 component:
   id: jira-preflight
   name: jira-preflight
-  status: draft
+  status: active
 intent: ./intent.md
 obligations:
   - id: JIRAPREFLIGHT-001
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Jira duplicate preflight must evaluate the proposed issue in its selected Jira context.
-    verification: []
+    verification:
+      - jirapreflight-001-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: JIRAPREFLIGHT-002
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A potential duplicate Jira creation must wait for the duplicate decision before creating the issue.
-    verification: []
+    verification:
+      - jirapreflight-002-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: JIRAPREFLIGHT-003
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A failed duplicate lookup must be reported as an unresolved preflight rather than proof that no matching issue exists.
-    verification: []
+    verification:
+      - jirapreflight-003-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: JIRAPREFLIGHT-004
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Duplicate Jira lookup must use a documented normalization rule and distinguish exact matches from heuristic suggestions.
-    verification: []
+    verification:
+      - jirapreflight-004-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: JIRAPREFLIGHT-005
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A duplicate confirmation must bind the selected project, summary and presented candidates and expire if that proposal changes.
-    verification: []
+    verification:
+      - jirapreflight-005-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+sources:
+  - models/jira/preflight/
+  - src/jira-preflight/
 dependencies:
   - tool-protocol
 interfaces:
@@ -63,3 +70,7 @@ interfaces:
     language: typescript
     module: architecture/modules/jira-preflight.json
     export: jira-preflight-v1
+  - name: jira-preflight-runtime
+    language: typescript
+    module: src/jira-preflight/module-port.ts
+    export: evaluateJiraDuplicates

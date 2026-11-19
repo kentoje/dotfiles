@@ -8,7 +8,7 @@ import type {
   GitlabReadInvocation,
   GitlabWireResult,
 } from "../../gitlab/module-port.js";
-import { GitlabTransportError } from "./body.js";
+import { HttpTransportError } from "../http/response-body.js";
 import { runGitlabReadScope } from "./deadline.js";
 import { requestGitlabProject } from "./request.js";
 import { gitlabCiRoute } from "./routes.js";
@@ -54,7 +54,7 @@ function hostUrl(origin: string) {
     url.hash ||
     url.pathname !== "/"
   ) {
-    throw new GitlabTransportError("INVALID_HOST_CONFIG");
+    throw new HttpTransportError("INVALID_HOST_CONFIG");
   }
   if (
     url.protocol !== "https:" &&
@@ -63,7 +63,7 @@ function hostUrl(origin: string) {
       ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)
     )
   ) {
-    throw new GitlabTransportError("INVALID_HOST_CONFIG");
+    throw new HttpTransportError("INVALID_HOST_CONFIG");
   }
   return url.origin;
 }
@@ -81,19 +81,19 @@ async function authenticateGitlabHost(
       .split("/")
       .some((segment) => segment === "." || segment === "..")
   ) {
-    throw new GitlabTransportError("INVALID_INPUT");
+    throw new HttpTransportError("INVALID_INPUT");
   }
   const hosts = options.hosts.filter((host) => host.host === target.host);
   if (hosts.length !== 1) {
-    throw new GitlabTransportError("HOST_NOT_ALLOWED");
+    throw new HttpTransportError("HOST_NOT_ALLOWED");
   }
   const [host] = hosts;
   if (!host) {
-    throw new GitlabTransportError("HOST_NOT_ALLOWED");
+    throw new HttpTransportError("HOST_NOT_ALLOWED");
   }
   const origin = hostUrl(host.apiOrigin);
   if (signal.aborted || Date.now() >= deadline) {
-    throw new GitlabTransportError("DEADLINE_EXCEEDED");
+    throw new HttpTransportError("DEADLINE_EXCEEDED");
   }
   let credential: typeof credentialSchema.Type;
   try {
@@ -101,7 +101,7 @@ async function authenticateGitlabHost(
       onExcessProperty: "error",
     })(await host.credential(signal));
   } catch {
-    throw new GitlabTransportError("AUTH_REQUIRED");
+    throw new HttpTransportError("AUTH_REQUIRED");
   }
   const secrets = [credential.token, ...(options.redactValues ?? [])].toSorted(
     (a, b) => b.length - a.length
@@ -110,7 +110,7 @@ async function authenticateGitlabHost(
     secrets.length > 32 ||
     secrets.some((value) => value.length < 1 || value.length > 4096)
   ) {
-    throw new GitlabTransportError("INVALID_HOST_CONFIG");
+    throw new HttpTransportError("INVALID_HOST_CONFIG");
   }
   const headers: Record<string, string> =
     credential.kind === "pat"
@@ -133,7 +133,7 @@ async function readWithinScope(
   const write = request?.kind === "retry" || request?.kind === "cancel";
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (signal.aborted || Date.now() >= deadline) {
-      throw new GitlabTransportError("CANCELLED");
+      throw new HttpTransportError("CANCELLED");
     }
     // oxlint-disable-next-line no-await-in-loop -- Exactly two bounded read attempts share one original deadline.
     const result = await requestGitlabProject({
@@ -149,7 +149,7 @@ async function readWithinScope(
       return result;
     }
     if (signal.aborted || Date.now() >= deadline) {
-      throw new GitlabTransportError("DEADLINE_EXCEEDED");
+      throw new HttpTransportError("DEADLINE_EXCEEDED");
     }
     if (result.kind !== "transient") {
       return result;

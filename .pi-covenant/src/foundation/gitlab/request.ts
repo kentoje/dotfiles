@@ -3,10 +3,10 @@ import type {
   GitlabWireResult,
 } from "../../gitlab/module-port.js";
 import {
-  GitlabTransportError,
-  readGitlabJsonBody,
-  redactGitlabJson,
-} from "./body.js";
+  HttpTransportError,
+  readBoundedJsonBody,
+  redactHttpJson,
+} from "../http/response-body.js";
 import { readGitlabTraceWindow } from "./trace.js";
 
 function gitlabHttpFailure(status: number) {
@@ -113,10 +113,10 @@ export async function requestGitlabProject(options: {
     });
   } catch {
     if (write) {
-      throw new GitlabTransportError("REMOTE_STATE_UNKNOWN");
+      throw new HttpTransportError("REMOTE_STATE_UNKNOWN");
     }
     if (options.signal.aborted) {
-      throw new GitlabTransportError("CANCELLED");
+      throw new HttpTransportError("CANCELLED");
     }
     return { code: "LOOKUP_FAILED", delay: 25, kind: "transient" };
   }
@@ -132,10 +132,10 @@ export async function requestGitlabProject(options: {
       kind: "ok",
     };
   }
-  const body = await readGitlabJsonBody(response, options.maxBytes);
-  const redacted = redactGitlabJson(body, options.secrets);
+  const body = await readBoundedJsonBody(response, options.maxBytes);
+  const redacted = redactHttpJson(body, options.secrets);
   if (Buffer.byteLength(JSON.stringify(redacted)) > options.maxBytes) {
-    throw new GitlabTransportError("OUTPUT_LIMIT");
+    throw new HttpTransportError("OUTPUT_LIMIT");
   }
   if (options.request && "page" in options.request) {
     return {

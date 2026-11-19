@@ -4,11 +4,11 @@ import { join } from "node:path";
 import { contractTest } from "@covenant/vitest";
 import { expect, vi } from "vitest";
 
-import { installGitlabHttpFixtures } from "../gitlab/http-fixture.js";
 import { installPiFixtures } from "../testing/fixture.js";
+import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 import { createGitlabTool } from "./gitlab-tool.js";
 
-const fixture = installGitlabHttpFixtures();
+const fixture = installLoopbackHttpFixtures();
 const project = installPiFixtures();
 contractTest("gitlab.surface", async () => {
   const root = await project();

@@ -2,7 +2,7 @@ import type {
   GitlabReadInvocation,
   GitlabWireResult,
 } from "../../gitlab/module-port.js";
-import { GitlabTransportError } from "./body.js";
+import { HttpTransportError } from "../http/response-body.js";
 /** Preserve caller cancellation separately from one absolute deadline and static host/input errors. */
 function classifyGitlabReadFailure(
   error: unknown,
@@ -16,7 +16,7 @@ function classifyGitlabReadFailure(
   if (signal.aborted || Date.now() >= deadline) {
     return "DEADLINE_EXCEEDED";
   }
-  return error instanceof GitlabTransportError ? error.code : "INVALID_INPUT";
+  return error instanceof HttpTransportError ? error.code : "INVALID_INPUT";
 }
 /** The host timer and abort bridge are released on every terminal result, including a noncooperative credential source. */
 export async function runGitlabReadScope(

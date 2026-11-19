@@ -1,2 +1,27 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: jirapreflight-001-acceptance
+    obligation: JIRAPREFLIGHT-001
+    adapter: vitest
+    tests:
+      - preflight.policy
+  - id: jirapreflight-002-acceptance
+    obligation: JIRAPREFLIGHT-002
+    adapter: vitest
+    tests:
+      - jira.duplicates
+  - id: jirapreflight-003-acceptance
+    obligation: JIRAPREFLIGHT-003
+    adapter: vitest
+    tests:
+      - jira.duplicates
+  - id: jirapreflight-004-acceptance
+    obligation: JIRAPREFLIGHT-004
+    adapter: vitest
+    tests:
+      - preflight.policy
+  - id: jirapreflight-005-acceptance
+    obligation: JIRAPREFLIGHT-005
+    adapter: vitest
+    tests:
+      - jira.duplicates

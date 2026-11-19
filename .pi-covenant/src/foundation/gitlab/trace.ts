@@ -1,4 +1,4 @@
-import { GitlabTransportError } from "./body.js";
+import { HttpTransportError } from "../http/response-body.js";
 
 const scanLimit = 16 * 1024 * 1024;
 
@@ -6,7 +6,7 @@ const scanLimit = 16 * 1024 * 1024;
 async function collectTrace(response: Response, start: number, end: number) {
   const reader = response.body?.getReader();
   if (!reader) {
-    throw new GitlabTransportError("LOG_UNAVAILABLE");
+    throw new HttpTransportError("LOG_UNAVAILABLE");
   }
   const slices: Uint8Array[] = [];
   let position = 0;
@@ -45,13 +45,13 @@ export async function readGitlabTraceWindow(
   const start = Math.max(0, offset - overlap);
   const end = offset + maxBytes + overlap + 1;
   if (end > scanLimit) {
-    throw new GitlabTransportError("OUTPUT_LIMIT");
+    throw new HttpTransportError("OUTPUT_LIMIT");
   }
   const bytes = await collectTrace(response, start, end);
   const masked = Buffer.from(bytes);
   const windowStart = offset - start;
   if (windowStart > bytes.length) {
-    throw new GitlabTransportError("INVALID_OFFSET");
+    throw new HttpTransportError("INVALID_OFFSET");
   }
   let redacted = false;
   for (const secret of secrets) {

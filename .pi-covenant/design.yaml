@@ -132,6 +132,57 @@ applicability:
   - obligation: GITLAB-017
     mode: not_applicable
     rationale: Host parsing, transport bytes, response mapping, credential handling or real concurrent coordination require executable adapter/process/SDK checks; no formal claim for these mechanisms.
+  - obligation: JIRA-001
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-002
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-003
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRA-004
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-005
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRA-006
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-007
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-008
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-009
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-010
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRA-011
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRA-012
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRAPREFLIGHT-001
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRAPREFLIGHT-002
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRAPREFLIGHT-003
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: JIRAPREFLIGHT-004
+    mode: not_applicable
+    rationale: Provider identity, field metadata, query or candidate normalization verified with executable fixtures.
+  - obligation: JIRAPREFLIGHT-005
+    mode: model
+    rationale: Finite authorization, preflight or mutation outcome decisions.
 models:
   - id: project-checks
     component: project-cli
@@ -466,3 +517,96 @@ models:
       - id: failure-absence
         source: models/gitlab/FailureAbsence.tla
         invariant: HonestAbsence
+  - id: jira-duplicate-preflight
+    component: jira-preflight
+    source: models/jira/preflight/Preflight.tla
+    configuration: models/jira/preflight/Preflight.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One invocation with one selected project. Clear denotes a complete scan without an exact match.
+      - Change represents new evidence after confirmation. Remote visibility, normalization and races after the final observation require executable checks or remain outside this model.
+    bindings:
+      - obligation: JIRAPREFLIGHT-002
+        invariant: CurrentDecision
+      - obligation: JIRAPREFLIGHT-003
+        invariant: CompleteBeforeSend
+      - obligation: JIRAPREFLIGHT-005
+        invariant: CurrentDecision
+    conformance:
+      - obligation: JIRAPREFLIGHT-002
+        action: Send
+        observation: sent
+        binding: jirapreflight-002-acceptance
+      - obligation: JIRAPREFLIGHT-003
+        action: Scan
+        observation: scan
+        binding: jirapreflight-003-acceptance
+      - obligation: JIRAPREFLIGHT-005
+        action: Change
+        observation: approval
+        binding: jirapreflight-005-acceptance
+    faults:
+      - id: incomplete-scan
+        source: models/jira/preflight/IncompleteScan.tla
+        invariant: CompleteBeforeSend
+      - id: stale-approval
+        source: models/jira/preflight/StaleApproval.tla
+        invariant: CurrentDecision
+  - id: jira-write
+    component: jira
+    source: models/jira/mutation/Write.tla
+    configuration: models/jira/mutation/Write.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One logical write in one invocation. Ready abstracts validated exact target and trusted host authority.
+      - Acknowledged without the required resulting view is partial. Lost delivery is indeterminate. HTTP validity and provider behavior require executable tests.
+    bindings:
+      - obligation: JIRA-003
+        invariant: AuthorizedOnce
+      - obligation: JIRA-005
+        invariant: HonestView
+      - obligation: JIRA-010
+        invariant: HonestLoss
+      - obligation: JIRA-012
+        invariant: KeepCommit
+    conformance:
+      - obligation: JIRA-003
+        action: Send
+        observation: sends
+        binding: jira-003-acceptance
+      - obligation: JIRA-005
+        action: Finish
+        observation: outcome
+        binding: jira-005-acceptance
+      - obligation: JIRA-010
+        action: Finish
+        observation: outcome
+        binding: jira-010-acceptance
+      - obligation: JIRA-012
+        action: Finish
+        observation: outcome
+        binding: jira-012-acceptance
+    faults:
+      - id: unauthorized-write
+        source: models/jira/mutation/UnauthorizedWrite.tla
+        invariant: AuthorizedOnce
+      - id: lost-write
+        source: models/jira/mutation/LostWrite.tla
+        invariant: HonestLoss
+      - id: lost-readback
+        source: models/jira/mutation/LostReadback.tla
+        invariant: KeepCommit

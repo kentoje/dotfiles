@@ -1,4 +1,6 @@
 import type { AgentToolResult } from "@earendil-works/pi-coding-agent";
+
+import type { JiraHostConfig } from "../jira/transport.js";
 /** Immutable host options are supplied by the extension, not by model-generated tool arguments. */
 export interface PiHarnessOptions {
   readonly configPath?: string;
@@ -7,6 +9,7 @@ export interface PiHarnessOptions {
     readonly apiOrigin: string;
     readonly credentialFile: string;
   };
+  readonly jira?: JiraHostConfig;
   readonly timeoutMs?: number;
 }
 /** Check stop at phase boundaries; in-flight cancellation is owned by each existing module. */

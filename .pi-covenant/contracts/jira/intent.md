@@ -1,6 +1,6 @@
 # jira: behavior contract
 
-Status: specified design; all obligations draft. Kind: tool. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -34,7 +34,7 @@ Must: Jira reads must retain the identity of the requested issue or search resul
 
 Why: The user explicitly selected all six Jira actions. The tool must retain fields that differ between projects instead of imposing a generic issue template.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-002
 
@@ -44,7 +44,7 @@ Must: Jira lookup failures must not be presented as an empty successful search o
 
 Why: The user explicitly selected all six Jira actions. The tool must retain fields that differ between projects instead of imposing a generic issue template.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-003
 
@@ -54,7 +54,7 @@ Must: Jira mutation must apply only the fields or operation authorized by the ta
 
 Why: The user explicitly selected all six Jira actions. The tool must retain fields that differ between projects instead of imposing a generic issue template.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-004
 
@@ -64,7 +64,7 @@ Must: Jira creation preflight must surface matching existing issues before a pos
 
 Why: The user explicitly selected all six Jira actions. The tool must retain fields that differ between projects instead of imposing a generic issue template.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-005
 
@@ -74,7 +74,7 @@ Must: A Jira mutation must report the resulting issue identity and must not repo
 
 Why: The user explicitly selected all six Jira actions. The tool must retain fields that differ between projects instead of imposing a generic issue template.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-006
 
@@ -84,7 +84,7 @@ Must: Jira search must preserve the selected site and project constraints, pagin
 
 Why: A result from another Jira context is not a useful task match.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-007
 
@@ -94,7 +94,7 @@ Must: Jira creation must validate required project, issue type and custom fields
 
 Why: Discovering a missing required field after partial writes is avoidable.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-008
 
@@ -104,7 +104,7 @@ Must: Jira field names must resolve unambiguously to current field metadata or r
 
 Why: Custom field IDs and names vary between projects.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-009
 
@@ -114,7 +114,7 @@ Must: Jira update must reject an empty patch and must preserve fields absent fro
 
 Why: A metadata update is not a replacement issue document.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-010
 
@@ -124,7 +124,7 @@ Must: Jira comments must preserve the requested issue and body without silently 
 
 Why: Comment creation is non-idempotent.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-011
 
@@ -134,7 +134,7 @@ Must: Jira transitions must use an available transition ID or an unambiguous ava
 
 Why: Workflow names and transition IDs are project-specific and state-dependent.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### JIRA-012
 
@@ -144,7 +144,7 @@ Must: A Jira mutation followed by a failed readback must distinguish the committ
 
 Why: A readback failure must not invite the agent to repeat a successful mutation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `get`
 
