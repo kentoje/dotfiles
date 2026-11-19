@@ -21,3 +21,85 @@ bindings:
     tests:
       - gitlab.read-only
       - gitlab.credential-boundary
+      - gitlab.mr-lookup
+      - gitlab.forbidden-effects
+  - id: gitlab-002-acceptance
+    obligation: GITLAB-002
+    adapter: vitest
+    tests:
+      - gitlab.mr-lookup
+  - id: gitlab-004-acceptance
+    obligation: GITLAB-004
+    adapter: vitest
+    tests:
+      - gitlab.surface
+      - foundation.sdk
+  - id: gitlab-005-acceptance
+    obligation: GITLAB-005
+    adapter: vitest
+    tests:
+      - gitlab.identities
+  - id: gitlab-006-acceptance
+    obligation: GITLAB-006
+    adapter: vitest
+    tests:
+      - gitlab.logs
+  - id: gitlab-007-acceptance
+    obligation: GITLAB-007
+    adapter: vitest
+    tests:
+      - gitlab.retry-target
+  - id: gitlab-008-acceptance
+    obligation: GITLAB-008
+    adapter: vitest
+    tests:
+      - gitlab.cancel
+  - id: gitlab-009-acceptance
+    obligation: GITLAB-009
+    adapter: vitest
+    tests:
+      - gitlab.retry-no-change
+  - id: gitlab-010-acceptance
+    obligation: GITLAB-010
+    adapter: vitest
+    tests:
+      - gitlab.forbidden-effects
+  - id: gitlab-011-acceptance
+    obligation: GITLAB-011
+    adapter: vitest
+    tests:
+      - gitlab.pagination
+  - id: gitlab-012-acceptance
+    obligation: GITLAB-012
+    adapter: vitest
+    tests:
+      - gitlab.uncertain-write
+  - id: gitlab-013-acceptance
+    obligation: GITLAB-013
+    adapter: vitest
+    tests:
+      - gitlab.cancellation
+      - gitlab.transport-bounds
+  - id: gitlab-014-acceptance
+    obligation: GITLAB-014
+    adapter: vitest
+    tests:
+      - gitlab.authorization
+  - id: gitlab-015-acceptance
+    obligation: GITLAB-015
+    adapter: vitest
+    tests:
+      - gitlab.transport-bounds
+      - gitlab.logs
+      - gitlab.uncertain-write
+  - id: gitlab-016-acceptance
+    obligation: GITLAB-016
+    adapter: vitest
+    tests:
+      - gitlab.coordination
+  - id: gitlab-017-acceptance
+    obligation: GITLAB-017
+    adapter: vitest
+    tests:
+      - gitlab.credential-boundary
+      - gitlab.logs

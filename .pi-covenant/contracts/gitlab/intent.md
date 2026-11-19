@@ -1,6 +1,6 @@
 # gitlab: behavior contract
 
-Status: repository-read module and host transport implemented; CI/mutations and Pi registration pending. Kind: tool. Exact active scope is recorded in contract.yaml and the implementation tracker.
+Status: implemented. All eight public actions register in Pi. The MR lookup is private to module consumers.
 
 ## Purpose
 
@@ -46,7 +46,7 @@ Must: GitLab lookup must distinguish an absent merge request from an unavailable
 
 Why: The user chose a separate GitLab tool, then explicitly included pipeline retry and cancel. The old lookup provider was too narrow to describe that surface.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-003
 
@@ -66,7 +66,7 @@ Must: The GitLab tool must expose repository and CI operations separately from M
 
 Why: The user explicitly selected a separate GitLab tool with distinct capabilities.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-005
 
@@ -76,7 +76,7 @@ Must: Pipeline and job reads must preserve pipeline ID, job ID, ref, SHA and ret
 
 Why: A green result on another commit or old job attempt does not describe the requested work.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-006
 
@@ -86,7 +86,7 @@ Must: Job log results must state the returned byte window, truncation and whethe
 
 Why: The agent needs actionable bounded output without mistaking a window for a full trace.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-007
 
@@ -96,7 +96,7 @@ Must: Pipeline retry must target an explicit repository and pipeline ID within a
 
 Why: Retrying an inferred latest pipeline can affect unrelated work.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-008
 
@@ -106,7 +106,7 @@ Must: Pipeline cancellation must target an explicit pipeline and report observed
 
 Why: API acceptance is not proof that all jobs have stopped.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-009
 
@@ -116,7 +116,7 @@ Must: A pipeline with no retryable failed or canceled jobs must be reported as a
 
 Why: An accepted retry request can legitimately have no effect.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ### GITLAB-010
 
@@ -126,7 +126,7 @@ Must: GitLab operations must not delete pipelines, play deployment jobs or creat
 
 Why: Those actions are outside the selected repository/CI retry-cancel scope.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the bindings.
 
 ## Action `repository`
 
@@ -381,4 +381,4 @@ See [module interface](../../architecture/modules/gitlab.json). Dependencies and
 
 ## Implementation-ready design supplement
 
-See [brick-design.md](brick-design.md), [implementation-plan.yml](implementation-plan.yml) and ADR-010 for the tightened module/host boundary, target precedence, cursor semantics, log accounting, single-send mutation outcomes and implementation slices. GITLAB-011..017 add draft evidence/transport/authority obligations; original GITLAB-001..010 meanings are retained. The machine-readable public/module schemas are authoritative for refined DTO shape: default_branch can be null, jobs retain optional ref, and logs include has_more/source_bytes. Repository context emits gitlab_target only when GitLab discovery is explicitly configured. No GitLab tool is registered in Pi by this design pass.
+See [brick-design.md](brick-design.md), [implementation-plan.yml](implementation-plan.yml) and ADR-010 for the tightened module/host boundary, target precedence, cursor semantics, log accounting, single-send mutation outcomes and implementation slices. GITLAB-011..017 add draft evidence/transport/authority obligations; original GITLAB-001..010 meanings are retained. The machine-readable public/module schemas are authoritative for refined DTO shape: default_branch can be null, jobs retain optional ref, and logs include has_more/source_bytes. Repository context emits gitlab_target only when GitLab discovery is explicitly configured. See ADR-012 for the Pi tool configuration and mutation authority.

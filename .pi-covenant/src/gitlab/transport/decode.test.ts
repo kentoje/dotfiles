@@ -42,5 +42,4 @@ contractTest("gitlab.read-only", async () => {
   expect((await Effect.runPromise(module.repository(input))).status).not.toBe(
     "ok"
   );
-  expect(Object.keys(module)).toStrictEqual(["repository"]);
 });

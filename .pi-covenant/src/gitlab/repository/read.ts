@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect";
 
+import type { GitlabTarget } from "../../repository-context/module-port.js";
 import { resolveProjectContext } from "../../repository-context/module-port.js";
 import { decodeGitlabProject } from "../transport/decode.js";
 import type {
@@ -40,7 +41,8 @@ export const readGitlabRepository = Effect.fn("readGitlabRepository")(
   function* readGitlabRepository(
     host: GitlabReaderHost,
     input: unknown,
-    invocation: GitlabReadInvocation
+    invocation: GitlabReadInvocation,
+    preflight?: (target: GitlabTarget) => Effect.Effect<void, Error>
   ) {
     let context: { host?: string; repository?: string; project_id?: number } =
       {};
@@ -80,6 +82,9 @@ export const readGitlabRepository = Effect.fn("readGitlabRepository")(
         );
       }
       context = { host: target.host, repository: target.project_path };
+      if (preflight) {
+        yield* preflight(target);
+      }
       yield* Effect.try({
         catch: () =>
           new Error(

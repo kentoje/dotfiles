@@ -17,11 +17,12 @@ obligations:
     enforcement: null
     applicability: null
   - id: GITLAB-002
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab lookup must distinguish an absent merge request from an unavailable or malformed lookup result.
-    verification: []
+    verification:
+      - gitlab-002-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
@@ -38,117 +39,131 @@ obligations:
     enforcement: null
     applicability: null
   - id: GITLAB-004
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: The GitLab tool must expose repository and CI operations separately from MR discussion and metadata operations.
-    verification: []
+    verification:
+      - gitlab-004-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-005
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Pipeline and job reads must preserve pipeline ID, job ID, ref, SHA and retried-attempt identity where available.
-    verification: []
+    verification:
+      - gitlab-005-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-006
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Job log results must state the returned byte window, truncation and whether more bytes remain.
-    verification: []
+    verification:
+      - gitlab-006-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-007
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Pipeline retry must target an explicit repository and pipeline ID within an authorized request.
-    verification: []
+    verification:
+      - gitlab-007-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-008
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Pipeline cancellation must target an explicit pipeline and report observed state separately from request acceptance.
-    verification: []
+    verification:
+      - gitlab-008-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-009
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A pipeline with no retryable failed or canceled jobs must be reported as an unchanged retry outcome.
-    verification: []
+    verification:
+      - gitlab-009-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-010
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab operations must not delete pipelines, play deployment jobs or create new pipelines in v1.
-    verification: []
+    verification:
+      - gitlab-010-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: GITLAB-011
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Pipeline job and merge-request collection evidence must retain query-bound pagination and must not infer absence or retry ineligibility from incomplete or failed reads.
-    verification: []
+    verification:
+      - gitlab-011-acceptance
   - id: GITLAB-012
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Each authorized pipeline mutation may be sent at most once per invocation; an unacknowledged dispatch must retain unknown effects and return indeterminate without an automatic replay.
-    verification: []
+    verification:
+      - gitlab-012-acceptance
   - id: GITLAB-013
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Cancellation or deadline expiry must prevent a new GitLab dispatch while preserving acknowledged or unknown effects of mutations already sent.
-    verification: []
+    verification:
+      - gitlab-013-acceptance
   - id: GITLAB-014
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Pipeline mutation authority must be supplied by the trusted host for the exact action host project and pipeline; tool arguments or changed targets must not grant or expand it.
-    verification: []
+    verification:
+      - gitlab-014-acceptance
   - id: GITLAB-015
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab response and trace processing must enforce transport byte and time limits and expose incomplete output without interpreting a killed or oversized response as complete success.
-    verification: []
+    verification:
+      - gitlab-015-acceptance
   - id: GITLAB-016
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Conflicting retry and cancel operations on the same resolved pipeline must be rejected or serialized within the host coordinator before dispatch; independent resources must not share a global write lock.
-    verification: []
+    verification:
+      - gitlab-016-acceptance
   - id: GITLAB-017
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: GitLab credentials and authentication headers must remain in the trusted host transport and configured redaction boundary rather than enter feature inputs outputs or diagnostic records.
-    verification: []
+    verification:
+      - gitlab-017-acceptance
   - id: GITLAB-018
     status: active
     severity: high

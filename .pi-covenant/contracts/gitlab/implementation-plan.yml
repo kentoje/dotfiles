@@ -1,6 +1,6 @@
 schema_version: 1
-status: repository-read-slice-implemented-ci-and-pi-pending
-binding_policy: Native verification.yaml contains only real executable bindings. Remaining reserved IDs are plans; mutation authorization is deferred, not inferred from the absence of a write port.
+status: implemented
+binding_policy: Native verification.yaml records executable bindings; files below locate their acceptance cases.
 slices:
   - id: target-and-transport
     files:
@@ -21,17 +21,17 @@ slices:
       - gitlab.credential-boundary
       - repository-context.gitlab-target
       - gitlab.credential-reader
-    status: implemented-repository-read
+    status: implemented
   - id: repository-ci-reads
     files:
-      - src/gitlab/repository/read.ts
-      - src/gitlab/pipelines/read.ts
-      - src/gitlab/jobs/read.ts
+      - src/gitlab/ci/read.ts
+      - src/gitlab/ci/models.ts
       - src/gitlab/pagination/cursor.ts
     tests:
       - gitlab.identities
       - gitlab.pagination
       - gitlab.forbidden-effects
+    status: implemented
   - id: logs-and-shared-mr-lookup
     files:
       - src/gitlab/logs/read.ts
@@ -39,10 +39,9 @@ slices:
     tests:
       - gitlab.logs
       - gitlab.mr-lookup
+    status: implemented
   - id: pipeline-mutations
     files:
-      - src/gitlab/pipelines/retry.ts
-      - src/gitlab/pipelines/cancel.ts
       - src/gitlab/invocation/mutation.ts
       - src/foundation/gitlab/coordination.ts
     tests:
@@ -53,12 +52,14 @@ slices:
       - gitlab.cancellation
       - gitlab.coordination
       - gitlab.authorization
+    status: implemented
   - id: pi-registration
     files:
       - src/gitlab/module-port.ts
       - src/foundation/registration/gitlab-tool.ts
     tests:
       - gitlab.surface
+    status: implemented
 bindings:
   - obligation: GITLAB-001
     test_id: gitlab.context
@@ -68,7 +69,8 @@ bindings:
   - obligation: GITLAB-002
     test_id: gitlab.mr-lookup
     adapter: vitest
-    planned_file: src/gitlab/merge-requests/lookup.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-003
     test_id: gitlab.read-only
     adapter: vitest
@@ -78,60 +80,72 @@ bindings:
     test_id: gitlab.surface
     adapter: vitest
     planned_file: src/foundation/registration/gitlab-tool.test.ts
+    status: implemented
   - obligation: GITLAB-005
     test_id: gitlab.identities
     adapter: vitest
-    planned_file: src/gitlab/pipelines/read.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-006
     test_id: gitlab.logs
     adapter: vitest
-    planned_file: src/gitlab/logs/read.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-007
     test_id: gitlab.retry-target
     adapter: vitest
-    planned_file: src/gitlab/pipelines/retry.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-008
     test_id: gitlab.cancel
     adapter: vitest
-    planned_file: src/gitlab/pipelines/cancel.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-009
     test_id: gitlab.retry-no-change
     adapter: vitest
-    planned_file: src/gitlab/pipelines/retry.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-010
     test_id: gitlab.forbidden-effects
     adapter: vitest
-    planned_file: src/gitlab/module-port.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-011
     test_id: gitlab.pagination
     adapter: vitest
-    planned_file: src/gitlab/pagination/cursor.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-012
     test_id: gitlab.uncertain-write
     adapter: vitest
-    planned_file: src/gitlab/invocation/mutation.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-013
     test_id: gitlab.cancellation
     adapter: vitest
-    planned_file: src/gitlab/invocation/mutation.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-014
     test_id: gitlab.authorization
     adapter: vitest
-    planned_file: src/gitlab/invocation/authorize.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-015
     test_id: gitlab.transport-bounds
     adapter: vitest
     planned_file: src/foundation/gitlab/transport.test.ts
-    status: repository-only-check-exists-broader-obligation-draft
+    status: implemented
   - obligation: GITLAB-016
     test_id: gitlab.coordination
     adapter: vitest
-    planned_file: src/foundation/gitlab/coordination.test.ts
+    planned_file: src/foundation/gitlab/brick.test.ts
+    status: implemented
   - obligation: GITLAB-017
     test_id: gitlab.credential-boundary
     adapter: vitest
     planned_file: src/foundation/gitlab/transport.test.ts
-    status: repository-only-check-exists-broader-obligation-draft
+    status: implemented
   - obligation: GITLAB-018
     test_id: gitlab.transport-bounds
     adapter: vitest

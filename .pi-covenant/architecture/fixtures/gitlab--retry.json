@@ -4,7 +4,8 @@
     "direction": "input_schema",
     "valid": true,
     "payload": {
-      "pipeline_id": 1
+      "pipeline_id": 1,
+      "repository": "https://gitlab.example/team/app"
     }
   },
   {

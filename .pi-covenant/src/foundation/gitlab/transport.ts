@@ -2,13 +2,16 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import { Effect, Schema } from "effect";
 
+import { gitlabCiRequest } from "../../gitlab/module-port.js";
 import type {
+  GitlabCiRequest,
   GitlabReadInvocation,
   GitlabWireResult,
 } from "../../gitlab/module-port.js";
 import { GitlabTransportError } from "./body.js";
 import { runGitlabReadScope } from "./deadline.js";
 import { requestGitlabProject } from "./request.js";
+import { gitlabCiRoute } from "./routes.js";
 
 const targetSchema = Schema.Struct({
   host: Schema.NonEmptyString,
@@ -33,11 +36,13 @@ interface GitlabTransportOptions {
   readonly timeoutMs?: number;
   readonly redactValues?: readonly string[];
 }
-function errorResult(code: string): GitlabWireResult {
+function errorResult(
+  code: string
+): Extract<GitlabWireResult, { kind: "error" }> {
   return {
     code,
     kind: "error",
-    message: `GitLab repository GET failed: ${code}`,
+    message: `GitLab transport failed: ${code}`,
   };
 }
 function hostUrl(origin: string) {
@@ -62,12 +67,12 @@ function hostUrl(origin: string) {
   }
   return url.origin;
 }
-async function readWithinScope(
+async function authenticateGitlabHost(
   options: GitlabTransportOptions,
   input: unknown,
   signal: AbortSignal,
   deadline: number
-): Promise<GitlabWireResult> {
+) {
   const target = Schema.decodeUnknownSync(targetSchema, {
     onExcessProperty: "error",
   })(input);
@@ -112,6 +117,20 @@ async function readWithinScope(
       ? { "PRIVATE-TOKEN": credential.token }
       : { Authorization: `Bearer ${credential.token}` };
   headers.Accept = "application/json";
+
+  return { headers, origin, projectPath: target.project_path, secrets };
+}
+async function readWithinScope(
+  options: GitlabTransportOptions,
+  input: unknown,
+  signal: AbortSignal,
+  deadline: number,
+  request: GitlabCiRequest | undefined,
+  onSend: () => void
+): Promise<GitlabWireResult> {
+  const { headers, origin, secrets, projectPath } =
+    await authenticateGitlabHost(options, input, signal, deadline);
+  const write = request?.kind === "retry" || request?.kind === "cancel";
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (signal.aborted || Date.now() >= deadline) {
       throw new GitlabTransportError("CANCELLED");
@@ -122,8 +141,13 @@ async function readWithinScope(
       maxBytes: options.maxBytes ?? 2_097_152,
       secrets,
       signal,
-      url: `${origin}/api/v4/projects/${encodeURIComponent(target.project_path)}`,
+      url: `${origin}/api/v4${request ? gitlabCiRoute(request) : `/projects/${encodeURIComponent(projectPath)}`}`,
+      ...(request ? { request } : {}),
+      onSend,
     });
+    if (write && result.kind !== "transient") {
+      return result;
+    }
     if (signal.aborted || Date.now() >= deadline) {
       throw new GitlabTransportError("DEADLINE_EXCEEDED");
     }
@@ -141,9 +165,11 @@ async function readWithinScope(
 function readWithDeadline(
   options: GitlabTransportOptions,
   input: unknown,
-  invocation: GitlabReadInvocation
+  invocation: GitlabReadInvocation,
+  request?: GitlabCiRequest
 ): Promise<GitlabWireResult> | GitlabWireResult {
-  const timeout = options.timeoutMs ?? 30_000;
+  const write = request?.kind === "retry" || request?.kind === "cancel";
+  const timeout = options.timeoutMs ?? (write ? 60_000 : 30_000);
   const maxBytes = options.maxBytes ?? 2_097_152;
   if (
     !Number.isFinite(timeout) ||
@@ -161,19 +187,26 @@ function readWithDeadline(
     invocation.deadline ?? Infinity
   );
   if (invocation.signal?.aborted) {
-    return errorResult("CANCELLED");
+    return { ...errorResult("CANCELLED"), delivery: "not_sent" };
   }
   if (deadline <= Date.now()) {
-    return errorResult("DEADLINE_EXCEEDED");
+    return { ...errorResult("DEADLINE_EXCEEDED"), delivery: "not_sent" };
   }
+  let sent = false;
   return runGitlabReadScope(
     invocation,
     deadline,
-    (signal) => readWithinScope(options, input, signal, deadline),
-    errorResult
+    (signal) =>
+      readWithinScope(options, input, signal, deadline, request, () => {
+        sent = true;
+      }),
+    (code) =>
+      write && sent
+        ? { ...errorResult("REMOTE_STATE_UNKNOWN"), delivery: "unknown" }
+        : { ...errorResult(code), delivery: "not_sent" }
   );
 }
-/** Create a bounded repository GET capability; no mutation or arbitrary request operation is exposed. */
+/** Create bounded GitLab transport for fixed REST endpoints, with credential isolation and single-send writes. */
 export function createGitlabReadTransport(options: GitlabTransportOptions) {
   return {
     readProject: (input: unknown, invocation: GitlabReadInvocation = {}) =>
@@ -182,6 +215,26 @@ export function createGitlabReadTransport(options: GitlabTransportOptions) {
         try: async () => await readWithDeadline(options, input, invocation),
       }).pipe(
         // oxlint-disable-next-line promise/prefer-await-to-callbacks -- Effect.catch handles a typed failure channel, not a Promise callback.
+        Effect.catch((error) => Effect.succeed(error))
+      ),
+    requestCi: (
+      input: unknown,
+      request: unknown,
+      invocation: GitlabReadInvocation = {}
+    ) =>
+      Effect.tryPromise({
+        catch: () => errorResult("INVALID_INPUT"),
+        try: async () =>
+          await readWithDeadline(
+            options,
+            input,
+            invocation,
+            Schema.decodeUnknownSync(gitlabCiRequest, {
+              onExcessProperty: "error",
+            })(request)
+          ),
+      }).pipe(
+        // oxlint-disable-next-line promise/prefer-await-to-callbacks -- Recover the Effect error channel.
         Effect.catch((error) => Effect.succeed(error))
       ),
   };

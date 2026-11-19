@@ -1,6 +1,6 @@
 # Running the custom harness in Pi
 
-The harness is an additive standard Pi extension. It currently registers `project_cli` and `worktree`. GitLab, Jira, MR, fleet, /ship and /harness-retro are not registered yet. No runtime Covenant/TLA+, completion gate, retry policy, prompt replacement or automatic follow-up turn is installed.
+The harness is an additive standard Pi extension. It currently registers `project_cli`, `worktree` and `gitlab`. Jira, MR, fleet, /ship and /harness-retro remain pending. No runtime Covenant/TLA+, completion gate, retry policy, prompt replacement or automatic follow-up turn is installed.
 
 ## Load the extension
 
@@ -59,3 +59,7 @@ Context uses bounded local filesystem/Git metadata reads, not subprocesses, fetc
 Acceptance loads the real extension through Pi's loader, creates an isolated in-memory Pi session, confirms built-ins remain active, and executes a check through Pi's tool wrapper. Temporary real repositories test context and all four worktree actions, failed/partial results, explicit configuration, cancellation and deadlines. This does not test a paid model conversation, interactive TUI rendering or every Pi release.
 
 Covenant verifies the integration during development only. The invocation model explores 32 finite states under three invariants; deliberate faults detect unvalidated dispatch, dispatch after stop and false success. Executable conformance bindings support those observations without claiming formal refinement or proving arbitrary filesystem/process scheduling. Run `pnpm check` for current implementation, design and fault evidence.
+
+## GitLab setup
+
+Set `PI_COVENANT_GITLAB_HOST` and the absolute `PI_COVENANT_GITLAB_CREDENTIAL_FILE` before loading the extension. The host defaults to its HTTPS API origin. See [GitLab setup and actions](../src/gitlab/README.md).

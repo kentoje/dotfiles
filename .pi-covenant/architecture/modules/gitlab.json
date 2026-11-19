@@ -1521,7 +1521,7 @@
             "minimum": 1
           }
         },
-        "required": ["pipeline_id"],
+        "required": ["pipeline_id", "repository"],
         "additionalProperties": false
       },
       "output_schema": {
@@ -1760,7 +1760,7 @@
             "minimum": 1
           }
         },
-        "required": ["pipeline_id"],
+        "required": ["pipeline_id", "repository"],
         "additionalProperties": false
       },
       "output_schema": {

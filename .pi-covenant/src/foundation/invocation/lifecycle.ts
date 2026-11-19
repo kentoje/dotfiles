@@ -2,6 +2,11 @@ import type { AgentToolResult } from "@earendil-works/pi-coding-agent";
 /** Immutable host options are supplied by the extension, not by model-generated tool arguments. */
 export interface PiHarnessOptions {
   readonly configPath?: string;
+  readonly gitlab?: {
+    readonly host: string;
+    readonly apiOrigin: string;
+    readonly credentialFile: string;
+  };
   readonly timeoutMs?: number;
 }
 /** Check stop at phase boundaries; in-flight cancellation is owned by each existing module. */

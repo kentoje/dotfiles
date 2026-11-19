@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "gitlab",
   "kind": "tool",
-  "design_status": "specified-awaiting-implementation",
+  "design_status": "implemented-pi",
   "description": "Give the agent structured repository and CI facts plus explicitly requested pipeline retry/cancel, while MR review operations stay in mr.",
   "component": "gitlab",
   "shared_protocol": "docs/tool-protocol.md",
@@ -1653,7 +1653,7 @@
             "minimum": 1
           }
         },
-        "required": ["pipeline_id"],
+        "required": ["pipeline_id", "repository"],
         "additionalProperties": false
       },
       "output_schema": {
@@ -1917,7 +1917,7 @@
             "minimum": 1
           }
         },
-        "required": ["pipeline_id"],
+        "required": ["pipeline_id", "repository"],
         "additionalProperties": false
       },
       "output_schema": {
