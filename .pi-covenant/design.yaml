@@ -183,6 +183,90 @@ applicability:
   - obligation: JIRAPREFLIGHT-005
     mode: model
     rationale: Finite authorization, preflight or mutation outcome decisions.
+  - obligation: MR-001
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-002
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-003
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MR-004
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-005
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-006
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-007
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-008
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MR-009
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MR-010
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MR-011
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MRGUARD-001
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MRGUARD-002
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MRGUARD-003
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: MRGUARD-004
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MRGUARD-005
+    mode: model
+    rationale: Finite target selection, phase order, policy and outcomes.
+  - obligation: MRGUARD-006
+    mode: not_applicable
+    rationale: Provider data, authorization payload, collection parsing or real Pi routing require executable fixtures.
+  - obligation: SHIPPING-001
+    mode: model
+    rationale: Finite authority, selected delivery and current-head readiness.
+  - obligation: SHIPPING-002
+    mode: model
+    rationale: Finite authority, selected delivery and current-head readiness.
+  - obligation: SHIPPING-003
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: SHIPPING-004
+    mode: model
+    rationale: Finite authority, selected delivery and current-head readiness.
+  - obligation: SHIPPING-005
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: SHIPPING-006
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: SHIPPING-007
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: SHIPPING-008
+    mode: model
+    rationale: Finite authority, selected delivery and current-head readiness.
+  - obligation: SHIPPING-009
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: SHIPPING-010
+    mode: model
+    rationale: Finite authority, selected delivery and current-head readiness.
+  - obligation: SHIPPING-011
+    mode: not_applicable
+    rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
 models:
   - id: project-checks
     component: project-cli
@@ -610,3 +694,171 @@ models:
       - id: lost-readback
         source: models/jira/mutation/LostReadback.tla
         invariant: KeepCommit
+  - id: mr-reply-policy
+    component: mr
+    source: models/mr/reply/Reply.tla
+    configuration: models/mr/reply/Reply.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One invocation and one selected existing discussion. Correct abstracts verified discussion identity and authority.
+      - Acknowledgement is the observed stable reply ID. Remote details and HTTP behavior are covered by executable tests.
+    bindings:
+      - obligation: MR-003
+        invariant: BoundReply
+      - obligation: MR-003
+        invariant: SeparateResolve
+      - obligation: MR-008
+        invariant: ReplyFirst
+      - obligation: MR-009
+        invariant: KeepReply
+    conformance:
+      - obligation: MR-003
+        action: Post
+        observation: posted
+        binding: mr-003-acceptance
+      - obligation: MR-003
+        action: Resolve
+        observation: resolved
+        binding: mr-003-acceptance
+      - obligation: MR-008
+        action: Observe
+        observation: reply
+        binding: mr-008-acceptance
+      - obligation: MR-009
+        action: FailResolution
+        observation: outcome
+        binding: mr-009-acceptance
+    faults:
+      - id: wrong-thread
+        source: models/mr/reply/WrongThread.tla
+        invariant: BoundReply
+      - id: unexpected-resolve
+        source: models/mr/reply/UnexpectedResolve.tla
+        invariant: SeparateResolve
+      - id: lost-then-resolve
+        source: models/mr/reply/LostThenResolve.tla
+        invariant: ReplyFirst
+      - id: forgot-reply
+        source: models/mr/reply/ForgotReply.tla
+        invariant: KeepReply
+  - id: mr-creation-guard
+    component: mr-guard
+    source: models/mr/guard/Guard.tla
+    configuration: models/mr/guard/Guard.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One explicit request and one bound target. Zero, one and many describe complete lookup outcomes; incomplete includes failed lookup.
+      - Policy means selected configuration passed or none applied. This model does not assert server-side locking or automatic creation.
+    bindings:
+      - obligation: MRGUARD-001
+        invariant: ExplicitGuard
+      - obligation: MRGUARD-002
+        invariant: ReusedExisting
+      - obligation: MRGUARD-004
+        invariant: CheckedAbsence
+      - obligation: MRGUARD-005
+        invariant: CheckedPolicy
+    conformance:
+      - obligation: MRGUARD-001
+        action: Select
+        observation: context
+        binding: mrguard-001-acceptance
+      - obligation: MRGUARD-002
+        action: Reuse
+        observation: decision
+        binding: mrguard-002-acceptance
+      - obligation: MRGUARD-004
+        action: Lookup
+        observation: lookup
+        binding: mrguard-004-acceptance
+      - obligation: MRGUARD-005
+        action: Allow
+        observation: policy
+        binding: mrguard-005-acceptance
+    faults:
+      - id: implicit-check
+        source: models/mr/guard/ImplicitCheck.tla
+        invariant: ExplicitGuard
+      - id: incomplete-allows
+        source: models/mr/guard/IncompleteAllows.tla
+        invariant: CheckedAbsence
+      - id: multiple-reuse
+        source: models/mr/guard/MultipleReuse.tla
+        invariant: ReusedExisting
+      - id: policy-bypass
+        source: models/mr/guard/PolicyBypass.tla
+        invariant: CheckedPolicy
+  - id: explicit-ship
+    component: shipping
+    source: models/shipping/Ship.tla
+    configuration: models/shipping/Ship.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - At most one repair and two head identities. A valid observation represents complete eligible evidence for the current head.
+      - The explicit command owns its deadline and effects. Filesystem and provider races remain within executable acceptance and declared limits.
+    bindings:
+      - obligation: SHIPPING-001
+        invariant: ExplicitEffects
+      - obligation: SHIPPING-002
+        invariant: ExplicitEffects
+      - obligation: SHIPPING-004
+        invariant: NoDuplicate
+      - obligation: SHIPPING-008
+        invariant: FreshEvidence
+      - obligation: SHIPPING-010
+        invariant: CheckedBeforeReady
+    conformance:
+      - obligation: SHIPPING-001
+        action: Deliver
+        observation: delivery
+        binding: shipping-001-acceptance
+      - obligation: SHIPPING-002
+        action: Authorize
+        observation: explicit
+        binding: shipping-002-acceptance
+      - obligation: SHIPPING-004
+        action: Deliver
+        observation: delivery
+        binding: shipping-004-acceptance
+      - obligation: SHIPPING-008
+        action: Repair
+        observation: head
+        binding: shipping-008-acceptance
+      - obligation: SHIPPING-010
+        action: Ready
+        observation: ready
+        binding: shipping-010-acceptance
+    faults:
+      - id: implicit-delivery
+        source: models/shipping/ImplicitDelivery.tla
+        invariant: ExplicitEffects
+      - id: duplicate-draft
+        source: models/shipping/DuplicateDraft.tla
+        invariant: NoDuplicate
+      - id: stale-head
+        source: models/shipping/StaleHead.tla
+        invariant: FreshEvidence
+      - id: skip-checks
+        source: models/shipping/SkipChecks.tla
+        invariant: CheckedBeforeReady

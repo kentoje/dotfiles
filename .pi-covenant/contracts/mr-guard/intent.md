@@ -1,6 +1,6 @@
 # mr-guard: behavior contract
 
-Status: specified design; all obligations draft. Kind: preflight. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -33,7 +33,7 @@ Must: An MR creation guard must check the effective target repository and source
 
 Why: Duplicate protection remains useful at creation time, but must not recreate the removed automatic ship gate.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MRGUARD-002
 
@@ -43,7 +43,7 @@ Must: An MR creation guard must surface an already existing matching MR before a
 
 Why: Duplicate protection remains useful at creation time, but must not recreate the removed automatic ship gate.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MRGUARD-003
 
@@ -53,7 +53,7 @@ Must: An MR creation guard must not require an MR at ordinary task completion or
 
 Why: Duplicate protection remains useful at creation time, but must not recreate the removed automatic ship gate.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MRGUARD-004
 
@@ -63,7 +63,7 @@ Must: MR creation protection must distinguish zero, one and multiple existing br
 
 Why: Lookup failure or ambiguity is not permission to create another MR.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MRGUARD-005
 
@@ -73,7 +73,7 @@ Must: Repository-specific title and delivery checks must be enforced only when e
 
 Why: One project release workflow must not be imposed on every project.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MRGUARD-006
 
@@ -83,7 +83,7 @@ Must: The guard must declare which direct creation entrypoints it covers and mus
 
 Why: A command interceptor is not a general remote-mutation firewall.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `check_creation`
 

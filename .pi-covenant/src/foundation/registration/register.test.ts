@@ -9,14 +9,24 @@ const fixture = installPiFixtures();
 contractTest("foundation.registration", () => {
   const names: string[] = [];
   const snippets: string[] = [];
-  const host: Pick<ExtensionAPI, "registerTool"> = {
+  const host: Pick<ExtensionAPI, "registerTool"> &
+    Partial<Pick<ExtensionAPI, "on">> = {
+    on() {
+      throw new Error("Default registration must not install an event hook");
+    },
     registerTool(tool) {
       names.push(tool.name);
       snippets.push(tool.promptSnippet ?? "");
     },
   };
   registerPiHarness(host);
-  expect(names).toStrictEqual(["project_cli", "worktree", "gitlab", "jira"]);
+  expect(names).toStrictEqual([
+    "project_cli",
+    "worktree",
+    "gitlab",
+    "jira",
+    "mr",
+  ]);
   expect(snippets.every((snippet) => snippet.length > 0)).toBeTruthy();
 });
 contractTest("foundation.boundary", async () => {

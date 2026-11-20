@@ -793,6 +793,10 @@
                         "allow_failure": {
                           "type": "boolean"
                         },
+                        "failure_reason": {
+                          "type": "string",
+                          "minLength": 1
+                        },
                         "retried": {
                           "type": "boolean"
                         },
@@ -955,6 +959,10 @@
                           "allow_failure": {
                             "type": "boolean"
                           },
+                          "failure_reason": {
+                            "type": "string",
+                            "minLength": 1
+                          },
                           "retried": {
                             "type": "boolean"
                           },
@@ -1078,6 +1086,10 @@
                   },
                   "allow_failure": {
                     "type": "boolean"
+                  },
+                  "failure_reason": {
+                    "type": "string",
+                    "minLength": 1
                   },
                   "retried": {
                     "type": "boolean"
@@ -1211,6 +1223,10 @@
                     },
                     "allow_failure": {
                       "type": "boolean"
+                    },
+                    "failure_reason": {
+                      "type": "string",
+                      "minLength": 1
                     },
                     "retried": {
                       "type": "boolean"

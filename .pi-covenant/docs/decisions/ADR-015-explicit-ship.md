@@ -1,0 +1,11 @@
+# ADR-015 Explicit shipping
+
+Only the Pi slash command grants an invocation-scoped shipping capability. The command runs synchronously in the active session and returns a report. There are no completion hooks, agent-turn messages or background workers.
+
+The checkout, exact paths, source branch, target branch and push destination are bound before mutation. An empty path scope ships committed work only and requires a clean checkout. A nonempty scope accepts exact files and commits only those files, preserving the staging state of unrelated paths. Project checks run from the selected repo configuration, and opted-in title and delivery policies apply before commit and at creation. The native GitLab adapter creates one draft or reuses one exact open branch MR. It uses GitLab's documented title prefix for draft and ready. A final status observation and post-write readback must agree with the pushed head. GitLab's title update does not offer a head compare-and-swap. Other clients can race its dispatch and readback.
+
+Shipping observes the MR, complete review pages and the required exact-head pipeline with one deadline. The default conservative policy treats every unresolved resolvable thread as blocking and requires a successful pipeline. A trusted review decision can reply with concrete rationale, resolve only explicitly addressed threads, and request a repair round after externally applied fixes to the same authorized paths. Declines keep the discussion open with a rationale. GitLab retry is considered only after bounded job diagnosis identifies transient failures and the user authorizes that exact retry. In interactive Pi the command obtains review decisions and retry approval through the existing UI, without generating or executing code from review comments.
+
+The finite model represents one explicit invocation, one repair and two distinct heads. Local process safety, exact path handling, cancellation, bounded review/CI polling and GitLab request semantics require executable checks.
+
+Before implementation, Covenant fully explored 142 states. The normal model passed in run `1795104703712645000-16712`; all four deliberate faults were detected in run `1795104713287536000-16861`.

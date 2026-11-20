@@ -1,6 +1,6 @@
 # ship: behavior contract
 
-Status: specified design; all obligations draft. Kind: user-command. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -34,7 +34,7 @@ Must: Completing an ordinary coding task must not require creating or updating a
 
 Why: The user explicitly selected shipping through review feedback and CI readiness. This is requested work within the current run, not the removed ship-gate hook.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-002
 
@@ -44,7 +44,7 @@ Must: Shipping actions must occur only within an explicit user request to ship.
 
 Why: The user explicitly selected shipping through review feedback and CI readiness. This is requested work within the current run, not the removed ship-gate hook.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-003
 
@@ -54,7 +54,7 @@ Must: A blocked completion must report its blocker without automatically enqueui
 
 Why: The user explicitly selected shipping through review feedback and CI readiness. This is requested work within the current run, not the removed ship-gate hook.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-004
 
@@ -64,7 +64,7 @@ Must: An explicit ship command must operate on the selected task branch and reus
 
 Why: Shipping should continue the requested task rather than fork another delivery.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-005
 
@@ -74,7 +74,7 @@ Must: Shipping must commit only task-authorized changes and must not stage unrel
 
 Why: A repository may contain concurrent work belonging to the user.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-006
 
@@ -84,7 +84,7 @@ Must: Shipping must push normally and must not force-push, merge or deploy by de
 
 Why: Shipping to review is not production release authority.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-007
 
@@ -94,7 +94,7 @@ Must: Shipping must drive review feedback and required CI readiness for the late
 
 Why: The user explicitly selected readiness rather than stopping after MR creation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-008
 
@@ -104,7 +104,7 @@ Must: Shipping must not claim readiness from a pipeline or review observation be
 
 Why: Fixes and rebases invalidate earlier readiness observations.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-009
 
@@ -114,7 +114,7 @@ Must: Shipping must bound polling and repair rounds and return unresolved blocke
 
 Why: The user rejected automatic blocked-completion follow-ups.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-010
 
@@ -124,7 +124,7 @@ Must: Shipping must mark an MR ready for human review only after the selected pr
 
 Why: An MR existing is not equivalent to ready for human review.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### SHIPPING-011
 
@@ -134,7 +134,7 @@ Must: Shipping must preserve rejected or unresolved review findings with an expl
 
 Why: Human review intent must remain visible.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `run`
 

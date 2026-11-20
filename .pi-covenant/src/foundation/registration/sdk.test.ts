@@ -2,6 +2,10 @@ import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { contractTest } from "@covenant/vitest";
+import type {
+  ExtensionRunner,
+  RegisteredTool,
+} from "@earendil-works/pi-coding-agent";
 import {
   discoverAndLoadExtensions,
   SessionManager,
@@ -18,10 +22,106 @@ import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 
 const fixture = installPiFixtures();
 const gitlabFixture = installLoopbackHttpFixtures();
+async function checkMrInPi(
+  loadedTool: RegisteredTool | undefined,
+  runner: ExtensionRunner,
+  checkout: string,
+  requests: readonly { method: string | undefined; url: string | undefined }[]
+) {
+  const mr = loadedTool;
+  if (!mr) {
+    throw new Error("PI_SDK_TEST: MR tool missing");
+  }
+  const mrTool = wrapRegisteredTool(mr, runner);
+  await expect(
+    mrTool.execute(
+      "mr-status",
+      { action: "status", cwd: checkout, iid: 9 },
+      undefined
+    )
+  ).resolves.toMatchObject({
+    details: { data: { merge_request: { iid: 9 } }, status: "ok" },
+  });
+  const start = requests.length;
+  const create = (branch: string) =>
+    `cd "${
+      checkout
+    }" && glab mr create -R https://gitlab.example/team/other -s ${
+      branch
+    } -b main -t "Reviewed"`;
+  const call = (command: string) =>
+    runner.emitToolCall({
+      input: { command },
+      toolCallId: "mr-guard",
+      toolName: "bash",
+      type: "tool_call",
+    });
+  await expect(call("git status")).resolves.toBeUndefined();
+  expect(requests).toHaveLength(start);
+  await expect(call(create("feature/guard"))).resolves.toMatchObject({
+    block: true,
+    reason: expect.stringContaining("!9"),
+  });
+  await expect(call(create("feature/other"))).resolves.toBeUndefined();
+  await expect(call("glab mr new --fill")).resolves.toMatchObject({
+    block: true,
+  });
+  expect(
+    requests.slice(start).every(({ method }) => method === "GET")
+  ).toBeTruthy();
+  expect(
+    requests
+      .slice(start)
+      .some(({ url }) => url?.includes("projects/8/merge_requests?"))
+  ).toBeTruthy();
+}
+
 contractTest("foundation.sdk", async () => {
   const f = await fixture();
+  const other = await fixture();
+  other.git(["remote", "add", "origin", "https://gitlab.example/team/other"]);
+  f.git(["remote", "add", "origin", "https://gitlab.example/team/app"]);
+  const mrDetail = {
+    iid: 9,
+    sha: "checked-sha",
+    source_branch: "feature/guard",
+    source_project_id: 8,
+    state: "opened",
+    target_branch: "main",
+    target_project_id: 8,
+    title: "Existing",
+    web_url: "https://gitlab.example/team/other/-/merge_requests/9",
+  };
   const service = await gitlabFixture((req, res) => {
     const path = req.url ?? "";
+    if (path.includes("/merge_requests?")) {
+      res.setHeader("x-next-page", "");
+      const url = new URL(path, "http://localhost");
+      return res.end(
+        JSON.stringify(
+          url.searchParams.get("source_branch") === "feature/guard"
+            ? [mrDetail]
+            : []
+        )
+      );
+    }
+    if (path.endsWith("/merge_requests/9")) {
+      return res.end(JSON.stringify(mrDetail));
+    }
+    if (path.endsWith("/discussions")) {
+      res.setHeader("x-next-page", "");
+      return res.end("[]");
+    }
+    if (path.endsWith("team%2Fother")) {
+      return res.end(
+        JSON.stringify({
+          default_branch: "main",
+          id: 8,
+          path_with_namespace: "team/other",
+          web_url: "https://gitlab.example/team/other",
+        })
+      );
+    }
     if (path.endsWith("/trace")) {
       return res.end("boot sdk-secret-token done");
     }
@@ -67,6 +167,7 @@ contractTest("foundation.sdk", async () => {
     credentials,
     "hosts:\n  gitlab.example:\n    token: sdk-secret-token\n"
   );
+  vi.stubEnv("PI_COVENANT_INTERCEPT_MR_CREATION", "1");
   vi.stubEnv("PI_COVENANT_GITLAB_HOST", "gitlab.example");
   vi.stubEnv("PI_COVENANT_GITLAB_CREDENTIAL_FILE", credentials);
   vi.stubEnv("PI_COVENANT_GITLAB_API_ORIGIN", service.origin);
@@ -86,8 +187,9 @@ contractTest("foundation.sdk", async () => {
     "worktree",
     "gitlab",
     "jira",
+    "mr",
   ]);
-  expect(extension.handlers.size).toBe(0);
+  expect([...extension.handlers.keys()]).toStrictEqual(["tool_call"]);
   const runtime = await ModelRuntime.create({
     allowModelNetwork: false,
     authPath: join(f.temp, "auth.json"),
@@ -127,6 +229,7 @@ contractTest("foundation.sdk", async () => {
         "worktree",
         "gitlab",
         "jira",
+        "mr",
       ])
     );
     const gitlab = extension.tools.get("gitlab");
@@ -201,6 +304,12 @@ contractTest("foundation.sdk", async () => {
       "GET",
       "GET",
     ]);
+    await checkMrInPi(
+      extension.tools.get("mr"),
+      session.extensionRunner,
+      other.repo,
+      service.requests
+    );
     const project = extension.tools.get("project_cli");
     if (!project) {
       throw new Error("PI_SDK_TEST: project tool missing");

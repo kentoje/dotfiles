@@ -8,7 +8,9 @@ import type {
   GitlabReadInvocation,
   GitlabWireResult,
 } from "../../gitlab/module-port.js";
+import type { MrRequest } from "../../mr/module-port.js";
 import { HttpTransportError } from "../http/response-body.js";
+import { gitlabMrRoute } from "../mr/routes.js";
 import { runGitlabReadScope } from "./deadline.js";
 import { requestGitlabProject } from "./request.js";
 import { gitlabCiRoute } from "./routes.js";
@@ -120,17 +122,46 @@ async function authenticateGitlabHost(
 
   return { headers, origin, projectPath: target.project_path, secrets };
 }
+function isGitlabWrite(request: GitlabCiRequest | MrRequest | undefined) {
+  return (
+    request?.kind === "retry" ||
+    request?.kind === "cancel" ||
+    request?.kind === "mrCreate" ||
+    request?.kind === "mrReply" ||
+    request?.kind === "mrResolve" ||
+    request?.kind === "mrUpdate"
+  );
+}
+function gitlabEndpoint(
+  origin: string,
+  projectPath: string,
+  request: GitlabCiRequest | MrRequest | undefined
+) {
+  const api = `${origin}/api/v4`;
+  if (!request) {
+    return { url: `${api}/projects/${encodeURIComponent(projectPath)}` };
+  }
+  if (
+    "iid" in request ||
+    request.kind === "mrCreate" ||
+    request.kind === "mrBranch"
+  ) {
+    const { path, ...details } = gitlabMrRoute(request);
+    return { ...details, url: api + path };
+  }
+  return { request, url: api + gitlabCiRoute(request) };
+}
 async function readWithinScope(
   options: GitlabTransportOptions,
   input: unknown,
   signal: AbortSignal,
   deadline: number,
-  request: GitlabCiRequest | undefined,
+  request: GitlabCiRequest | MrRequest | undefined,
   onSend: () => void
 ): Promise<GitlabWireResult> {
   const { headers, origin, secrets, projectPath } =
     await authenticateGitlabHost(options, input, signal, deadline);
-  const write = request?.kind === "retry" || request?.kind === "cancel";
+  const write = isGitlabWrite(request);
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (signal.aborted || Date.now() >= deadline) {
       throw new HttpTransportError("CANCELLED");
@@ -141,8 +172,7 @@ async function readWithinScope(
       maxBytes: options.maxBytes ?? 2_097_152,
       secrets,
       signal,
-      url: `${origin}/api/v4${request ? gitlabCiRoute(request) : `/projects/${encodeURIComponent(projectPath)}`}`,
-      ...(request ? { request } : {}),
+      ...gitlabEndpoint(origin, projectPath, request),
       onSend,
     });
     if (write && result.kind !== "transient") {
@@ -166,9 +196,9 @@ function readWithDeadline(
   options: GitlabTransportOptions,
   input: unknown,
   invocation: GitlabReadInvocation,
-  request?: GitlabCiRequest
+  request?: GitlabCiRequest | MrRequest
 ): Promise<GitlabWireResult> | GitlabWireResult {
-  const write = request?.kind === "retry" || request?.kind === "cancel";
+  const write = isGitlabWrite(request);
   const timeout = options.timeoutMs ?? (write ? 60_000 : 30_000);
   const maxBytes = options.maxBytes ?? 2_097_152;
   if (
@@ -236,6 +266,14 @@ export function createGitlabReadTransport(options: GitlabTransportOptions) {
       }).pipe(
         // oxlint-disable-next-line promise/prefer-await-to-callbacks -- Recover the Effect error channel.
         Effect.catch((error) => Effect.succeed(error))
+      ),
+    requestMr: (
+      input: unknown,
+      request: MrRequest,
+      invocation: GitlabReadInvocation = {}
+    ) =>
+      Effect.promise(
+        async () => await readWithDeadline(options, input, invocation, request)
       ),
   };
 }

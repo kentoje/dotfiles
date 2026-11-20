@@ -19,6 +19,13 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "description": { "type": "string", "maxLength": 65000 },
+          "commit_message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
           "cwd": {
             "type": "string",
             "minLength": 1
@@ -523,5 +530,11 @@
   "state_ownership": [
     "Task commit/push effects and bounded invocation progress; no durable auto-wake state"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "shipping-runtime",
+    "language": "typescript",
+    "module": "src/shipping/module-port.ts",
+    "export": "createShipCommand"
+  }
 }

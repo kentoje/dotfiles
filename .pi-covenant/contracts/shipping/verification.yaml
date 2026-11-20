@@ -1,2 +1,66 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: shipping-001-acceptance
+    obligation: SHIPPING-001
+    adapter: vitest
+    tests:
+      - ship.explicit
+      - ship.integration
+  - id: shipping-002-acceptance
+    obligation: SHIPPING-002
+    adapter: vitest
+    tests:
+      - ship.explicit
+      - ship.integration
+  - id: shipping-003-acceptance
+    obligation: SHIPPING-003
+    adapter: vitest
+    tests:
+      - ship.bounds
+  - id: shipping-004-acceptance
+    obligation: SHIPPING-004
+    adapter: vitest
+    tests:
+      - ship.delivery
+      - ship.integration
+  - id: shipping-005-acceptance
+    obligation: SHIPPING-005
+    adapter: vitest
+    tests:
+      - ship.scope
+      - ship.integration
+  - id: shipping-006-acceptance
+    obligation: SHIPPING-006
+    adapter: vitest
+    tests:
+      - ship.scope
+      - ship.integration
+  - id: shipping-007-acceptance
+    obligation: SHIPPING-007
+    adapter: vitest
+    tests:
+      - ship.feedback
+      - ship.integration
+      - ship.retry
+  - id: shipping-008-acceptance
+    obligation: SHIPPING-008
+    adapter: vitest
+    tests:
+      - ship.freshness
+  - id: shipping-009-acceptance
+    obligation: SHIPPING-009
+    adapter: vitest
+    tests:
+      - ship.bounds
+      - ship.retry
+  - id: shipping-010-acceptance
+    obligation: SHIPPING-010
+    adapter: vitest
+    tests:
+      - ship.ready
+      - ship.integration
+  - id: shipping-011-acceptance
+    obligation: SHIPPING-011
+    adapter: vitest
+    tests:
+      - ship.feedback

@@ -10,6 +10,8 @@ Project-specific decisions remain intentionally deferred until discovery: reposi
 
 Fleet mutations, automatic retrospectives, autonomous blocked-turn continuation, and universal browser checks remain outside this version.
 
-Module interfaces, dependencies and ownership are now explicit in [architecture](../architecture/README.md). Run its validator and deliberate-violation suite before implementation and after interface changes. Worktree implementation is authorized and implemented; project checks are now implemented; Pi registration and local repository context are implemented; other runtime modules remain pending.
+Module interfaces, dependencies and ownership are now explicit in [architecture](../architecture/README.md). Run its validator and deliberate-violation suite before implementation and after interface changes. Worktree implementation is authorized and implemented; project checks are now implemented; Pi registration and local repository context are implemented.
 
 GitLab is implemented under ADR-010 through ADR-012. Authentication uses trusted host configuration. Interactive Pi binds authority through exact-target confirmation. Live service compatibility remains to be exercised with a configured project.
+
+Jira and the existing-MR tool are implemented. The MR creation guard provides structured preflight and an opt-in literal Bash hook. Draft creation and mark-ready are private ports used by the explicit shipping workflow.

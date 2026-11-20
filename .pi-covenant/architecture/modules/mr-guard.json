@@ -294,5 +294,11 @@
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "mr-guard-runtime",
+    "language": "typescript",
+    "module": "src/mr-guard/module-port.ts",
+    "export": "makeMrCreationGuard"
+  }
 }

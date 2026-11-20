@@ -2,120 +2,133 @@ schema_version: 1
 component:
   id: shipping
   name: shipping
-  status: draft
+  status: active
 intent: ./intent.md
 obligations:
   - id: SHIPPING-001
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Completing an ordinary coding task must not require creating or updating a merge request.
-    verification: []
+    verification:
+      - shipping-001-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-002
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping actions must occur only within an explicit user request to ship.
-    verification: []
+    verification:
+      - shipping-002-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-003
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A blocked completion must report its blocker without automatically enqueuing or triggering another agent turn.
-    verification: []
+    verification:
+      - shipping-003-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-004
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: An explicit ship command must operate on the selected task branch and reuse an existing branch MR instead of creating a duplicate.
-    verification: []
+    verification:
+      - shipping-004-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-005
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must commit only task-authorized changes and must not stage unrelated user edits implicitly.
-    verification: []
+    verification:
+      - shipping-005-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-006
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must push normally and must not force-push, merge or deploy by default.
-    verification: []
+    verification:
+      - shipping-006-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-007
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must drive review feedback and required CI readiness for the latest pushed head within the current user-requested run.
-    verification: []
+    verification:
+      - shipping-007-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-008
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must not claim readiness from a pipeline or review observation belonging to an earlier head.
-    verification: []
+    verification:
+      - shipping-008-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-009
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must bound polling and repair rounds and return unresolved blockers without scheduling a new agent turn.
-    verification: []
+    verification:
+      - shipping-009-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-010
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must mark an MR ready for human review only after the selected project checks, required CI and addressed blocking feedback satisfy the readiness policy.
-    verification: []
+    verification:
+      - shipping-010-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: SHIPPING-011
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Shipping must preserve rejected or unresolved review findings with an explicit rationale rather than resolving every discussion indiscriminately.
-    verification: []
+    verification:
+      - shipping-011-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+sources:
+  - models/shipping/
+  - src/shipping/
 dependencies:
   - tool-protocol
   - repository-context
@@ -128,3 +141,7 @@ interfaces:
     language: typescript
     module: architecture/modules/shipping.json
     export: shipping-v1
+  - name: shipping-runtime
+    language: typescript
+    module: src/shipping/module-port.ts
+    export: createShipCommand

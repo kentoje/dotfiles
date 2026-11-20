@@ -1,6 +1,6 @@
 # Running the custom harness in Pi
 
-The harness is an additive standard Pi extension. It currently registers `project_cli`, `worktree`, `gitlab` and `jira`. MR, fleet, /ship and /harness-retro remain pending. Standard Pi retains its own prompt, controls and completion behavior. Covenant and TLA+ run only during harness development.
+The harness is an additive standard Pi extension. It currently registers `project_cli`, `worktree`, `gitlab`, `jira` and `mr`. Fleet and /harness-retro remain pending. Standard Pi retains its own prompt, controls and completion behavior. Covenant and TLA+ run only during harness development.
 
 ## Load the extension
 
@@ -67,3 +67,11 @@ Set `PI_COVENANT_GITLAB_HOST` and the absolute `PI_COVENANT_GITLAB_CREDENTIAL_FI
 ## Jira setup
 
 Set `PI_COVENANT_JIRA_SITE`, `PI_COVENANT_JIRA_EMAIL` and the absolute `PI_COVENANT_JIRA_CREDENTIAL_FILE` before loading the extension. Reads work in headless sessions. Writes and duplicate decisions use Pi confirmation. See [Jira setup and actions](../src/jira/README.md).
+
+## Merge request setup
+
+The `mr` tool shares GitLab configuration. Set `PI_COVENANT_INTERCEPT_MR_CREATION=1` to enable the supported direct creation guard and optionally supply `PI_COVENANT_MR_POLICY_FILE` for per-repository rules. See [MR setup and guard coverage](../src/mr/README.md).
+
+## Shipping to human review
+
+Run the explicit `/ship` command from a task branch. It shares GitLab and project check configuration. Exact file scope is required to commit uncommitted work. See [shipping usage and review decisions](../commands/ship/README.md).

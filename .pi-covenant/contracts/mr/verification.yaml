@@ -1,2 +1,64 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: mr-001-acceptance
+    obligation: MR-001
+    adapter: vitest
+    tests:
+      - mr.status
+      - mr.http
+      - foundation.sdk
+  - id: mr-002-acceptance
+    obligation: MR-002
+    adapter: vitest
+    tests:
+      - mr.threads
+      - mr.http
+  - id: mr-003-acceptance
+    obligation: MR-003
+    adapter: vitest
+    tests:
+      - mr.reply
+      - mr.http
+  - id: mr-004-acceptance
+    obligation: MR-004
+    adapter: vitest
+    tests:
+      - mr.update
+      - mr.http
+  - id: mr-005-acceptance
+    obligation: MR-005
+    adapter: vitest
+    tests:
+      - mr.status
+      - foundation.sdk
+  - id: mr-006-acceptance
+    obligation: MR-006
+    adapter: vitest
+    tests:
+      - mr.selection
+  - id: mr-007-acceptance
+    obligation: MR-007
+    adapter: vitest
+    tests:
+      - mr.threads
+  - id: mr-008-acceptance
+    obligation: MR-008
+    adapter: vitest
+    tests:
+      - mr.reply
+  - id: mr-009-acceptance
+    obligation: MR-009
+    adapter: vitest
+    tests:
+      - mr.partial
+      - mr.http
+  - id: mr-010-acceptance
+    obligation: MR-010
+    adapter: vitest
+    tests:
+      - mr.update
+  - id: mr-011-acceptance
+    obligation: MR-011
+    adapter: vitest
+    tests:
+      - mr.status

@@ -17,6 +17,7 @@ const pipelineSchema = Schema.Struct({
 const jobSchema = Schema.Struct({
   allow_failure: optionalFlag,
   commit: Schema.optionalKey(Schema.NullOr(Schema.Struct({ id: text }))),
+  failure_reason: optionalText,
   id: gitlabId,
   name: text,
   pipeline: Schema.Struct({
@@ -80,6 +81,7 @@ export function decodeGitlabJob(
     ...(typeof job.allow_failure === "boolean"
       ? { allow_failure: job.allow_failure }
       : {}),
+    ...(job.failure_reason ? { failure_reason: job.failure_reason } : {}),
     ...(typeof job.retried === "boolean" ? { retried: job.retried } : {}),
     ...(job.stage ? { stage: job.stage } : {}),
     ...(job.web_url ? { url: job.web_url } : {}),

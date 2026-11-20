@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "ship",
   "kind": "user-command",
-  "design_status": "specified-awaiting-implementation",
+  "design_status": "implemented",
   "description": "On an explicit shipping request, commit and push task changes, create/reuse a draft MR, address feedback and reach current-head CI readiness for human review.",
   "component": "shipping",
   "shared_protocol": "docs/tool-protocol.md",
@@ -14,6 +14,13 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "description": { "type": "string", "maxLength": 65000 },
+          "commit_message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
           "cwd": {
             "type": "string",
             "minLength": 1

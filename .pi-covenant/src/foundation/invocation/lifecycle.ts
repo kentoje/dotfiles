@@ -10,6 +10,8 @@ export interface PiHarnessOptions {
     readonly credentialFile: string;
   };
   readonly jira?: JiraHostConfig;
+  readonly interceptMrCreation?: boolean;
+  readonly mrPolicyFile?: string;
   readonly timeoutMs?: number;
 }
 /** Check stop at phase boundaries; in-flight cancellation is owned by each existing module. */

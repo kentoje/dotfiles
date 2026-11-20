@@ -22,3 +22,6 @@ export function createGitlabMutationCoordinator() {
     };
   };
 }
+
+/** Share the permit between public CI tools and the explicit shipping command. */
+export const acquireGitlabPipelineMutation = createGitlabMutationCoordinator();

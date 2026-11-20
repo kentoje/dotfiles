@@ -1,6 +1,6 @@
 # mr: behavior contract
 
-Status: specified design; all obligations draft. Kind: tool. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Must: MR status must identify the selected existing merge request and report its
 
 Why: The old workflow needs cheap review inspection and targeted updates. The user explicitly removed the automatic ship gate and requires explicit shipping.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-002
 
@@ -41,7 +41,7 @@ Must: MR discussion results must retain thread identity, author, body, resolutio
 
 Why: The old workflow needs cheap review inspection and targeted updates. The user explicitly removed the automatic ship gate and requires explicit shipping.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-003
 
@@ -51,7 +51,7 @@ Must: Replying to a merge request discussion must target the requested thread an
 
 Why: The old workflow needs cheap review inspection and targeted updates. The user explicitly removed the automatic ship gate and requires explicit shipping.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-004
 
@@ -61,7 +61,7 @@ Must: An MR update must modify only the requested metadata of the selected exist
 
 Why: The old workflow needs cheap review inspection and targeted updates. The user explicitly removed the automatic ship gate and requires explicit shipping.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-005
 
@@ -71,7 +71,7 @@ Must: Inspecting an MR or encountering a pipeline or review blocker must not sta
 
 Why: The old workflow needs cheap review inspection and targeted updates. The user explicitly removed the automatic ship gate and requires explicit shipping.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-006
 
@@ -81,7 +81,7 @@ Must: MR selection without an IID must require exactly one open MR for the selec
 
 Why: Choosing the first result can update the wrong MR.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-007
 
@@ -91,7 +91,7 @@ Must: MR collection results must identify incomplete pagination and must disting
 
 Why: An absent code position or partial list must not fabricate review state.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-008
 
@@ -101,7 +101,7 @@ Must: MR reply must finish posting the requested comment before attempting a sep
 
 Why: The resolution should not erase a discussion when its requested explanation failed to post.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-009
 
@@ -111,7 +111,7 @@ Must: A successful MR reply followed by failed resolution must return partial co
 
 Why: Repeating the whole action would duplicate the comment.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-010
 
@@ -121,7 +121,7 @@ Must: MR metadata update must reject an empty patch and must not regenerate unsp
 
 Why: An agent can propose text separately; the mutation should apply only the chosen text.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### MR-011
 
@@ -131,7 +131,7 @@ Must: MR status must associate pipeline observations with their SHA and identify
 
 Why: Old green pipelines must not imply readiness of new commits.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `status`
 

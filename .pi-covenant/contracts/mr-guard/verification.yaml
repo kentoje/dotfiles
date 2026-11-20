@@ -1,2 +1,36 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: mrguard-001-acceptance
+    obligation: MRGUARD-001
+    adapter: vitest
+    tests:
+      - mr-guard.direct
+      - foundation.sdk
+  - id: mrguard-002-acceptance
+    obligation: MRGUARD-002
+    adapter: vitest
+    tests:
+      - mr-guard.decision
+  - id: mrguard-003-acceptance
+    obligation: MRGUARD-003
+    adapter: vitest
+    tests:
+      - mr-guard.direct
+      - foundation.sdk
+  - id: mrguard-004-acceptance
+    obligation: MRGUARD-004
+    adapter: vitest
+    tests:
+      - mr-guard.decision
+  - id: mrguard-005-acceptance
+    obligation: MRGUARD-005
+    adapter: vitest
+    tests:
+      - mr-guard.policy
+      - mr-guard.git-evidence
+  - id: mrguard-006-acceptance
+    obligation: MRGUARD-006
+    adapter: vitest
+    tests:
+      - mr-guard.direct
+      - foundation.sdk

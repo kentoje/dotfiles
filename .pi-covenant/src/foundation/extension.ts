@@ -9,7 +9,10 @@ export default function piCovenantExtension(pi: ExtensionAPI) {
   const jiraSite = process.env.PI_COVENANT_JIRA_SITE;
   const jiraEmail = process.env.PI_COVENANT_JIRA_EMAIL;
   const jiraCredentialFile = process.env.PI_COVENANT_JIRA_CREDENTIAL_FILE;
+  const mrPolicyFile = process.env.PI_COVENANT_MR_POLICY_FILE;
   registerPiHarness(pi, {
+    interceptMrCreation: process.env.PI_COVENANT_INTERCEPT_MR_CREATION === "1",
+    ...(mrPolicyFile ? { mrPolicyFile } : {}),
     ...(jiraSite && jiraEmail && jiraCredentialFile
       ? {
           jira: {

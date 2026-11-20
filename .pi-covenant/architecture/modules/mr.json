@@ -1700,11 +1700,17 @@
   "consumes": {
     "tool-protocol": ["validate_boundary"],
     "repository-context": ["resolve"],
-    "gitlab": ["lookup_open_mrs", "pipeline"]
+    "gitlab": ["repository", "lookup_open_mrs", "pipeline"]
   },
   "host_capabilities": ["GitLab MR transport via trusted credentials"],
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "mr-runtime",
+    "language": "typescript",
+    "module": "src/mr/module-port.ts",
+    "export": "makeMrModule"
+  }
 }

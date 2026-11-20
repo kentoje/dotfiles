@@ -7,9 +7,8 @@ import { Type } from "typebox";
 import { Value } from "typebox/value";
 
 import { makeGitlabModule } from "../../gitlab/module-port.js";
-import { createGitlabMutationCoordinator } from "../gitlab/coordination.js";
-import { createGlabCredentialProvider } from "../gitlab/credential.js";
-import { createGitlabReadTransport } from "../gitlab/transport.js";
+import { createConfiguredGitlabTransport } from "../gitlab/configured.js";
+import { acquireGitlabPipelineMutation } from "../gitlab/coordination.js";
 import {
   piBoundaryFailure,
   piInvocationDeadline,
@@ -48,22 +47,9 @@ const parameters = Type.Object(
 
 /** Present the eight GitLab actions and obtain exact-target authority from the Pi host. */
 export function createGitlabTool(options: PiHarnessOptions) {
-  const acquireMutation = createGitlabMutationCoordinator();
+  const acquireMutation = acquireGitlabPipelineMutation;
   const config = options.gitlab;
-  const transport = config
-    ? createGitlabReadTransport({
-        hosts: [
-          {
-            apiOrigin: config.apiOrigin,
-            credential: createGlabCredentialProvider({
-              configPath: config.credentialFile,
-              host: config.host,
-            }),
-            host: config.host,
-          },
-        ],
-      })
-    : null;
+  const transport = config ? createConfiguredGitlabTransport(config) : null;
   return {
     description:
       "Read GitLab repository, pipeline, job or log data. Retry or cancel requires an explicitly selected repository and pipeline ID and host authorization.",

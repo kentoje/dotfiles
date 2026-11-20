@@ -113,3 +113,6 @@ export type {
   GitlabCiRequest,
   GitlabMutationTarget,
 } from "./transport/ci-request.js";
+
+/** Decode provider pagination without trusting a next-page URL as a destination. */
+export { decodeGitlabPage, gitlabPageQuery } from "./pagination/cursor.js";

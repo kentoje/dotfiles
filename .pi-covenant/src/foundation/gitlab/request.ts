@@ -65,8 +65,7 @@ async function rejectGitlabResponse(
         : "REMOTE_STATE_UNKNOWN",
       delivery: rejected ? "rejected" : "unknown",
       kind: "error",
-      message:
-        "GitLab pipeline request did not return a valid acknowledgement.",
+      message: "GitLab write did not return a valid acknowledgement.",
     };
   }
   if ([429, 502, 503, 504].includes(response.status)) {
@@ -90,24 +89,75 @@ async function rejectGitlabResponse(
     message: "GitLab repository GET was rejected.",
   };
 }
-/** Use manual redirects; only transient reads are eligible for another attempt. */
-export async function requestGitlabProject(options: {
+interface GitlabRequestOptions {
   url: string;
   request?: GitlabCiRequest;
+  method?: "POST" | "PUT";
+  body?: object;
+  paged?: boolean;
+  acknowledgement?: number;
   onSend: () => void;
   headers: Record<string, string>;
   signal: AbortSignal;
   maxBytes: number;
   secrets: readonly string[];
-}): Promise<GitlabAttempt> {
+}
+
+async function decodeGitlabResponse(
+  response: Response,
+  options: GitlabRequestOptions
+): Promise<GitlabWireResult> {
+  if (options.request?.kind === "logs") {
+    return {
+      body: await readGitlabTraceWindow(response, {
+        ...options.request,
+        secrets: options.secrets,
+      }),
+      kind: "ok",
+    };
+  }
+  const body = await readBoundedJsonBody(response, options.maxBytes);
+  const redacted = redactHttpJson(body, options.secrets);
+  if (Buffer.byteLength(JSON.stringify(redacted)) > options.maxBytes) {
+    throw new HttpTransportError("OUTPUT_LIMIT");
+  }
+  if (options.paged || (options.request && "page" in options.request)) {
+    return {
+      body: redacted,
+      kind: "ok",
+      pagination: {
+        linkNext: gitlabLinkNext(response.headers.get("link")),
+        next: response.headers.get("x-next-page"),
+        page: response.headers.get("x-page"),
+        perPage: response.headers.get("x-per-page"),
+      },
+    };
+  }
+  return { body: redacted, kind: "ok" };
+}
+
+/** Use manual redirects; only transient reads are eligible for another attempt. */
+export async function requestGitlabProject(
+  options: GitlabRequestOptions
+): Promise<GitlabAttempt> {
   const write =
-    options.request?.kind === "retry" || options.request?.kind === "cancel";
+    options.method !== undefined ||
+    options.request?.kind === "retry" ||
+    options.request?.kind === "cancel";
+  const bodyText =
+    options.body === undefined ? undefined : JSON.stringify(options.body);
+  if (bodyText && Buffer.byteLength(bodyText) > 262_144) {
+    throw new HttpTransportError("OUTPUT_LIMIT");
+  }
   let response: Response;
   try {
     options.onSend();
     response = await fetch(options.url, {
-      headers: options.headers,
-      method: write ? "POST" : "GET",
+      headers: bodyText
+        ? { ...options.headers, "Content-Type": "application/json" }
+        : options.headers,
+      method: options.method ?? (write ? "POST" : "GET"),
+      ...(bodyText ? { body: bodyText } : {}),
       redirect: "manual",
       signal: options.signal,
     });
@@ -123,31 +173,12 @@ export async function requestGitlabProject(options: {
   if (!response.ok) {
     return rejectGitlabResponse(response, write);
   }
-  if (options.request?.kind === "logs") {
-    return {
-      body: await readGitlabTraceWindow(response, {
-        ...options.request,
-        secrets: options.secrets,
-      }),
-      kind: "ok",
-    };
+  if (
+    options.acknowledgement !== undefined &&
+    response.status !== options.acknowledgement
+  ) {
+    await response.body?.cancel().catch(() => null);
+    throw new HttpTransportError("REMOTE_STATE_UNKNOWN");
   }
-  const body = await readBoundedJsonBody(response, options.maxBytes);
-  const redacted = redactHttpJson(body, options.secrets);
-  if (Buffer.byteLength(JSON.stringify(redacted)) > options.maxBytes) {
-    throw new HttpTransportError("OUTPUT_LIMIT");
-  }
-  if (options.request && "page" in options.request) {
-    return {
-      body: redacted,
-      kind: "ok",
-      pagination: {
-        linkNext: gitlabLinkNext(response.headers.get("link")),
-        next: response.headers.get("x-next-page"),
-        page: response.headers.get("x-page"),
-        perPage: response.headers.get("x-per-page"),
-      },
-    };
-  }
-  return { body: redacted, kind: "ok" };
+  return decodeGitlabResponse(response, options);
 }
