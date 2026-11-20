@@ -271,7 +271,24 @@ obligations:
     description: Optional keep-going execution must retain every failure while attempting later mandatory checks; it must never turn partial success into pass or schedule new commands after cancellation or global deadline expiry.
     verification:
       - project-check-keep-going
+  - id: PROJECTCLI-031
+    status: active
+    severity: high
+    kind: invariant
+    description: Applying a generated project check profile must require exact approval of the current proposal and preserve existing user-owned or changed profiles.
+    verification: [project-profile-reviewed-write]
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
+  - id: PROJECTCLI-032
+    status: active
+    severity: high
+    kind: invariant
+    description: A named optional capability runs only when declared by the selected project and explicitly invoked, and its actual process outcome must be reported.
+    verification: [project-optional-capabilities]
 sources:
+  - models/project-authoring/
   - src/project-cli/
   - models/project-checks/
 dependencies:

@@ -86,6 +86,12 @@ obligations:
     description: Opt-in GitLab target discovery must select an explicit or single distinct allowed fetch target with canonical host path and provenance; ambiguous remotes or conflicting explicit checkout and repository choices must block without executing Git config includes.
     verification:
       - repository-context.gitlab-target
+  - id: REPOSITORYCONTEXT-010
+    status: active
+    severity: high
+    kind: invariant
+    description: Discover local check capability IDs and a declared Jira project with provenance; ignore malformed declarations and never accept credentials from them.
+    verification: [repository-context.project-declarations]
 sources:
   - src/repository-context/
 dependencies:

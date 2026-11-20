@@ -14,7 +14,8 @@ import {
 import { jiraIssueKey, jiraObject, jiraString } from "../issues/read.js";
 import { fetchJiraPage } from "../search/search.js";
 
-const pageLimit = 20;
+const metadataPageLimit = 20;
+const duplicatePageLimit = 100;
 const lockedCreateFields = new Set(["project", "issuetype", "summary"]);
 
 async function fetchJiraCreateMetadata(
@@ -23,7 +24,7 @@ async function fetchJiraCreateMetadata(
   type?: string
 ) {
   const entries: unknown[] = [];
-  for (let page = 0; page < pageLimit; page += 1) {
+  for (let page = 0; page < metadataPageLimit; page += 1) {
     const start = entries.length;
     // oxlint-disable-next-line no-await-in-loop -- Each offset depends on the preceding page size.
     const response = await op.read({
@@ -68,7 +69,7 @@ async function collectJiraDuplicates(op: JiraOperation, project: string) {
     { key: string; summary: string; state: string }
   >();
   const tokens = new Set<string>();
-  for (let page = 0; page < pageLimit; page += 1) {
+  for (let page = 0; page < duplicatePageLimit; page += 1) {
     // oxlint-disable-next-line no-await-in-loop -- The next page requires the provider continuation from this page.
     const result = await fetchJiraPage(query, op, project);
     for (const { key, summary, state } of result.issues) {

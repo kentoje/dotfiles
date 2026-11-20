@@ -15,3 +15,7 @@ bindings:
     adapter: vitest
     tests:
       - repository-context.gitlab-target
+  - id: repository-context.project-declarations
+    obligation: REPOSITORYCONTEXT-010
+    adapter: vitest
+    tests: [repository-context.project-declarations]

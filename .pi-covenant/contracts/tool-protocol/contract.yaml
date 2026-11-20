@@ -2,7 +2,7 @@ schema_version: 1
 component:
   id: tool-protocol
   name: tool-protocol
-  status: draft
+  status: active
 intent: ./intent.md
 obligations:
   - id: TOOLPROTOCOL-001
@@ -105,10 +105,20 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+  - id: TOOLPROTOCOL-011
+    status: active
+    severity: high
+    kind: invariant
+    description: Shared TypeBox boundaries must reject invalid payloads against the pinned caller schema with no coercion or added approval fields.
+    verification: [tool-protocol-strict-boundary]
+sources: [src/tool-protocol/]
 dependencies: []
 interfaces:
   - name: tool-protocol-v1
     language: typescript
     module: architecture/modules/tool-protocol.json
     export: tool-protocol-v1
+  - name: tool-protocol-runtime
+    language: typescript
+    module: src/tool-protocol/module-port.ts
+    export: validateToolBoundary

@@ -3,7 +3,13 @@ import { Console, Effect, Option } from "effect";
 import { Command, Flag } from "effect/cli";
 
 import type { DiscoveredProjectCheck } from "./discovery/model.js";
-import { inspectProjectChecks, runProjectChecks } from "./module-port.js";
+import {
+  applyProjectProfile,
+  inspectProjectChecks,
+  proposeProjectProfile,
+  runProjectChecks,
+  runProjectCapability,
+} from "./module-port.js";
 
 const flags = {
   config: Flag.String("config").pipe(
@@ -125,9 +131,98 @@ const inspect = Command.make(
     "Discover checks, selection reasons and local source evidence without executing the project"
   )
 );
+
+const profileFlags = {
+  checks: Flag.String("checks").pipe(
+    Flag.optional,
+    Flag.withDescription("Comma-separated exact discovered check IDs")
+  ),
+  json: flags.json,
+  project: flags.project,
+};
+const profileRequest = (project: string, checks: Option.Option<string>) => ({
+  project,
+  ...(Option.isSome(checks)
+    ? { checks: checks.value.split(",").map((id) => id.trim()) }
+    : {}),
+});
+function reportProfileFailure(error: { message: string }) {
+  process.exitCode = 2;
+  return Console.error(error.message);
+}
+function printProfileResult<A, E extends { message: string }>(
+  effect: Effect.Effect<A, E>
+) {
+  return effect.pipe(
+    Effect.flatMap((result) => Console.log(JSON.stringify(result, null, 2))),
+    Effect.catch(reportProfileFailure)
+  );
+}
+
+function profileCommand(name: "propose" | "maintain") {
+  return Command.make(name, profileFlags, ({ project, checks }) =>
+    printProfileResult(proposeProjectProfile(profileRequest(project, checks)))
+  );
+}
+const apply = Command.make(
+  "apply",
+  { ...profileFlags, proposal: Flag.String("proposal") },
+  ({ project, checks, proposal }) =>
+    printProfileResult(
+      applyProjectProfile({
+        ...profileRequest(project, checks),
+        proposal_id: proposal,
+      })
+    )
+);
+const runCapability = Command.make(
+  "run",
+  {
+    arguments: Flag.String("arguments").pipe(
+      Flag.withDefault("[]"),
+      Flag.withDescription("Additional argument vector as a JSON array")
+    ),
+    capability: Flag.String("capability"),
+    project: flags.project,
+  },
+  ({ arguments: args, capability, project }) =>
+    Effect.gen(function* projectCapabilityCommand() {
+      const parsed = yield* Effect.try({
+        catch: () => null,
+        try: () => JSON.parse(args) as unknown,
+      }).pipe(Effect.orElseSucceed(() => null));
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every(
+          (argument): argument is string => typeof argument === "string"
+        )
+      ) {
+        process.exitCode = 2;
+        return yield* Console.error(
+          "PROJECT_CAPABILITY_ARGS: expected a JSON array of strings."
+        );
+      }
+      const report = yield* runProjectCapability({
+        arguments: parsed,
+        capability_id: capability,
+        project,
+      });
+      yield* Console.log(JSON.stringify(report, null, 2));
+      process.exitCode = { blocked: 2, cancelled: 130, fail: 1, pass: 0 }[
+        report.outcome
+      ];
+    })
+);
 Command.make("project").pipe(
   Command.withDescription("Repository check discovery and execution"),
-  Command.withSubcommands([check, inspect]),
+  Command.withSubcommands([
+    check,
+    inspect,
+    profileCommand("propose"),
+    profileCommand("maintain"),
+    apply,
+    runCapability,
+  ]),
   Command.run({ version: "0.1.0" }),
   Effect.provide(NodeServices.layer),
   Effect.onInterrupt(() =>

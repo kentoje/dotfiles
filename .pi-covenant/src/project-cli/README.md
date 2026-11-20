@@ -42,10 +42,40 @@ Commands run sequentially. Failed/unavailable/timed-out checks stop execution by
 
 ## Development verification
 
-The public module port exports inspectProjectChecks and runProjectChecks. Standard Pi registration is implemented; see [Pi setup](../../docs/pi-integration.md). Legacy authoring/maintenance and execute_capability ports remain deferred.
+The public module port exposes discovery, mandatory checks, profile proposals and publication, and explicit capability execution. See [Pi setup](../../docs/pi-integration.md).
 
 Covenant/TLA+ are development-only. The completion model checks two mandatory checks; the selection model checks representative ordinary/E2E categories, explicit precedence and omitted coverage. Real filesystem/process/CLI tests verify the implementation and parser cases. These finite models and explicit test-bound correspondence do not prove arbitrary-list/category equivalence, underlying project correctness, shell-program semantics, continuous isolation or termination. The actual runner does not load models or Covenant.
 
 Standalone commands in local CI `script`/`run` and instruction code blocks/backticks can fill missing ordinary categories. Only known literal tool invocations are supported; simple quoted bash/sh wrappers are unwrapped, never executed during discovery. Source file/line provenance is retained. TypeScript compiler checks require explicit noEmit or a contained local config whose relative extends chain resolves noEmit=true; build commands are never substituted. README samples remain available. Environment setup, shell control flow, fix/watch/UI flags and unsupported configuration inheritance require explicit project selection. Browser install/codegen helpers are categorized as setup and never auto-selected.
 
 The optional execution-mode model explores 138 states and three invariants; last-result-wins, dispatch after stop and premature keep-going termination are deliberately detected. Together the three models have eight detected deliberate faults. Modeling remains a development activity only.
+
+## Review and save a project profile
+
+Run `project propose --project /path/to/repo` to see discovered commands and a proposal ID. Add `--checks check,ts:check,test` to select exact discovered IDs. Use the same project and selection with `project apply --proposal <id>` to create `project-checks.json`. Run `project check` afterwards to verify the saved profile.
+
+Run `project maintain` to review drift. It retains the agreed check IDs. If a command is missing, explicitly select a replacement. Apply the new proposal ID to save the update. The command preserves edited and hand-authored profiles.
+
+In Pi, use `propose` to review the initial plan and `create` with its `proposal_id` to save. Use `maintain` without a proposal ID to review changes and with the matching ID to save. Pass exact check IDs in `capabilities` to choose a custom set. Pi shows the target and commands before writing.
+
+## Optional project commands
+
+Declare optional commands in the selected project's `project-capabilities.json`. Project owners supply the actual scripts and choose the capability IDs.
+
+```json
+{
+  "capabilities": [
+    { "id": "preview:url", "command": "pnpm", "args": ["run", "preview:url"] },
+    {
+      "id": "story:show",
+      "command": "pnpm",
+      "args": ["run", "story:show", "--"],
+      "accepts_arguments": true
+    }
+  ]
+}
+```
+
+Run `project run --capability preview:url`, or supply literal arguments with `project run --capability story:show --arguments '["editor--default"]'`. Pi uses `execute_capability` with a `capability_id` and an `arguments` array. The project command owns app identity, readiness, authentication, screenshots, and persistent resources. Use a bounded command that exits after producing its result. The runner reports its actual exit and bounded output.
+
+To set the default Jira project for create and search in this repository, add `{"jira_project":"CI"}` to `project-services.json`. An explicit Jira project argument takes precedence.

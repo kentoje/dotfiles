@@ -29,7 +29,7 @@ const packageSchema = Schema.Struct({
 
 /** Inventory existing check commands and their selection evidence without running or writing project code. */
 export const inspectProjectChecks = Effect.fn("inspectProjectChecks")(
-  (input: unknown) =>
+  (input: unknown, discoveryOnly = false) =>
     Effect.tryPromise({
       catch: (error) =>
         new ProjectCheckError({
@@ -46,8 +46,9 @@ export const inspectProjectChecks = Effect.fn("inspectProjectChecks")(
         }
         const source = request.config ?? "project-checks.json";
         const explicit =
-          Boolean(request.config) ||
-          (await projectFileExists(join(project, source)));
+          !discoveryOnly &&
+          (Boolean(request.config) ||
+            (await projectFileExists(join(project, source))));
         const configured = explicit
           ? await decodeProjectCheckPlan(
               project,

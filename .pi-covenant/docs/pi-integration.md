@@ -12,7 +12,7 @@ pi -e /Users/kento/dotfiles/.pi-covenant/src/foundation/extension.ts
 
 The package also declares its extension in package.json for Pi package loading. Loading explicitly avoids changing global Pi configuration. Development and acceptance use standard Pi 1.5.0 with Node 24; other Pi variants/versions have not been verified.
 
-`project_cli` accepts `action: inspect | check`, optional `project` and `config`, and `keep_going` for check only. Project paths resolve from the current Pi session cwd, including relative explicit overrides. Inspection reports the selected/covered/available inventory; check reports every selected outcome and failure diagnostics. A failed check is an error result, even if later checks pass. E2E and builds remain project-specific.
+`project_cli` provides `inspect`, `check`, `propose`, `create`, `maintain`, and `execute_capability`. Check accepts `keep_going` and reports per-command start and outcome. Profile writes and optional command execution require exact Pi confirmation. See [project CLI usage](../src/project-cli/README.md). Project paths resolve from the current Pi session cwd, including relative explicit overrides. Inspection reports the selected/covered/available inventory; check reports every selected outcome and failure diagnostics. A failed check is an error result, even if later checks pass. E2E and builds remain project-specific.
 
 ## Configure worktrees explicitly
 
@@ -52,7 +52,7 @@ Each call validates the complete action input, resolves local context, then disp
 
 Progress reports context resolution and inspection/execution stages. Per-check/live setup logs are not streamed. Final text includes actionable outcomes; display text is capped at 16 KiB and marked when truncated, while structured details preserve module reports and their existing log limits. Cancellation before dispatch is reported as cancelled; known module results remain authoritative if delivery races a later cancellation. Errors do not schedule another turn.
 
-Context uses bounded local filesystem/Git metadata reads, not subprocesses, fetches or service queries. It chooses the nearest package/check-config project marker inside the current Git worktree, otherwise the Git root or selected non-Git directory. Linked worktrees, loose/packed refs and detached/unborn HEAD are observed where metadata is supported. Service IDs, default-branch policy, broader capabilities and project-specific auth remain unavailable. Bare repositories, reftable reference lookup and arbitrary setup/config discovery are not supported by this slice. No cache carries a previous invocation's target into another call.
+Context uses bounded local filesystem/Git metadata reads, not subprocesses, fetches or service queries. It chooses the nearest package/check-config project marker inside the current Git worktree, otherwise the Git root or selected non-Git directory. Linked worktrees, loose/packed refs and detached/unborn HEAD are observed where metadata is supported. The context reads declared check and optional capability IDs and a Jira project key from `project-services.json`. Explicit Jira project arguments take precedence. The configured Jira origin and credentials remain host-owned. Remote default-branch policy and project-specific authentication are outside local discovery. Bare repositories, reftable reference lookup and arbitrary setup/config discovery are not supported by this slice. No cache carries a previous invocation's target into another call.
 
 ## Verification and remaining work
 

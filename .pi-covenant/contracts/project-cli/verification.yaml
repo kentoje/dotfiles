@@ -70,3 +70,15 @@ bindings:
     adapter: vitest
     tests:
       - project-cli.keep-going
+  - id: project-profile-reviewed-write
+    obligation: PROJECTCLI-031
+    adapter: vitest
+    tests: [project-profile.reviewed-write]
+  - id: project-optional-capabilities
+    obligation: PROJECTCLI-032
+    adapter: vitest
+    tests:
+      [
+        project-cli.optional-capabilities,
+        foundation.optional-capability-approval,
+      ]

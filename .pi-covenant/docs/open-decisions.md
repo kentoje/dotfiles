@@ -2,7 +2,7 @@
 
 The harness design scope is specified in the [catalogue](tool-catalogue.md) and per-component decisions.yml files.
 
-Confirmed by the user: standard Pi; separate GitLab surface including explicit pipeline retry/cancel; Jira get/search/create/update/comment/transition; fleet status/versions only; explicit retrospective; minimal per-project mandatory check runner first; broad CLI authoring, maintenance and preview/Storybook capabilities deferred; no universal E2E rule; no runtime Covenant gate; no automatic follow-up turn on blockers. Explicit /ship includes commit, push, draft MR creation/reuse, review feedback and CI readiness. It does not merge or deploy.
+Confirmed by the user: standard Pi; separate GitLab surface including explicit pipeline retry/cancel; Jira get/search/create/update/comment/transition; fleet status/versions only; explicit retrospective; minimal per-project mandatory check runner first; reviewed project profile authoring and maintenance; optional per-project preview and Storybook commands; no universal E2E rule; no runtime Covenant gate; no automatic follow-up turn on blockers. Explicit /ship includes commit, push, draft MR creation/reuse, review feedback and CI readiness. It does not merge or deploy.
 
 Authored defaults, open to revision: bounded execution limits in design-defaults.json, command spelling, generated CLI default paths and backlog record format. They are specified sufficiently for implementation but are not represented as user-approved preferences.
 

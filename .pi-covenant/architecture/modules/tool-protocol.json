@@ -181,5 +181,11 @@
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
+  "implementation_binding": {
+    "export": "validateToolBoundary",
+    "language": "typescript",
+    "module": "src/tool-protocol/module-port.ts",
+    "name": "tool-protocol-runtime"
+  },
   "test_pattern": "**/*.test.ts"
 }

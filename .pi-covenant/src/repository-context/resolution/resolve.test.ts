@@ -106,3 +106,52 @@ contractTest("repository-context.unavailable", async () => {
     await rm(temp, { force: true, recursive: true });
   }
 });
+
+contractTest("repository-context.project-declarations", async () => {
+  const project = await realpath(
+    await mkdtemp(join(tmpdir(), "pi-context-declarations-"))
+  );
+  try {
+    await writeFile(
+      join(project, "project-checks.json"),
+      JSON.stringify({
+        checks: [{ args: ["test"], command: "npm", id: "test" }],
+      })
+    );
+    await writeFile(
+      join(project, "project-services.json"),
+      JSON.stringify({ jira_project: "CI" })
+    );
+    const result = await resolveProjectContext({}, { sessionCwd: project });
+    expect(result.data).toMatchObject({
+      available_capabilities: ["test"],
+      jira_project: "CI",
+      sources: expect.arrayContaining([
+        {
+          fact: "available_capabilities",
+          source: join(project, "project-checks.json"),
+        },
+        {
+          fact: "jira_project",
+          source: join(project, "project-services.json"),
+        },
+      ]),
+    });
+    await writeFile(
+      join(project, "project-services.json"),
+      JSON.stringify({
+        jira_project: "CI",
+        jira_token: "fake",
+      })
+    );
+    const invalid = await resolveProjectContext({}, { sessionCwd: project });
+    expect(invalid.data).toMatchObject({
+      jira_project: null,
+      unavailable: expect.arrayContaining([
+        expect.objectContaining({ fact: "jira_project" }),
+      ]),
+    });
+  } finally {
+    await rm(project, { force: true, recursive: true });
+  }
+});

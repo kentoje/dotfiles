@@ -5,9 +5,13 @@ import { Schema } from "effect";
 
 import type { DiscoveredProjectCheck } from "../discovery/model.js";
 
-const argument = Schema.String.check(Schema.isPattern(/^[^\0]*$/u));
-const checkSchema = Schema.Struct({
-  args: Schema.Array(argument),
+/** Literal process argument never contains a NUL byte. */
+export const projectCommandArgument = Schema.String.check(
+  Schema.isPattern(/^[^\0]*$/u)
+);
+/** Common bounded command configuration for required checks and optional capabilities. */
+export const projectCommandSchema = Schema.Struct({
+  args: Schema.Array(projectCommandArgument),
   command: Schema.NonEmptyString.check(Schema.isPattern(/^[^\0]*\S[^\0]*$/u)),
   cwd: Schema.optionalKey(Schema.NonEmptyString),
   id: Schema.NonEmptyString.check(
@@ -21,7 +25,10 @@ const checkSchema = Schema.Struct({
   ),
 });
 const configuration = Schema.Struct({
-  checks: Schema.NonEmptyArray(checkSchema),
+  checks: Schema.NonEmptyArray(projectCommandSchema),
+  managed: Schema.optionalKey(
+    Schema.Struct({ checksum: Schema.String, discovery: Schema.String })
+  ),
 });
 
 /** Configuration errors block execution before any mandatory command starts. */

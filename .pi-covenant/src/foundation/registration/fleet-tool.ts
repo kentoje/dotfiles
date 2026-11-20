@@ -1,7 +1,6 @@
 import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { Effect } from "effect";
 import { Type } from "typebox";
-import { Value } from "typebox/value";
 
 import { makeFleetModule } from "../../fleet/module-port.js";
 import type {
@@ -10,6 +9,7 @@ import type {
 } from "../../fleet/module-port.js";
 import { makeMrModule } from "../../mr/module-port.js";
 import { resolveProjectContext } from "../../repository-context/module-port.js";
+import { validateToolBoundary } from "../../tool-protocol/module-port.js";
 import { loadFleetInventory } from "../fleet/inventory.js";
 import { readFleetStatus } from "../fleet/status.js";
 import { readFleetVersions } from "../fleet/versions.js";
@@ -100,7 +100,7 @@ export function createFleetTool(options: PiHarnessOptions) {
       "Read status or exact declared package versions across configured repositories.",
     async execute(_id, input: unknown, signal) {
       try {
-        if (!Value.Check(parameters, input)) {
+        if (!validateToolBoundary(parameters, input)) {
           throw new Error("FLEET_INPUT: expected status or versions.");
         }
         const repositories = await loadFleetInventory(options.fleetFile);

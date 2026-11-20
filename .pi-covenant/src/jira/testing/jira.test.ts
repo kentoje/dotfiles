@@ -27,6 +27,43 @@ const sprint = {
   schema: { type: "number" },
 };
 const ok = (data: unknown) => Promise.resolve({ data, kind: "ok" } as const);
+function jiraFixtureIssues(
+  mode: string | undefined,
+  scans: number,
+  token: string | null
+) {
+  if (mode === "large" || mode === "unbounded") {
+    const page = Number(token ?? 0) + 1;
+    if (page === 21 && mode === "large") {
+      return ok({ isLast: true, issues: [issue] });
+    }
+    return ok({ isLast: false, issues: [], nextPageToken: String(page) });
+  }
+  if (mode === "incomplete") {
+    return ok({ issues: [] });
+  }
+  if (mode === "match" || mode === "changed") {
+    return ok({
+      isLast: true,
+      issues: [
+        scans === 1 || mode === "match"
+          ? issue
+          : {
+              ...issue,
+              fields: { ...issue.fields, status: { name: "Closed" } },
+            },
+      ],
+    });
+  }
+  if (!token && mode === "pages") {
+    return ok({
+      isLast: false,
+      issues: [issue],
+      nextPageToken: "next-token",
+    });
+  }
+  return ok({ isLast: true, issues: [] });
+}
 function setup(options: { mode?: string; authorize?: boolean } = {}) {
   const calls: JiraRequest[] = [];
   let scans = 0;
@@ -42,30 +79,11 @@ function setup(options: { mode?: string; authorize?: boolean } = {}) {
       }
       case "search": {
         scans += 1;
-        if (options.mode === "incomplete") {
-          return ok({ issues: [] });
-        }
-        if (options.mode === "match" || options.mode === "changed") {
-          return ok({
-            isLast: true,
-            issues: [
-              scans === 1 || options.mode === "match"
-                ? issue
-                : {
-                    ...issue,
-                    fields: { ...issue.fields, status: { name: "Closed" } },
-                  },
-            ],
-          });
-        }
-        if (!r.query.get("nextPageToken") && options.mode === "pages") {
-          return ok({
-            isLast: false,
-            issues: [issue],
-            nextPageToken: "next-token",
-          });
-        }
-        return ok({ isLast: true, issues: [] });
+        return jiraFixtureIssues(
+          options.mode,
+          scans,
+          r.query.get("nextPageToken")
+        );
       }
       case "types": {
         return ok({
@@ -240,6 +258,32 @@ contractTest("jira.duplicates", async () => {
   });
   expect(approved.calls.filter((r) => r.route === "search")).toHaveLength(2);
   expect(approved.writes()).toBe(1);
+});
+
+contractTest("jira.large-duplicate-scan", async () => {
+  const large = setup({ mode: "large" });
+  await expect(
+    Effect.runPromise(large.jira.create(create))
+  ).resolves.toMatchObject({
+    status: "ok",
+  });
+  expect(large.confirmations[0]).toMatchObject({
+    duplicate: { matches: [{ key: "APP-1", state: "Open" }] },
+  });
+  expect(
+    large.calls.filter((request) => request.route === "search")
+  ).toHaveLength(42);
+  expect(large.writes()).toBe(1);
+
+  const unbounded = setup({ mode: "unbounded" });
+  await expect(
+    Effect.runPromise(unbounded.jira.create(create))
+  ).resolves.toMatchObject({
+    error: { code: "SEARCH_INCOMPLETE" },
+    status: "blocked",
+  });
+  expect(unbounded.confirmations).toHaveLength(0);
+  expect(unbounded.writes()).toBe(0);
 });
 
 contractTest("jira.authorization", async () => {

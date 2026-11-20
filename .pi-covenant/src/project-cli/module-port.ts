@@ -12,3 +12,10 @@ export type {
   ProjectCheckInvocation,
   ProjectCheckResult,
 } from "./execution/process.js";
+/** Static project profile proposals and explicit reviewed publication. */
+export {
+  applyProjectProfile,
+  proposeProjectProfile,
+} from "./authoring/profile.js";
+/** Execute one explicitly selected project capability with inherited host limits. */
+export { runProjectCapability } from "./capability/run.js";

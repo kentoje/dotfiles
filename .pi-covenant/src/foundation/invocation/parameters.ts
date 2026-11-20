@@ -5,10 +5,23 @@ const optionalString = () => Type.Optional(Type.String({ minLength: 1 }));
 /** Pi accepts one discriminated action at a time; unknown or unrelated fields are rejected. */
 export const projectToolParameters = Type.Object(
   {
-    action: Type.Union([Type.Literal("inspect"), Type.Literal("check")]),
+    action: Type.Union([
+      Type.Literal("inspect"),
+      Type.Literal("check"),
+      Type.Literal("propose"),
+      Type.Literal("create"),
+      Type.Literal("maintain"),
+      Type.Literal("execute_capability"),
+    ]),
+    arguments: Type.Optional(Type.Array(Type.String(), { maxItems: 32 })),
+    capabilities: Type.Optional(
+      Type.Array(Type.String({ minLength: 1 }), { maxItems: 64, minItems: 1 })
+    ),
+    capability_id: optionalString(),
     config: optionalString(),
     keep_going: Type.Optional(Type.Boolean()),
     project: optionalString(),
+    proposal_id: optionalString(),
   },
   { additionalProperties: false }
 );
@@ -21,8 +34,34 @@ const projectFields = {
   project: Schema.optionalKey(Schema.NonEmptyString),
 };
 /** Effect validates tool invocation input again even if a caller bypasses Pi's argument validator. */
+const profileFields = {
+  capabilities: Schema.optionalKey(
+    Schema.Array(Schema.NonEmptyString).check(
+      Schema.isMinLength(1),
+      Schema.isMaxLength(64)
+    )
+  ),
+  project: Schema.optionalKey(Schema.NonEmptyString),
+};
 export const projectToolRequest = Schema.Union([
   Schema.Struct({ action: Schema.Literal("inspect"), ...projectFields }),
+  Schema.Struct({
+    action: Schema.Literal("execute_capability"),
+    arguments: Schema.Array(Schema.String).check(Schema.isMaxLength(32)),
+    capability_id: Schema.NonEmptyString,
+    project: Schema.optionalKey(Schema.NonEmptyString),
+  }),
+  Schema.Struct({ action: Schema.Literal("propose"), ...profileFields }),
+  Schema.Struct({
+    action: Schema.Literal("create"),
+    ...profileFields,
+    proposal_id: Schema.NonEmptyString,
+  }),
+  Schema.Struct({
+    action: Schema.Literal("maintain"),
+    ...profileFields,
+    proposal_id: Schema.optionalKey(Schema.NonEmptyString),
+  }),
   Schema.Struct({
     action: Schema.Literal("check"),
     ...projectFields,

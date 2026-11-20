@@ -1,5 +1,6 @@
 import type {
   ToolDefinition,
+  ExtensionContext,
   AgentToolUpdateCallback,
 } from "@earendil-works/pi-coding-agent";
 import { Effect, Schema } from "effect";
@@ -24,17 +25,23 @@ import {
   renderPiDetails,
   renderProjectCheckReport,
 } from "../invocation/render.js";
+import {
+  invokeProjectCapability,
+  invokeProjectProfile,
+} from "./project-profile.js";
+import type { ProjectToolConfirmation } from "./project-profile.js";
+
 /** Thin project tool adapter preserves the repository runner's report and complete exit semantics. */
 export function createProjectCheckTool(options: PiHarnessOptions) {
   return {
     description:
-      "Inspect discovered checks or run the selected mandatory project suite. E2E/build remain project-specific. keep_going retains failures while attempting later checks.",
+      "Inspect discovered checks, run the selected mandatory project suite, or propose and maintain an approved check profile. E2E/build remain project-specific. keep_going retains failures while attempting later checks.",
     async execute(
       _id: string,
       input: unknown,
       signal: AbortSignal | undefined,
       onUpdate: AgentToolUpdateCallback<unknown> | undefined,
-      ctx: { cwd: string }
+      ctx: Pick<ExtensionContext, "cwd"> & ProjectToolConfirmation
     ) {
       try {
         const deadline = piInvocationDeadline(options);
@@ -59,6 +66,22 @@ export function createProjectCheckTool(options: PiHarnessOptions) {
           );
         }
         requirePiInvocationActive(signal, deadline);
+        const invocation = {
+          ctx,
+          deadline,
+          project: context.data.project_root,
+          signal,
+        };
+        if (request.action === "execute_capability") {
+          return await invokeProjectCapability(request, invocation);
+        }
+        if (
+          request.action === "propose" ||
+          request.action === "maintain" ||
+          request.action === "create"
+        ) {
+          return await invokeProjectProfile(request, invocation);
+        }
         const { action, project: _project, ...args } = request;
         const selected = { ...args, project: context.data.project_root };
         onUpdate?.(
@@ -85,6 +108,16 @@ export function createProjectCheckTool(options: PiHarnessOptions) {
         const report = await Effect.runPromise(
           runProjectChecks(selected, {
             deadline,
+            onProgress: (progress) =>
+              onUpdate?.(
+                piToolResult(
+                  { ...progress, project: selected.project },
+                  false,
+                  progress.stage === "check_started"
+                    ? `Running ${progress.check_id} (${progress.index}/${progress.total}).`
+                    : `${progress.check_id}: ${progress.status}.`
+                )
+              ),
             ...(signal ? { signal } : {}),
           })
         );

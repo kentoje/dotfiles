@@ -4,9 +4,10 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { Effect } from "effect";
 import { Type } from "typebox";
-import { Value } from "typebox/value";
 
 import { makeJiraModule } from "../../jira/module-port.js";
+import { resolveProjectContext } from "../../repository-context/module-port.js";
+import { validateToolBoundary } from "../../tool-protocol/module-port.js";
 import {
   piBoundaryFailure,
   piInvocationDeadline,
@@ -58,9 +59,10 @@ export function createJiraTool(options: PiHarnessOptions) {
       input: unknown,
       signal,
       _onUpdate,
-      ctx: Pick<ExtensionContext, "hasUI"> & {
-        ui: Pick<ExtensionContext["ui"], "confirm">;
-      }
+      ctx: Pick<ExtensionContext, "hasUI"> &
+        Partial<Pick<ExtensionContext, "cwd">> & {
+          ui: Pick<ExtensionContext["ui"], "confirm">;
+        }
     ) {
       try {
         if (!options.jira) {
@@ -68,7 +70,7 @@ export function createJiraTool(options: PiHarnessOptions) {
             "JIRA_CONFIG: set the Jira site, email and credential file in host configuration."
           );
         }
-        if (!Value.Check(parameters, input)) {
+        if (!validateToolBoundary(parameters, input)) {
           throw new Error(
             "JIRA_INPUT: invalid public Jira action or arguments."
           );
@@ -94,7 +96,15 @@ export function createJiraTool(options: PiHarnessOptions) {
           },
         });
         const { action, ...args } = input;
-        const operation = jira[action](args, {
+        const context =
+          !args.project &&
+          ctx.cwd &&
+          (action === "create" || action === "search")
+            ? await resolveProjectContext({}, { sessionCwd: ctx.cwd })
+            : null;
+        const project = context?.data?.jira_project;
+        requirePiInvocationActive(signal, deadline);
+        const operation = jira[action](project ? { ...args, project } : args, {
           deadline,
           ...(signal ? { signal } : {}),
         });

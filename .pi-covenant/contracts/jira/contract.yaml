@@ -137,6 +137,17 @@ obligations:
     postconditions: []
     enforcement: null
     applicability: null
+  - id: JIRA-013
+    status: active
+    severity: high
+    kind: invariant
+    description: Jira create must continue a valid duplicate search beyond twenty pages and still require complete evidence within the configured bound.
+    verification:
+      - jira-013-acceptance
+    preconditions: []
+    postconditions: []
+    enforcement: null
+    applicability: null
 sources:
   - models/jira/mutation/
   - src/jira/

@@ -70,6 +70,7 @@
                   "repository_id": {
                     "type": ["string", "null"]
                   },
+                  "jira_project": { "type": ["string", "null"] },
                   "gitlab_host": {
                     "type": ["string", "null"]
                   },
@@ -278,6 +279,7 @@
                     "repository_id": {
                       "type": ["string", "null"]
                     },
+                    "jira_project": { "type": ["string", "null"] },
                     "gitlab_host": {
                       "type": ["string", "null"]
                     },

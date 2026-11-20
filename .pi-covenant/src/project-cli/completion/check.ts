@@ -3,7 +3,10 @@ import { resolve } from "node:path";
 import { NodeServices } from "@effect/platform-node";
 import { Effect, Schema } from "effect";
 
-import type { ProjectCheckRunRequest } from "../configuration/plan.js";
+import type {
+  ProjectCheckPlan,
+  ProjectCheckRunRequest,
+} from "../configuration/plan.js";
 import {
   projectCheckRunRequestSchema,
   ProjectCheckError,
@@ -12,6 +15,7 @@ import { inspectProjectChecks } from "../discovery/inspect.js";
 import type { DiscoveredProjectCheck } from "../discovery/model.js";
 import type {
   ProjectCheckInvocation,
+  ProjectCheckProgress,
   ProjectCheckResult,
 } from "../execution/process.js";
 import {
@@ -43,6 +47,53 @@ function shouldStopProjectChecks(
     (!keepGoing && result.status !== "passed")
   );
 }
+function reportProjectCheckProgress(
+  invocation: ProjectCheckInvocation,
+  progress: ProjectCheckProgress
+) {
+  try {
+    invocation.onProgress?.(progress);
+  } catch {
+    // Observer failures must not change process effects or the final report.
+  }
+}
+const runProjectCheckPlan = Effect.fn("runProjectCheckPlan")(
+  function* runProjectCheckPlan(
+    plan: ProjectCheckPlan,
+    invocation: ProjectCheckInvocation,
+    keepGoing: boolean
+  ) {
+    const checks: ProjectCheckResult[] = [];
+    let stopped = false;
+    for (const spec of plan.checks) {
+      if (
+        !stopped &&
+        !invocation.signal?.aborted &&
+        Date.now() < (invocation.deadline ?? Infinity)
+      ) {
+        reportProjectCheckProgress(invocation, {
+          check_id: spec.id,
+          index: checks.length + 1,
+          stage: "check_started",
+          total: plan.checks.length,
+        });
+      }
+      const result: ProjectCheckResult = stopped
+        ? unexecutedProjectCheck(spec)
+        : yield* executeProjectCheck(spec, invocation);
+      checks.push(result);
+      if (!stopped) {
+        reportProjectCheckProgress(invocation, {
+          check_id: spec.id,
+          stage: "check_finished",
+          status: result.status,
+        });
+      }
+      stopped ||= shouldStopProjectChecks(result, invocation, keepGoing);
+    }
+    return checks;
+  }
+);
 /** Run the complete validated plan sequentially; never retry or silently omit a check. */
 export const runProjectChecks = Effect.fn("runProjectChecks")(
   function* runProjectChecks(
@@ -118,15 +169,7 @@ export const runProjectChecks = Effect.fn("runProjectChecks")(
         project: plan.project,
       } satisfies ProjectCheckReport;
     }
-    const checks: ProjectCheckResult[] = [];
-    let stopped = false;
-    for (const spec of plan.checks) {
-      const result: ProjectCheckResult = stopped
-        ? unexecutedProjectCheck(spec)
-        : yield* executeProjectCheck(spec, invocation);
-      checks.push(result);
-      stopped ||= shouldStopProjectChecks(result, invocation, keepGoing);
-    }
+    const checks = yield* runProjectCheckPlan(plan, invocation, keepGoing);
     const passed =
       checks.length === plan.checks.length &&
       checks.length > 0 &&

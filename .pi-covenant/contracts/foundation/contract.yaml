@@ -79,6 +79,12 @@ obligations:
     description: The explicit glab credential-file bridge must read only the selected host entry from bounded regular configuration and reject missing unsupported or malformed credentials without fallback to another host or project settings.
     verification:
       - gitlab.credential-reader
+  - id: FOUNDATION-010
+    status: active
+    severity: high
+    kind: invariant
+    description: Pi must report command start and terminal status while respecting cancellation before dispatching another project check.
+    verification: [foundation-project-check-progress]
 sources:
   - src/foundation/
   - models/pi-invocation/

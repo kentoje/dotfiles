@@ -4,9 +4,9 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { Effect } from "effect";
 import { Type } from "typebox";
-import { Value } from "typebox/value";
 
 import { makeMrModule } from "../../mr/module-port.js";
+import { validateToolBoundary } from "../../tool-protocol/module-port.js";
 import {
   piBoundaryFailure,
   piInvocationDeadline,
@@ -55,7 +55,7 @@ export function createMrTool(options: PiHarnessOptions) {
       }
     ) {
       try {
-        if (!Value.Check(parameters, input)) {
+        if (!validateToolBoundary(parameters, input)) {
           throw new Error("MR_INPUT: invalid MR action or arguments.");
         }
         const deadline = piInvocationDeadline(options);

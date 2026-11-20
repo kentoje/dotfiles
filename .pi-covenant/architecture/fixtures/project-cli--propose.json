@@ -16,22 +16,35 @@
     "direction": "output_schema",
     "valid": true,
     "payload": {
-      "status": "ok",
-      "context": {},
-      "data": {
-        "project": "fixture",
-        "proposal_id": "fixture",
-        "manifest_path": "fixture",
-        "entrypoint": "fixture",
-        "capabilities": [],
-        "changes": [],
-        "findings": [],
-        "evidence": [],
-        "state": "proposed"
+      "base": null,
+      "checks": [
+        {
+          "id": "test",
+          "command": "npm",
+          "args": ["run", "test"],
+          "cwd": ".",
+          "timeout_ms": 60000
+        }
+      ],
+      "content": {
+        "checks": [
+          {
+            "id": "test",
+            "command": "npm",
+            "args": ["run", "test"],
+            "cwd": ".",
+            "timeout_ms": 60000
+          }
+        ],
+        "managed": {
+          "checksum": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "discovery": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
       },
-      "error": null,
-      "warnings": [],
-      "completed_effects": []
+      "disclosed_checks": [],
+      "project": "/project",
+      "proposal_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "state": "create"
     }
   },
   {

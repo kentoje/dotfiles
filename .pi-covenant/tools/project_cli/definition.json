@@ -455,6 +455,953 @@
         "report every required check"
       ],
       "failure_codes": ["PROJECT_CHECK_CONFIG", "PROJECT_CHECK_FAILED"]
+    },
+    {
+      "name": "propose",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requested_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 64
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3600000
+                }
+              },
+              "required": ["id", "command", "args", "cwd", "timeout_ms"],
+              "additionalProperties": false
+            }
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "checks": {
+                "type": "array",
+                "minItems": 0,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "command": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cwd": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3600000
+                    }
+                  },
+                  "required": ["id", "command", "args", "cwd", "timeout_ms"],
+                  "additionalProperties": false
+                }
+              },
+              "managed": {
+                "type": "object",
+                "properties": {
+                  "checksum": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "discovery": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": ["checksum", "discovery"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["checks", "managed"],
+            "additionalProperties": false
+          },
+          "disclosed_checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "types",
+                      "lint",
+                      "format",
+                      "unit",
+                      "dead-code",
+                      "e2e",
+                      "build",
+                      "custom",
+                      "setup"
+                    ]
+                  }
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "selection": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "selected"
+                        }
+                      },
+                      "required": ["state"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "covered"
+                        },
+                        "by": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "by"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "reason"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "categories",
+                "command",
+                "args",
+                "cwd",
+                "evidence",
+                "selection"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposal_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "state": {
+            "enum": ["create", "update", "unchanged", "saved"]
+          }
+        },
+        "required": [
+          "base",
+          "checks",
+          "content",
+          "disclosed_checks",
+          "project",
+          "proposal_id",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "read-only",
+      "rules": [
+        "Inspect project-owned commands without running them or publishing a profile."
+      ],
+      "obligations": ["PROJECTCLI-031"],
+      "ordering": [
+        "Resolve the selected project and exact request.",
+        "Apply the action policy and report the result."
+      ],
+      "failure_codes": ["PROJECT_PROFILE_SELECTION", "PROJECT_PROFILE_DRIFT"]
+    },
+    {
+      "name": "maintain",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 64
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3600000
+                }
+              },
+              "required": ["id", "command", "args", "cwd", "timeout_ms"],
+              "additionalProperties": false
+            }
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "checks": {
+                "type": "array",
+                "minItems": 0,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "command": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cwd": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3600000
+                    }
+                  },
+                  "required": ["id", "command", "args", "cwd", "timeout_ms"],
+                  "additionalProperties": false
+                }
+              },
+              "managed": {
+                "type": "object",
+                "properties": {
+                  "checksum": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "discovery": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": ["checksum", "discovery"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["checks", "managed"],
+            "additionalProperties": false
+          },
+          "disclosed_checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "types",
+                      "lint",
+                      "format",
+                      "unit",
+                      "dead-code",
+                      "e2e",
+                      "build",
+                      "custom",
+                      "setup"
+                    ]
+                  }
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "selection": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "selected"
+                        }
+                      },
+                      "required": ["state"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "covered"
+                        },
+                        "by": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "by"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "reason"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "categories",
+                "command",
+                "args",
+                "cwd",
+                "evidence",
+                "selection"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposal_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "state": {
+            "enum": ["create", "update", "unchanged", "saved"]
+          }
+        },
+        "required": [
+          "base",
+          "checks",
+          "content",
+          "disclosed_checks",
+          "project",
+          "proposal_id",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "local-write",
+      "rules": [
+        "Review the current profile and command drift. A matching proposal and trusted confirmation are required to apply an update."
+      ],
+      "obligations": ["PROJECTCLI-031"],
+      "ordering": [
+        "Resolve the selected project and exact request.",
+        "Apply the action policy and report the result."
+      ],
+      "failure_codes": ["PROJECT_PROFILE_STALE", "PROJECT_PROFILE_AUTH"]
+    },
+    {
+      "name": "create",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposal_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 64
+          }
+        },
+        "required": ["proposal_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3600000
+                }
+              },
+              "required": ["id", "command", "args", "cwd", "timeout_ms"],
+              "additionalProperties": false
+            }
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "checks": {
+                "type": "array",
+                "minItems": 0,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "command": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cwd": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3600000
+                    }
+                  },
+                  "required": ["id", "command", "args", "cwd", "timeout_ms"],
+                  "additionalProperties": false
+                }
+              },
+              "managed": {
+                "type": "object",
+                "properties": {
+                  "checksum": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "discovery": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": ["checksum", "discovery"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["checks", "managed"],
+            "additionalProperties": false
+          },
+          "disclosed_checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "types",
+                      "lint",
+                      "format",
+                      "unit",
+                      "dead-code",
+                      "e2e",
+                      "build",
+                      "custom",
+                      "setup"
+                    ]
+                  }
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "selection": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "selected"
+                        }
+                      },
+                      "required": ["state"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "covered"
+                        },
+                        "by": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "by"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["state", "reason"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "categories",
+                "command",
+                "args",
+                "cwd",
+                "evidence",
+                "selection"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposal_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "state": {
+            "enum": ["create", "update", "unchanged", "saved"]
+          }
+        },
+        "required": [
+          "base",
+          "checks",
+          "content",
+          "disclosed_checks",
+          "project",
+          "proposal_id",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "local-write",
+      "rules": [
+        "Require a matching proposal and trusted confirmation before creating a project check profile."
+      ],
+      "obligations": ["PROJECTCLI-031"],
+      "ordering": [
+        "Resolve the selected project and exact request.",
+        "Apply the action policy and report the result."
+      ],
+      "failure_codes": ["PROJECT_PROFILE_STALE", "PROJECT_PROFILE_AUTH"]
+    },
+    {
+      "name": "execute_capability",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capability_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "arguments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 32
+          }
+        },
+        "required": ["project", "capability_id", "arguments"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "capability_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "diagnostic": {
+            "type": ["string", "null"]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "exit_code": {
+            "type": ["integer", "null"]
+          },
+          "outcome": {
+            "enum": ["pass", "fail", "blocked", "cancelled"]
+          },
+          "owned_resources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "command": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "args": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cwd": {
+                    "type": "string"
+                  },
+                  "timeout_ms": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "enum": [
+                      "passed",
+                      "failed",
+                      "timed_out",
+                      "unavailable",
+                      "cancelled",
+                      "not_run"
+                    ]
+                  },
+                  "code": {
+                    "type": ["integer", "null"]
+                  },
+                  "stdout": {
+                    "type": "string"
+                  },
+                  "stderr": {
+                    "type": "string"
+                  },
+                  "truncated": {
+                    "type": "boolean"
+                  },
+                  "duration_ms": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "command",
+                  "args",
+                  "cwd",
+                  "timeout_ms",
+                  "status",
+                  "code",
+                  "stdout",
+                  "stderr",
+                  "truncated",
+                  "duration_ms"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "capability_id",
+          "diagnostic",
+          "evidence",
+          "exit_code",
+          "outcome",
+          "owned_resources",
+          "result"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "process",
+      "rules": [
+        "Run an explicitly declared command with inherited cancellation and deadline. Return the actual subprocess outcome."
+      ],
+      "obligations": ["PROJECTCLI-032"],
+      "ordering": [
+        "Resolve the selected project and exact request.",
+        "Apply the action policy and report the result."
+      ],
+      "failure_codes": [
+        "PROJECT_CAPABILITY_ARGS",
+        "PROJECT_CAPABILITY_UNAVAILABLE",
+        "PROJECT_CAPABILITY_AUTH"
+      ]
     }
   ]
 }

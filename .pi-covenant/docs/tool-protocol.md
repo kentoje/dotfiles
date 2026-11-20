@@ -1,6 +1,6 @@
 # Shared tool behavior protocol
 
-Status: specified design; implementation and tests pending.
+The shared TypeBox validator powers the GitLab, Jira, MR and Fleet Pi boundaries. Cross-tool execution behavior is covered by the owning modules. The broader protocol obligations remain draft.
 
 ## Statuses
 

@@ -42,3 +42,7 @@ bindings:
     adapter: vitest
     tests:
       - gitlab.credential-reader
+  - id: foundation-project-check-progress
+    obligation: FOUNDATION-010
+    adapter: vitest
+    tests: [foundation.project-check-progress]

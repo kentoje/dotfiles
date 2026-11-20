@@ -4,9 +4,9 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { Effect } from "effect";
 import { Type } from "typebox";
-import { Value } from "typebox/value";
 
 import { makeGitlabModule } from "../../gitlab/module-port.js";
+import { validateToolBoundary } from "../../tool-protocol/module-port.js";
 import { createConfiguredGitlabTransport } from "../gitlab/configured.js";
 import { acquireGitlabPipelineMutation } from "../gitlab/coordination.js";
 import {
@@ -68,7 +68,7 @@ export function createGitlabTool(options: PiHarnessOptions) {
             "GITLAB_CONFIG: set PI_COVENANT_GITLAB_HOST and PI_COVENANT_GITLAB_CREDENTIAL_FILE to enable GitLab."
           );
         }
-        if (!Value.Check(parameters, input)) {
+        if (!validateToolBoundary(parameters, input)) {
           throw new Error(
             "GITLAB_INPUT: invalid public tool action or arguments."
           );

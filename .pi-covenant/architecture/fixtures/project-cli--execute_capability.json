@@ -20,18 +20,25 @@
     "direction": "output_schema",
     "valid": true,
     "payload": {
-      "status": "ok",
-      "context": {},
-      "data": {
-        "capability_id": "fixture",
-        "exit_code": 1,
-        "outcome": "pass",
-        "evidence": [],
-        "owned_resources": []
-      },
-      "error": null,
-      "warnings": [],
-      "completed_effects": []
+      "capability_id": "preview:url",
+      "diagnostic": null,
+      "evidence": ["project-capabilities.json"],
+      "exit_code": 0,
+      "outcome": "pass",
+      "owned_resources": [],
+      "result": {
+        "id": "preview:url",
+        "command": "npm",
+        "args": ["run", "test"],
+        "cwd": ".",
+        "timeout_ms": 60000,
+        "status": "passed",
+        "code": 0,
+        "stdout": "http://localhost:4321",
+        "stderr": "",
+        "truncated": false,
+        "duration_ms": 1
+      }
     }
   },
   {

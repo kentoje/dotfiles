@@ -1,2 +1,6 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: tool-protocol-strict-boundary
+    obligation: TOOLPROTOCOL-011
+    adapter: vitest
+    tests: [tool-protocol.strict-boundary]

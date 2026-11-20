@@ -1,5 +1,20 @@
 schema_version: 1
 applicability:
+  - obligation: TOOLPROTOCOL-011
+    mode: not_applicable
+    rationale: Strict schema validation is a pure executable input/output check rather than state behavior.
+  - obligation: PROJECTCLI-032
+    mode: not_applicable
+    rationale: Named capability lookup and argv delegation need executable fixtures; the suite model covers separation from required check selection.
+  - obligation: FOUNDATION-010
+    mode: not_applicable
+    rationale: Observer delivery is an executable SDK concern. Existing invocation and execution models cover cancellation before dispatch.
+  - obligation: REPOSITORYCONTEXT-010
+    mode: not_applicable
+    rationale: Bounded local file recognition and provenance require filesystem checks.
+  - obligation: PROJECTCLI-031
+    mode: model
+    rationale: Profile writes depend on approval against an unchanged base.
   - obligation: PROJECTCLI-014
     mode: model
     rationale: Finite required-check completion and cancellation policy
@@ -971,3 +986,31 @@ models:
       - id: duplicate-record
         source: models/retrospective/DuplicateRecord.tla
         invariant: UniqueProposal
+
+  - id: project-profile
+    component: project-cli
+    source: models/project-authoring/Profile.tla
+    configuration: models/project-authoring/Profile.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: "0.0.7"
+      timeout_seconds: 10
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - Version abstracts the reviewed project profile and command evidence. One writer is coordinated by the harness lock.
+      - Atomic filesystem publication and exclusion of unrelated editors are tested or bounded separately.
+    bindings:
+      - obligation: PROJECTCLI-031
+        invariant: ReviewedSave
+    conformance:
+      - obligation: PROJECTCLI-031
+        action: Save
+        observation: committed
+        binding: project-profile-reviewed-write
+    faults:
+      - id: stale-profile
+        source: models/project-authoring/StaleProfile.tla
+        invariant: ReviewedSave

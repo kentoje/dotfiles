@@ -19,10 +19,20 @@ export interface ProjectCheckResult extends ProjectCheckSpec {
   duration_ms: number;
 }
 
+/** Project check progress only reports lifecycle metadata, never process output or environment. */
+export type ProjectCheckProgress =
+  | { stage: "check_started"; check_id: string; index: number; total: number }
+  | {
+      stage: "check_finished";
+      check_id: string;
+      status: ProjectCheckResult["status"];
+    };
+
 /** Shared host cancellation and absolute deadline; neither comes from project JSON. */
 export interface ProjectCheckInvocation {
   signal?: AbortSignal;
   deadline?: number;
+  onProgress?: (progress: ProjectCheckProgress) => void;
 }
 
 /** Represent a required check that was not executed; it can never support success. */

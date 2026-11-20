@@ -3,14 +3,11 @@ import { resolve } from "node:path";
 
 import { Schema } from "effect";
 
+import { discoverProjectDeclarations } from "./declarations.js";
 import { resolveGitlabTarget } from "./gitlab-target.js";
 import { GitlabTargetError, isGitlabSelector } from "./gitlab-url.js";
 import type { GitlabSelection } from "./gitlab-url.js";
-import {
-  locateProjectRoots,
-  readLocalGitFacts,
-  readContextMetadata,
-} from "./metadata.js";
+import { locateProjectRoots, readLocalGitFacts } from "./metadata.js";
 
 const contextRequest = Schema.Struct({
   cwd: Schema.optionalKey(Schema.NonEmptyString),
@@ -42,7 +39,7 @@ function contextData(
   project: string,
   git: LocalGitFacts | null,
   source: string,
-  manifest: string | null
+  declarations: Awaited<ReturnType<typeof discoverProjectDeclarations>>
 ) {
   const facts = git ?? {
     branch: null,
@@ -52,18 +49,17 @@ function contextData(
     worktree_root: null,
   };
   return {
-    available_capabilities: [],
+    ...declarations,
     branch: facts.branch,
     default_branch: null,
     git_root: facts.git_root,
     gitlab_host: null,
     head_sha: facts.head_sha,
-    project_cli_manifest:
-      manifest === null ? null : resolve(project, "project-checks.json"),
     project_root: project,
     repository_id: facts.repository_id,
     sources: [
       { fact: "project_root", source },
+      ...declarations.sources,
       ...(git
         ? [
             "git_root",
@@ -74,7 +70,7 @@ function contextData(
           ].map((fact) => ({ fact, source: git.source }))
         : []),
     ],
-    unavailable: unavailableContextFacts(git),
+    unavailable: [...unavailableContextFacts(git), ...declarations.unavailable],
     worktree_root: facts.worktree_root,
   };
 }
@@ -120,15 +116,12 @@ export async function resolveProjectContext(
     const roots = await locateProjectRoots(selected);
     const git = roots.worktree ? await readLocalGitFacts(roots.worktree) : null;
     requireLocalRepositoryChoice(request, git, roots.project, host.gitlab);
-    const manifest = await readContextMetadata(
-      resolve(roots.project, "project-checks.json"),
-      1_048_576
-    );
+    const declarations = await discoverProjectDeclarations(roots.project);
     const data = contextData(
       roots.project,
       git,
       request.cwd ? "explicit cwd" : "Pi session cwd",
-      manifest
+      declarations
     );
     const target = host.gitlab
       ? await resolveGitlabTarget({

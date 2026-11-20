@@ -63,3 +63,8 @@ bindings:
     adapter: vitest
     tests:
       - jira.outcomes
+  - id: jira-013-acceptance
+    obligation: JIRA-013
+    adapter: vitest
+    tests:
+      - jira.large-duplicate-scan

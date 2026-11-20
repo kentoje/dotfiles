@@ -4,7 +4,7 @@ Standard Pi with custom tools and controls, developed using Covenant. Worktree, 
 
 Start with the [behavior catalogue](docs/tool-catalogue.md), [shared protocol](docs/tool-protocol.md), [decisions](docs/open-decisions.md), and [planned acceptance scenarios](docs/acceptance-scenarios.md).
 
-There are 16 components, 116 active obligations, 47 draft obligations and 37 specified actions. Six global tool definitions cover GitLab, Jira, MR, worktree, fleet and project checks. Preview, Storybook and broad CLI authoring are deferred; /ship and /harness-retro are user commands. Supporting context and preflight contracts are not additional public tools.
+There are 16 components, 122 active obligations, 47 draft obligations and 41 specified actions. Six global tool definitions cover GitLab, Jira, MR, worktree, fleet and project checks. Project check profiles support reviewed creation and maintenance. Preview and Storybook commands can be declared per project. /ship and /harness-retro are user commands. Supporting context and preflight contracts are not additional public tools.
 
 Native Covenant validation checks contract structure and references. Rich decisions, scenarios, schemas and mutation review plans are design sidecars, not additional native enforcement. Worktree, project checks, development tooling, foundation integration, local context, GitLab, Jira and its preflight, merge requests and their creation guard, explicit shipping, Fleet and retrospective have executable verification.yaml bindings. Other components retain empty bindings. See [implemented scope](docs/implemented-features.md) for verification and remaining gaps.
 
