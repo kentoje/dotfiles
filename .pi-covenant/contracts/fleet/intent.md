@@ -1,6 +1,6 @@
 # fleet: behavior contract
 
-Status: specified design; all obligations draft. Kind: tool. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -33,7 +33,7 @@ Must: Fleet v1 exposes repository status across the selected repositories.
 
 Why: The user explicitly selected status and versions and deferred all fleet mutations. The tool should reduce repeated read calls, not become repository management automation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-002
 
@@ -43,7 +43,7 @@ Must: Fleet v1 reports the requested package version for each selected repositor
 
 Why: The user explicitly selected status and versions and deferred all fleet mutations. The tool should reduce repeated read calls, not become repository management automation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-003
 
@@ -53,7 +53,7 @@ Must: Fleet status and versions must not mutate repository contents, Git refs or
 
 Why: The user explicitly selected status and versions and deferred all fleet mutations. The tool should reduce repeated read calls, not become repository management automation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-004
 
@@ -63,7 +63,7 @@ Must: Fleet v1 must not expose sync, install or prune as supported actions.
 
 Why: The user explicitly selected status and versions and deferred all fleet mutations. The tool should reduce repeated read calls, not become repository management automation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-005
 
@@ -73,7 +73,7 @@ Must: Fleet selection must use explicit repository IDs or the configured reposit
 
 Why: A typo must not silently broaden a fleet operation.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-006
 
@@ -83,7 +83,7 @@ Must: Fleet status must identify the comparison ref and must not fetch remote br
 
 Why: Ahead/behind counts are meaningful only relative to an explicit locally observed ref.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-007
 
@@ -93,7 +93,7 @@ Must: Fleet versions must preserve manifest path, dependency section and declare
 
 Why: A package range, workspace alias and installed version are different facts.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### FLEET-008
 
@@ -103,7 +103,7 @@ Must: Fleet must preserve per-repository failures, report partial results when s
 
 Why: One unavailable repository should not erase useful results or look fully successful.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `status`
 

@@ -22,6 +22,57 @@ import { installLoopbackHttpFixtures } from "../testing/http-fixture.js";
 
 const fixture = installPiFixtures();
 const gitlabFixture = installLoopbackHttpFixtures();
+async function checkFleetRetroInPi(
+  loadedTool: RegisteredTool | undefined,
+  runner: ExtensionRunner
+) {
+  if (!loadedTool) {
+    throw new Error("PI_SDK_TEST: Fleet tool missing");
+  }
+  const fleet = wrapRegisteredTool(loadedTool, runner);
+  await expect(
+    fleet.execute(
+      "versions",
+      { action: "versions", package: "missing" },
+      undefined
+    )
+  ).resolves.toMatchObject({
+    details: {
+      data: { results: [{ data: { missing: true }, repository: "app" }] },
+      status: "ok",
+    },
+  });
+  await expect(
+    fleet.execute("status", { action: "status" }, undefined)
+  ).resolves.toMatchObject({
+    details: {
+      data: {
+        results: [
+          { data: { branch: "main", merge_requests: [] }, repository: "app" },
+        ],
+      },
+      status: "ok",
+    },
+  });
+  const retro = runner.getCommand("harness-retro");
+  if (!retro) {
+    throw new Error("PI_SDK_TEST: retrospective command missing");
+  }
+  const context = runner.createCommandContext();
+  const notified: string[] = [];
+  await retro.handler('review {"dry_run":true}', {
+    ...context,
+    ui: {
+      ...context.ui,
+      notify: (message) => {
+        notified.push(message);
+      },
+    },
+  });
+  expect(notified.join("\n")).toContain("Clarify mr LOOKUP_FAILED outcomes");
+  expect(notified.join("\n")).toContain('"recorded_ids": []');
+}
+
 async function checkMrInPi(
   loadedTool: RegisteredTool | undefined,
   runner: ExtensionRunner,
@@ -157,6 +208,12 @@ contractTest("foundation.sdk", async () => {
       })
     )
   );
+  const inventoryFile = join(f.temp, "fleet.json");
+  await writeFile(
+    inventoryFile,
+    JSON.stringify({ repositories: [{ id: "app", path: f.repo }] })
+  );
+  vi.stubEnv("PI_COVENANT_FLEET_FILE", inventoryFile);
   const jiraCredentials = join(f.temp, "jira-token");
   await writeFile(jiraCredentials, "jira-sdk-token", { mode: 0o600 });
   vi.stubEnv("PI_COVENANT_JIRA_SITE", jiraService.origin);
@@ -188,6 +245,7 @@ contractTest("foundation.sdk", async () => {
     "gitlab",
     "jira",
     "mr",
+    "fleet",
   ]);
   expect([...extension.handlers.keys()]).toStrictEqual(["tool_call"]);
   const runtime = await ModelRuntime.create({
@@ -210,12 +268,22 @@ contractTest("foundation.sdk", async () => {
     settingsManager,
   });
   await resourceLoader.reload();
+  const sessionManager = SessionManager.inMemory(f.repo);
+  sessionManager.appendMessage({
+    content: [],
+    details: { error: { code: "LOOKUP_FAILED" } },
+    isError: true,
+    role: "toolResult",
+    timestamp: Date.now(),
+    toolCallId: "previous-mr",
+    toolName: "mr",
+  });
   const { session } = await createAgentSession({
     agentDir: join(f.temp, "agent"),
     cwd: f.repo,
     modelRuntime: runtime,
     resourceLoader,
-    sessionManager: SessionManager.inMemory(f.repo),
+    sessionManager,
     settingsManager,
   });
   try {
@@ -230,6 +298,7 @@ contractTest("foundation.sdk", async () => {
         "gitlab",
         "jira",
         "mr",
+        "fleet",
       ])
     );
     const gitlab = extension.tools.get("gitlab");
@@ -309,6 +378,10 @@ contractTest("foundation.sdk", async () => {
       session.extensionRunner,
       other.repo,
       service.requests
+    );
+    await checkFleetRetroInPi(
+      extension.tools.get("fleet"),
+      session.extensionRunner
     );
     const project = extension.tools.get("project_cli");
     if (!project) {

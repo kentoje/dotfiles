@@ -26,6 +26,7 @@ contractTest("foundation.registration", () => {
     "gitlab",
     "jira",
     "mr",
+    "fleet",
   ]);
   expect(snippets.every((snippet) => snippet.length > 0)).toBeTruthy();
 });

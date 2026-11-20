@@ -2,60 +2,67 @@ schema_version: 1
 component:
   id: retrospective
   name: retrospective
-  status: draft
+  status: active
 intent: ./intent.md
 obligations:
   - id: RETROSPECTIVE-001
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: A user can explicitly request a retrospective of harness behavior and receive concrete improvement proposals grounded in observed friction.
-    verification: []
+    verification:
+      - retrospective-001-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: RETROSPECTIVE-002
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Completing a session must not automatically invoke a retrospective or start another agent turn for one.
-    verification: []
+    verification:
+      - retrospective-002-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: RETROSPECTIVE-003
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Retrospective recording must retain observed friction, proposed behavior and source references without asserting a fabricated incident or measurement.
-    verification: []
+    verification:
+      - retrospective-003-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: RETROSPECTIVE-004
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Retrospective recording must link a matching existing backlog item rather than append an exact normalized-title duplicate.
-    verification: []
+    verification:
+      - retrospective-004-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
   - id: RETROSPECTIVE-005
-    status: draft
+    status: active
     severity: high
     kind: invariant
     description: Retrospectives must not implement proposed changes, modify product repositories or start shipping automatically.
-    verification: []
+    verification:
+      - retrospective-005-acceptance
     preconditions: []
     postconditions: []
     enforcement: null
     applicability: null
-sources: []
+sources:
+  - models/retrospective/
+  - src/retrospective/
 dependencies:
   - tool-protocol
 interfaces:
@@ -63,3 +70,7 @@ interfaces:
     language: typescript
     module: architecture/modules/retrospective.json
     export: retrospective-v1
+  - name: retrospective-runtime
+    language: typescript
+    module: src/retrospective/module-port.ts
+    export: makeRetrospectiveModule

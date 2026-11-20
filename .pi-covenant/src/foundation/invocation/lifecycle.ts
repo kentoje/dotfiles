@@ -4,6 +4,7 @@ import type { JiraHostConfig } from "../jira/transport.js";
 /** Immutable host options are supplied by the extension, not by model-generated tool arguments. */
 export interface PiHarnessOptions {
   readonly configPath?: string;
+  readonly fleetFile?: string;
   readonly gitlab?: {
     readonly host: string;
     readonly apiOrigin: string;

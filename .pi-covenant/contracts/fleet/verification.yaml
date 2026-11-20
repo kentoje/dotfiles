@@ -1,2 +1,46 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: fleet-001-acceptance
+    obligation: FLEET-001
+    adapter: vitest
+    tests:
+      - fleet.status
+      - foundation.sdk
+  - id: fleet-002-acceptance
+    obligation: FLEET-002
+    adapter: vitest
+    tests:
+      - fleet.versions
+      - foundation.sdk
+  - id: fleet-003-acceptance
+    obligation: FLEET-003
+    adapter: vitest
+    tests:
+      - fleet.status
+  - id: fleet-004-acceptance
+    obligation: FLEET-004
+    adapter: vitest
+    tests:
+      - fleet.selection
+      - foundation.registration
+  - id: fleet-005-acceptance
+    obligation: FLEET-005
+    adapter: vitest
+    tests:
+      - fleet.selection
+  - id: fleet-006-acceptance
+    obligation: FLEET-006
+    adapter: vitest
+    tests:
+      - fleet.status
+  - id: fleet-007-acceptance
+    obligation: FLEET-007
+    adapter: vitest
+    tests:
+      - fleet.versions
+  - id: fleet-008-acceptance
+    obligation: FLEET-008
+    adapter: vitest
+    tests:
+      - fleet.selection
+      - fleet.versions

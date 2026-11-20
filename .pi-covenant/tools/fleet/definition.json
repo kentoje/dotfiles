@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "fleet",
   "kind": "tool",
-  "design_status": "specified-awaiting-implementation",
+  "design_status": "implemented",
   "description": "Answer multi-repository status and declared package-version questions without changing any repository.",
   "component": "fleet",
   "shared_protocol": "docs/tool-protocol.md",

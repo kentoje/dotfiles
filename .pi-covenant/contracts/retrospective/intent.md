@@ -1,6 +1,6 @@
 # harness-retro: behavior contract
 
-Status: specified design; all obligations draft. Kind: user-command. Implementation and executable acceptance checks are pending.
+Status: implemented with active obligations and executable acceptance bindings.
 
 ## Purpose
 
@@ -32,7 +32,7 @@ Must: A user can explicitly request a retrospective of harness behavior and rece
 
 Why: The user retained retrospectives specifically to refine the setup early. The old expect-only pseudo-test and automatic shipping conventions were not selected.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### RETROSPECTIVE-002
 
@@ -42,7 +42,7 @@ Must: Completing a session must not automatically invoke a retrospective or star
 
 Why: The user retained retrospectives specifically to refine the setup early. The old expect-only pseudo-test and automatic shipping conventions were not selected.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### RETROSPECTIVE-003
 
@@ -52,7 +52,7 @@ Must: Retrospective recording must retain observed friction, proposed behavior a
 
 Why: Improvement decisions need traceable evidence rather than invented history.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### RETROSPECTIVE-004
 
@@ -62,7 +62,7 @@ Must: Retrospective recording must link a matching existing backlog item rather 
 
 Why: Early frequent retrospectives should not multiply the same proposal.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ### RETROSPECTIVE-005
 
@@ -72,7 +72,7 @@ Must: Retrospectives must not implement proposed changes, modify product reposit
 
 Why: A reflection request authorizes harness improvement records, not a repair or release task.
 
-Status: draft. Record: contract.yaml; acceptance design: scenarios.yml; execution evidence: none.
+Status: active. See contract.yaml, scenarios.yml and verification.yaml for the executable binding.
 
 ## Action `review`
 

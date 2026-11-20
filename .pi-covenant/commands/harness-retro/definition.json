@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-retro",
   "kind": "user-command",
-  "design_status": "specified-awaiting-implementation",
+  "design_status": "implemented",
   "description": "Use an explicit operator retrospective to improve the harness and maintain a deduplicated proposal backlog during early use.",
   "component": "retrospective",
   "shared_protocol": "docs/tool-protocol.md",

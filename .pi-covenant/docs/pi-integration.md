@@ -1,6 +1,6 @@
 # Running the custom harness in Pi
 
-The harness is an additive standard Pi extension. It currently registers `project_cli`, `worktree`, `gitlab`, `jira` and `mr`. Fleet and /harness-retro remain pending. Standard Pi retains its own prompt, controls and completion behavior. Covenant and TLA+ run only during harness development.
+The harness is an additive standard Pi extension. It currently registers `project_cli`, `worktree`, `gitlab`, `jira`, `mr` and `fleet`, plus the explicit `/ship` and `/harness-retro` commands. Standard Pi retains its own prompt, controls and completion behavior. Covenant and TLA+ run only during harness development.
 
 ## Load the extension
 
@@ -75,3 +75,7 @@ The `mr` tool shares GitLab configuration. Set `PI_COVENANT_INTERCEPT_MR_CREATIO
 ## Shipping to human review
 
 Run the explicit `/ship` command from a task branch. It shares GitLab and project check configuration. Exact file scope is required to commit uncommitted work. See [shipping usage and review decisions](../commands/ship/README.md).
+
+## Fleet and retrospective
+
+Bind an absolute Fleet inventory using `PI_COVENANT_FLEET_FILE`. Invoke `/harness-retro` explicitly from Pi to review session friction. See [Fleet configuration](../src/fleet/README.md) and [retrospective usage](../commands/harness-retro/README.md).

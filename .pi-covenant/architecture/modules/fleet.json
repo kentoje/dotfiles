@@ -795,5 +795,11 @@
   "state_ownership": [
     "Immutable invocation facts and returned evidence; no implicit global mutable cache"
   ],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "fleet-runtime",
+    "language": "typescript",
+    "module": "src/fleet/module-port.ts",
+    "export": "makeFleetModule"
+  }
 }

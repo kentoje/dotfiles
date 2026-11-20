@@ -818,5 +818,11 @@
   },
   "host_capabilities": ["Harness backlog write lock and atomic patch"],
   "state_ownership": ["Harness docs/backlog.md atomic updates"],
-  "test_pattern": "**/*.test.ts"
+  "test_pattern": "**/*.test.ts",
+  "implementation_binding": {
+    "name": "retrospective-runtime",
+    "language": "typescript",
+    "module": "src/retrospective/module-port.ts",
+    "export": "makeRetrospectiveModule"
+  }
 }

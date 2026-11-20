@@ -267,6 +267,45 @@ applicability:
   - obligation: SHIPPING-011
     mode: not_applicable
     rationale: Git path and process behavior, provider responses, UX and bounded time need executable fixtures.
+  - obligation: FLEET-001
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-002
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-003
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-004
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-005
+    mode: model
+    rationale: Finite authority, uniqueness or collection outcomes.
+  - obligation: FLEET-006
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-007
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: FLEET-008
+    mode: model
+    rationale: Finite authority, uniqueness or collection outcomes.
+  - obligation: RETROSPECTIVE-001
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: RETROSPECTIVE-002
+    mode: model
+    rationale: Finite authority, uniqueness or collection outcomes.
+  - obligation: RETROSPECTIVE-003
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
+  - obligation: RETROSPECTIVE-004
+    mode: model
+    rationale: Finite authority, uniqueness or collection outcomes.
+  - obligation: RETROSPECTIVE-005
+    mode: not_applicable
+    rationale: Host Git, filesystem, session and command behavior require executable fixtures.
 models:
   - id: project-checks
     component: project-cli
@@ -862,3 +901,73 @@ models:
       - id: skip-checks
         source: models/shipping/SkipChecks.tla
         invariant: CheckedBeforeReady
+  - id: fleet-observations
+    component: fleet
+    source: models/fleet/Fleet.tla
+    configuration: models/fleet/Fleet.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - Two independent rows represent complete, partial or failed observations.
+    bindings:
+      - obligation: FLEET-005
+        invariant: ValidatedSelection
+      - obligation: FLEET-008
+        invariant: TruthfulAggregate
+    conformance:
+      - obligation: FLEET-005
+        binding: fleet-005-acceptance
+        action: Select
+        observation: selection
+      - obligation: FLEET-008
+        binding: fleet-008-acceptance
+        action: Finish
+        observation: outcome
+    faults:
+      - id: unknown-selection
+        source: models/fleet/UnknownSelection.tla
+        invariant: ValidatedSelection
+      - id: partial-success
+        source: models/fleet/PartialSuccess.tla
+        invariant: TruthfulAggregate
+  - id: retro-recording
+    component: retrospective
+    source: models/retrospective/Retro.tla
+    configuration: models/retrospective/Retro.cfg
+    modules: {}
+    checker:
+      backend: tla-ts
+      version: 0.0.7
+      timeout_seconds: 15
+    bounds:
+      max_states: 10000
+      max_depth: 50
+    assumptions:
+      - One normalized proposal identity represents repeated record attempts; the adapter owns atomic storage.
+    bindings:
+      - obligation: RETROSPECTIVE-002
+        invariant: ExplicitWrite
+      - obligation: RETROSPECTIVE-004
+        invariant: UniqueProposal
+    conformance:
+      - obligation: RETROSPECTIVE-002
+        binding: retrospective-002-acceptance
+        action: Request
+        observation: mode
+      - obligation: RETROSPECTIVE-004
+        binding: retrospective-004-acceptance
+        action: Link
+        observation: items
+    faults:
+      - id: dry-run-writes
+        source: models/retrospective/DryRunWrites.tla
+        invariant: ExplicitWrite
+      - id: duplicate-record
+        source: models/retrospective/DuplicateRecord.tla
+        invariant: UniqueProposal

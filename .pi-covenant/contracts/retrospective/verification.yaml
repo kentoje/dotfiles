@@ -1,2 +1,33 @@
 schema_version: 1
-bindings: []
+bindings:
+  - id: retrospective-001-acceptance
+    obligation: RETROSPECTIVE-001
+    adapter: vitest
+    tests:
+      - retrospective.review
+      - foundation.sdk
+      - retrospective.session
+  - id: retrospective-002-acceptance
+    obligation: RETROSPECTIVE-002
+    adapter: vitest
+    tests:
+      - retrospective.review
+      - foundation.sdk
+  - id: retrospective-003-acceptance
+    obligation: RETROSPECTIVE-003
+    adapter: vitest
+    tests:
+      - retrospective.record
+      - retrospective.storage
+  - id: retrospective-004-acceptance
+    obligation: RETROSPECTIVE-004
+    adapter: vitest
+    tests:
+      - retrospective.record
+      - retrospective.storage
+  - id: retrospective-005-acceptance
+    obligation: RETROSPECTIVE-005
+    adapter: vitest
+    tests:
+      - retrospective.review
+      - retrospective.storage
