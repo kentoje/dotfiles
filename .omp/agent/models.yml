@@ -25,6 +25,7 @@ providers:
         maxTokens: 128000
         compat:
           supportsReasoningEffort: true
+          supportsStrictMode: true
           reasoningEffortMap:
             minimal: low
         cost:
@@ -48,6 +49,7 @@ providers:
         maxTokens: 128000
         compat:
           supportsReasoningEffort: true
+          supportsStrictMode: true
           reasoningEffortMap:
             minimal: low
         cost:
@@ -71,6 +73,7 @@ providers:
         maxTokens: 128000
         compat:
           supportsReasoningEffort: true
+          supportsStrictMode: true
           reasoningEffortMap:
             minimal: low
         cost:
@@ -94,6 +97,7 @@ providers:
         maxTokens: 128000
         compat:
           supportsReasoningEffort: true
+          supportsStrictMode: true
           reasoningEffortMap:
             minimal: low
         cost:
