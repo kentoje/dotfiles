@@ -18,7 +18,8 @@
           "contextWindow": 1050000,
           "maxTokens": 128000,
           "compat": {
-            "supportsReasoningEffort": true
+            "supportsReasoningEffort": true,
+            "supportsStrictMode": true
           },
           "thinkingLevelMap": {
             "off": null,
@@ -44,7 +45,8 @@
           "contextWindow": 1050000,
           "maxTokens": 128000,
           "compat": {
-            "supportsReasoningEffort": true
+            "supportsReasoningEffort": true,
+            "supportsStrictMode": true
           },
           "thinkingLevelMap": {
             "off": "none",
@@ -70,7 +72,8 @@
           "contextWindow": 1050000,
           "maxTokens": 128000,
           "compat": {
-            "supportsReasoningEffort": true
+            "supportsReasoningEffort": true,
+            "supportsStrictMode": true
           },
           "thinkingLevelMap": {
             "off": "none",
@@ -96,7 +99,8 @@
           "contextWindow": 1050000,
           "maxTokens": 128000,
           "compat": {
-            "supportsReasoningEffort": true
+            "supportsReasoningEffort": true,
+            "supportsStrictMode": true
           },
           "thinkingLevelMap": {
             "off": "none",
