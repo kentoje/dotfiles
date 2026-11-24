@@ -11,6 +11,13 @@ after-login-command = []
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = []
 
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
+# config-version 2 no longer infers these from the keybindings. SketchyBar draws
+# one item per workspace, so keep every bound workspace alive even when empty.
+persistent-workspaces = ['0', 'C', 'D', 'F', 'G', 'M', 'R', 'S', 'T', 'V', 'W', 'Z']
+
 # Start AeroSpace at login
 start-at-login = true
 
@@ -264,9 +271,11 @@ run = 'move-node-to-workspace T'
 if.app-id = 'company.thebrowser.Browser'
 run = 'move-node-to-workspace G'
 
+# Helium reports every title-bar button (close, minimize, zoom) as disabled, so
+# AeroSpace's dialog heuristic floats its main window. Force it back to tiling.
 [[on-window-detected]]
 if.app-id = 'net.imput.helium'
-run = 'move-node-to-workspace G'
+run = ['layout tiling', 'move-node-to-workspace G']
 
 
 [[on-window-detected]]
