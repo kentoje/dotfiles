@@ -11,7 +11,7 @@
     "llmgateway/openai/gpt-6.1-terra",
     "llmgateway/anthropic/claude-opus-5-5",
     "llmgateway/xai/grok-4-7",
-    "llmgateway/google-ai-studio/gemini-4-carbon",
+    "llmgateway/google-ai-studio/gemini-4-neon",
     "llmgateway/deepinfra/deepseek-v4.1-flash-1017"
   ],
   "npmCommand": ["npm", "--registry=https://registry.npmjs.org/"],

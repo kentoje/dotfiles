@@ -106,29 +106,24 @@ providers:
           cacheRead: 0.01
           cacheWrite: 0.125
 
-      - id: google-ai-studio/gemini-4-carbon
-        name: Gemini 4 Carbon
+      - id: google-ai-studio/gemini-4-neon
+        name: Gemini 4 Neon
         reasoning: true
         input: [text, image]
         contextWindow: 1048576
-        # Gateway reports max_output equal to the context window for this route.
-        maxTokens: 1048576
+        maxTokens: 65536
         compat:
           supportsReasoningEffort: true
-          # /v1/models lists only "medium" and "high" for google-ai-studio/gemini-4-carbon.
-          # Other tiers 400, so lower levels collapse to medium and higher levels to high.
+          # /v1/models lists low|medium|high|xhigh for google-ai-studio/gemini-4-neon,
+          # not minimal or max.
           reasoningEffortMap:
-            minimal: medium
-            low: medium
-            medium: medium
-            high: high
-            xhigh: high
-            max: high
+            minimal: low
+            max: xhigh
         cost:
-          input: 4.0
-          output: 20.0
-          cacheRead: 0.2
-          cacheWrite: 0.375
+          input: 3.0
+          output: 15.0
+          cacheRead: 0.15
+          cacheWrite: 0
 
       - id: xai/grok-4-7
         name: Grok 4.7

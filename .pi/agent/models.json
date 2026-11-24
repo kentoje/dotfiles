@@ -119,29 +119,29 @@
           }
         },
         {
-          "id": "google-ai-studio/gemini-4-carbon",
-          "name": "Gemini 4 Carbon",
+          "id": "google-ai-studio/gemini-4-neon",
+          "name": "Gemini 4 Neon",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
-          "maxTokens": 1048576,
+          "maxTokens": 65536,
           "compat": {
             "supportsReasoningEffort": true
           },
           "thinkingLevelMap": {
-            "off": "medium",
-            "minimal": "medium",
-            "low": "medium",
+            "off": "low",
+            "minimal": "low",
+            "low": "low",
             "medium": "medium",
             "high": "high",
-            "xhigh": "high",
-            "max": "high"
+            "xhigh": "xhigh",
+            "max": "xhigh"
           },
           "cost": {
-            "input": 4.0,
-            "output": 20.0,
-            "cacheRead": 0.2,
-            "cacheWrite": 0.375
+            "input": 3.0,
+            "output": 15.0,
+            "cacheRead": 0.15,
+            "cacheWrite": 0
           }
         },
         {
