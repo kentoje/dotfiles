@@ -55,3 +55,4 @@ A dialog there stalls every `mvm agent` dispatch silently.
 | 2026-11-18 | Claude Code 2.1.322 to 2.1.327; omp 18.10.3 to 18.22.2 (its new first-run update screen is skipped by `setupVersion: 3` in `omp-machine-config-overlay.yml`) | 33.0 |
 | 2026-11-18 | pi 1.2.0 to 1.5.2, the version the laptop runs | 34.0 |
 | 2026-11-18 | No image change: 2.1.327's managed-settings approval dialog stalled claude on 33.0 and 34.0; `mvm new`, `mvm attach` and `mvm agent` now copy the laptop's approval | - |
+| 2026-11-26 | tuios 0.10.1 to 0.13.3, the version the laptop runs | 35.0 |

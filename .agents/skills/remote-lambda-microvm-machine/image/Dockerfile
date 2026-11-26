@@ -24,7 +24,7 @@ ARG CCSTATUSLINE_VERSION=2.2.33
 ARG OMP_VERSION=18.22.2
 ARG HERDR_VERSION=0.9.5
 # The laptop's `aws-<name>` tuios window runs this client over ssh (`tuios attach main`): no version link to the laptop's tuios.
-ARG TUIOS_VERSION=0.10.1
+ARG TUIOS_VERSION=0.13.3
 ARG CODEX_VERSION=0.162.1
 # Claude Code auto-updates on running machines; pinning keeps that download out of every new machine.
 ARG CLAUDE_CODE_VERSION=2.1.327
