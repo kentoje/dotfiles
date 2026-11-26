@@ -1,6 +1,13 @@
 # Place a copy of this config to ~/.aerospace.toml
 # After that, you can edit ~/.aerospace.toml to your liking
 
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
+# Workspaces that always exist, even when empty (shown by SketchyBar).
+# Keep in sync with the alt-<key> workspace bindings below.
+persistent-workspaces = ['0', 'C', 'D', 'F', 'G', 'M', 'R', 'S', 'T', 'V', 'W', 'Z']
+
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
 # Available commands: https://nikitabobko.github.io/AeroSpace/commands
@@ -10,13 +17,6 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = []
-
-# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
-config-version = 2
-
-# config-version 2 no longer infers these from the keybindings. SketchyBar draws
-# one item per workspace, so keep every bound workspace alive even when empty.
-persistent-workspaces = ['0', 'C', 'D', 'F', 'G', 'M', 'R', 'S', 'T', 'V', 'W', 'Z']
 
 # Start AeroSpace at login
 start-at-login = true
@@ -271,8 +271,14 @@ run = 'move-node-to-workspace T'
 if.app-id = 'company.thebrowser.Browser'
 run = 'move-node-to-workspace G'
 
-# Helium reports every title-bar button (close, minimize, zoom) as disabled, so
-# AeroSpace's dialog heuristic floats its main window. Force it back to tiling.
+# Match Helium picture-in-picture before the general tiling rule below.
+[[on-window-detected]]
+if.app-id = 'net.imput.helium'
+if.window-title-regex-substring = '^Picture[ -]in[ -]Picture$'
+run = 'layout floating'
+
+# Helium zen mode hides the traffic lights and reports them disabled, so
+# AeroSpace's dialog heuristic floats the window. Force tiling.
 [[on-window-detected]]
 if.app-id = 'net.imput.helium'
 run = ['layout tiling', 'move-node-to-workspace G']
