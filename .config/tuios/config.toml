@@ -177,7 +177,7 @@ enabled = false
 #   1. Ghostty's Cmd layer (.config/ghostty/config) forwards Cmd+<key> as
 #      ctrl+a then <key>. The tmux preset already answers most of those bytes
 #      (c, 1-9, %, ", z, [), and [keybindings.prefix_mode] below fixes the rest.
-#   2. Keys Ghostty leaves alone (Cmd+h/j/k/l/e/r) reach tuios directly
+#   2. Keys Ghostty leaves alone (Cmd+h/j/k/l/r) reach tuios directly
 #      through the Kitty keyboard protocol and live in [keybindings.global].
 #
 #   Cmd key        ghostty sends   herdr action          tuios action
@@ -199,8 +199,8 @@ enabled = false
 #   Cmd+Shift+b    prefix B        toggle_sidebar        prefix_toggle_sidebar
 #   Cmd+h / Cmd+l  direct          previous/next_tab     prev/next_workspace
 #   Cmd+k / Cmd+j  direct          previous/next_workspace  prev/next_session
-#   Cmd+e          direct          next_agent            command key below
-#   Cmd+Shift+e    direct          previous_agent        command key below
+#   Cmd+e          Alt+Shift+j     next_agent            custom Agents panel
+#   Cmd+Shift+e    Alt+Shift+k     previous_agent        custom Agents panel
 #   Cmd+r          direct          rename_tab            rename_workspace
 #   Cmd+Shift+r    direct          rename_workspace      rename_session
 #   ctrl+h/j/k/l   direct          vim-herdr-navigation  terminal_focus_* + nvim_navigation
@@ -218,9 +218,6 @@ prev_workspace = ["super+h"]
 next_workspace = ["super+l"]
 prev_session = ["super+k"]
 next_session = ["super+j"]
-# Cmd+e / Cmd+Shift+e cycle interactive agent panes: command keys below. The tuios
-# jumps stay on the prefix: ctrl+t o for the agent waiting on you, O for the
-# newest finished turn.
 rename_workspace = ["super+r"]
 rename_session = ["super+shift+r"]
 # Cmd+g: herdr goto, every pane of every session. Ghostty forwards Cmd+g as
@@ -230,6 +227,11 @@ choose_tree = ["super+g"]
 prefix_inbox = ["super+shift+g"]
 # Cmd+i: review (inspect) the focused pane's changes and send the agent notes. prefix v too.
 prefix_review = ["super+i"]
+
+[keybindings.window_management]
+# Ghostty sends these chords to the custom Agents panel's commands below.
+next_agent = []
+prev_agent = []
 
 [keybindings.terminal_mode]
 # ctrl+h/j/k/l move between panes, and through Neovim splits first (see
@@ -315,22 +317,18 @@ command = "$HOME/.config/tuios/scripts/close-session-and-switch.sh"
 width = "60"
 height = "8"
 
-# Cmd+e / Cmd+Shift+e: herdr next_agent / previous_agent, interactive agent panes
-# in every session, whatever their state. Headless workflow Claude runs are skipped.
-# Direct Rust socket client: fresh membership + target validation on every press.
-# Build/update with scripts/install-agent-pane-focus.sh; never compile on keypress.
-# If the binary is missing, a popup warns and offers to install it.
+# Cmd+e and Cmd+Shift+e use the same agent selection and order as the panel.
 [[keybindings.command]]
-key = "super+e"
+key = "alt+shift+j"
 type = "shell"
-description = "Focus the next interactive agent pane"
-command = 'b="$HOME/.local/bin/tuios-agent-pane-focus"; [ -x "$b" ] && exec "$b" next; exec "$HOME/.config/tuios/scripts/warn-agent-pane-focus-missing.sh" next'
+description = "Focus the next agent in the custom Agents panel"
+command = 'exec "$HOME/.local/bin/tuios-agent-rail" --cycle next'
 
 [[keybindings.command]]
-key = "super+shift+e"
+key = "alt+shift+k"
 type = "shell"
-description = "Focus the previous interactive agent pane"
-command = 'b="$HOME/.local/bin/tuios-agent-pane-focus"; [ -x "$b" ] && exec "$b" prev; exec "$HOME/.config/tuios/scripts/warn-agent-pane-focus-missing.sh" prev'
+description = "Focus the previous agent in the custom Agents panel"
+command = 'exec "$HOME/.local/bin/tuios-agent-rail" --cycle prev'
 
 # prefix p: fuzzy file path, typed into the focused pane without a newline.
 [[keybindings.command]]

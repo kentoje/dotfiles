@@ -1,7 +1,8 @@
 # Instant agent pane switching
 
-`super+e` and `super+shift+e` execute this compiled Rust client directly through
-TuiOS's `sh -c` command binding. Install or update it with:
+The active Cmd+E and Cmd+Shift+E bindings use `tuios-agent-rail --cycle`
+to follow the custom Agents panel's order. This standalone Rust helper is
+available for the compatibility script and benchmarks. Install or update it with:
 
 ```sh
 ~/.config/tuios/scripts/install-agent-pane-focus.sh
@@ -34,11 +35,9 @@ presses. The daemon's focused pane and, when only one client is attached, its cu
 session override a renderer frame's stale environment. With multiple attached
 clients, the binding's originating session selects the client as before.
 
-Builds happen explicitly, never on keypress. The installer atomically replaces the
-binary at `~/.local/bin/tuios-agent-pane-focus`. Existing TuiOS config reloads on save.
-If the binary is missing, the bindings open `scripts/warn-agent-pane-focus-missing.sh`
-in a popup, which explains the problem and offers to run the installer.
-The old `scripts/cycle-agent-pane-focus.sh` entry point forwards to this binary.
+The installer atomically replaces `~/.local/bin/tuios-agent-pane-focus`.
+`scripts/cycle-agent-pane-focus.sh` forwards to this binary and shows an
+installation popup when the binary is missing.
 
 ## Verification
 

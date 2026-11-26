@@ -96,6 +96,9 @@ keybind = super+f=text:\x01\x1b[122u
 keybind = super+t=text:\x01\x1b[99u
 keybind = super+g=text:\x01\x1b[106u
 keybind = super+a=text:\x01\x1b[107u
+# Send TUiOS's Alt+Shift+J/K agent cycling chords.
+keybind = super+e=text:\x1b[106;4u
+keybind = super+shift+e=text:\x1b[107;4u
 # Cmd+p reaches the multiplexer directly: tuios binds it to its command palette.
 # Uncomment to send prefix+p (fd|fzf file picker in herdr and tuios) again.
 # keybind = super+p=text:\x01\x1b[112u
