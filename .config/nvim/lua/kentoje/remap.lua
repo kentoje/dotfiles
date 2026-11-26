@@ -5,7 +5,6 @@ local function get_path()
 	return path
 end
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { silent = true, desc = "Move line down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { silent = true, desc = "Move line up" })
 
 vim.keymap.set("n", "H", "0", { desc = "Go to beginning of line" })
