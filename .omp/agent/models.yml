@@ -82,40 +82,23 @@ providers:
           cacheRead: 0.05
           cacheWrite: 1.25
 
-      - id: openai/gpt-6-luna
-        name: GPT-6 Luna
-        reasoning: true
-        thinking:
-          mode: effort
-          efforts: [low, medium, high, xhigh, max]
-          defaultLevel: xhigh
-          requiresEffort: true
-          effortMap:
-            minimal: low
-        input: [text, image]
-        contextWindow: 1050000
-        maxTokens: 128000
-        compat:
-          supportsReasoningEffort: true
-          supportsStrictMode: true
-          reasoningEffortMap:
-            minimal: low
-        cost:
-          input: 0.1
-          output: 0.5
-          cacheRead: 0.01
-          cacheWrite: 0.125
-
       - id: google-ai-studio/gemini-4-neon
         name: Gemini 4 Neon
         reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, high, xhigh]
+          defaultLevel: high
+          requiresEffort: true
+          effortMap:
+            minimal: low
+            max: xhigh
         input: [text, image]
         contextWindow: 1048576
         maxTokens: 65536
         compat:
           supportsReasoningEffort: true
-          # /v1/models lists low|medium|high|xhigh for google-ai-studio/gemini-4-neon,
-          # not minimal or max.
+          # Neon accepts low|medium|high|xhigh; map unsupported tiers.
           reasoningEffortMap:
             minimal: low
             max: xhigh
@@ -191,31 +174,3 @@ providers:
           output: 20.0
           cacheRead: 0.2
           cacheWrite: 5.0
-
-      - id: deepinfra/mimo-v2.6-pro
-        name: MiMo V2.6 Pro
-        reasoning: true
-        input: [text, image]
-        contextWindow: 1048576
-        maxTokens: 65536
-        compat:
-          supportsReasoningEffort: true
-        cost:
-          input: 0.435
-          output: 0.87
-          cacheRead: 0.0036
-          cacheWrite: 0
-
-      - id: deepinfra/mimo-v2.6-flash
-        name: MiMo V2.6 Flash
-        reasoning: true
-        input: [text, image]
-        contextWindow: 1048576
-        maxTokens: 65536
-        compat:
-          supportsReasoningEffort: true
-        cost:
-          input: 0.14
-          output: 0.28
-          cacheRead: 0.0028
-          cacheWrite: 0

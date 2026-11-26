@@ -92,33 +92,6 @@
           }
         },
         {
-          "id": "openai/gpt-6-luna",
-          "name": "GPT-6 Luna",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1050000,
-          "maxTokens": 128000,
-          "compat": {
-            "supportsReasoningEffort": true,
-            "supportsStrictMode": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 0.1,
-            "output": 0.5,
-            "cacheRead": 0.01,
-            "cacheWrite": 0.125
-          }
-        },
-        {
           "id": "google-ai-studio/gemini-4-neon",
           "name": "Gemini 4 Neon",
           "reasoning": true,
@@ -193,58 +166,6 @@
             "input": 0.2,
             "output": 0.6,
             "cacheRead": 0.006,
-            "cacheWrite": 0
-          }
-        },
-                {
-          "id": "deepinfra/mimo-v2.6-pro",
-          "name": "MiMo V2.6 Pro",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 65536,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": "minimal",
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 0.435,
-            "output": 0.87,
-            "cacheRead": 0.0036,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "deepinfra/mimo-v2.6-flash",
-          "name": "MiMo V2.6 Flash",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 65536,
-          "compat": {
-            "supportsReasoningEffort": true
-          },
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": "minimal",
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          },
-          "cost": {
-            "input": 0.14,
-            "output": 0.28,
-            "cacheRead": 0.0028,
             "cacheWrite": 0
           }
         },
